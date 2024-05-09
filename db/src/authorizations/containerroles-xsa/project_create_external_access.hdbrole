@@ -1,0 +1,52 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::project_create_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_project", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_project_activity_price_surcharge_values", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_project_activity_price_surcharges", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_project_material_price_surcharge_values", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_project_material_price_surcharges", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_project_lifecycle_configuration", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		},
+		{ 
+			"name":"sap.plc.db::basis.t_open_projects", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		},
+		{ 
+			"name":"sap.plc.db::basis.t_entity_relation", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		]
+	}
+}

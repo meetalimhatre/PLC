@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_vendor_key" AS TABLE (
+		VENDOR_ID NVARCHAR(10))

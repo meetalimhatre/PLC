@@ -1,0 +1,42 @@
+_schema-version: "2.1"
+ID: xsac-plc
+description: xsac-plc
+version: 2.7.1
+
+modules:
+  - name: xsac-plc-xsjs
+    path: xsjs
+    type: nodejs
+    requires:
+      - name: xsac-plc-hdi_db
+      - name: xsac-plc-uaa-service
+    provides:
+      - name: xsac-plc-xs-api
+        properties:
+          url: ${default-url}
+
+  - name: xsac-plc-db
+    type: hdb
+    path: db
+    requires:
+      - name: xsac-plc-hdi_db
+        properties:
+          TARGET_CONTAINER: ~{service-name}
+      - name: xsac-plc-synonym-grantor-service
+
+resources:
+  - name: xsac-plc-hdi_db
+    type: com.sap.xs.hdi-container
+    properties:
+      service-name: ${service-name}
+  - name: xsac-plc-synonym-grantor-service
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: xsac-plc-synonym-grantor-service
+
+  - name: xsac-plc-uaa-service
+    type: com.sap.xs.uaa-space
+    parameters:
+      path: xs-security.json
+      service: xsuaa
+      service-plan: application

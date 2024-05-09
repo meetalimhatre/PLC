@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="sap.plc.analytics.viewsCF::V_EXT_DUMMY_CUST" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" dataCategory="DIMENSION" dimensionType="STANDARD" schemaVersion="3.0" defaultClient="$$client$$" outputViewType="Projection" cacheInvalidationPeriod="NONE" enforceSqlExecution="false">
+<descriptions defaultDescription="V_EXT_DUMMY_CUST"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="sap.plc.db::DUMMY">
+    <resourceUri>sap.plc.db::DUMMY</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews/>
+<logicalModel id="sap.plc.db::DUMMY">
+  <attributes>
+    <attribute id="DUMMY" order="1" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="DUMMY"/>
+      <keyMapping columnObjectName="DUMMY" columnName="DUMMY"/>
+    </attribute>
+  </attributes>
+  <calculatedAttributes/>
+  <baseMeasures/>
+  <calculatedMeasures/>
+  <restrictedMeasures/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="40" y="85"/>
+    </shape>
+  </shapes>
+</layout>
+</Calculation:scenario>

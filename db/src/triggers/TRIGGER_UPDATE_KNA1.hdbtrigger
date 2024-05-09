@@ -1,0 +1,37 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_KNA1" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_kna1"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+select count(CUSTOMER_ID) into lv_identical_rows_count
+        from "sap.plc.db::basis.t_customer"
+            WHERE "sap.plc.db::basis.t_customer"."CUSTOMER_ID" = :NEWROW."KUNNR"
+                AND "sap.plc.db::basis.t_customer"."CUSTOMER_NAME" = :NEWROW."NAME1"
+                AND "sap.plc.db::basis.t_customer"."COUNTRY" = :NEWROW."LAND1"
+                AND "sap.plc.db::basis.t_customer"."POSTAL_CODE" = :NEWROW."PSTLZ"
+                AND "sap.plc.db::basis.t_customer"."REGION" = :NEWROW."REGIO"
+                AND "sap.plc.db::basis.t_customer"."CITY" = :NEWROW."ORT01"
+                AND "sap.plc.db::basis.t_customer"."STREET_NUMBER_OR_PO_BOX" = :NEWROW."STRAS"
+                AND "sap.plc.db::basis.t_customer"."_SOURCE" = :lv_source
+                AND "sap.plc.db::basis.t_customer"."_VALID_FROM" < :lv_current_utctimestamp
+                AND "sap.plc.db::basis.t_customer"."_VALID_TO" IS NULL
+                AND UPPER("sap.plc.db::basis.t_customer"."CUSTOMER_ID") <> 'DELETED';
+                
+IF :lv_identical_rows_count = 0 THEN    
+   UPDATE "sap.plc.db::basis.t_customer"
+                SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+                WHERE "sap.plc.db::basis.t_customer"."CUSTOMER_ID" = :NEWROW."KUNNR"
+                  AND "sap.plc.db::basis.t_customer"."_VALID_FROM" < :lv_current_utctimestamp 
+                  AND "sap.plc.db::basis.t_customer"."_VALID_TO" IS NULL
+                  AND UPPER("sap.plc.db::basis.t_customer"."CUSTOMER_ID") <> 'DELETED';
+   IF UPPER(:NEWROW."KUNNR") <> 'DELETED' THEN
+   INSERT INTO  "sap.plc.db::basis.t_customer"
+        (CUSTOMER_ID, CUSTOMER_NAME, COUNTRY, POSTAL_CODE, REGION, CITY, STREET_NUMBER_OR_PO_BOX, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, IS_PERSONAL_DATA )
+         VALUES ( :NEWROW."KUNNR", :NEWROW."NAME1", :NEWROW."LAND1", :NEWROW."PSTLZ", :NEWROW."REGIO", :NEWROW."ORT01", :NEWROW."STRAS", :lv_current_utctimestamp, NULL, :lv_source, user(), :NEWROW."STKZN");
+    END IF;
+END IF;
+end 
+;

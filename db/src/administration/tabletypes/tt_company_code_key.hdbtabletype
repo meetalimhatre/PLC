@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_company_code_key" AS TABLE (
+		COMPANY_CODE_ID NVARCHAR(4))

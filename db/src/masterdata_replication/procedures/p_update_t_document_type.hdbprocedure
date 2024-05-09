@@ -1,0 +1,69 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_document_type"(
+    IN INPUT_TABLE TABLE (
+    	"DOCUMENT_TYPE_ID" NVARCHAR(3),
+    	"_SOURCE" TINYINT -- 1: PLC / 2: ERP
+    ),
+    OUT OV_PROCESSED_ROWS  INTEGER 
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+
+    lt_update_records =
+        select DOCUMENT_TYPE_ID, _SOURCE
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY DOCUMENT_TYPE_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore unchanged records 
+         --and (it.DOCUMENT_TYPE_ID, it._SOURCE
+         --   ) 
+         --     not in 
+         except     
+              (select std.DOCUMENT_TYPE_ID, std._SOURCE
+                    from "sap.plc.db::basis.t_document_type" as std
+                    where _VALID_TO IS NULL
+                    AND std.DOCUMENT_TYPE_ID in (select DOCUMENT_TYPE_ID from :INPUT_TABLE));
+              
+    SELECT COUNT(DOCUMENT_TYPE_ID) into lv_rows_count from :lt_update_records;
+    
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_document_type" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.DOCUMENT_TYPE_ID)
+    		      in (select DOCUMENT_TYPE_ID
+    			      from :lt_update_records as upd 
+    			      where upd.DOCUMENT_TYPE_ID = tbl.DOCUMENT_TYPE_ID
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- insert the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_document_type" 
+    		(DOCUMENT_TYPE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select DOCUMENT_TYPE_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+		
+	END IF;	
+    
+END

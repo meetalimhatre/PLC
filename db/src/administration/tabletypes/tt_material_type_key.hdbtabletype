@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_material_type_key" AS TABLE (
+		MATERIAL_TYPE_ID NVARCHAR(4)
+	)

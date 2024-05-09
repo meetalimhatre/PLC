@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_plant_input" AS TABLE (
+		PLANT_ID NVARCHAR(8),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

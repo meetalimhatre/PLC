@@ -1,0 +1,61 @@
+namespace sap.plc.db;
+
+context temp {
+
+    temporary entity t_item_ids {
+        ITEM_ID: Integer;
+    } technical configuration {
+        row store;
+    };
+
+    temporary entity gtt_item_changed_active_state {
+    	key ITEM_ID: Integer not null;
+        PARENT_ITEM_ID: Integer;
+        IS_ACTIVE: hana.TINYINT not null;
+    } technical configuration {
+        row store;
+    };
+
+    temporary entity gtt_calculation_ids {
+        CALCULATION_ID: Integer;
+    } technical configuration {
+         row store;
+    }; 
+
+    temporary entity gtt_calculation_version_ids {
+        CALCULATION_VERSION_ID: Integer;
+    } technical configuration {
+        row store;
+    };  
+
+    temporary entity gtt_reference_calculation_version_items {
+     	ITEM_ID: Integer;
+ 		CALCULATION_VERSION_ID: Integer;
+		REFERENCED_CALCULATION_VERSION_ID: Integer;
+		ITEM_CATEGORY_ID: Integer;
+        ACCOUNT_ID: String(10);
+    } technical configuration {
+  row store;
+    };
+
+	temporary entity gtt_item_ids {
+		ITEM_ID: Integer;
+	} technical configuration {
+  row store;
+ };
+
+	temporary entity gtt_changed_items  {
+    	ITEM_ID: Integer;
+    	FIELD_NAME: String(100);
+    } technical configuration {
+     row store;
+    } ;
+
+    temporary entity gtt_masterdata_validator {
+        COLUMN_ID: String(50) not null;
+        VALUE: String(50) not null;
+    } technical configuration {
+        row store;
+    };
+
+};

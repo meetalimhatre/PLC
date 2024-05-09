@@ -1,0 +1,27 @@
+update temp_table 
+					set	temp_table.ERROR_CODE = 'GENERAL_ENTITY_DUPLICATE_ERROR',
+					temp_table.ERROR_DETAILS = '{"administrationObjType": "MainObj"}'
+					from {{temporaryTable MasterdataBusinessObject}} as temp_table, 
+					( select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}} from {{temporaryTable MasterdataBusinessObject}} as temp_table
+						inner join {{mainTable MasterdataBusinessObject}} as main_table
+						on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+						and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and main_table._VALID_TO is null
+						and temp_table.operation = 'Create'
+						and ( temp_table.error_code = '' or  temp_table.error_code is null )
+					  union
+					  (SELECT {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table1'}} from {{temporaryTable MasterdataBusinessObject}} as temp_table1
+					        INNER JOIN (SELECT 
+					                        {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table2'}}, COUNT(*) AS CountOf 
+					                        from {{temporaryTable MasterdataBusinessObject}} as temp_table2 
+					                        where temp_table2.operation = 'Create'
+						                    and ( temp_table2.error_code = '' or  temp_table2.error_code is null )
+					                        GROUP BY {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table2'}}
+					                        HAVING COUNT(*) > 1
+					                    ) as inserted_duplicates 
+					   ON {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table1' 'inserted_duplicates'}}
+					   and temp_table1.operation = 'Create'
+					   and ( temp_table1.error_code = '' or  temp_table1.error_code is null ))
+					) as result
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+					and temp_table.operation = 'Create'
+					and ( temp_table.error_code = '' or  temp_table.error_code is null ) 

@@ -1,0 +1,6 @@
+COLUMN TABLE "sap.plc.db.calcengine::calcengine_signatures.t_afl_signature" (
+  POSITION INTEGER,
+  SCHEMA_NAME NVARCHAR(256),
+  TYPE_NAME NVARCHAR(256),
+  PARAMETER_TYPE VARCHAR(7)
+)

@@ -1,0 +1,11 @@
+VIEW "sap.plc.db.authorization::privileges.v_calculation_read" AS SELECT
+  auth_0.USER_ID,
+  calculation_1.CALCULATION_ID,
+  calculation_1.PROJECT_ID,
+  calculation_1.CALCULATION_NAME,
+  calculation_1.CURRENT_CALCULATION_VERSION_ID,
+  calculation_1.CREATED_ON,
+  calculation_1.CREATED_BY,
+  calculation_1.LAST_MODIFIED_ON,
+  calculation_1.LAST_MODIFIED_BY
+FROM ("sap.plc.db::auth.t_auth_project" AS auth_0 INNER JOIN "sap.plc.db::basis.t_calculation" AS calculation_1 ON auth_0.PROJECT_ID = calculation_1.PROJECT_ID)

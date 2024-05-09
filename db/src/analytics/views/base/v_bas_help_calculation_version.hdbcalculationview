@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="sap.plc.analytics.views.base::v_bas_help_calculation_version" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" dataCategory="DIMENSION" schemaVersion="3.0" outputViewType="Projection" cacheInvalidationPeriod="NONE" enforceSqlExecution="false" defaultClient="$$client$$">
+<descriptions defaultDescription="v_bas_help_calculation_version"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="sap.plc.analytics.views.base::v_calculation_version_search">
+    <resourceUri>sap.plc.analytics.views.base::v_calculation_version_search</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews/>
+<logicalModel id="sap.plc.analytics.views.base::v_calculation_version_search">
+  <attributes>
+    <attribute id="calculation_version_id" order="1" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="calculation_version_id"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="calculation_version_id"/>
+    </attribute>
+    <attribute id="calculation_version_name" order="2" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="calculation_version_name"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="calculation_version_name"/>
+    </attribute>
+    <attribute id="calculation_id" order="3" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="calculation_id"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="calculation_id"/>
+    </attribute>
+    <attribute id="calculation_name" order="4" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="calculation_name"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="calculation_name"/>
+    </attribute>
+    <attribute id="project_id" order="5" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="project_id"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="project_id"/>
+    </attribute>
+    <attribute id="project_name" order="6" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="project_name"/>
+      <keyMapping columnObjectName="v_calculation_version_search" columnName="project_name"/>
+    </attribute>
+  </attributes>
+  <calculatedAttributes/>
+  <baseMeasures/>
+  <calculatedMeasures/>
+  <restrictedMeasures/></logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="40" y="85"/>
+    </shape>
+  </shapes>
+</layout>
+</Calculation:scenario>

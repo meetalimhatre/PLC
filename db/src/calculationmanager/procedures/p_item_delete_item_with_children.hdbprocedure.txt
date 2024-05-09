@@ -1,0 +1,70 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_delete_item_with_children" (
+		IN iv_session_id 				NVARCHAR(50),
+		IN iv_item_id 					INTEGER,
+		IN iv_calculation_version_id 	INTEGER,
+		IN iv_delete_root 				TINYINT,
+		OUT ov_calculation_version_id 	INTEGER,
+		OUT ov_item_count 				INTEGER
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY DEFINER
+	/* READS SQL DATA */
+	AS
+	
+	subtree_stmt VARCHAR(255);
+	predecessorItemId INTEGER;
+	calculationVersionId INTEGER;
+	parentItemId INTEGER;
+	rowCount INTEGER;
+	
+BEGIN
+
+    subtree_stmt := 'subtree(' || :iv_item_id || ')';
+    
+
+   -- Check if the item exists in the session
+   /* CH: 2015-02-06 
+   *      This logic needs to be refactored. 
+   *      The ov_item_count output param is misleading here beacuse it will be always 1 or Zero but the expectation would be that is contains the number of affected (updated) values.
+   *      In this case we should consider the distinction between deleted items (deletion flag = 1) and thos which have predecessor updated 
+   */ 
+	SELECT COUNT(*) into rowCount
+	 	FROM "sap.plc.db::basis.t_item_temporary" 
+		WHERE session_id = :iv_session_id AND item_id = :iv_item_id AND calculation_version_id = :iv_calculation_version_id; 	
+		
+  IF rowCount>0 THEN 	/* Delete item only if it exists */
+  
+    -- Select and keep predecessor_id for deleted item
+	SELECT predecessor_item_id, calculation_version_id, parent_item_id INTO predecessorItemId, calculationVersionId, parentItemId
+	 	FROM "sap.plc.db::basis.t_item_temporary" 
+		WHERE session_id = :iv_session_id AND item_id = :iv_item_id AND calculation_version_id = :iv_calculation_version_id; 
+	
+	-- Delete item and its children using the hierarchy view
+	UPDATE "sap.plc.db::basis.t_item_temporary" SET is_deleted = 1 
+		WHERE session_id = :iv_session_id 
+			AND calculation_version_id = :iv_calculation_version_id
+			-- only mark parent item (iv_item_id) for deletion if iv_delete_root flag is set to 1
+			AND (item_id != :iv_item_id OR iv_delete_root = 1) 
+			AND item_id IN  
+		(SELECT result_node FROM "sap.plc.db.views::vc_item_hierarchy/hier/items"
+			("expression" => :subtree_stmt, PLACEHOLDER."$$session_id$$" => :iv_session_id, PLACEHOLDER."$$calc_version_id$$" => :iv_calculation_version_id ) as hierarchy)
+			;
+	
+	-- Update predecessor of the item following to the deleted item. Set it to the predecessor of the deleted item.  	
+	UPDATE "sap.plc.db::basis.t_item_temporary" set predecessor_item_id = predecessorItemId, is_dirty = 1 
+          WHERE session_id = :iv_session_id 
+          	AND calculation_version_id = calculationVersionId 
+          	AND parent_item_id = parentItemId
+          	AND item_id<>:iv_item_id 
+          	AND predecessor_item_id =:iv_item_id
+          	-- only update successors predecessor if item (iv_item_id)  has been marked for deletion (iv_delete_root flag is set to 1)
+          	AND iv_delete_root = 1;
+	
+	ov_calculation_version_id := calculationVersionId;
+	ov_item_count := 1;	          
+  ELSE
+  	ov_calculation_version_id := 0;
+	ov_item_count := 0;	 
+  END IF;       
+     
+END;

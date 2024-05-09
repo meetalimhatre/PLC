@@ -1,0 +1,1 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_item_account_determination_output" AS TABLE  ( "ITEM_ID" INT  NOT NULL, "ACCOUNT_ID" NVARCHAR(10)   NOT NULL, PRIMARY KEY ( "ITEM_ID" ) ) 

@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_customer_input" AS TABLE (
+		CUSTOMER_ID NVARCHAR(10),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

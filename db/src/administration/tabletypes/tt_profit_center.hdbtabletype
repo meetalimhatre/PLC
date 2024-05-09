@@ -1,0 +1,10 @@
+TYPE "sap.plc.db.administration::masterdata.tt_profit_center" AS TABLE (
+		PROFIT_CENTER_ID NVARCHAR(10),
+		CONTROLLING_AREA_ID NVARCHAR(4),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		_VALID_FROM_FIRST_VERSION TIMESTAMP,
+		_CREATED_BY_FIRST_VERSION NVARCHAR(256),
+		PROFIT_CENTER_DESCRIPTION NVARCHAR(250))

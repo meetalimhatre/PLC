@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.defaultsettings::defaultsettings.tt_report_currency_key" AS TABLE (
+    CURRENCY_ID NVARCHAR(3)
+)

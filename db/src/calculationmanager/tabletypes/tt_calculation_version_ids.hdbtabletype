@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.calculationmanager::calculationmanager_types.tt_calculation_version_ids" AS TABLE (
+    CALCULATION_VERSION_ID INTEGER
+)

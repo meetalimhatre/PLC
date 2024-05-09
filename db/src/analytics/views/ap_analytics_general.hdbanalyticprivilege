@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Privilege:analyticPrivilege xmlns:Privilege="http://www.sap.com/ndb/BiModelPrivilege.ecore" id="sap.plc.analytics.views::ap_analytics_general" privilegeType="SQL_ANALYTIC_PRIVILEGE" schemaVersion="1.1">
+<descriptions defaultDescription="ap_analytics_general"/>
+<securedModels>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_account</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_calcversion</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_cost_component</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_costing_sheet_row</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_documents</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_item</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_dime_project</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_help_language</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_help_calculation_version</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_component_split</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_costing_sheet_w_costs_and_prices</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_item_costs</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_line_items</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_project_component_split</modelUri>
+  <modelUri>sap.plc.analytics.views.base::v_bas_meas_project_costing_sheet</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_ACTIVITIES</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_COMPONENT_SPLIT</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_COSTING_SHEET</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_LINE_ITEMS</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_MATERIAL_LIST</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_PROJECT_COSTING_SHEET</modelUri>
+  <modelUri>sap.plc.analytics.views::V_EXT_PROJECT_COMPONENT_SPLIT</modelUri>
+</securedModels>
+</Privilege:analyticPrivilege>

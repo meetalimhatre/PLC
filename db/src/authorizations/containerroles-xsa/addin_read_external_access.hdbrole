@@ -1,0 +1,24 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::addin_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_addin_configuration_header", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_addin_configuration_items", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_addin_version", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

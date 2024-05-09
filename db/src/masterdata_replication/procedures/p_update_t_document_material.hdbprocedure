@@ -1,0 +1,154 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_document_material"(
+    IN INPUT_TABLE TABLE (
+    	"DOCUMENT_TYPE_ID" NVARCHAR(3),
+    	"DOCUMENT_ID" NVARCHAR(40),
+    	"DOCUMENT_VERSION" NVARCHAR(2),
+    	"DOCUMENT_PART" NVARCHAR(3), 
+    	"MATERIAL_ID" NVARCHAR(40),
+    	"_SOURCE" TINYINT -- 1: PLC / 2: ERP
+    ),
+    OUT OV_PROCESSED_ROWS  INTEGER 
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";   
+
+    -- Insert into general Error Table
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'DOCUMENT_TYPE_ID'                                                                  as FIELD_NAME ,
+            it.DOCUMENT_TYPE_ID                                                                 as FIELD_VALUE,
+            'Unknown Document Type ID for Document ID ' || it.DOCUMENT_ID                       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                             as MESSAGE_TIME ,
+            'ERROR'                                                                             as MESSAGE_TYPE ,
+            't_document_material'                                                               as TABLE_NAME,
+            'Replication_Update'                                                                as OPERATION,
+            :lv_run_id                                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.DOCUMENT_TYPE_ID not in (select DOCUMENT_TYPE_ID from "sap.plc.db::basis.t_document_type")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'DOCUMENT_ID'                                                                   as FIELD_NAME ,
+            it.DOCUMENT_ID                                                                  as FIELD_VALUE,
+            'Unknown Document ID for Document Type ID ' || it.DOCUMENT_TYPE_ID              as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                         as MESSAGE_TIME ,
+            'ERROR'                                                                         as MESSAGE_TYPE ,
+            't_document_material'                                                           as TABLE_NAME,
+            'Replication_Update'                                                            as OPERATION,
+            :lv_run_id                                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.DOCUMENT_ID not in (select DOCUMENT_ID from "sap.plc.db::basis.t_document")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'MATERIAL_ID'                                                   as FIELD_NAME ,
+            it.MATERIAL_ID                                                  as FIELD_VALUE,
+            'Unknown Material ID for Document ID ' || it.DOCUMENT_ID        as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_document_material'                                           as TABLE_NAME,
+            'Replication_Update'                                            as OPERATION,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.MATERIAL_ID not in (select MATERIAL_ID from "sap.plc.db::basis.t_material")
+    ;
+    
+    lt_update_records =
+        select it.DOCUMENT_TYPE_ID, it.DOCUMENT_ID, it.DOCUMENT_VERSION, it.DOCUMENT_PART, it.MATERIAL_ID,  it._SOURCE
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+        and it.DOCUMENT_TYPE_ID in (select DOCUMENT_TYPE_ID from "sap.plc.db::basis.t_document_type") 
+        and it.DOCUMENT_ID in (select DOCUMENT_ID from "sap.plc.db::basis.t_document") 
+        and it.MATERIAL_ID in (select MATERIAL_ID from "sap.plc.db::basis.t_material") 
+            -- ignore unchanged records 
+         --and (it.DOCUMENT_TYPE_ID, it.DOCUMENT_ID, it.DOCUMENT_VERSION, it.DOCUMENT_PART, it.MATERIAL_ID,  it._SOURCE
+         --   ) 
+         --     not in 
+        except      
+              (select std.DOCUMENT_TYPE_ID, std.DOCUMENT_ID, std.DOCUMENT_VERSION, std.DOCUMENT_PART, std.MATERIAL_ID,  std._SOURCE
+                    from "sap.plc.db::basis.t_document_material" as std
+                    where _VALID_TO IS NULL
+                    AND (std.DOCUMENT_TYPE_ID, std.DOCUMENT_ID, std.DOCUMENT_VERSION, std.DOCUMENT_PART, std.MATERIAL_ID) in (select DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID from :INPUT_TABLE));
+              
+    SELECT COUNT(DOCUMENT_ID) into lv_rows_count from :lt_update_records;
+    
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_document_material" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.DOCUMENT_TYPE_ID, tbl.DOCUMENT_ID, tbl.DOCUMENT_VERSION, tbl.DOCUMENT_PART, tbl.MATERIAL_ID)
+    		      in (select DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID
+    			      from :lt_update_records as upd 
+    			      where upd.DOCUMENT_TYPE_ID = tbl.DOCUMENT_TYPE_ID
+    			        and upd.DOCUMENT_ID = tbl.DOCUMENT_ID
+    			        and upd.DOCUMENT_VERSION = tbl.DOCUMENT_VERSION
+    			        and upd.DOCUMENT_PART = tbl.DOCUMENT_PART
+    			        and upd.MATERIAL_ID = tbl.MATERIAL_ID
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- insert the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_document_material" 
+    		(DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY
+    		from :lt_update_records;
+		
+	END IF;	
+    
+END

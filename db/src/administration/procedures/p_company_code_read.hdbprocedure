@@ -1,0 +1,84 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_company_code_read" ( 		
+	    IN iv_logon_language         NVARCHAR(11),
+		IN iv_master_data_timestamp  TIMESTAMP,
+		IN iv_filter_string	         NVARCHAR(5000),
+		IN iv_no_max_records         INTEGER,	
+		IN iv_no_skip_records        INTEGER,	
+        OUT ot_company_code         "sap.plc.db.administration::masterdata.tt_company_code" default empty,
+        OUT ot_controlling_area     "sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+        OUT ot_company_code_text    "sap.plc.db::basis.t_company_code__text" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+	Read company codes and referenced objects 
+ ***************************************************/
+ 
+  --select company codes				
+ tt_company_code_union = 
+ 				 select  
+	 				 plcTable.COMPANY_CODE_ID, 
+	 				 plcTable.CONTROLLING_AREA_ID, 
+	 				 plcTable.COMPANY_CODE_CURRENCY_ID, 
+	 				 plcTable._VALID_FROM, 
+	 				 plcTable._VALID_TO, 
+	 				 plcTable._SOURCE, 
+	 				 plcTable._CREATED_BY,
+		             minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+		             minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+	 				 plcTextTable.COMPANY_CODE_DESCRIPTION 
+ 				 from "sap.plc.db::basis.t_company_code" as plcTable 
+ 				 inner join 
+					(   select A._VALID_FROM, A.COMPANY_CODE_ID, A._CREATED_BY 
+						from "sap.plc.db::basis.t_company_code" AS A 
+							inner join 
+							( select MIN(_VALID_FROM) AS _VALID_FROM, COMPANY_CODE_ID
+								from "sap.plc.db::basis.t_company_code" 
+								group by COMPANY_CODE_ID
+							) AS B
+							ON A._VALID_FROM = B._VALID_FROM AND A.COMPANY_CODE_ID = B.COMPANY_CODE_ID
+					) AS minValues
+				 	on  plcTable.COMPANY_CODE_ID = minValues.COMPANY_CODE_ID	
+ 				 left outer join "sap.plc.db::basis.t_company_code__text" as plcTextTable 
+ 				 	on  plcTable.COMPANY_CODE_ID = plcTextTable.COMPANY_CODE_ID 
+ 				 	and plcTextTable.LANGUAGE = :iv_logon_language  
+ 				 	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+ 				 	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+ 				 where plcTable._VALID_FROM <= :iv_master_data_timestamp and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+            	order by plcTable.COMPANY_CODE_ID;
+
+	tt_company_code_filter = APPLY_FILTER(:tt_company_code_union, :iv_filter_string) ;      
+	
+	ot_company_code =  
+			select  COMPANY_CODE_ID, CONTROLLING_AREA_ID, COMPANY_CODE_CURRENCY_ID, _VALID_FROM, _VALID_TO, _SOURCE, 
+				    _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COMPANY_CODE_DESCRIPTION 
+				    from :tt_company_code_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+          
+
+ --select company codetexts
+ ot_company_code_text =  
+						  select
+							  plcTextTable.COMPANY_CODE_ID, 
+							  plcTextTable.LANGUAGE, 
+							  plcTextTable.COMPANY_CODE_DESCRIPTION, 
+							  plcTextTable._VALID_FROM, 
+							  plcTextTable._VALID_TO,
+							  plcTextTable._SOURCE,
+							  plcTextTable._CREATED_BY
+						   from "sap.plc.db::basis.t_company_code__text" as plcTextTable 
+						   where ( plcTextTable.COMPANY_CODE_ID) in ( select COMPANY_CODE_ID from :ot_company_code )
+						   and plcTextTable._VALID_FROM <= :iv_master_data_timestamp and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+ 
+ 
+/***************************** 
+	Select referenced objects 
+ *****************************/
+                         
+ --select controlling area	
+ tt_controlling_area_key = select distinct CONTROLLING_AREA_ID from :ot_company_code;
+ call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_key,ot_controlling_area);	
+ 
+END;

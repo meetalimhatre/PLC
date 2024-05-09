@@ -1,0 +1,8 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet" AS TABLE (
+    COSTING_SHEET_ID NVARCHAR(15),
+    CONTROLLING_AREA_ID NVARCHAR(4),
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP,
+    IS_TOTAL_COST2_ENABLED INTEGER,
+    IS_TOTAL_COST3_ENABLED INTEGER
+)

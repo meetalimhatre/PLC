@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_valuation_class_key" AS TABLE (
+		VALUATION_CLASS_ID NVARCHAR(4))

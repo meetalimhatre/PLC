@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::plant_update_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_plant", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_plant__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		]
+	}
+}

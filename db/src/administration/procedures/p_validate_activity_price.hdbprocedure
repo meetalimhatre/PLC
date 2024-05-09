@@ -1,0 +1,85 @@
+PROCEDURE  "sap.plc.db.administration.procedures::p_validate_activity_price" ()
+       LANGUAGE SQLSCRIPT
+       SQL SECURITY INVOKER
+       AS
+BEGIN
+
+-- The procedure generates the primary key with a SYSUUID call in varchar(32) format,
+-- validates the foreign keys (invalid foreign key rows will be populated as comma separated values
+-- in the fk_issue column, for logging purposes) and also validates the logical unique key of: PRICE_SOURCE_ID,
+-- CONTROLLING_AREA_ID, COST_CENTER_ID, ACTIVITY_TYPE_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM,
+-- VALID_FROM_QUANTITY (invalid unique key rows will have a value greater than 0 in the uk_issue column).
+-- The data is processed in a global temporary table:
+-- sap.plc.db.administration::maintemporarytables.gtt_validate_activity_price
+
+MERGE INTO "sap.plc.db.administration::maintemporarytables.gtt_validate_activity_price" AS APV
+USING (
+    SELECT
+        APV.PRICE_ID AS APV_PRICE_ID,
+        (
+            SELECT STRING_AGG(FAILING_FK, ', ' ORDER BY FORDER)
+            FROM (
+                SELECT 'price_source_id' AS FAILING_FK, 0 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_price_source" FKPS
+                    WHERE FKPS.PRICE_SOURCE_TYPE_ID = 2 AND APV.PRICE_SOURCE_ID = FKPS.PRICE_SOURCE_ID)
+                UNION
+                SELECT 'controlling_area_id' AS FAILING_FK, 1 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE APV.CONTROLLING_AREA_ID <> '*' AND NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_controlling_area" FKCA
+                    WHERE APV.CONTROLLING_AREA_ID = FKCA.CONTROLLING_AREA_ID AND FKCA._VALID_TO IS NULL)
+                UNION
+                SELECT 'cost_center_id' AS FAILING_FK, 2 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE APV.COST_CENTER_ID <> '*' AND NOT EXISTS (
+                    SELECT 1 from "sap.plc.db::basis.t_cost_center" FKCC
+                    WHERE APV.CONTROLLING_AREA_ID = FKCC.CONTROLLING_AREA_ID AND APV.COST_CENTER_ID = FKCC.COST_CENTER_ID AND FKCC._VALID_TO IS NULL)
+                UNION
+                SELECT 'activity_type_id' AS FAILING_FK, 3 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE APV.ACTIVITY_TYPE_ID <> '*' AND NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_activity_type" FKAT
+                    WHERE APV.CONTROLLING_AREA_ID = FKAT.CONTROLLING_AREA_ID AND APV.ACTIVITY_TYPE_ID = FKAT.ACTIVITY_TYPE_ID AND FKAT._VALID_TO IS NULL)
+                UNION
+                SELECT 'project_id' AS FAILING_FK, 4 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE APV.PROJECT_ID <> '*' AND NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_project" FKPR
+                    WHERE APV.PROJECT_ID = FKPR.PROJECT_ID)
+                UNION
+                SELECT 'customer_id' AS FAILING_FK, 5 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE APV.CUSTOMER_ID <> '*' AND NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_customer" FKCS
+                    WHERE APV.CUSTOMER_ID = FKCS.CUSTOMER_ID AND FKCS._VALID_TO IS NULL)
+                UNION
+                SELECT 'transaction_currency_id' AS FAILING_FK, 6 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_currency" FKCR
+                    WHERE APV.TRANSACTION_CURRENCY_ID = FKCR.CURRENCY_ID AND FKCR._VALID_TO IS NULL)
+                UNION
+                SELECT 'price_unit_uom_id' AS FAILING_FK, 7 AS FORDER FROM "sap.plc.db::DUMMY"
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM "sap.plc.db::basis.t_uom" FKUM
+                    WHERE APV.PRICE_UNIT_UOM_ID = FKUM.UOM_ID AND FKUM._VALID_TO IS NULL)
+            )
+        ) AS FK_ISSUE,
+        (
+            SELECT COUNT(0)
+            FROM "sap.plc.db::basis.t_activity_price" AP
+            WHERE AP.PRICE_SOURCE_ID = APV.PRICE_SOURCE_ID AND
+                  AP.CONTROLLING_AREA_ID = APV.CONTROLLING_AREA_ID AND
+                  AP.COST_CENTER_ID = APV.COST_CENTER_ID AND
+                  AP.ACTIVITY_TYPE_ID = APV.ACTIVITY_TYPE_ID AND
+                  AP.PROJECT_ID = APV.PROJECT_ID AND
+                  AP.CUSTOMER_ID = APV.CUSTOMER_ID AND
+                  AP.VALID_FROM = APV.VALID_FROM AND
+                  AP.VALID_FROM_QUANTITY = APV.VALID_FROM_QUANTITY AND
+                  AP._VALID_TO IS NULL
+        ) AS UK_ISSUE
+    FROM "sap.plc.db.administration::maintemporarytables.gtt_validate_activity_price" AS APV
+) AS APV_NEW
+ON APV.PRICE_ID = APV_NEW.APV_PRICE_ID
+WHEN MATCHED THEN
+    UPDATE SET
+        APV.PRICE_ID = CAST(SYSUUID AS NVARCHAR(32)),
+        APV.FK_ISSUE = APV_NEW.FK_ISSUE,
+        APV.UK_ISSUE = APV_NEW.UK_ISSUE;
+
+END;

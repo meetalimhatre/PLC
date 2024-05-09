@@ -1,0 +1,31 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_document_type_read" ( 
+	    IN iv_logon_language 			NVARCHAR(11),	
+	    IN iv_master_data_timestamp 	TIMESTAMP,
+		IN ot_document_type_key 		"sap.plc.db.administration::masterdata.tt_document_type_key",
+        OUT ot_document_type 			"sap.plc.db.administration::masterdata.tt_document_type" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+ 	ot_document_type =
+					select
+						plcTable.DOCUMENT_TYPE_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null AS _VALID_FROM_FIRST_VERSION,
+						null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.DOCUMENT_TYPE_DESCRIPTION
+					from "sap.plc.db::basis.t_document_type" as plcTable
+					left outer join "sap.plc.db::basis.t_document_type__text" as plcTextTable
+						on  plcTable.DOCUMENT_TYPE_ID = plcTextTable.DOCUMENT_TYPE_ID
+						and plcTextTable.LANGUAGE = :iv_logon_language
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+						and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+					where plcTable._VALID_FROM <= :iv_master_data_timestamp
+						and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+						and plcTable.DOCUMENT_TYPE_ID in (select  DOCUMENT_TYPE_ID from :ot_document_type_key);	
+END;

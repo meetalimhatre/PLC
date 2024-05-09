@@ -1,0 +1,6 @@
+COLUMN TABLE "sap.plc.db::basis.t_activity_price__first_version" (
+  PRICE_ID NVARCHAR(32) NOT NULL,
+  _VALID_FROM TIMESTAMP NOT NULL,
+  _CREATED_BY NVARCHAR(256),
+  PRIMARY KEY(PRICE_ID, _VALID_FROM)
+)

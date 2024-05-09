@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.administration::masterdata.tt_price_component" AS TABLE (
+		PRICE_ID NVARCHAR(32),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		ACCOUNT_ID NVARCHAR(10),
+		PRICE_FIXED DECIMAL(28,7),
+		PRICE_VARIABLE DECIMAL(28,7),
+		CONTROLLING_AREA_ID NVARCHAR(4))

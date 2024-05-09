@@ -1,0 +1,8 @@
+VIEW "sap.plc.db.replication.views::v_t030_t001w" ( "BKLAS", "KONTS", "MTART", "KOKRS", "WERKS" ) AS select T030.BKLAS , T030.KONTS , T030.MTART ,     
+	   T001.KOKRS , T001W.WERKS 
+                from "sap.plc.db::repl.t030" AS T030
+                inner join "sap.plc.db::repl.t_t001w_t001k" AS T001W
+                on 	T030.BWMOD = T001W.BWMOD
+                inner join "sap.plc.db::repl.t_t001_tka02" as T001
+                on T030.KTOPL = T001.KTOPL
+                AND T001W.BUKRS = T001.BUKRS WITH READ ONLY

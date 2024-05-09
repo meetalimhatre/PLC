@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::frontend_settings_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_frontend_settings", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,13 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_T134" AFTER DELETE ON "sap.plc.db::repl.t134"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_material_type"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE     "sap.plc.db::basis.t_material_type"."MATERIAL_TYPE_ID" = :OLDROW."MTART"  
+            AND  "sap.plc.db::basis.t_material_type"."_VALID_FROM" < :lv_current_utctimestamp
+            AND  "sap.plc.db::basis.t_material_type"."_VALID_TO" IS NULL;
+end
+;

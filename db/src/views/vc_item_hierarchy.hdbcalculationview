@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:AccessControl="http://www.sap.com/ndb/SQLCoreModelAccessControl.ecore" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Dimension="http://www.sap.com/ndb/BiModelDimension.ecore" schemaVersion="2.3" id="sap.plc.db.views::vc_item_hierarchy" applyPrivilegeType="NONE" defaultClient="" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DIMENSION" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true">
+  <descriptions defaultDescription="vc_item_hierarchy"/>
+  <localVariables>
+    <variable id="session_id" parameter="true">
+      <descriptions defaultDescription="session_id"/>
+      <variableProperties datatype="NVARCHAR" length="50" mandatory="false">
+        <valueDomain type="empty"/>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+    <variable id="calc_version_id" parameter="true">
+      <descriptions defaultDescription="calc_version_id"/>
+      <variableProperties datatype="INTEGER" mandatory="true">
+        <valueDomain type="empty"/>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings/>
+  <dataSources>
+    <DataSource id="sap.plc.db::basis.t_item_temporary">
+      <resourceUri>sap.plc.db::basis.t_item_temporary</resourceUri>
+    </DataSource>
+  </dataSources>
+  <calculationViews>
+    <calculationView xsi:type="Calculation:ProjectionView" id="Projection_1">
+      <descriptions/>
+      <viewAttributes>
+        <viewAttribute id="ITEM_ID"/>
+        <viewAttribute id="PARENT_ITEM_ID"/>
+        <viewAttribute id="SESSION_ID"/>
+        <viewAttribute id="CALCULATION_VERSION_ID"/>
+        <viewAttribute id="IS_DELETED"/>
+      </viewAttributes>
+      <calculatedViewAttributes/>
+      <input node="#sap.plc.db::basis.t_item_temporary">
+        <mapping xsi:type="Calculation:AttributeMapping" target="ITEM_ID" source="ITEM_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="PARENT_ITEM_ID" source="PARENT_ITEM_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="SESSION_ID" source="SESSION_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="CALCULATION_VERSION_ID" source="CALCULATION_VERSION_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="IS_DELETED" source="IS_DELETED"/>
+      </input>
+      <filter>(&quot;SESSION_ID&quot; ='$$session_id$$') AND (&quot;CALCULATION_VERSION_ID&quot; =$$calc_version_id$$) AND (&quot;IS_DELETED&quot; !=1)</filter>
+    </calculationView>
+  </calculationViews>
+  <inlineHierarchy xsi:type="Dimension:ParentChildHierarchy" id="items" aggregateAllNodes="true" rootNodeVisibility="ADD_ROOT_NODE_IF_DEFINED">
+    <descriptions defaultDescription="items"/>
+    <attributeParentPair attribute="#ITEM_ID" parentAttribute="#PARENT_ITEM_ID"/>
+  </inlineHierarchy>
+  <logicalModel id="Projection_1">
+    <descriptions/>
+    <attributes>
+      <attribute id="ITEM_ID" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="ITEM_ID"/>
+        <keyMapping columnObjectName="Projection_1" columnName="ITEM_ID"/>
+      </attribute>
+      <attribute id="PARENT_ITEM_ID" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PARENT_ITEM_ID"/>
+        <keyMapping columnObjectName="Projection_1" columnName="PARENT_ITEM_ID"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+  <layout>
+    <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="40" y="85"/>
+        <rectangleSize height="0" width="0"/>
+      </shape>
+      <shape expanded="true" modelObjectName="Projection_1" modelObjectNameSpace="CalculationView">
+        <upperLeftCorner x="40" y="190"/>
+        <rectangleSize height="-1" width="-1"/>
+      </shape>
+    </shapes>
+  </layout>
+</Calculation:scenario>

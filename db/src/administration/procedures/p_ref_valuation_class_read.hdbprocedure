@@ -1,0 +1,32 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_valuation_class_read" ( 
+		IN iv_logon_language 			NVARCHAR(11),
+		IN iv_master_data_timestamp 	TIMESTAMP,	
+        IN ot_valuation_class_key 		"sap.plc.db.administration::masterdata.tt_valuation_class_key",
+        OUT ot_valuation_class 			"sap.plc.db.administration::masterdata.tt_valuation_class" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+--select valuation classes 
+ot_valuation_class = 
+						select 
+							plcTable.VALUATION_CLASS_ID,
+							plcTable._VALID_FROM, 
+				            plcTable._VALID_TO, 
+				            plcTable._SOURCE, 
+				            plcTable._CREATED_BY,
+					        null AS _VALID_FROM_FIRST_VERSION,
+					        null AS _CREATED_BY_FIRST_VERSION,
+					        plcTextTable.VALUATION_CLASS_DESCRIPTION
+			        	from "sap.plc.db::basis.t_valuation_class" as plcTable
+			        	left outer join "sap.plc.db::basis.t_valuation_class__text" as plcTextTable 
+		                   on  plcTable.VALUATION_CLASS_ID = plcTextTable.VALUATION_CLASS_ID 
+		                   and plcTextTable.LANGUAGE = :iv_logon_language 
+		                   and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		                   and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)
+			        	where plcTable._VALID_FROM <= :iv_master_data_timestamp and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+	                   	   and ( plcTable.VALUATION_CLASS_ID ) in ( select VALUATION_CLASS_ID from :ot_valuation_class_key );
+                   	   
+END;

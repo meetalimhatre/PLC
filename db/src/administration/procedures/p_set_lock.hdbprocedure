@@ -1,0 +1,14 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_set_lock" (
+		IN iv_currentUser       NVARCHAR(256),
+		IN iv_lock_object       NVARCHAR(35),
+		IN iv_last_updated_on   TIMESTAMP
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+	LOCK TABLE "sap.plc.db::basis.t_lock" IN EXCLUSIVE MODE ;
+ 	INSERT INTO "sap.plc.db::basis.t_lock"(LOCK_OBJECT, USER_ID, LAST_UPDATED_ON) values (:iv_currentUser, :iv_lock_object, :iv_last_updated_on);
+ 	
+END;

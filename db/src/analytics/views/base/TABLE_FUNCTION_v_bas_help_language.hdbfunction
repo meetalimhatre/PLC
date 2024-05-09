@@ -1,0 +1,38 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_help_language" ()
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "LANGUAGE" NVARCHAR (11)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+-- Preselect languages available in description tables
+lt_languages = select distinct language from "sap.plc.db::basis.t_business_area__text" businessareatext
+	union select distinct language from "sap.plc.db::basis.t_activity_type__text" activitytypetext
+	union select distinct language from "sap.plc.db::basis.t_process__text" processtext
+	union select distinct language from "sap.plc.db::basis.t_material__text" materialtext
+	union select distinct language from "sap.plc.db::basis.t_component_split__text" componentsplittext
+	union select distinct language from "sap.plc.db::basis.t_confidence_level__text" confidencelevel_text
+	union select distinct language from "sap.plc.db::basis.t_cost_center__text" cc_text
+	union select distinct language from "sap.plc.db::basis.t_costing_sheet__text" costingsheettext
+	union select distinct language from "sap.plc.db::basis.t_company_code__text" companycodetext
+	union select distinct language from "sap.plc.db::basis.t_controlling_area__text" controllingareatext 
+	union select distinct language from "sap.plc.db::basis.t_document__text" document_text
+	union select distinct language from "sap.plc.db::basis.t_document_type__text" documenttype_text
+	union select distinct language from "sap.plc.db::basis.t_plant__text" planttext
+	union select distinct language from "sap.plc.db::basis.t_price_source__text" pricesourcetext
+	union select distinct language from "sap.plc.db::basis.t_profit_center__text" profitcentertext
+;
+
+var_out = 
+	SELECT
+       calcVersion.calculation_version_id,
+       languages.language
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion 
+        CROSS JOIN :lt_languages languages       
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))           		                           
+;               
+
+
+return :var_out;
+END;

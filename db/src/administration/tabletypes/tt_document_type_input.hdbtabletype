@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_document_type_input" AS TABLE (
+		DOCUMENT_TYPE_ID NVARCHAR(3),
+		MASTER_DATA_TIMESTAMP TIMESTAMP		
+	)

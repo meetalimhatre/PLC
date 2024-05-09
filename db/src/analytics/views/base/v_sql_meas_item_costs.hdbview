@@ -1,0 +1,177 @@
+VIEW "sap.plc.analytics.views.base::v_sql_meas_item_costs" ( 
+	"PROJECT_ID", 
+	"CALCULATION_VERSION_ID", 
+	"ITEM_ID", 
+	"IS_LEAF", 
+	"ITEM_CATEGORY_ID",	
+	"IS_ROLLED_UP_VALUE", 
+	"IS_OVERHEAD_ROLLED_UP", 
+	"COSTING_SHEET_ROW_ID", 
+	"COSTING_SHEET_OVERHEAD_ROW_ID", 
+	"ACCOUNT_ID", 
+	"PRICE_FOR_TOTAL_QUANTITY", 
+	"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION", 
+	"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION", 		
+	"TOTAL_COST", 
+	"TOTAL_COST_PER_UNIT", 
+	"TOTAL_COST_FIXED_PORTION", 
+	"TOTAL_COST_VARIABLE_PORTION", 
+	"PRICE_FOR_TOTAL_QUANTITY2", 
+	"PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION", 
+	"PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION", 
+	"TOTAL_COST2", 
+	"TOTAL_COST2_PER_UNIT", 
+	"TOTAL_COST2_FIXED_PORTION", 
+	"TOTAL_COST2_VARIABLE_PORTION", 
+	"PRICE_FOR_TOTAL_QUANTITY3", 
+	"PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION", 
+	"PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION", 
+	"TOTAL_COST3", 
+	"TOTAL_COST3_PER_UNIT", 
+	"TOTAL_COST3_FIXED_PORTION", 
+	"TOTAL_COST3_VARIABLE_PORTION", 
+	"OTHER_COST", 
+	"OTHER_COST_FIXED_PORTION", 
+	"OTHER_COST_VARIABLE_PORTION", 
+	"REPORT_CURRENCY_ID", 
+	"TOTAL_QUANTITY", 
+	"TOTAL_QUANTITY_UOM_ID", 
+	"TARGET_COST", 
+	"TARGET_COST_CURRENCY_ID", 
+	"PRICE", 
+	"PRICE_FIXED_PORTION", 
+	"PRICE_VARIABLE_PORTION", 
+	"PRICE_UNIT", 
+	"TRANSACTION_CURRENCY_ID", 
+	"PRICE_SOURCE_ID", 
+	"PRICE_UNIT_UOM_ID", 
+	"SURCHARGE", 
+	"LOCAL_CONTENT", 
+	"BASE_QUANTITY", 
+	"BASE_QUANTITY_UOM_ID", 
+	"QUANTITY_PER_BASE_UNIT", 
+	"QUANTITY_PER_BASE_UNIT_UOM_ID", 
+	"SALES_PRICE", 
+	"SALES_PRICE_CURRENCY_ID", 
+	"PROJECT_SALES_PRICE", 
+	"PROJECT_SALES_PRICE_CURRENCY_ID", 
+	"TOTAL_QUANTITY_OF_VARIANTS" 
+	) AS SELECT 
+		project.project_id,
+		item.calculation_version_id,
+		item.item_id,
+		IFNULL(itemhierarchy.is_leaf, 0) AS is_leaf,
+		item.item_category_id,
+		0 AS is_rolled_up_value,
+		0 AS is_overhead_rolled_up,
+		--TODO: revise logic for costing_sheet_row since it is not working for all kinds of costing sheets
+		csv.costing_sheet_row_id as costing_sheet_row_id,
+		0 AS costing_sheet_overhead_row_id,
+		item.account_id,
+		item.price_for_total_quantity,
+		item.price_for_total_quantity_fixed_portion,
+		item.price_for_total_quantity_variable_portion,
+		item.total_cost,
+		item.total_cost_per_unit,
+		item.total_cost_fixed_portion,
+		item.total_cost_variable_portion,
+		item.price_for_total_quantity2,
+		item.price_for_total_quantity2_fixed_portion,
+		item.price_for_total_quantity2_variable_portion,
+		item.total_cost2,
+		item.total_cost2_per_unit,
+		item.total_cost2_fixed_portion,
+		item.total_cost2_variable_portion,
+		item.price_for_total_quantity3,
+		item.price_for_total_quantity3_fixed_portion,
+		item.price_for_total_quantity3_variable_portion,
+		item.total_cost3,
+		item.total_cost3_per_unit,
+		item.total_cost3_fixed_portion,
+		item.total_cost3_variable_portion,
+		item.other_cost,
+		item.other_cost_fixed_portion,
+		item.other_cost_variable_portion,
+		calcVersion.report_currency_id,
+		item.total_quantity,
+		item.total_quantity_uom_id,
+		CASE item.target_cost_is_manual
+			WHEN 0 THEN item.target_cost_calculated
+			ELSE item.target_cost
+		END as target_cost,
+		item.target_cost_currency_id,
+		-- For the selection of item prices it is necessary to distinguish between leaf and assembly items
+		-- In case of assemblies (non-leaf items) only columns with suffix '_calculated' contain prices values (since those are rolled up from child items)
+		-- In case of leaf items columns with suffix '_calculated' are only picked, if '_is_manual' is 0. Otherwise (=NULL, =1) prices were entered manually
+		IFNULL(item.price,
+			CASE itemhierarchy.is_leaf
+				WHEN 1 THEN (
+					-- Select appropriate fixed price
+					(CASE item.price_fixed_portion_is_manual WHEN 0 THEN item.price_fixed_portion_calculated ELSE item.price_fixed_portion END)
+					+
+					-- Select appropriate variable price
+					(CASE item.price_variable_portion_is_manual WHEN 0 THEN item.price_variable_portion_calculated ELSE item.price_variable_portion END)
+					)
+				ELSE (item.price_fixed_portion_calculated + item.price_variable_portion_calculated)
+			END
+		) as price,
+		CASE itemhierarchy.is_leaf
+			WHEN 1 THEN (CASE item.price_fixed_portion_is_manual WHEN 0 THEN item.price_fixed_portion_calculated ELSE item.price_fixed_portion END) 
+			ELSE item.price_fixed_portion_calculated
+		END AS price_fixed_portion,
+		CASE itemhierarchy.is_leaf
+			WHEN 1 THEN (CASE item.price_variable_portion_is_manual WHEN 0 THEN item.price_variable_portion_calculated ELSE item.price_variable_portion END) 
+			ELSE item.price_variable_portion_calculated
+		END AS price_variable_portion,
+		item.price_unit,
+		item.transaction_currency_id,
+		item.price_source_id,
+		item.price_unit_uom_id,
+		item.surcharge,
+		item.local_content,
+		CASE IFNULL(itemParent.item_id, 0) -- base quantity == null for root item
+			WHEN 0 THEN null
+			ELSE
+				CASE item.base_quantity_is_manual
+					WHEN 0 THEN item.base_quantity_calculated
+					ELSE item.base_quantity
+				END
+		END as base_quantity,
+		itemParent.total_quantity_uom_id as base_quantity_uom_id,
+		item.quantity_per_base_unit,
+		item.quantity_per_base_unit_uom_id,
+		calcVersion.sales_price,
+		calcVersion.sales_price_currency_id,
+		project.sales_price as project_sales_price,
+		project.sales_price_currency_id as project_sales_price_currency_id,
+		item.total_quantity_of_variants
+	FROM "sap.plc.db::basis.t_item" item
+		INNER JOIN "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+			ON item.calculation_version_id = calcVersion.calculation_version_id
+			AND upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+		INNER JOIN "sap.plc.db::basis.t_calculation" calculation
+			ON calculation.calculation_id = calcVersion.calculation_id
+		INNER JOIN "sap.plc.db::basis.t_project" project
+			ON calculation.project_id = project.project_id
+		LEFT OUTER JOIN "sap.plc.db::basis.t_item" itemParent
+			ON item.parent_item_id = itemParent.item_id AND item.calculation_version_id = itemParent.calculation_version_id
+		LEFT OUTER JOIN (
+			SELECT item.item_id, item.calculation_version_id, 1 as is_leaf FROM "sap.plc.db::basis.t_item" item
+			LEFT OUTER JOIN "sap.plc.db::basis.t_item" childitems
+				ON childitems.calculation_version_id = item.calculation_version_id AND childitems.parent_item_id = item.item_id
+			WHERE childitems.parent_item_id IS NULL
+		) itemhierarchy
+			ON itemhierarchy.calculation_version_id = item.calculation_version_id AND itemhierarchy.item_id = item.item_id 
+		left outer JOIN  "sap.plc.db::basis.t_item_calculated_values_costing_sheet" csv
+			on calcVersion.costing_sheet_id is not null
+			and csv.calculation_version_id = itemhierarchy.calculation_version_id 
+			AND csv.item_id=itemhierarchy.item_id AND csv.costing_sheet_overhead_row_id = -1 
+			AND csv.is_rolled_up_value = 0
+			and csv.costing_sheet_row_id is not null
+			and  csv.costing_sheet_row_id in 
+					(select costing_sheet_row_id from "sap.plc.db::basis.t_costing_sheet_row" csr
+					where 
+					csr.costing_sheet_id = calcVersion.costing_sheet_id and
+								csr.account_group_as_base_id IS NOT NULL 
+										AND calcVersion.master_data_timestamp >= csr._valid_from 
+										AND (csr._valid_to IS NULL OR calcVersion.master_data_timestamp < csr._valid_to)) WITH READ ONLY;

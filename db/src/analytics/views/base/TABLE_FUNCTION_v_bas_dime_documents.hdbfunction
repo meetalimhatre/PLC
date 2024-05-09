@@ -1,0 +1,37 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_documents" (VAR_LANGUAGE NVARCHAR (11))
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "LANGUAGE" NVARCHAR (11), "ITEM_ID" NVARCHAR (22), "DOCUMENT_ID" NVARCHAR (40), "DOCUMENT_DESCRIPTION" NVARCHAR (250), "DOCUMENT_PART" NVARCHAR (3), "DOCUMENT_VERSION" NVARCHAR (2), "DOCUMENT_TYPE_ID" NVARCHAR (3), "DOCUMENT_TYPE_DESCRIPTION" NVARCHAR (250)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = SELECT
+       calcVersion.calculation_version_id,
+       document_text.language,
+       concat(item.calculation_version_id, concat('-', item.item_id)) as item_id,
+       item.document_id,
+       document_text.document_description, 
+       item.document_part, 
+       item.document_version,
+       item.document_type_id,
+       documenttype_text.document_type_description
+FROM "sap.plc.db::basis.t_item" item
+            INNER JOIN "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion 
+                ON item.calculation_version_id = calcVersion.calculation_version_id 
+                AND upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+			LEFT OUTER JOIN "sap.plc.db::basis.t_document__text" document_text
+                ON item.document_id = document_text.document_id               
+                AND calcVersion.master_data_timestamp >= document_text._valid_from 
+                AND (document_text._valid_to IS NULL OR calcVersion.master_data_timestamp < document_text._valid_to)
+                AND document_text.language = VAR_LANGUAGE                
+            LEFT OUTER JOIN "sap.plc.db::basis.t_document_type__text" documenttype_text
+                ON item.document_type_id = documenttype_text.document_type_id               
+                AND calcVersion.master_data_timestamp >= documenttype_text._valid_from 
+                AND (documenttype_text._valid_to IS NULL OR calcVersion.master_data_timestamp < documenttype_text._valid_to)
+                AND documenttype_text.language = VAR_LANGUAGE
+;
+
+
+return :var_out;
+END;

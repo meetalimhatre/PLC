@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_currency_input" AS TABLE (
+		CURRENCY_ID NVARCHAR(3),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

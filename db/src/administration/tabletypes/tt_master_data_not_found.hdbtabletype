@@ -1,0 +1,5 @@
+TYPE "sap.plc.db.administration::masterdata.tt_master_data_not_found" AS TABLE (
+		ID1 NVARCHAR(20),
+		ID2 NVARCHAR(20),
+		ID3 NVARCHAR(20),
+		BUSINESS_OBJECT NVARCHAR(20))

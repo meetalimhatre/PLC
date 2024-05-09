@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_row_dependencies" AS TABLE (
+    SOURCE_ROW_ID NVARCHAR(5),
+    TARGET_ROW_ID NVARCHAR(5),
+    COSTING_SHEET_ID NVARCHAR(15),
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP
+)

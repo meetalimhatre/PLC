@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_work_center_key" AS TABLE (
+        WORK_CENTER_ID NVARCHAR(15),
+		PLANT_ID NVARCHAR(8)
+    )

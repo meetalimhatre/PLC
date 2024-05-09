@@ -1,0 +1,74 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_document_type_read" ( 
+	    IN iv_logon_language          	NVARCHAR(11),
+		IN iv_master_data_timestamp   	TIMESTAMP,
+		IN iv_filter_string	        	NVARCHAR(5000),
+		IN iv_no_max_records            INTEGER, 
+		IN iv_no_skip_records           INTEGER,
+        OUT ot_document_type         	"sap.plc.db.administration::masterdata.tt_document_type" default empty,
+        OUT ot_document_type_text    	"sap.plc.db::basis.t_document_type__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+	Select document type
+ ***************************************************/
+ 
+ --select document types
+ 	tt_document_type_union =
+ 						select
+ 							plcTable.DOCUMENT_TYPE_ID,
+ 							plcTable._VALID_FROM,
+ 							plcTable._VALID_TO,
+ 							plcTable._SOURCE,
+ 							plcTable._CREATED_BY,
+ 							minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+ 							minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+ 							plcTextTable.DOCUMENT_TYPE_DESCRIPTION
+ 						from "sap.plc.db::basis.t_document_type" as plcTable
+ 						inner join
+							(   select A._VALID_FROM, A.DOCUMENT_TYPE_ID, A._CREATED_BY 
+								from "sap.plc.db::basis.t_document_type" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM, DOCUMENT_TYPE_ID
+										from "sap.plc.db::basis.t_document_type" 
+										group by DOCUMENT_TYPE_ID
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.DOCUMENT_TYPE_ID = B.DOCUMENT_TYPE_ID
+							) AS minValues
+							on plcTable.DOCUMENT_TYPE_ID = minValues.DOCUMENT_TYPE_ID
+						left outer join "sap.plc.db::basis.t_document_type__text" as plcTextTable
+							on  plcTable.DOCUMENT_TYPE_ID = plcTextTable.DOCUMENT_TYPE_ID
+							and plcTextTable.LANGUAGE = :iv_logon_language
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+						where plcTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+						 order by plcTable.DOCUMENT_TYPE_ID;
+
+tt_document_type_filter = APPLY_FILTER(:tt_document_type_union, :iv_filter_string) ;      
+	
+ot_document_type =  
+		select DOCUMENT_TYPE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION,
+ 			   DOCUMENT_TYPE_DESCRIPTION 
+ 			   from :tt_document_type_filter limit :iv_no_max_records offset :iv_no_skip_records; 
+						 	
+
+--select document_type text
+ot_document_type_text =
+						
+						select
+							plcTextTable.DOCUMENT_TYPE_ID,
+							plcTextTable.LANGUAGE,
+							plcTextTable.DOCUMENT_TYPE_DESCRIPTION,
+							plcTextTable._VALID_FROM,
+							plcTextTable._VALID_TO,
+							plcTextTable._SOURCE,
+							plcTextTable._CREATED_BY
+						from "sap.plc.db::basis.t_document_type__text" as plcTextTable
+						where ( plcTextTable.DOCUMENT_TYPE_ID ) in ( select DOCUMENT_TYPE_ID from :ot_document_type )
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);						
+END;

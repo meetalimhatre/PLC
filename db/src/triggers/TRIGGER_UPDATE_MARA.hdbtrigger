@@ -1,0 +1,33 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_MARA" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_mara_t006"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+SELECT COUNT(MATERIAL_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_material"
+    WHERE "sap.plc.db::basis.t_material"."MATERIAL_ID" = :NEWROW."MATNR"
+        AND "sap.plc.db::basis.t_material"."BASE_UOM_ID" = :NEWROW."MEINS"
+        AND "sap.plc.db::basis.t_material"."MATERIAL_GROUP_ID" = :NEWROW."MATKL"
+        AND "sap.plc.db::basis.t_material"."MATERIAL_TYPE_ID" = :NEWROW."MTART"
+        AND "sap.plc.db::basis.t_material"."IS_CREATED_VIA_CAD_INTEGRATION" = :NEWROW."CADKZ"
+        AND "sap.plc.db::basis.t_material"."IS_CONFIGURABLE_MATERIAL" = :NEWROW."KZKFG"
+        AND "sap.plc.db::basis.t_material"."_SOURCE" = :lv_source
+        AND "sap.plc.db::basis.t_material"."_VALID_FROM" < :lv_current_utctimestamp 
+        AND "sap.plc.db::basis.t_material"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0 THEN
+    UPDATE "sap.plc.db::basis.t_material"
+                SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+            WHERE "sap.plc.db::basis.t_material"."MATERIAL_ID" = :NEWROW."MATNR"
+              AND "sap.plc.db::basis.t_material"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material"."_VALID_TO" IS NULL;
+   
+   INSERT INTO  "sap.plc.db::basis.t_material" 
+        (MATERIAL_ID,BASE_UOM_ID,MATERIAL_GROUP_ID,MATERIAL_TYPE_ID, IS_CREATED_VIA_CAD_INTEGRATION, IS_CONFIGURABLE_MATERIAL, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+         VALUES ( :NEWROW."MATNR", :NEWROW."MEINS",:NEWROW."MATKL", :NEWROW."MTART", :NEWROW."CADKZ", :NEWROW."KZKFG", :lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

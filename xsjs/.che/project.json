@@ -1,0 +1,1 @@
+{"type":"sap.nodejs","builders":{"default":"sap.nodejs","configs":{}},"runners":{"default":"system:/sap.nodejs/default","configs":{}},"attributes":{"sap.watt.common.setting":["{\"basevalidator\":{\"services\":{\"xml\":\"xmlValidator\",\"js\":\"jsValidator\"}}}"]},"mixinTypes":["mtamodule"]}

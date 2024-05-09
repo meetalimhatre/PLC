@@ -1,0 +1,159 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_replicate_data"
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER AS
+	lv_current_user nvarchar(256);
+	lv_current_utctimestamp timestamp;
+	lv_run_id nvarchar(50);
+	lv_manual tinyint;
+	lv_last_scheduler_time timestamp;
+	lv_batch_size nclob;
+BEGIN
+
+	select max(FIRED_TIME) into lv_last_scheduler_time  from "sap.plc.db::map.t_scheduler_log" where state = 'RUNNING';
+		
+	if exists (select run_id from "sap.plc.db::map.t_scheduler_log" where fired_time = :lv_last_scheduler_time)
+	THEN
+		select run_id into lv_run_id from "sap.plc.db::map.t_scheduler_log" where fired_time = :lv_last_scheduler_time;
+	ELSE
+		lv_run_id = concat('MANUAL',lv_current_utctimestamp) ;  
+	END IF;
+	
+	IF EXISTS (SELECT TABLE_NAME from "sap.plc.db::map.t_destination_entity" where repl_status = 'ENABLED')
+	THEN
+		DECLARE CURSOR c_cursor FOR 
+			select 
+			concat('"sap.plc.db.masterdata_replication.procedures::p_load_', concat(table_name,'"()')) as procedure_name
+			from "sap.plc.db::map.t_destination_entity"
+				where repl_status = 'ENABLED'
+			order by id;
+
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY";
+		
+		SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+			INTO lv_current_user 
+			FROM "sap.plc.db::DUMMY";	    
+	
+		SET 'SCHEDULER_RUN_ID' = :lv_run_id;
+		if lv_current_user = '_SYSTEM_TRIGGER_'
+		THEN
+			lv_manual=0;
+		ELSE 
+			lv_manual=1;
+		END IF;
+
+		--get BATCH_SIZE variable
+		lt_setting_content = select SETTING_CONTENT from "sap.plc.db::basis.t_frontend_settings" where setting_name = 'MaximumBatchSizeRepl' and SETTING_TYPE = 'REPLSETTINGS';
+		lv_batch_size = :lt_setting_content.SETTING_CONTENT[1];	
+
+		if lv_batch_size is null then
+			lv_batch_size = '500000';
+		end if;
+		SET 'BATCH_SIZE' = :lv_batch_size;
+		
+		-- check if a job is already running. 
+		if exists (select run_id from "sap.plc.db::map.t_replication_run" where STATUS = 'RUNNING')
+		THEN
+			-- ignore run if a job is already running.
+			INSERT INTO "sap.plc.db::map.t_replication_run" (run_id,manual,user_id,start_time,end_time,last_update_time,status)
+			values(:lv_run_id,:lv_manual,:lv_current_user,:lv_current_utctimestamp,:lv_current_utctimestamp,:lv_current_utctimestamp,'DUPLICATE');
+		ELSE
+		
+			-- create run record
+			INSERT INTO "sap.plc.db::map.t_replication_run" (run_id,manual,user_id,start_time,end_time,last_update_time,status)
+			values(:lv_run_id,:lv_manual,:lv_current_user,:lv_current_utctimestamp,null,:lv_current_utctimestamp,'RUNNING');
+			
+			-- log replication start
+			INSERT INTO "sap.plc.db::map.t_replication_log" (
+			FIELD_NAME ,
+			FIELD_VALUE,
+			MESSAGE_TEXT ,
+			MESSAGE_TIME ,
+			MESSAGE_TYPE ,
+			TABLE_NAME ,
+			OPERATION ,
+			RUN_ID
+			)
+			values(
+				'',
+				'',
+				'Replication started',
+				:lv_current_utctimestamp,
+				'INFO',
+				'',
+				'Replication_Process',
+				:lv_run_id
+			);
+			
+			BEGIN
+
+			/* =========== START REPLICATE ENTITIES  ================= */
+
+			FOR procedure as c_cursor do
+				exec 'call ' || :procedure.procedure_name;
+			END FOR; 
+					
+			/* END REPLICATE TABLES */
+				
+				-- log finish replication with success
+				select current_utctimestamp 
+					into lv_current_utctimestamp 
+					from "sap.plc.db::DUMMY";
+					
+				INSERT INTO "sap.plc.db::map.t_replication_log" (
+					FIELD_NAME ,
+					FIELD_VALUE,
+					MESSAGE_TEXT ,
+					MESSAGE_TIME ,
+					MESSAGE_TYPE ,
+					TABLE_NAME ,
+					OPERATION ,
+					RUN_ID
+					)
+				values(
+					'',
+					'',
+					'Replication ended',
+					:lv_current_utctimestamp,
+					'INFO',
+					'',
+					'Replication_Process',
+					:lv_run_id
+				);
+				
+				update "sap.plc.db::map.t_replication_run"
+					set last_update_time = :lv_current_utctimestamp,
+					end_time=:lv_current_utctimestamp,
+					status='SUCCESS'
+					where run_id=:lv_run_id;
+				
+			END;
+		END IF;
+	ELSE 
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY";
+					
+		INSERT INTO "sap.plc.db::map.t_replication_log" (
+			FIELD_NAME ,
+			FIELD_VALUE,
+			MESSAGE_TEXT ,
+			MESSAGE_TIME ,
+			MESSAGE_TYPE ,
+			TABLE_NAME ,
+			OPERATION ,
+			RUN_ID
+			)
+		values(
+			'',
+			'',
+			'Replication not started as no entities are currently enabled',
+			:lv_current_utctimestamp,
+			'INFO',
+			'',
+			'Replication_Process',
+			:lv_run_id
+		);
+	END IF;
+END

@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.defaultsettings::defaultsettings.tt_component_split_key" AS TABLE (
+    COMPONENT_SPLIT_ID NVARCHAR(35)
+)

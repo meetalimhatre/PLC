@@ -1,0 +1,71 @@
+PROCEDURE "sap.plc.xs.postinstall.release_2_2_1::p_check_work_center_data_inconsistencies" ( 
+		IN iv_master_data_timestamp  TIMESTAMP,
+		OUT ot_work_center          "sap.plc.db::basis.t_work_center" default empty,
+		OUT ot_business_objects TABLE (
+            	business_objects   NVARCHAR(50)
+            )
+    )
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+ 
+lt_work_center_result = select work_center_table.*, business_objects
+						from "sap.plc.db::basis.t_work_center" as work_center_table,
+						(select STRING_AGG( business_object, ',') as business_objects, WORK_CENTER_ID, PLANT_ID, _VALID_FROM
+						  from (					    	
+								     ( select 'Controlling_Area' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+								        from "sap.plc.db::basis.t_work_center" as work_center_table
+								        where (  work_center_table.CONTROLLING_AREA_ID is not null and work_center_table.CONTROLLING_AREA_ID not in ('','*') )
+								        minus
+								       (select 'Controlling_Area' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+									        from "sap.plc.db::basis.t_work_center" as work_center_table
+									        inner join "sap.plc.db::basis.t_controlling_area" as main_table
+									        on (  main_table.CONTROLLING_AREA_ID = work_center_table.CONTROLLING_AREA_ID )
+											  and main_table._VALID_FROM <= :iv_master_data_timestamp and main_table._VALID_TO is null
+									        where (  work_center_table.CONTROLLING_AREA_ID is not null and work_center_table.CONTROLLING_AREA_ID not in ('','*') )								
+									     )
+								      )
+									  union
+								     ( select 'Plant' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+								        from "sap.plc.db::basis.t_work_center" as work_center_table
+								        where (  work_center_table.PLANT_ID is not null and work_center_table.PLANT_ID not in ('','*') )
+ 
+								        minus
+								       
+								       (select 'Plant' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+									        from "sap.plc.db::basis.t_work_center" as work_center_table
+									        inner join "sap.plc.db::basis.t_plant" as main_table
+									        on (  main_table.PLANT_ID = work_center_table.PLANT_ID )
+											  and main_table._VALID_FROM <= :iv_master_data_timestamp and main_table._VALID_TO is null
+									        where (  work_center_table.PLANT_ID is not null and work_center_table.PLANT_ID not in ('','*') )
+									      
+									     )
+								      )								   
+									  union						    	
+								     ( select 'Cost_Center' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+								        from "sap.plc.db::basis.t_work_center" as work_center_table
+								        where (  work_center_table.COST_CENTER_ID is not null and work_center_table.COST_CENTER_ID not in ('','*') and  work_center_table.CONTROLLING_AREA_ID is not null and work_center_table.CONTROLLING_AREA_ID not in ('','*') )
+								        
+								        minus
+								       
+								       (select 'Cost_Center' as business_object,  work_center_table.WORK_CENTER_ID,  work_center_table.PLANT_ID, work_center_table._VALID_FROM
+									        from "sap.plc.db::basis.t_work_center" as work_center_table
+									        inner join "sap.plc.db::basis.t_cost_center" as main_table
+									        on (  main_table.COST_CENTER_ID = work_center_table.COST_CENTER_ID and  main_table.CONTROLLING_AREA_ID = work_center_table.CONTROLLING_AREA_ID )
+											  and main_table._VALID_FROM <= :iv_master_data_timestamp and main_table._VALID_TO is null
+									        where (  work_center_table.COST_CENTER_ID is not null and work_center_table.COST_CENTER_ID not in ('','*') and  work_center_table.CONTROLLING_AREA_ID is not null and work_center_table.CONTROLLING_AREA_ID not in ('','*') )
+									        
+									     )
+								      )	   
+						   ) group by WORK_CENTER_ID, PLANT_ID, _VALID_FROM
+						) as result
+						where  work_center_table.WORK_CENTER_ID = result.WORK_CENTER_ID and  work_center_table.PLANT_ID = result.PLANT_ID
+						and ( ( work_center_table._VALID_FROM = result._VALID_FROM) or ( work_center_table._VALID_FROM is null and result._VALID_FROM is null));
+						
+ot_work_center = select WORK_CENTER_ID, PLANT_ID, WORK_CENTER_CATEGORY, COST_CENTER_ID, CONTROLLING_AREA_ID, WORK_CENTER_RESPONSIBLE, EFFICIENCY, _VALID_FROM,
+						_VALID_TO, _SOURCE, _CREATED_BY, NULL as DELETED_FROM_SOURCE from :lt_work_center_result;	
+		  	   
+ot_business_objects = select business_objects from :lt_work_center_result;	  	   
+
+END;

@@ -1,0 +1,1 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_item_message_output" AS TABLE  ( "MSG_ID" NVARCHAR(100)   NOT NULL, "ITEM_ID" INT  NOT NULL, "MD_ID_1" NVARCHAR(20)  , "MD_ID_2" NVARCHAR(20)  , "MD_ID_3" NVARCHAR(20)  , "BUSINESS_OBJECT" NVARCHAR(20)  , "PRICE_SOURCE_ID" NVARCHAR(20)  , PRIMARY KEY ( "MSG_ID", "ITEM_ID" ) ) 

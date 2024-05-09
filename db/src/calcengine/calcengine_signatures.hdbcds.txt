@@ -1,0 +1,12 @@
+namespace sap.plc.db.calcengine;
+
+context calcengine_signatures {
+
+	temporary entity t_afl_signature {
+		"POSITION" : Integer;
+		"SCHEMA_NAME" : String(256);
+		"TYPE_NAME" : String(256);
+		"PARAMETER_TYPE" : hana.VARCHAR(7);
+ }
+
+};

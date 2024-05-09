@@ -1,0 +1,11 @@
+{
+    "sap.plc.db::DUMMY": {}/*,
+    "sap.plc.db::PLC_AREA_CHECK_FORMULAS_PROC": {},
+    "sap.plc.db::PLC_AREA_CHECK_FORMULAS_COSTING_SHEET_OVERHEAD_ROW_PROC": {},
+    "sap.plc.db::PLC_AREA_CONVERT_UOM_PROC": {},
+    "sap.plc.db::TRIGGERS": {},
+    "sap.plc.db::M_INIFILE_CONTENTS": {},
+    "sap.plc.db::EFFECTIVE_ROLE_GRANTEES": {},
+    "sap.plc.db::USERS": {},
+    "sap.plc.db::BIMC_CUBES": {}*/
+}

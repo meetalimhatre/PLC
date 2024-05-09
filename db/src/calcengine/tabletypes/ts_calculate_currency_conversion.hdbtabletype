@@ -1,0 +1,11 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_currency_conversion" AS TABLE (
+    EXCHANGE_RATE_TYPE_ID NVARCHAR(20),
+    FROM_CURRENCY_ID NVARCHAR(5),
+    TO_CURRENCY_ID NVARCHAR(5),
+    RATE DECIMAL(28, 7),
+    FROM_FACTOR INTEGER,
+    TO_FACTOR INTEGER,
+    VALID_FROM DATE,
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP
+)

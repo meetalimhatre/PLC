@@ -1,0 +1,11 @@
+TYPE "sap.plc.db.administration::masterdata.tt_account_groups" AS TABLE (
+		ACCOUNT_GROUP_ID INTEGER,
+		CONTROLLING_AREA_ID NVARCHAR(4),
+		COST_PORTION INTEGER,
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		_VALID_FROM_FIRST_VERSION TIMESTAMP,
+		_CREATED_BY_FIRST_VERSION NVARCHAR(256),
+		ACCOUNT_GROUP_DESCRIPTION NVARCHAR(250))

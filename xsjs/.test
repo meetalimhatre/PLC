@@ -1,0 +1,6 @@
+mode=all
+generate=no
+pattern=.*(tests|test)$
+package=
+spec=
+tags=

@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_accounts_key" AS TABLE (
+		ACCOUNT_ID NVARCHAR(10),
+		CONTROLLING_AREA_ID NVARCHAR(4))

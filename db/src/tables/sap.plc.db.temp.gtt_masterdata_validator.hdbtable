@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::temp.gtt_masterdata_validator" (
+  COLUMN_ID NVARCHAR(50) NOT NULL,
+  VALUE NVARCHAR(50) NOT NULL
+)

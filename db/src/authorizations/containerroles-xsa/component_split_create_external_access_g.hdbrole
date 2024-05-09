@@ -1,0 +1,24 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::component_split_create_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_component_split", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_component_split__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_component_split_account_group", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		]
+	}
+}

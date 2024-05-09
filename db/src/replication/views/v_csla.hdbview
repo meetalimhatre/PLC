@@ -1,0 +1,7 @@
+VIEW "sap.plc.db.replication.views::v_csla" ( "LSTAR", "KOKRS", "VKSTA" ) AS select CSLA.LSTAR , CSLA.KOKRS , CSLA.VKSTA
+                from "sap.plc.db::repl.csla" AS CSLA
+                	WHERE CSLA.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.csla" AS CSLA1
+                								WHERE CSLA1.LSTAR = CSLA.LSTAR AND 
+                									  CSLA1.KOKRS = CSLA.KOKRS  )
+					  AND CSLA.DATBI >= TO_DATS(CURRENT_DATE)

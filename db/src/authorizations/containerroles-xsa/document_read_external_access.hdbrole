@@ -1,0 +1,29 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::document_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_document", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_document__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		},
+		{ 
+			"name":"sap.plc.db::basis.t_design_office", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_design_office__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

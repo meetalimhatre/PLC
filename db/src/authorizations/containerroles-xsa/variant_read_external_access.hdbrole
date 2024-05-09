@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::variant_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_variant", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_variant_item", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

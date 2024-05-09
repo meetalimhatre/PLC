@@ -1,0 +1,63 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_currency_read" (
+		IN iv_logon_language    	NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP, 
+		IN iv_filter_string	        NVARCHAR(5000),
+		IN iv_no_max_records 		INTEGER,
+		IN iv_no_skip_records       INTEGER,
+	 	OUT ot_currencies 			"sap.plc.db.administration::masterdata.tt_currency" default empty,
+	 	OUT ot_currency_texts 		"sap.plc.db::basis.t_currency__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Procedure logic 
+ *****************************/
+ 
+ -- select currency
+ tt_currencies_join = select
+	 					plcTable.CURRENCY_ID as CURRENCY_ID,
+	 					plcTable._VALID_FROM as _VALID_FROM,
+	 					plcTable._VALID_TO as _VALID_TO,
+	 					plcTable._SOURCE as _SOURCE,
+	 					plcTable._CREATED_BY as _CREATED_BY,
+	 					minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+						minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+	 					plcTextTable.CURRENCY_CODE as CURRENCY_CODE,
+	 					plcTextTable.CURRENCY_DESCRIPTION as CURRENCY_DESCRIPTION
+ 				from "sap.plc.db::basis.t_currency" as plcTable
+				inner join 
+				( 	select A._VALID_FROM, A.CURRENCY_ID, A._CREATED_BY
+					from "sap.plc.db::basis.t_currency" as A
+					inner join 
+					(	select MIN(_VALID_FROM) as _VALID_FROM, CURRENCY_ID
+						from "sap.plc.db::basis.t_currency"
+							group by CURRENCY_ID
+					) as B
+						on A._VALID_FROM = B._VALID_FROM and A.CURRENCY_ID = B.CURRENCY_ID
+				) as minValues
+					on plcTable.CURRENCY_ID = minValues.CURRENCY_ID
+                left outer join "sap.plc.db::basis.t_currency__text" as plcTextTable 
+                on  plcTable.CURRENCY_ID = plcTextTable.CURRENCY_ID 
+                and plcTextTable.LANGUAGE = :iv_logon_language 
+                and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+                where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+                order by plcTable.CURRENCY_ID;
+ 
+ tt_currencies_filter = APPLY_FILTER(:tt_currencies_join, :iv_filter_string) ;      
+	
+ ot_currencies =  
+ 		select CURRENCY_ID,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY,
+	 		   _VALID_FROM_FIRST_VERSION,_CREATED_BY_FIRST_VERSION,CURRENCY_CODE,CURRENCY_DESCRIPTION 
+	 		   from :tt_currencies_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+                
+ ot_currency_texts = select *
+ 					from "sap.plc.db::basis.t_currency__text" as plcTextTable 
+					where ( plcTextTable.CURRENCY_ID) in ( select CURRENCY_ID from :ot_currencies ) 
+					and plcTextTable._VALID_FROM <= :iv_master_data_timestamp and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null); 
+ 					 
+END;

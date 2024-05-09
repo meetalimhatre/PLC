@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_errors" AS TABLE (
+    CALCULATION_VERSION_ID INTEGER,
+    ITEM_ID INTEGER,
+    ERROR_CODE INTEGER,
+    ERROR_DETAILS NVARCHAR(1000)
+)

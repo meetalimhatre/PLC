@@ -1,0 +1,6 @@
+STATUS_ID,LANGUAGE,STATUS_DESCRIPTION,STATUS_NAME
+DRAFT,EN,Draft status is used to define a calculation in its early stages before it is approved or rejected by the Fund Manager,Draft
+ACTIVE,EN,Active status is used for representing the calculation versions that are being actively used in production,Active
+PENDING,EN,Pending status is used for the calculations that require the attention of the Fund Manager for approval or rejection,Pending
+COMPLETE,EN,Complete status is used for representing the calculation versions that have met all the requirements and will require the Executive Office approval,Complete
+INCOMPLETE,EN,Incomplete status is used to mark the calculations that require the attention of the version creator after being reviewed by the Fund Manager,Incomplete

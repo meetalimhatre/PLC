@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_component_split" AS TABLE (
+    COMPONENT_SPLIT_ID NVARCHAR(35),
+    CONTROLLING_AREA_ID NVARCHAR(4),
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP
+);

@@ -1,0 +1,304 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item" (
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000),
+VAR_LANGUAGE NVARCHAR (11)
+)
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "CALCULATION_VERSION_NAME" NVARCHAR (500), 
+				"LANGUAGE" NVARCHAR (11), "ITEM_ID"  NVARCHAR (22), "ITEM_DESCRIPTION" NVARCHAR (250), "PARENT_ITEM_ID" NVARCHAR (22), "PARENT_ITEM_DESCRIPTION" NVARCHAR (250), "COMMENT" NVARCHAR (5000), 
+				"IS_LEAF" TINYINT, "ITEM_CATEGORY_ID" INTEGER, "CHILD_ITEM_CATEGORY_ID" INTEGER, "IS_ACTIVE" TINYINT,
+				 "RESOURCE_ID" NVARCHAR (40), "RESOURCE_DESCRIPTION" NVARCHAR (250), "RESOURCE_TYPE_ID" INTEGER, "RESOURCE_TYPE" NVARCHAR (19), 
+				 "MATERIAL_ID" NVARCHAR (40), "MATERIAL_DESCRIPTION" VARCHAR (250), "MATERIAL_GROUP_ID" NVARCHAR (9), "MATERIAL_TYPE_ID" NVARCHAR (4), 
+				 "ACTIVITY_TYPE_ID" NVARCHAR (12), "ACTIVITY_TYPE_DESCRIPTION" NVARCHAR (250), "PROCESS_ID" NVARCHAR (12), "PROCESS_DESCRIPTION" NVARCHAR (250), 
+				 "COMPANY_CODE_ID" NVARCHAR (4), "COMPANY_CODE_DESCRIPTION" NVARCHAR (250), "COST_CENTER_ID" NVARCHAR (10), "COST_CENTER_DESCRIPTION" NVARCHAR (250), 
+				 "PLANT_ID" NVARCHAR (8), "PLANT_DESCRIPTION" NVARCHAR (250), "BUSINESS_AREA_ID" NVARCHAR (15), "BUSINESS_AREA_DESCRIPTION" NVARCHAR (250), 
+				 "PROFIT_CENTER_ID" NVARCHAR (10), "PROFIT_CENTER_DESCRIPTION" NVARCHAR (250), "CONFIDENCE_LEVEL_ID" INTEGER, "CONFIDENCE_LEVEL_DESCRIPTION" NVARCHAR (50), 
+				 "VENDOR_ID" NVARCHAR (10), "VENDOR_NAME" NVARCHAR (100), "PRICE_SOURCE_ID" NVARCHAR(20), "PRICE_SOURCE_DESCRIPTION" NVARCHAR (250), "ENGINEERING_CHANGE_NUMBER_ID" NVARCHAR (250), 
+				 "TOTAL_QUANTITY_DEPENDS_ON" INTEGER, "IS_RELEVANT_TO_COSTING_IN_ERP" TINYINT, "IS_DISABLING_PRICE_DETERMINATION" TINYINT, "PURCHASING_DOCUMENT" NVARCHAR (10), "PURCHASING_GROUP" NVARCHAR (20), 
+				 "WORK_CENTER_ID" NVARCHAR(15), "WORK_CENTER_DESCRIPTION" NVARCHAR(250)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = SELECT
+       calcVersion.calculation_version_id,
+       calcVersion.calculation_version_name,
+       VAR_LANGUAGE as language,
+       -- Use a complex unique key as string, since HANA INA protocol has a bug resulting in wrong item descriptions when using two keys. 
+       concat(item.calculation_version_id, concat('-', item.item_id)) as item_id,
+       CASE 
+           WHEN item.item_category_id = 0 THEN calcVersion.calculation_version_name
+           WHEN item.item_category_id = 1 THEN 
+             	(item.document_type_id || '_' || item.document_id || '_' || item.document_part || '_' || item.document_version)
+           WHEN item.item_category_id = 2 THEN
+           		CASE 
+           		 	WHEN item.item_description IS NOT NULL THEN (IFNULL(item.material_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.material_id || ' ', '') || IFNULL(materialtext.material_description, '<Temporary>'))
+           		END
+           WHEN item.item_category_id = 3 THEN 
+           		CASE 
+           			WHEN item.item_description IS NOT NULL THEN (IFNULL(item.activity_type_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.activity_type_id || ' ' , '') || IFNULL(activitytypetext.activity_type_description, '<Temporary>'))
+           		END
+           WHEN item.item_category_id = 4 THEN
+                CASE 
+           			WHEN item.item_description IS NOT NULL THEN (IFNULL(item.activity_type_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.activity_type_id || ' ' , '') || IFNULL(activitytypetext.activity_type_description, '<Temporary>'))
+           		END
+           WHEN item.item_category_id = 5 THEN
+                CASE 
+           			WHEN item.item_description IS NOT NULL THEN (IFNULL(item.process_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.process_id || ' ', '') || IFNULL(processtext.process_description, '<Temporary>'))
+           		END
+           WHEN item.item_category_id = 6 THEN 
+                CASE 
+           			WHEN item.item_description IS NOT NULL THEN (IFNULL(item.activity_type_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.activity_type_id || ' ' , '') || IFNULL(activitytypetext.activity_type_description, '<Temporary>'))
+           		END           
+           WHEN item.item_category_id = 7 THEN
+                CASE 
+           			WHEN item.item_description IS NOT NULL THEN (IFNULL(item.activity_type_id || ' ', '') || item.item_description)
+           			ELSE (IFNULL(item.activity_type_id || ' ' , '') || IFNULL(activitytypetext.activity_type_description, '<Temporary>'))
+           		END           
+           WHEN item.item_category_id = 8 THEN item.item_description
+           WHEN item.item_category_id = 9 THEN item.item_description
+           WHEN item.item_category_id = 10 THEN (SELECT  referencedCalculation.calculation_name || '__' || referencedVersion.calculation_version_name
+           											FROM "sap.plc.db::basis.t_calculation_version" referencedVersion 
+           											    INNER JOIN "sap.plc.db::basis.t_calculation" referencedCalculation 
+           											        ON referencedCalculation.calculation_id = referencedVersion.calculation_id
+                										WHERE item.referenced_calculation_version_id = referencedVersion.calculation_version_id)
+           ELSE item.item_description
+       END AS item_description,
+	   concat(item.calculation_version_id, concat('-', item.parent_item_id)) as parent_item_id,
+	   CASE 
+           WHEN parentitem.item_category_id = 0 THEN calcVersion.calculation_version_name
+           WHEN parentitem.item_category_id = 1 THEN 
+             	(parentitem.document_type_id || '_' || parentitem.document_id || '_' || parentitem.document_part || '_' || parentitem.document_version)
+           WHEN parentitem.item_category_id = 2 THEN
+           		CASE 
+           		 	WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.material_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.material_id || ' ', '') || IFNULL(parentmaterialtext.material_description, '<Temporary>'))
+           		END
+           WHEN parentitem.item_category_id = 3 THEN 
+           		CASE 
+           			WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.activity_type_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.activity_type_id || ' ', '') || IFNULL(parentactivitytypetext.activity_type_description, '<Temporary>'))
+           		END
+           WHEN parentitem.item_category_id = 4 THEN 
+           		CASE 
+           			WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.activity_type_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.activity_type_id || ' ', '') || IFNULL(parentactivitytypetext.activity_type_description, '<Temporary>'))
+           		END           
+           WHEN parentitem.item_category_id = 5 THEN
+                CASE 
+           			WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.process_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.process_id || ' ', '') || IFNULL(parentprocesstext.process_description, '<Temporary>'))
+           		END
+           WHEN parentitem.item_category_id = 6 THEN 
+           		CASE 
+           			WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.activity_type_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.activity_type_id || ' ', '') || IFNULL(parentactivitytypetext.activity_type_description, '<Temporary>'))
+           		END            
+           WHEN parentitem.item_category_id = 7 THEN 
+           		CASE 
+           			WHEN parentitem.item_description IS NOT NULL THEN (IFNULL(parentitem.activity_type_id || ' ', '') || parentitem.item_description)
+           			ELSE (IFNULL(parentitem.activity_type_id || ' ', '') || IFNULL(parentactivitytypetext.activity_type_description, '<Temporary>'))
+           		END            
+           WHEN parentitem.item_category_id = 8 THEN parentitem.item_description
+           WHEN parentitem.item_category_id = 9 THEN parentitem.item_description
+           WHEN parentitem.item_category_id = 10 THEN (SELECT referencedVersion.calculation_version_name 
+           											FROM "sap.plc.db::basis.t_calculation_version" referencedVersion 
+                										WHERE parentitem.referenced_calculation_version_id = referencedVersion.calculation_version_id)
+           ELSE parentitem.item_description
+		 END AS parent_item_description,
+       CASE
+         WHEN parentitem.item_category_id = 10 THEN (SELECT referencedItem.comment 
+           											FROM "sap.plc.db::basis.t_item" as referencedItem
+                										WHERE referencedItem.calculation_version_id = parentitem.referenced_calculation_version_id
+                										  AND referencedItem.item_id = (SELECT root_item_id FROM "sap.plc.db::basis.t_calculation_version" WHERE calculation_version_id = parentitem.referenced_calculation_version_id))
+         ELSE item.comment
+       END as comment,
+       IFNULL(itemhierarchy.is_leaf, 0) AS is_leaf,     
+       item.item_category_id,
+       item.child_item_category_id,
+       item.is_active, 
+       CASE 
+       	   -- A unique id for resource should always be set to differentiate the resources from each other
+	       WHEN item.item_category_id = 0 THEN TO_NVARCHAR(calcVersion.calculation_version_id)
+           WHEN item.item_category_id = 1 THEN 
+             	(item.document_type_id || '_' || item.document_id || '_' || item.document_part || '_' || item.document_version)
+           WHEN item.item_category_id = 2 THEN IFNULL(item.material_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 3 THEN IFNULL(item.activity_type_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 4 THEN IFNULL(item.activity_type_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 5 THEN IFNULL(item.process_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 6 THEN IFNULL(item.activity_type_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 7 THEN IFNULL(item.activity_type_id, TO_NVARCHAR(item.item_id))
+           WHEN item.item_category_id = 8 THEN TO_NVARCHAR(item.item_id)
+           WHEN item.item_category_id = 9 THEN TO_NVARCHAR(item.item_id)
+           WHEN item.item_category_id = 10 THEN TO_NVARCHAR(item.referenced_calculation_version_id)
+       END AS resource_id,
+       CASE 
+	       WHEN item.item_category_id = 0 THEN calcVersion.calculation_version_name
+           WHEN item.item_category_id = 1 THEN 
+             	(item.document_type_id || '_' || item.document_id || '_' || item.document_part || '_' || item.document_version)
+           WHEN item.item_category_id = 2 THEN IFNULL(materialtext.material_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 3 THEN IFNULL(activitytypetext.activity_type_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 4 THEN IFNULL(activitytypetext.activity_type_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 5 THEN IFNULL(processtext.process_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 6 THEN IFNULL(activitytypetext.activity_type_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 7 THEN IFNULL(activitytypetext.activity_type_description, IFNULL(item.item_description, '<Temporary>'))
+           WHEN item.item_category_id = 8 THEN item.item_description
+           WHEN item.item_category_id = 9 THEN item.item_description
+           WHEN item.item_category_id = 10 THEN (SELECT referencedCalculation.calculation_name || '__' || referencedVersion.calculation_version_name
+           											FROM "sap.plc.db::basis.t_calculation_version" referencedVersion 
+           											    INNER JOIN "sap.plc.db::basis.t_calculation" referencedCalculation 
+           											        ON referencedCalculation.calculation_id = referencedVersion.calculation_id
+                										WHERE item.referenced_calculation_version_id = referencedVersion.calculation_version_id )
+       END AS resource_description,       
+       itemcategorytext.item_category_id as resource_type_id,    
+       itemcategorytext.item_category_description as resource_type,
+       item.material_id,
+       materialtext.material_description,
+       material.material_group_id,
+       material.material_type_id,
+       item.activity_type_id,   
+       activitytypetext.activity_type_description,
+       item.process_id, 
+       processtext.process_description,          
+       item.company_code_id,
+       companycodetext.company_code_description,
+       item.cost_center_id,
+       cc_text.cost_center_description,
+       item.plant_id,
+       planttext.plant_description,
+       item.business_area_id,
+       businessareatext.business_area_description,
+       item.profit_center_id,  
+       profitcentertext.profit_center_description,         
+       confidencelevel_text.confidence_level_id,   
+       confidencelevel_text.confidence_level_description, 
+       vendor.vendor_id,
+       vendor.vendor_name,    
+       item.price_source_id,
+       pricesourcetext.price_source_description,
+       item.engineering_change_number_id,
+       item.total_quantity_depends_on,
+       item.is_relevant_to_costing_in_erp,
+       item.is_disabling_price_determination,
+       item.purchasing_document,
+       item.purchasing_group,
+       item.work_center_id,
+       workCenterText.work_center_description
+FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+            INNER JOIN "sap.plc.db::basis.t_item" item
+                ON item.calculation_version_id = calcVersion.calculation_version_id
+                AND (:versionId = '' OR calcVersion.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId)))
+                and upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER')) 
+            INNER JOIN "sap.plc.db::basis.t_calculation" calc 
+				ON calc.calculation_id = calcVersion.calculation_id
+                AND calc.PROJECT_ID IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId))
+			INNER JOIN "sap.plc.db::basis.t_project" project 
+				ON project.project_id = calc.project_id
+            LEFT OUTER JOIN (
+		        SELECT item.item_id, item.calculation_version_id, 1 AS is_leaf FROM "sap.plc.db::basis.t_item" item
+		        LEFT OUTER JOIN "sap.plc.db::basis.t_item" parentitems
+			        ON parentitems.calculation_version_id = item.calculation_version_id AND parentitems.parent_item_id = item.item_id
+		            WHERE parentitems.parent_item_id IS NULL
+		    ) itemhierarchy
+			    ON itemhierarchy.calculation_version_id = item.calculation_version_id AND itemhierarchy.item_id = item.item_id		
+			LEFT OUTER JOIN "sap.plc.db::basis.t_item" parentitem
+				ON item.calculation_version_id = parentitem.calculation_version_id AND item.parent_item_id = parentitem.item_id			    				
+			LEFT OUTER JOIN "sap.plc.db::basis.t_business_area__text" businessareatext
+                ON businessareatext.BUSINESS_AREA_ID = item.BUSINESS_AREA_ID  
+                AND calcVersion.master_data_timestamp >= businessareatext._valid_from 
+                AND (businessareatext._valid_to IS NULL OR calcVersion.master_data_timestamp < businessareatext._valid_to) 
+                AND businessareatext.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_confidence_level__text" confidencelevel_text
+                ON confidencelevel_text.confidence_level_id = item.confidence_level_id 
+                AND confidencelevel_text.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_cost_center__text" cc_text
+                ON cc_text.cost_center_id = item.cost_center_id 
+                AND cc_text.controlling_area_id = project.controlling_area_id
+				AND calcVersion.master_data_timestamp >= cc_text._valid_from 
+				AND (cc_text._valid_to IS NULL OR calcVersion.master_data_timestamp < cc_text._valid_to)                                
+                AND cc_text.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_company_code__text" companycodetext
+                ON companycodetext.company_code_id = item.company_code_id
+                AND companycodetext.company_code_id IN 
+                	(SELECT company_code_id FROM "sap.plc.db::basis.t_company_code" WHERE controlling_area_id = project.controlling_area_id)
+                AND calcVersion.master_data_timestamp >= companycodetext._valid_from 
+				AND (companycodetext._valid_to IS NULL OR calcVersion.master_data_timestamp < companycodetext._valid_to)
+				AND companycodetext.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_item_category__text" itemcategorytext
+                ON itemcategorytext.item_category_id = item.item_category_id 
+                AND itemcategorytext.language = VAR_LANGUAGE              
+            LEFT OUTER JOIN "sap.plc.db::basis.t_material" material
+                ON material.material_id = item.material_id   
+                AND calcVersion.master_data_timestamp >= material._valid_from
+                AND (material._valid_to IS NULL OR calcVersion.master_data_timestamp < material._valid_to)
+            LEFT OUTER JOIN "sap.plc.db::basis.t_plant__text" planttext
+                ON planttext.plant_id = item.plant_id 
+                AND planttext.plant_id IN
+                	(SELECT plant_id FROM "sap.plc.db::basis.t_plant" plant
+						INNER JOIN "sap.plc.db::basis.t_company_code" companycode 
+						ON plant.company_code_id = companycode.company_code_id 
+						AND companycode.controlling_area_id = project.controlling_area_id)  
+                AND calcVersion.master_data_timestamp >= planttext._valid_from 
+                AND (planttext._valid_to IS NULL OR calcVersion.master_data_timestamp < planttext._valid_to)             
+                AND planttext.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_price_source__text" pricesourcetext
+                ON pricesourcetext.price_source_id = item.price_source_id           
+                AND pricesourcetext.price_source_type_id = item.price_source_type_id               
+                AND pricesourcetext.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_profit_center__text" profitcentertext
+                ON profitcentertext.profit_center_id = item.profit_center_id 
+                AND profitcentertext.controlling_area_id = project.controlling_area_id
+                AND calcVersion.master_data_timestamp >= profitcentertext._valid_from 
+                AND (profitcentertext._valid_to IS NULL OR calcVersion.master_data_timestamp < profitcentertext._valid_to)
+                AND profitcentertext.language = VAR_LANGUAGE
+            LEFT OUTER JOIN "sap.plc.db::basis.t_vendor" vendor
+                ON vendor.vendor_id = item.vendor_id
+                AND calcVersion.master_data_timestamp >= vendor._valid_from AND (vendor._valid_to IS NULL OR calcVersion.master_data_timestamp < vendor._valid_to)
+            LEFT OUTER JOIN "sap.plc.db::basis.t_activity_type__text" activitytypetext
+                ON activitytypetext.activity_type_id = item.activity_type_id 
+				AND activitytypetext.controlling_area_id = (SELECT project.controlling_area_id FROM "sap.plc.db::basis.t_project" project
+						WHERE project.project_id = calc.project_id)
+				AND activitytypetext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= activitytypetext._valid_from
+                AND (activitytypetext._valid_to IS NULL OR calcVersion.master_data_timestamp < activitytypetext._valid_to)   
+            LEFT OUTER JOIN "sap.plc.db::basis.t_activity_type__text" parentactivitytypetext
+                ON parentactivitytypetext.activity_type_id = parentitem.activity_type_id 
+				AND parentactivitytypetext.controlling_area_id = (SELECT project.controlling_area_id FROM "sap.plc.db::basis.t_project" project
+						WHERE project.project_id = calc.project_id)
+				AND parentactivitytypetext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= parentactivitytypetext._valid_from
+                AND (parentactivitytypetext._valid_to IS NULL OR calcVersion.master_data_timestamp < parentactivitytypetext._valid_to)                                                                                  
+            LEFT OUTER JOIN "sap.plc.db::basis.t_process__text" processtext
+                ON processtext.process_id = item.process_id AND processtext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= processtext._valid_from 
+                AND (processtext._valid_to IS NULL OR calcVersion.master_data_timestamp < processtext._valid_to)    
+            LEFT OUTER JOIN "sap.plc.db::basis.t_process__text" parentprocesstext
+                ON parentprocesstext.process_id = parentitem.process_id AND parentprocesstext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= parentprocesstext._valid_from 
+                AND (parentprocesstext._valid_to IS NULL OR calcVersion.master_data_timestamp < parentprocesstext._valid_to)                      
+            LEFT OUTER JOIN "sap.plc.db::basis.t_material__text" materialtext
+                ON materialtext.material_id = item.material_id 
+                AND materialtext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= materialtext._valid_from 
+                AND (materialtext._valid_to IS NULL OR calcVersion.master_data_timestamp < materialtext._valid_to)    
+            LEFT OUTER JOIN "sap.plc.db::basis.t_material__text" parentmaterialtext
+                ON parentmaterialtext.material_id = parentitem.material_id 
+                AND parentmaterialtext.language = VAR_LANGUAGE
+                AND calcVersion.master_data_timestamp >= parentmaterialtext._valid_from 
+                AND (parentmaterialtext._valid_to IS NULL OR calcVersion.master_data_timestamp < parentmaterialtext._valid_to)
+            LEFT OUTER JOIN "sap.plc.db::basis.t_work_center__text" workCenterText
+            	ON workCenterText.WORK_CENTER_ID = item.WORK_CENTER_ID
+            	AND workCenterText.PLANT_ID = item.PLANT_ID
+                AND workCenterText.language = VAR_LANGUAGE
+            	AND calcVersion.master_data_timestamp >= workCenterText._VALID_FROM
+            	AND (workCenterText._valid_to IS NULL OR calcVersion.master_data_timestamp < workCenterText._valid_to)
+;
+
+return :var_out;
+END;

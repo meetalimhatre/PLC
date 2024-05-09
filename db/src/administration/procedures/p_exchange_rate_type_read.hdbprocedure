@@ -1,0 +1,48 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_exchange_rate_type_read" ( 
+		IN iv_logon_language 			NVARCHAR(11),
+		IN iv_master_data_timestamp 	TIMESTAMP,
+	    IN iv_filter_string 			NVARCHAR(5000),
+		IN iv_no_max_records 			INTEGER,
+		IN iv_no_skip_records           INTEGER,
+        OUT ot_exchange_rate_type 		"sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty,
+        OUT ot_exchange_rate_type_text 	"sap.plc.db::basis.t_exchange_rate_type__text" default empty
+        ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+--select exchange rate types
+ tt_exchange_rate_type_all =
+            select  
+   				plcTable.EXCHANGE_RATE_TYPE_ID,
+				plcTable.CREATED_ON,
+				plcTable.CREATED_BY,
+				plcTable.LAST_MODIFIED_ON,
+				plcTable.LAST_MODIFIED_BY,
+    			plcTextTable.EXCHANGE_RATE_TYPE_DESCRIPTION
+    		from "sap.plc.db::basis.t_exchange_rate_type" as plcTable 	
+            left outer join "sap.plc.db::basis.t_exchange_rate_type__text" as plcTextTable 
+                on  plcTable.EXCHANGE_RATE_TYPE_ID = plcTextTable.EXCHANGE_RATE_TYPE_ID 
+                and plcTextTable.LANGUAGE = :iv_logon_language                             
+          	order by EXCHANGE_RATE_TYPE_ID;
+          	
+  tt_exchange_rate_type_filter = APPLY_FILTER(:tt_exchange_rate_type_all, :iv_filter_string) ;
+   
+  ot_exchange_rate_type = select 
+                        EXCHANGE_RATE_TYPE_ID,
+        				CREATED_ON,
+        				CREATED_BY,
+        				LAST_MODIFIED_ON,
+        				LAST_MODIFIED_BY,
+        				EXCHANGE_RATE_TYPE_DESCRIPTION
+                    from :tt_exchange_rate_type_filter
+                    limit :iv_no_max_records
+                    offset :iv_no_skip_records; 
+  
+ ot_exchange_rate_type_text =  select  *
+						 from "sap.plc.db::basis.t_exchange_rate_type__text" 
+						 where ( EXCHANGE_RATE_TYPE_ID) in ( select EXCHANGE_RATE_TYPE_ID from :ot_exchange_rate_type ); 
+						 
+ 
+END;

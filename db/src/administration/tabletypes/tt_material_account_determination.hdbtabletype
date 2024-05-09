@@ -1,0 +1,12 @@
+TYPE "sap.plc.db.administration::masterdata.tt_material_account_determination" AS TABLE (
+		CONTROLLING_AREA_ID NVARCHAR(4),
+		MATERIAL_TYPE_ID NVARCHAR(4),
+		PLANT_ID NVARCHAR(8),
+		VALUATION_CLASS_ID NVARCHAR(4),
+		ACCOUNT_ID NVARCHAR(10),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+	  	_VALID_TO TIMESTAMP, -- used to define the validity of master data
+	  	_SOURCE TINYINT, -- used to define the source of master data
+	  	_CREATED_BY NVARCHAR(256),
+	  	_VALID_FROM_FIRST_VERSION TIMESTAMP,
+	  	_CREATED_BY_FIRST_VERSION NVARCHAR(256))

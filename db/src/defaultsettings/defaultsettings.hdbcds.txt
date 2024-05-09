@@ -1,0 +1,121 @@
+namespace sap.plc.db.defaultsettings;
+
+
+context defaultsettings {
+
+    table type tt_default_settings {
+    	CONTROLLING_AREA_ID: String(4);
+    	COMPANY_CODE_ID: String(4);
+    	PLANT_ID: String(8);
+    	REPORT_CURRENCY_ID: String(3);
+    	COMPONENT_SPLIT_ID: String(35); 
+    	COSTING_SHEET_ID: String(15);
+    };
+
+    table type tt_controlling_area_key {
+    	CONTROLLING_AREA_ID: String(4);
+    };
+
+    table type tt_company_code_key {
+    	COMPANY_CODE_ID: String(4);
+    };
+
+    table type tt_plant_key {
+    	PLANT_ID: String(8);
+    };
+
+    table type tt_report_currency_key {
+    	CURRENCY_ID: String(3);
+    };
+
+    table type tt_component_split_key {
+    	COMPONENT_SPLIT_ID: String(35); 
+    };
+
+    table type tt_costing_sheet_key {
+    	COSTING_SHEET_ID: String(15);
+    };
+
+    table type tt_controlling_area {
+	      CONTROLLING_AREA_ID: String(4);
+	      CONTROLLING_AREA_CURRENCY_ID: String(5);
+	      _VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+	      _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	      _SOURCE: hana.TINYINT; // used to define the source of master data
+	      _CREATED_BY: String(256);
+	      _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	      _CREATED_BY_FIRST_VERSION: String(256);
+	      CONTROLLING_AREA_DESCRIPTION: String(250);
+	};
+
+    table type tt_company_code {
+	      COMPANY_CODE_ID: String(4);
+	      CONTROLLING_AREA_ID: String(4);
+	      COMPANY_CODE_CURRENCY_ID: String(5);
+	      _VALID_FROM: UTCTimestamp; // used to define the validity of master data
+	      _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	      _SOURCE: hana.TINYINT; // used to define the source of master data
+	      _CREATED_BY: String(256);
+	      _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	      _CREATED_BY_FIRST_VERSION: String(256);
+		  COMPANY_CODE_DESCRIPTION: String(250);
+	};
+
+	table type tt_plant {
+	      PLANT_ID: String(8);
+	      COMPANY_CODE_ID: String(4);
+	      COUNTRY: String(100);
+	      POSTAL_CODE: String(35);
+	      REGION: String(100);
+	      CITY: String(100);
+	      STREET_NUMBER_OR_PO_BOX: String(100);
+	      _VALID_FROM: UTCTimestamp; // used to define the validity of master data
+	      _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	      _SOURCE: hana.TINYINT; // used to define the source of master data
+	      _CREATED_BY: String(256);
+	      _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	      _CREATED_BY_FIRST_VERSION: String(256);
+	      PLANT_DESCRIPTION: String(250);
+	};
+
+	table type tt_report_currency {
+	      CURRENCY_ID: String(5);
+	      _VALID_FROM: UTCTimestamp; // used to define the validity of master data
+	      _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	      _SOURCE: hana.TINYINT; // used to define the source of master data
+	      _CREATED_BY: String(256);
+	      _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	      _CREATED_BY_FIRST_VERSION: String(256);
+	      CURRENCY_CODE: String(5);
+          CURRENCY_DESCRIPTION: String(40);
+    };
+
+    table type tt_component_split {
+	   	  COMPONENT_SPLIT_ID: String(35);
+	   	  CONTROLLING_AREA_ID: String(4);	
+		  _VALID_FROM: UTCTimestamp; // used to define the validity of master data
+	      _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	      _SOURCE: hana.TINYINT; // used to define the source of master data,
+	      _CREATED_BY: String(256);
+	      _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	      _CREATED_BY_FIRST_VERSION: String(256);
+	      COMPONENT_SPLIT_DESCRIPTION: String(250);
+	};
+
+	table type tt_costing_sheet {
+	       COSTING_SHEET_ID: String(15);
+	       CONTROLLING_AREA_ID: String(4);
+		   IS_TOTAL_COST2_ENABLED: hana.TINYINT;
+	       IS_TOTAL_COST3_ENABLED: hana.TINYINT;
+	       _VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+	       _VALID_TO: UTCTimestamp; // used to define the validity of master data
+	       _SOURCE: hana.TINYINT; // used to define the source of master data
+	       _CREATED_BY: String(256);
+	       _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+	       _CREATED_BY_FIRST_VERSION: String(256);
+	       COSTING_SHEET_DESCRIPTION: String(250);
+		   TOTAL_COST2_DESCRIPTION: String(50);
+		   TOTAL_COST3_DESCRIPTION: String(50);
+    };
+
+};

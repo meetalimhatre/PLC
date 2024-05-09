@@ -1,0 +1,5 @@
+PRICE_DETERMINATION_STRATEGY_ID,PRICE_DETERMINATION_STRATEGY_TYPE_ID,LANGUAGE,PRICE_DETERMINATION_STRATEGY_DESCRIPTION
+PLC_STANDARD,1,EN,Standard Price Determination Strategy For Materials (SAP PLC)
+PLC_STANDARD,2,EN,Standard Price Determination Strategy For Activities (SAP PLC)
+PLC_STANDARD,1,DE,Standard Preisfindung Materialiensstrategie (SAP PLC)
+PLC_STANDARD,2,DE,Standard Preisfindung Leistungsstrategie (SAP PLC)

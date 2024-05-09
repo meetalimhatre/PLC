@@ -1,0 +1,13 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_T025" AFTER DELETE ON "sap.plc.db::repl.t025"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_valuation_class"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE     "sap.plc.db::basis.t_valuation_class"."VALUATION_CLASS_ID" = :OLDROW."BKLAS"  
+        AND "sap.plc.db::basis.t_valuation_class"."_VALID_FROM" < :lv_current_utctimestamp
+        AND "sap.plc.db::basis.t_valuation_class"."_VALID_TO" IS NULL;
+end
+;

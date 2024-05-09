@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_vendor_input" AS TABLE (
+		VENDOR_ID NVARCHAR(10),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

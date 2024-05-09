@@ -1,0 +1,1 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_create_lifecycle_versions_output" AS TABLE  ( "CALCULATION_VERSION_ID" INT  NOT NULL, "LIFECYCLE_PERIOD_FROM" INT  NOT NULL, PRIMARY KEY ( "CALCULATION_VERSION_ID" ) ) 

@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::temp.gtt_changed_items" (
+  ITEM_ID INTEGER,
+  FIELD_NAME NVARCHAR(100)
+)

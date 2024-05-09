@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::cost_center_update_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_cost_center", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_cost_center__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		]
+	}
+}

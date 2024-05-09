@@ -1,0 +1,8 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_variant_items" AS TABLE (
+    VARIANT_ID INTEGER,
+    ITEM_ID INTEGER,
+    IS_INCLUDED INTEGER,
+    QUANTITY DECIMAL(28,7),
+    QUANTITY_STATE INTEGER,
+    QUANTITY_UOM_ID NVARCHAR(3)
+)

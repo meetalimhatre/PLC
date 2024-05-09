@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.administration::masterdata.tt_document_material_key" AS TABLE (
+		DOCUMENT_TYPE_ID NVARCHAR(3),
+		DOCUMENT_ID NVARCHAR(40),
+		DOCUMENT_VERSION NVARCHAR(2),
+		DOCUMENT_PART NVARCHAR(3),
+		MATERIAL_ID NVARCHAR(40))

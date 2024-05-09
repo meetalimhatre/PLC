@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_design_office_input" AS TABLE (
+		DESIGN_OFFICE_ID NVARCHAR(3),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

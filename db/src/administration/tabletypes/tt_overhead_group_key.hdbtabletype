@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_overhead_group_key" AS TABLE (
+		OVERHEAD_GROUP_ID NVARCHAR(10),
+		PLANT_ID NVARCHAR(8))

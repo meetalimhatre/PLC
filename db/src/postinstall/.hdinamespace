@@ -1,0 +1,4 @@
+{
+    "name": "sap.plc.xs.postinstall",
+    "subfolder": "append"
+}

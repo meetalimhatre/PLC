@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_variant_items_calculated" AS TABLE (
+    VARIANT_ID INTEGER,
+    ITEM_ID INTEGER,
+    TOTAL_QUANTITY DECIMAL(28,7),
+    TOTAL_COST DECIMAL(28,7),
+    QUANTITY_CALCULATED DECIMAL(28,7)
+)

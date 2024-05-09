@@ -1,0 +1,33 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_currency_read" ( 
+		IN iv_logon_language        NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,
+        IN ot_currency_key			"sap.plc.db.defaultsettings::defaultsettings.tt_report_currency_key",
+        OUT ot_currency				"sap.plc.db.defaultsettings::defaultsettings.tt_report_currency" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+ -- select currency
+ ot_currency = select
+ 					plcTable.CURRENCY_ID,
+ 					plcTable._VALID_FROM,
+ 					plcTable._VALID_TO,
+ 					plcTable._SOURCE,
+ 					plcTable._CREATED_BY,
+ 					null AS _VALID_FROM_FIRST_VERSION,
+					null as _CREATED_BY_FIRST_VERSION,
+ 					plcTextTable.CURRENCY_CODE,
+ 					plcTextTable.CURRENCY_DESCRIPTION
+ 				from "sap.plc.db::basis.t_currency" as plcTable
+                left outer join "sap.plc.db::basis.t_currency__text" as plcTextTable 
+                on  plcTable.CURRENCY_ID = plcTextTable.CURRENCY_ID 
+                and plcTextTable.LANGUAGE = :iv_logon_language 
+                and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+                where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+                and ( plcTable.CURRENCY_ID ) in ( select CURRENCY_ID from :ot_currency_key );
+
+END;

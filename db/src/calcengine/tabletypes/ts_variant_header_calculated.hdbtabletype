@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_variant_header_calculated" AS TABLE (
+    VARIANT_ID INTEGER,
+    VARIANT_TYPE INTEGER,
+    SALES_PRICE DECIMAL(28,7),
+    TOTAL_COST DECIMAL(28,7)
+)

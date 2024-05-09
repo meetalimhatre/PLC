@@ -1,0 +1,32 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_T006" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t006" 
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+select count(UOM_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_uom"
+    WHERE "sap.plc.db::basis.t_uom"."UOM_ID" = :NEWROW."MSEHI"
+        AND "sap.plc.db::basis.t_uom"."DIMENSION_ID" = :NEWROW."DIMID"
+        AND "sap.plc.db::basis.t_uom"."NUMERATOR" = :NEWROW."ZAEHL"
+        AND "sap.plc.db::basis.t_uom"."DENOMINATOR" = :NEWROW."NENNR"
+        AND "sap.plc.db::basis.t_uom"."EXPONENT_BASE10" = :NEWROW."EXP10"
+        AND "sap.plc.db::basis.t_uom"."SI_CONSTANT" = :NEWROW."ADDKO"
+        AND "sap.plc.db::basis.t_uom"."_SOURCE" = :lv_source
+        AND "sap.plc.db::basis.t_uom"."_VALID_FROM" < :lv_current_utctimestamp 
+        AND "sap.plc.db::basis.t_uom"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0 THEN              
+    UPDATE "sap.plc.db::basis.t_uom"
+        SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user()  
+        WHERE "sap.plc.db::basis.t_uom"."UOM_ID" = :NEWROW."MSEHI" 
+                AND "sap.plc.db::basis.t_uom"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_uom"."_VALID_TO" IS NULL;
+    INSERT INTO "sap.plc.db::basis.t_uom" 
+        (UOM_ID,DIMENSION_ID,NUMERATOR,DENOMINATOR,EXPONENT_BASE10,SI_CONSTANT,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+        VALUES (:NEWROW."MSEHI", :NEWROW."DIMID", :NEWROW."ZAEHL", :NEWROW."NENNR", :NEWROW."EXP10", :NEWROW."ADDKO", :lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

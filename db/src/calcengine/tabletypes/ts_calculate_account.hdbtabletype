@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_account" AS TABLE (
+		ACCOUNT_ID NVARCHAR(10)
+	)

@@ -1,0 +1,6 @@
+COLUMN TABLE "sap.plc.db::temp.gtt_item_changed_active_state" (
+  ITEM_ID INTEGER NOT NULL,
+  PARENT_ITEM_ID INTEGER,
+  IS_ACTIVE TINYINT NOT NULL,
+  PRIMARY KEY(ITEM_ID)
+)

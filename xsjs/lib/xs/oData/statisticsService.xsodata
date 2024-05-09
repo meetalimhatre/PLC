@@ -1,0 +1,9 @@
+service {
+    "sap.plc.db::map.t_statistics" as "StatisticsOdata"
+        create forbidden
+        update forbidden
+        delete forbidden;
+}
+annotations {
+   enable OData4SAP;
+}

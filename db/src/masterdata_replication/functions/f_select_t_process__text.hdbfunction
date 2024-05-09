@@ -1,0 +1,23 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_process__text" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"PROCESS_ID"	NVARCHAR(12),
+	"CONTROLLING_AREA_ID"	NVARCHAR(4),
+	"LANGUAGE"	NVARCHAR(11),
+	"PROCESS_DESCRIPTION"	NVARCHAR(250),
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"PROCESS_ID"	NVARCHAR(12),
+		"CONTROLLING_AREA_ID"	NVARCHAR(4),
+		"LANGUAGE"	NVARCHAR(11),
+		"PROCESS_DESCRIPTION"	NVARCHAR(250),
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_process__text', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

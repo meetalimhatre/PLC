@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::repl.tgsb" (
+  GSBER NVARCHAR(15) NOT NULL DEFAULT '',
+  PRIMARY KEY(GSBER)
+)

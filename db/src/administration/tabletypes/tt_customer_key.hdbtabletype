@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_customer_key" AS TABLE (
+		CUSTOMER_ID NVARCHAR(10))

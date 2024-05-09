@@ -1,0 +1,10 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::data_select_plc",
+		"schema_privileges": [
+             {
+             "privileges": ["SELECT"]
+             }
+        ]
+	}
+}

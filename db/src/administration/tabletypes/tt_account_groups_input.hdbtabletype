@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_account_groups_input" AS TABLE (
+		ACCOUNT_GROUP_ID INTEGER,
+		MASTER_DATA_TIMESTAMP TIMESTAMP		
+	)
