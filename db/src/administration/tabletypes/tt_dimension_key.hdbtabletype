@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_dimension_key" AS TABLE (
+		DIMENSION_ID NVARCHAR(10)
+    )  

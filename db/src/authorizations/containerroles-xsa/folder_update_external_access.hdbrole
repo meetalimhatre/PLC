@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::folder_update_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_folder", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_entity_relation", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,7 @@
+COSTING_SHEET_ID,LANGUAGE,COSTING_SHEET_DESCRIPTION,TOTAL_COST2_DESCRIPTION,TOTAL_COST3_DESCRIPTION,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY
+#COGSL,EN,Cost of Goods Sold (low overhead),Total Cost 2,Total Cost 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER
+#COGSL,DE,Selbstkosten (niedrige Zuschläge),Gesamtkosten 2,Gesamtkosten 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER
+#COGM,EN,Cost of Goods Manufactured,Total Cost 2,Total Cost 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER
+#COGM,DE,Herstellkosten,Gesamtkosten 2,Gesamtkosten 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER
+#IC_COGM,EN,Intercompany - Cost of Goods Manufactured,Group Cost,Total Cost 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER
+#IC_COGM,DE,Buchungskreisübergreifend - Herstellkosten,Gruppenkosten,Gesamtkosten 3,2000-01-01 00:00:00.0000000,,1,#CONTROLLER

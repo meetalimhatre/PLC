@@ -1,0 +1,40 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_TCURR"
+AFTER DELETE ON "sap.plc.db::repl.t_tcurr"
+REFERENCING OLD ROW OLDROW FOR EACH ROW 
+BEGIN 
+ DECLARE lv_current_utctimestamp    timestamp;
+ DECLARE v_FCURR       VARCHAR(5) := '''';                                  
+ DECLARE v_TCURR       VARCHAR(5) := '''';                                                      
+ DECLARE v_ERP_DATE    DATE ;
+ DECLARE v_TCURF_GDATU_C VARCHAR(27) := '''';
+ 
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+v_FCURR = :OLDROW."FCURR";
+v_TCURR = :OLDROW."TCURR";
+v_ERP_DATE = TO_DATS(:OLDROW."GDATU_C");
+
+select MAX(GDATU_C)
+    INTO v_TCURF_GDATU_C 
+                        from "sap.plc.db::repl.t_tcurf"
+                        WHERE   FCURR = v_FCURR AND 
+                                TCURR = v_TCURR AND
+                                GDATU_C <= :v_ERP_DATE;
+           
+UPDATE "sap.plc.db::basis.t_currency_conversion"
+        SET _VALID_TO = :lv_current_utctimestamp 
+        WHERE 
+          ( "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" , "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" )
+          IN (  select TCURF.FCURR, 
+                       TCURF.TCURR
+                from "sap.plc.db::repl.t_tcurf" AS TCURF
+                WHERE
+                    TCURF.FCURR = :v_FCURR AND 
+                    TCURF.TCURR = :v_TCURR AND
+                    TCURF.GDATU_C = :v_TCURF_GDATU_C )
+          AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = :v_ERP_DATE
+          AND "sap.plc.db::basis.t_currency_conversion"."EXCHANGE_RATE_TYPE_ID" = 'STANDARD'
+          AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+          AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+
+end
+;

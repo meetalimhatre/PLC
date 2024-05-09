@@ -1,0 +1,10 @@
+TYPE "sap.plc.db.administration::masterdata.tt_costing_sheet_overhead" AS TABLE (
+		COSTING_SHEET_OVERHEAD_ID INTEGER,
+		CREDIT_ACCOUNT_ID NVARCHAR(10), -- account for credit
+		CREDIT_FIXED_COST_PORTION INTEGER, -- percentage of fixed cost portion in percentage
+		IS_ROLLED_UP TINYINT, -- if set = rollUp, in ERP: CHAR(1)
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		USE_DEFAULT_FIXED_COST_PORTION TINYINT)

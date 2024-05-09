@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.defaultsettings::defaultsettings.tt_company_code_key" AS TABLE (
+    COMPANY_CODE_ID NVARCHAR(4)
+)

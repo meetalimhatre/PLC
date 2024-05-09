@@ -1,0 +1,1037 @@
+{
+    "format_version": 1,
+    "imports": [
+        {
+            "target_table": "sap.plc.db::basis.t_account",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_account.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_account_account_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_account_account_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_account_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_account_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_component_split_account_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_component_split_account_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_account_group__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_account_group__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_account__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_account__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_activity_price",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_activity_price.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_activity_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_activity_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_activity_type__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_activity_type__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_addin_configuration_header",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_addin_configuration_header.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_addin_configuration_items",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_addin_configuration_items.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_addin_version",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_addin_version.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_application_timeout",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_application_timeout.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_business_area",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_business_area.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_business_area__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_business_area__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_process",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_process.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_process__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_process__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_calculation",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_calculation.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_calculation_version",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_calculation_version.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_calculation_version_temporary",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_calculation_version_temporary.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_company_code",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_company_code.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_company_code__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_company_code__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_component_split",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_component_split.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_component_split__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_component_split__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_confidence_level",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_confidence_level.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_confidence_level__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_confidence_level__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_controlling_area",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_controlling_area.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_controlling_area__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_controlling_area__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_overhead",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_overhead.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_overhead_row",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_overhead_row.csv",
+                "has_header": true
+            }
+        },
+               {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_overhead_row_formula",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_overhead_row_formula.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_row",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_row.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_row_dependencies",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_row_dependencies.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet_row__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet_row__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_costing_sheet__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_costing_sheet__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_cost_center",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_cost_center.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_cost_center__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_cost_center__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_currency",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_currency.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_currency_conversion",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_currency_conversion.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_currency__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_currency__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_customer",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_customer.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_default_settings",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_default_settings.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_dimension",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_dimension.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_dimension__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_dimension__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document_material",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document_material.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document_status",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document_status.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document_status__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document_status__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document_type__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document_type__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_document__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_document__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_exchange_rate_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_exchange_rate_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_exchange_rate_type__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_exchange_rate_type__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_formula",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_formula.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_calculated_values_component_split",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_calculated_values_component_split.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_calculated_values_costing_sheet",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_calculated_values_costing_sheet.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_category",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_category.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_category__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_category__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_referenced_version_component_split",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_referenced_version_component_split.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_item_temporary",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_item_temporary.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_design_office",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_design_office.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_design_office__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_design_office__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_language",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_language.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_layout",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_layout.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_layout_column",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_layout_column.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_account_determination",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_account_determination.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_group__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_group__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_plant",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_plant.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_type__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_type__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_metadata",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_metadata.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_metadata_item_attributes",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_metadata_item_attributes.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_metadata_selection_displayed",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_metadata_selection_displayed.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_metadata_selection_filter",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_metadata_selection_filter.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_metadata__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_metadata__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_open_calculation_versions",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_open_calculation_versions.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_overhead_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_overhead_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_overhead_group__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_overhead_group__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_plant",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_plant.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_plant__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_plant__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_material_price",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_material_price.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_component",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_component.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_rule",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_rule.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_determination_strategy",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_determination_strategy.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_determination_strategy_price_source",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_determination_strategy_price_source.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_determination_strategy_rule",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_determination_strategy_rule.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_determination_strategy__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_determination_strategy__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_source",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_source.csv",
+                "has_header": true
+            }
+        },
+       {
+            "target_table": "sap.plc.db::basis.t_tag",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_tag.csv",
+                "has_header": true
+            }
+        },
+       {
+            "target_table": "sap.plc.db::basis.t_entity_tags",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_entity_tags.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_lifecycle_period_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_lifecycle_period_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_monthly_lifecycle_period",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_monthly_lifecycle_period.csv",
+                "has_header": true
+            }
+        },
+       {
+            "target_table": "sap.plc.db::basis.t_project_lifecycle_configuration",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_lifecycle_configuration.csv",
+                "has_header": true
+            }
+        },
+       {
+            "target_table": "sap.plc.db::basis.t_project_lifecycle_period_quantity_value",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_lifecycle_period_quantity_value.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_price_source__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_price_source__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_status",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_status.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_status__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_status__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_profit_center",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_profit_center.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_profit_center__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_profit_center__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_activity_price_surcharges",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_activity_price_surcharges.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_activity_price_surcharge_values",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_activity_price_surcharge_values.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_material_price_surcharges",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_material_price_surcharges.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_project_material_price_surcharge_values",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_project_material_price_surcharge_values.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_regex",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_regex.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_session",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_session.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_side_panel_group",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_side_panel_group.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_system_message",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_system_message.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_uom",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_uom.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_uom__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_uom__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_valuation_class",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_valuation_class.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_valuation_class__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_valuation_class__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_vendor",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_vendor.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_work_center",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_work_center.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_work_center_activity_type",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_work_center_activity_type.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_work_center_process",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_work_center_process.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_variant",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_variant.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_variant_item",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_variant_item.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::basis.t_work_center__text",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_work_center__text.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::map.t_destination_entity",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_destination_entity.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::map.t_field_mapping",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_field_mapping.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::map.t_depends_on",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_depends_on.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::map.t_uom_mapping",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_uom_mapping.csv",
+                "has_header": true
+            }
+        },
+        {
+            "target_table": "sap.plc.db::map.t_dimension_mapping",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "sap.plc.db.content::t_dimension_mapping.csv",
+                "has_header": true
+            }
+        }
+    ]
+}

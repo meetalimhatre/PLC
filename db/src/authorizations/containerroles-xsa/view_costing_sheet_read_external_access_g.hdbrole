@@ -1,0 +1,12 @@
+{
+	 "role" : { 
+		"name" : "sap.plc.authorizations.containerroles-xsa::view_costing_sheet_read_external_access_g#",
+		"object_privileges" : [ 
+            { 
+                "name" : "sap.plc.analytics.views.base::v_sql_meas_costing_sheet", 
+                "type" : "VIEW", 
+                "privileges_with_grant_option" : [ "SELECT" ] 
+            }
+		]
+	}
+}

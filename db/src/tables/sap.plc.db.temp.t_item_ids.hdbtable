@@ -1,0 +1,3 @@
+COLUMN TABLE "sap.plc.db::temp.t_item_ids" (
+  ITEM_ID INTEGER
+)

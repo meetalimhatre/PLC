@@ -1,0 +1,6 @@
+INDEX "sap.plc.db::UNIQUE_IS_WRITEABLE_SESSION_ID_CALCULATION_VERSION_ID_CONTEXT_LOCK" ON "sap.plc.db::basis.t_open_calculation_versions" (
+    IS_WRITEABLE,
+    SESSION_ID,
+    CALCULATION_VERSION_ID,
+    CONTEXT
+);

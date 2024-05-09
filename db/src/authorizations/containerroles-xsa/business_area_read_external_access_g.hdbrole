@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::business_area_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_business_area", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_business_area__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

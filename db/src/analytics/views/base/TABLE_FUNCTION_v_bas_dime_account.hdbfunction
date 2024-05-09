@@ -1,0 +1,34 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_account" (
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000),
+VAR_LANGUAGE NVARCHAR (11))
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "LANGUAGE" NVARCHAR (11), "ACCOUNT_ID" NVARCHAR (10), "ACCOUNT_DESCRIPTION" NVARCHAR (250)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = SELECT
+       calcVersion.calculation_version_id,
+       accounttext.language, 
+	   accounttext.account_id,    
+       accounttext.account_description 
+FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion 
+        INNER JOIN "sap.plc.db::basis.t_calculation" calc
+            ON calc.calculation_id = calcVersion.calculation_id             		        
+        INNER JOIN "sap.plc.db::basis.t_project" project
+        	ON project.project_id = calc.project_id    		        
+        LEFT OUTER JOIN "sap.plc.db::basis.t_account__text" accounttext
+            ON accounttext.controlling_area_id = project.controlling_area_id
+            AND calcVersion.master_data_timestamp >= accounttext._valid_from 
+            AND (accounttext._valid_to IS NULL OR calcVersion.master_data_timestamp < accounttext._valid_to)                      
+            AND accounttext.language = VAR_LANGUAGE
+WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+AND (:versionId = '' OR calcVersion.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId))) 
+AND (project.PROJECT_ID IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId)))
+;               
+
+
+return :var_out;
+END;

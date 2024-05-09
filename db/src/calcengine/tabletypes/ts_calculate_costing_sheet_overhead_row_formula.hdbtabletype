@@ -1,0 +1,8 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_overhead_row_formula" AS TABLE (
+    FORMULA_ID INTEGER,
+    FORMULA_STRING NVARCHAR(5000),
+    FORMULA_DESCRIPTION NVARCHAR(5000),
+    COSTING_SHEET_OVERHEAD_ID INTEGER,
+    COSTING_SHEET_OVERHEAD_ROW_ID INTEGER,
+    OVERHEAD_CUSTOM NVARCHAR(127)
+)

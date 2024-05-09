@@ -1,0 +1,5 @@
+TYPE "sap.plc.db.administration::masterdata.tt_process_input" AS TABLE (
+		PROCESS_ID NVARCHAR(12),
+		CONTROLLING_AREA_ID NVARCHAR(4),
+		MASTER_DATA_TIMESTAMP TIMESTAMP		
+	)

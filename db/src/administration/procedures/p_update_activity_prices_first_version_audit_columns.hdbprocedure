@@ -1,0 +1,82 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_update_activity_prices_first_version_audit_columns" (
+		IN i_table_threshold        INTEGER        DEFAULT 1000000
+		)
+    LANGUAGE SQLSCRIPT
+    SQL SECURITY INVOKER
+    AS
+BEGIN
+
+	/************************************************************************
+		Calculate and store first version audit fields in temporary table
+	 ************************************************************************/
+	DECLARE v_index INTEGER = 0;
+	DECLARE i_ap_table_size INTEGER = 0;
+	DECLARE i_loops INTEGER = 0;
+	
+	SELECT COUNT(*) INTO i_ap_table_size FROM "sap.plc.db::basis.t_activity_price";
+
+	IF :i_ap_table_size > 0 THEN
+
+        i_loops = TO_INTEGER(i_ap_table_size/i_table_threshold);
+
+        FOR v_index IN 0 .. :i_loops DO
+
+            DECLARE i_offset INTEGER = :v_index * :i_table_threshold;
+
+            INSERT
+                INTO
+                "sap.plc.db::basis.t_activity_price__first_version" (PRICE_ID,
+                _VALID_FROM,
+                _CREATED_BY)
+            SELECT
+                A.PRICE_ID,
+                A._VALID_FROM,
+                A._CREATED_BY
+            FROM
+                "sap.plc.db::basis.t_activity_price" AS A
+            INNER JOIN (
+                SELECT
+                    MIN(_VALID_FROM) AS _VALID_FROM,
+                    PRICE_ID
+                FROM
+                    "sap.plc.db::basis.t_activity_price"
+                GROUP BY
+                    PRICE_ID ) AS B ON
+                A._VALID_FROM = B._VALID_FROM
+                AND A.PRICE_ID = B.PRICE_ID
+            WHERE
+                A._VALID_FROM_FIRST_VERSION IS NULL
+                AND A._CREATED_BY_FIRST_VERSION IS NULL
+            ORDER BY
+                A.PRICE_ID,
+                A._VALID_FROM
+            LIMIT :i_table_threshold OFFSET :i_offset;
+
+            COMMIT;
+
+        END FOR;
+
+    /***************************************************************************************
+        Update activity price table with _VALID_FROM_FIRST_VERSION and _CREATED_BY_FIRST_VERSION
+     ***************************************************************************************/
+
+     MERGE INTO "sap.plc.db::basis.t_activity_price" AS price
+     USING "sap.plc.db::basis.t_activity_price__first_version" AS first_version
+     ON price.PRICE_ID = first_version.PRICE_ID
+     WHEN MATCHED THEN
+         UPDATE SET
+             "_VALID_FROM_FIRST_VERSION" = first_version."_VALID_FROM",
+             "_CREATED_BY_FIRST_VERSION" = first_version."_CREATED_BY";
+     
+
+        COMMIT;
+
+    END IF;
+
+    /*************************************************
+        Remove leftover data from temporary table
+     *************************************************/
+
+	DELETE FROM "sap.plc.db::basis.t_activity_price__first_version";
+
+END;

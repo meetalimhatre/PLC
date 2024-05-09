@@ -1,0 +1,24 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::account_group_update_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_account_group", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_account_group__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_account_account_group", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_profit_center_input" AS TABLE (
+		PROFIT_CENTER_ID NVARCHAR(10),
+		CONTROLLING_AREA_ID NVARCHAR(4),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

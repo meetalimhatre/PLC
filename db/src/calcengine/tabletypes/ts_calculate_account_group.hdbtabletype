@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_account_group" AS TABLE (
+    ACCOUNT_GROUP_ID INTEGER,
+    CONTROLLING_AREA_ID NVARCHAR(4),
+    COST_PORTION INTEGER,
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP
+)

@@ -1,0 +1,101 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_document_read" ( 
+	    IN iv_logon_language         NVARCHAR(11),
+		IN iv_master_data_timestamp  TIMESTAMP,
+		IN iv_filter_string	         NVARCHAR(5000),
+		IN iv_no_max_records         INTEGER, 
+		IN iv_no_skip_records        INTEGER,
+        OUT ot_document         	    "sap.plc.db.administration::masterdata.tt_document" default empty,
+        OUT ot_document_type		    "sap.plc.db.administration::masterdata.tt_document_type" default empty,
+        OUT ot_document_status		    "sap.plc.db.administration::masterdata.tt_document_status" default empty,
+        OUT ot_design_office			"sap.plc.db.administration::masterdata.tt_design_office" default empty,
+        OUT ot_document_text    	    "sap.plc.db::basis.t_document__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+	Select document
+ ***************************************************/
+ 
+--select documents
+ 	tt_document_union =			
+ 						select
+ 							plcTable.DOCUMENT_TYPE_ID,
+ 							plcTable.DOCUMENT_ID,
+ 							plcTable.DOCUMENT_VERSION,
+ 							plcTable.DOCUMENT_PART,
+ 							plcTable.IS_CREATED_VIA_CAD_INTEGRATION,
+ 							plcTable.DOCUMENT_STATUS_ID,
+ 							plcTable.DESIGN_OFFICE_ID,
+ 							plcTable._VALID_FROM,
+ 							plcTable._VALID_TO,
+ 							plcTable._SOURCE,
+ 							plcTable._CREATED_BY,
+ 							minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+ 							minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+ 							plcTextTable.DOCUMENT_DESCRIPTION
+ 						from "sap.plc.db::basis.t_document" as plcTable
+ 						inner join
+							(   select A._VALID_FROM, A.DOCUMENT_ID, A.DOCUMENT_TYPE_ID, A.DOCUMENT_VERSION, A.DOCUMENT_PART, A._CREATED_BY 
+								from "sap.plc.db::basis.t_document" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM, DOCUMENT_ID, DOCUMENT_TYPE_ID, DOCUMENT_VERSION, DOCUMENT_PART
+										from "sap.plc.db::basis.t_document" 
+										group by DOCUMENT_ID, DOCUMENT_TYPE_ID, DOCUMENT_VERSION, DOCUMENT_PART
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.DOCUMENT_ID = B.DOCUMENT_ID AND A.DOCUMENT_TYPE_ID = B.DOCUMENT_TYPE_ID
+									AND A.DOCUMENT_VERSION = B.DOCUMENT_VERSION AND A.DOCUMENT_PART = B.DOCUMENT_PART
+							) AS minValues
+							on plcTable.DOCUMENT_ID = minValues.DOCUMENT_ID and plcTable.DOCUMENT_TYPE_ID = minValues.DOCUMENT_TYPE_ID and
+							plcTable.DOCUMENT_VERSION = minValues.DOCUMENT_VERSION and plcTable.DOCUMENT_PART = minValues.DOCUMENT_PART
+						left outer join "sap.plc.db::basis.t_document__text" as plcTextTable
+							on  plcTable.DOCUMENT_ID = plcTextTable.DOCUMENT_ID and plcTable.DOCUMENT_TYPE_ID = plcTextTable.DOCUMENT_TYPE_ID
+							and plcTable.DOCUMENT_VERSION = plcTextTable.DOCUMENT_VERSION and plcTable.DOCUMENT_PART = plcTextTable.DOCUMENT_PART
+							and plcTextTable.LANGUAGE = :iv_logon_language
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+						where plcTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+						 order by plcTable.DOCUMENT_TYPE_ID, plcTable.DOCUMENT_ID, plcTable.DOCUMENT_VERSION, plcTable.DOCUMENT_PART;
+						 	
+tt_document_filter = APPLY_FILTER(:tt_document_union, :iv_filter_string) ;      
+	
+ot_document =  
+	 	select DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, IS_CREATED_VIA_CAD_INTEGRATION, DOCUMENT_STATUS_ID,
+              DESIGN_OFFICE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, 
+              _CREATED_BY_FIRST_VERSION, DOCUMENT_DESCRIPTION 
+              from :tt_document_filter limit :iv_no_max_records offset :iv_no_skip_records;   
+
+
+--select document text
+ot_document_text =			
+						select
+							plcTextTable.DOCUMENT_TYPE_ID,
+							plcTextTable.DOCUMENT_ID,
+							plcTextTable.DOCUMENT_VERSION,
+							plcTextTable.DOCUMENT_PART,
+							plcTextTable.LANGUAGE,
+							plcTextTable.DOCUMENT_DESCRIPTION,
+							plcTextTable._VALID_FROM,
+							plcTextTable._VALID_TO,
+							plcTextTable._SOURCE,
+							plcTextTable._CREATED_BY
+						from "sap.plc.db::basis.t_document__text" as plcTextTable
+						where ( plcTextTable.DOCUMENT_ID, plcTextTable.DOCUMENT_TYPE_ID, plcTextTable.DOCUMENT_VERSION, plcTextTable.DOCUMENT_PART) in 
+						( select DOCUMENT_ID, DOCUMENT_TYPE_ID, DOCUMENT_VERSION, DOCUMENT_PART  from :ot_document )
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);	
+							
+tt_document_type_key = select distinct DOCUMENT_TYPE_ID from :ot_document;
+call "sap.plc.db.administration.procedures::p_ref_document_type_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_document_type_key,ot_document_type);	
+
+tt_document_status_key = select distinct DOCUMENT_STATUS_ID from :ot_document;
+call "sap.plc.db.administration.procedures::p_ref_document_status_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_document_status_key,ot_document_status);	
+
+tt_design_office_key = select distinct DESIGN_OFFICE_ID from :ot_document;
+call "sap.plc.db.administration.procedures::p_ref_design_office_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_design_office_key, ot_design_office);
+
+
+END;

@@ -1,0 +1,15 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_is_numeric"(var_value string)
+returns retisnumeric int
+language sqlscript
+sql security invoker as
+
+BEGIN
+
+retisnumeric := length(ltrim(var_value,'+-.0123456789'));
+
+if retisnumeric > 0 
+ then retisnumeric := 0;
+else retisnumeric := 1;
+end if;
+
+END; 

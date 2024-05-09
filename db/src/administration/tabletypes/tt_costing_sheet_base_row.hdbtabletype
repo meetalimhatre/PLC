@@ -1,0 +1,9 @@
+TYPE "sap.plc.db.administration::masterdata.tt_costing_sheet_base_row" AS TABLE (
+		COSTING_SHEET_BASE_ID INTEGER,
+		ITEM_CATEGORY_ID INTEGER,
+		SUBITEM_STATE SMALLINT,
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		CHILD_ITEM_CATEGORY_ID INTEGER)

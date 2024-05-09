@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_base" AS TABLE (
+    COSTING_SHEET_BASE_ID INTEGER,
+    COST_PORTION INTEGER,
+    _VALID_FROM TIMESTAMP,
+    _VALID_TO TIMESTAMP
+)

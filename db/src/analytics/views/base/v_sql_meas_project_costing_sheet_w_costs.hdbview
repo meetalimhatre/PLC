@@ -1,0 +1,139 @@
+VIEW "sap.plc.analytics.views.base::v_sql_meas_project_costing_sheet_w_costs" ( 
+	"CALCULATION_VERSION_ID", 
+	"REPORT_CURRENCY_ID", 
+	"ITEM_ID", 
+	"IS_ROLLED_UP_VALUE", 
+	"IS_OVERHEAD_ROLLED_UP", 
+	"COSTING_SHEET_ROW_ID", 
+	"COSTING_SHEET_ROW_TYPE", 
+	"COSTING_SHEET_OVERHEAD_ROW_ID", 
+	"ACCOUNT_ID", 
+	"COST", 
+	"COST_FIXED_PORTION", 
+	"COST_VARIABLE_PORTION", 
+	"COST2", 
+	"COST2_FIXED_PORTION", 
+	"COST2_VARIABLE_PORTION", 
+	"COST3", 
+	"COST3_FIXED_PORTION", 
+	"COST3_VARIABLE_PORTION", 
+	"TOTAL_QUANTITY", 
+	"TOTAL_QUANTITY_UOM_ID" 
+	) AS SELECT
+	calcVersion.calculation_version_id,
+	calcVersion.report_currency_id,
+	item.item_id,
+	csvalues.is_rolled_up_value,
+	csvalues.is_overhead_rolled_up,
+	csvalues.costing_sheet_row_id,
+	csvalues.costing_sheet_row_type,
+	csvalues.costing_sheet_overhead_row_id,
+	csvalues.account_id,
+	csvalues.cost,
+	csvalues.cost_fixed_portion,
+	csvalues.cost_variable_portion,
+	csvalues.cost2,
+	csvalues.cost2_fixed_portion,
+	csvalues.cost2_variable_portion,
+	csvalues.cost3,
+	csvalues.cost3_fixed_portion,
+	csvalues.cost3_variable_portion,
+	IFNULL(item.total_quantity, 0) AS total_quantity,
+ 	item.total_quantity_uom_id
+FROM "sap.plc.db::basis.t_calculation_version" calcVersion
+	-- join on t_item required to fetch also those items where no costing sheet rows were stored for
+	INNER JOIN "sap.plc.db::basis.t_item" item
+		ON item.calculation_version_id = calcVersion.calculation_version_id
+		
+	LEFT OUTER JOIN (
+		-- Select 3 types of costs (costing sheet row costs, total costs, other costs) for root items of calculation versions 
+	
+        -- Select costs based on calculated costing sheets rows
+         SELECT
+		    item.calculation_version_id,
+       		item.item_id,
+       		item_cvcs.is_rolled_up_value, 
+       		csoverhead.is_rolled_up AS is_overhead_rolled_up, 
+       		csrow.costing_sheet_row_id,
+					csrow.costing_sheet_row_type,
+       		item_cvcs.costing_sheet_overhead_row_id,
+	   		item_cvcs.account_id,        
+       		item_cvcs.cost, 
+       		item_cvcs.cost_fixed_portion, 
+       		item_cvcs.cost_variable_portion,
+			item_cvcs.cost2, 
+       		item_cvcs.cost2_fixed_portion, 
+       		item_cvcs.cost2_variable_portion,
+			item_cvcs.cost3, 
+       		item_cvcs.cost3_fixed_portion, 
+       		item_cvcs.cost3_variable_portion
+		FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+			INNER JOIN "sap.plc.db::basis.t_costing_sheet_row" csrow
+				ON csrow.costing_sheet_id = calcVersion.costing_sheet_id  
+        		AND calcVersion.master_data_timestamp >= csrow._valid_from AND (csrow._valid_to IS NULL OR calcVersion.master_data_timestamp < csrow._valid_to)   
+			INNER JOIN "sap.plc.db::basis.t_item" item
+				ON item.calculation_version_id=calcVersion.calculation_version_id
+			LEFT OUTER JOIN  "sap.plc.db::basis.t_costing_sheet_overhead" csoverhead
+				ON csrow.costing_sheet_overhead_id = csoverhead.costing_sheet_overhead_id
+				AND calcVersion.master_data_timestamp >= csoverhead._valid_from AND (csoverhead._valid_to IS NULL OR calcVersion.master_data_timestamp < csoverhead._valid_to)                
+			LEFT OUTER JOIN "sap.plc.db::basis.t_item_calculated_values_costing_sheet" item_cvcs
+        		ON item.item_id = item_cvcs.item_id AND item.calculation_version_id=item_cvcs.calculation_version_id 
+				and csrow.costing_sheet_row_id = item_cvcs.costing_sheet_row_id  
+			WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER')) 
+				AND item_cvcs.is_rolled_up_value = 1	
+				AND item.parent_item_id is null
+				AND item_cvcs.cost is not null  
+		
+	    UNION ALL
+    	-- Add total costs based on calculated values per item
+	    SELECT
+		    totalcosts.calculation_version_id,
+		    totalcosts.item_id,
+    		0 as is_rolled_up,
+	    	0 as is_overhead_rolled_up,
+    		'Total Cost' as costing_sheet_row_id,
+				null  as costing_sheet_row_type,
+		    0 as costing_sheet_overhead_row_id,
+    		totalcosts.account_id,
+	    	totalcosts.total_cost as cost,
+		    totalcosts.total_cost_fixed_portion as cost_fixed_portion,
+    		totalcosts.total_cost_variable_portion as cost_variable_portion,
+			totalcosts.total_cost2 as cost2,
+		    totalcosts.total_cost2_fixed_portion as cost2_fixed_portion,
+    		totalcosts.total_cost2_variable_portion as cost2_variable_portion,
+			totalcosts.total_cost3 as cost3,
+		    totalcosts.total_cost3_fixed_portion as cost3_fixed_portion,
+    		totalcosts.total_cost3_variable_portion as cost3_variable_portion
+        FROM  "sap.plc.db::basis.t_item" totalcosts
+        	WHERE (totalcosts.total_cost <> 0
+			    OR totalcosts.total_cost_fixed_portion <> 0
+			    OR totalcosts.total_cost_variable_portion <> 0) AND totalcosts.parent_item_id is null
+        	
+	    UNION ALL
+	    -- Add other costs based on calculated values per item
+	    SELECT
+		    othercosts.calculation_version_id,
+    		othercosts.item_id,
+	    	0 as is_rolled_up,
+		    0 as is_overhead_rolled_up,
+    		'Other Costs' as costing_sheet_row_id,
+				null  as costing_sheet_row_type,
+	    	0 as costing_sheet_overhead_row_id,
+		    othercosts.account_id,
+    		othercosts.other_cost as cost,
+	    	othercosts.other_cost_fixed_portion as cost_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost_variable_portion,
+			othercosts.other_cost as cost2,
+	    	othercosts.other_cost_fixed_portion as cost2_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost2_variable_portion,
+			othercosts.other_cost as cost3,
+	    	othercosts.other_cost_fixed_portion as cost3_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost3_variable_portion
+	    FROM  "sap.plc.db::basis.t_item" othercosts
+		    WHERE (othercosts.other_cost <> 0
+			    OR othercosts.other_cost_fixed_portion <> 0
+			    OR othercosts.other_cost_variable_portion <> 0)
+			    AND othercosts.parent_item_id is null
+	    ) csvalues
+	ON item.calculation_version_id = csvalues.calculation_version_id
+	AND item.item_id = csvalues.item_id WITH READ ONLY

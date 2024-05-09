@@ -1,0 +1,3 @@
+COLUMN TABLE "sap.plc.db::temp.gtt_calculation_version_ids" (
+  CALCULATION_VERSION_ID INTEGER
+)

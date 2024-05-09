@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_business_area_input" AS TABLE (
+		BUSINESS_AREA_ID NVARCHAR(15),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

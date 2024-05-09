@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_price_component_input" AS TABLE (
+		PRICE_ID NVARCHAR(32),
+		MASTER_DATA_TIMESTAMP TIMESTAMP,
+		VALUATION_DATE DATE)

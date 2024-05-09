@@ -1,0 +1,42 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::item_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_item", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_item_temporary", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_item_calculated_values_component_split", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_item_calculated_values_costing_sheet", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_item_referenced_version_component_split", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_item_referenced_version_component_split_temporary", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

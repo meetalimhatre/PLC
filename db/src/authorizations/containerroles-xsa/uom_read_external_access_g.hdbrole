@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::uom_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_uom", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_uom__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

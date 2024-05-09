@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_overhead_group_input" AS TABLE (
+		OVERHEAD_GROUP_ID NVARCHAR(10),
+		PLANT_ID NVARCHAR(8),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

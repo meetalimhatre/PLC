@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_document_type_key" AS TABLE (
+		DOCUMENT_TYPE_ID NVARCHAR(3))

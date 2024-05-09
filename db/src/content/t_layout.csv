@@ -1,0 +1,4 @@
+LAYOUT_ID,LAYOUT_NAME,IS_CORPORATE,LAYOUT_TYPE
+1,#SAP Default,1,1
+2,#SAP Default with #COGS,1,1
+3,#SAP Default for BoM Compare,1,2

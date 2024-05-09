@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::profit_center_update_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_profit_center", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_profit_center__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		]
+	}
+}

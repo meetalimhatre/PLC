@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_changed_items" AS TABLE (
+    ITEM_ID INTEGER,
+    FIELD_NAME NVARCHAR(50)
+)

@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::basis.t_initialization_state" (
+  PLC_VERSION NVARCHAR(20) NOT NULL,
+  GENERATION_TIME TIMESTAMP NOT NULL
+)

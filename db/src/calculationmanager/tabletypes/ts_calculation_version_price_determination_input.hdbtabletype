@@ -1,0 +1,10 @@
+TYPE "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input" AS TABLE (
+    MASTER_DATA_TIMESTAMP TIMESTAMP,
+    VALUATION_DATE DATE,
+    REPORT_CURRENCY_ID NVARCHAR(3),
+    CONTROLLING_AREA_ID NVARCHAR(4),
+    PROJECT_ID NVARCHAR(35),
+    CUSTOMER_ID NVARCHAR(10),
+    MATERIAL_PRICE_STRATEGY_ID NVARCHAR(20),
+    ACTIVITY_PRICE_STRATEGY_ID NVARCHAR(20)
+)

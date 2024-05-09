@@ -1,0 +1,14 @@
+{
+    "xsappname": "xsac-plc-xsjs",
+    "tenant-mode": "dedicated",
+    "scopes": [],
+    "role-templates": [
+        {
+            "name": "Token_Exchange",
+            "description": "UAA",
+            "scope-references": [
+                "uaa.user"
+            ]
+        }
+    ]
+}

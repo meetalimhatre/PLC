@@ -1,0 +1,100 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_profit_center"(
+    IN INPUT_TABLE TABLE (
+    	"PROFIT_CENTER_ID" NVARCHAR(10),
+    	"CONTROLLING_AREA_ID" NVARCHAR(4),
+    	"_SOURCE" TINYINT -- 1: PLC / 2: ERP
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+        
+        SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+    
+        SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";
+
+    -- Insert into general Error Table
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+		TABLE_NAME,
+		OPERATION,
+		RUN_ID
+    )
+        select 
+            'CONTROLLING_AREA_ID'                                                           as FIELD_NAME ,
+            it.CONTROLLING_AREA_ID                                                          as FIELD_VALUE,
+            'Unknown Controlling Area ID for Profit Center ID ' || it.PROFIT_CENTER_ID       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                         as MESSAGE_TIME ,
+            'ERROR'                                                                         as MESSAGE_TYPE ,
+            't_profit_center'                                                               as TABLE_NAME,
+            'Replication_Update'                                                            as OPERATION,
+			:lv_run_id                                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.CONTROLLING_AREA_ID not in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area")
+    ;
+    
+    lt_update_records =
+        select it.PROFIT_CENTER_ID, it.CONTROLLING_AREA_ID, it._SOURCE
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY PROFIT_CENTER_ID, CONTROLLING_AREA_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+        and it.CONTROLLING_AREA_ID in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area") 
+            -- ignore unchanged records 
+        -- and (it.PROFIT_CENTER_ID, it.CONTROLLING_AREA_ID, it._SOURCE
+        --     ) 
+        --       not in 
+    	except
+              (select std.PROFIT_CENTER_ID, std.CONTROLLING_AREA_ID, std._SOURCE
+                    from "sap.plc.db::basis.t_profit_center" as std
+                    where _VALID_TO IS NULL
+                    AND (std.PROFIT_CENTER_ID, std.CONTROLLING_AREA_ID) in (select PROFIT_CENTER_ID, CONTROLLING_AREA_ID from :INPUT_TABLE));
+              
+    SELECT COUNT(PROFIT_CENTER_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_profit_center" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.PROFIT_CENTER_ID, tbl.CONTROLLING_AREA_ID)
+    		      in (select PROFIT_CENTER_ID, CONTROLLING_AREA_ID
+    			      from :lt_update_records as upd 
+    			      where upd.PROFIT_CENTER_ID = tbl.PROFIT_CENTER_ID
+    			        and upd.CONTROLLING_AREA_ID = tbl.CONTROLLING_AREA_ID
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- insert the new entries
+    	INSERT INTO "sap.plc.db::basis.t_profit_center" 
+    		(PROFIT_CENTER_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select PROFIT_CENTER_ID, CONTROLLING_AREA_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+		
+	END IF;	
+    
+END

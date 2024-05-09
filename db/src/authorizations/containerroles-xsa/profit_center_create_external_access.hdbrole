@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::profit_center_create_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_profit_center", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_profit_center__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		]
+	}
+}

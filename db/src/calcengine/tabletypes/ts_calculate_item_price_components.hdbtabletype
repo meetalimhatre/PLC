@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_item_price_components" AS TABLE (
+    PRICE_FIXED DECIMAL(28, 7),
+    PRICE_VARIABLE DECIMAL(28, 7),
+    ITEM_ID INTEGER,
+    CALCULATION_VERSION_ID INTEGER,
+    ACCOUNT_ID NVARCHAR(10)
+)

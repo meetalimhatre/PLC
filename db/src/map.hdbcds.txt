@@ -1,0 +1,102 @@
+namespace sap.plc.db;
+
+context map {
+    entity t_destination_entity {
+        key ID				  : Integer;
+            TABLE_NAME		  : String(128) not null;
+            LABEL			  : String(128) not null;
+            DESCRIPTION		  : String(5000);
+            INPUT_SQL_DEFAULT : String(5000);
+            INPUT_SQL		  : LargeString;
+            IS_REPL_MANDATORY : hana.TINYINT;
+            REPL_STATUS		  : String(8);
+
+    } technical configuration {
+        unique index idx_tbl_name on (TABLE_NAME) asc;
+    };
+
+    entity t_field_mapping {
+        key ID				      : Integer;
+            TABLE_NAME		      : String(128) not null;
+            COLUMN_NAME		      : String(128) not null;
+            FIELD_TYPE  		  : String(32) not null;
+            IS_PK			      : hana.TINYINT;
+            MAPPED_COLUMN		  : String(128);
+            MAPPED_COLUMN_DEFAULT : String(128);
+            FIELD_ORDER		      : Integer not null;
+            IS_MANDATORY	      : hana.TINYINT;
+            IS_NULLABLE		      : hana.TINYINT;
+            VALIDATION_REGEX	  : String(1024);
+            IS_CUSTOM		      : hana.TINYINT;
+            IS_UPPERCASE	      : hana.TINYINT;
+            LENGTH			      : Integer;
+            SCALE			      : Integer;
+            PRECISION		      : Integer;
+            DESCRIPTION		      : String(1024);
+    };
+
+    entity t_depends_on {
+        key ID						: Integer;
+            TABLE_NAME				: String(128) not null;
+            DEPENDS_ON_TABLE_NAME	: String(128) not null;
+    };
+
+    entity t_settings {
+        key SETTING_ID : String(100);
+            FLAG       : hana.TINYINT;
+            VALUE      : Decimal(28, 7);
+    };
+
+    entity t_replication_log {
+            TABLE_NAME    : String(100);
+            MESSAGE_TIME  : UTCTimestamp;
+            FIELD_NAME    : String(100);
+            FIELD_VALUE   : String(100);
+            MESSAGE_TEXT  : String(5000);
+            MESSAGE_TYPE  : String(10);
+            OPERATION     : String(25);
+            RUN_ID        : String(50);
+    };
+
+    entity t_scheduler_log {
+          key RUN_ID: String(120) not null;
+          SCHED_NAME: String(120) not null;
+          JOB_NAME:  String(200) not null;
+          JOB_GROUP: String(200) not null;
+          STATE: String(20) not null;
+          FIRED_TIME: UTCTimestamp not null;
+          FINISHED_TIME: UTCTimestamp default null;
+    };
+
+    entity t_statistics {
+        key TABLE_NAME       : String(100);
+        key START_TIME       : UTCTimestamp;
+            FULL_COUNT       : Integer;
+            UPDATED_COUNT    : Integer;
+            DELETED_COUNT    : Integer;
+            END_TIME         : UTCTimestamp;
+            RUN_TIME_SECONDS : Decimal(28, 7);
+            RUN_ID			 : String(50);
+    };
+
+    entity t_replication_run {
+        key RUN_ID				: String(50);
+            MANUAL 				: hana.TINYINT;
+            USER_ID				: String(256);
+            START_TIME			: UTCTimestamp;
+            END_TIME			: UTCTimestamp;
+            LAST_UPDATE_TIME	: UTCTimestamp;
+            STATUS				: String(16); //RUNNING,DUPLICATE,SUCCESS,FAILURE
+    };
+
+    
+    entity t_uom_mapping {
+        key SOURCE_UOM_ID       : String(3) not null;
+            DESTINATION_UOM_ID  : String(3) not null;
+    };
+
+    entity t_dimension_mapping {
+        key SOURCE_DIMENSION_ID      : String(10) not null;
+            DESTINATION_DIMENSION_ID : String(10) not null;
+    };
+};

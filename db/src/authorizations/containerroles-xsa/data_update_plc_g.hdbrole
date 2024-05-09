@@ -1,0 +1,10 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::data_update_plc_g#",
+		"schema_privileges": [
+             {
+             "privileges_with_grant_option": ["UPDATE"]
+             }
+        ]
+	}
+}

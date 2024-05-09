@@ -1,0 +1,26 @@
+{
+    "xsac-plc-synonym-grantor-service": {
+        "object_owner": {
+            "object_privileges": [
+                {
+                    "name": "DUMMY",
+                    "schema": "SYS",
+                    "privileges_with_grant_option": [
+                        "SELECT"
+                    ]
+                }
+            ]
+        },
+        "application_user": {
+            "object_privileges": [
+                {
+                    "name": "DUMMY",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                }
+            ]
+        }
+    }
+}

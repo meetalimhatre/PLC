@@ -1,0 +1,35 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_business_area_read" ( 
+		IN iv_logon_language			NVARCHAR(11),
+		IN iv_master_data_timestamp		TIMESTAMP,
+		IN ot_business_area_key      	"sap.plc.db.administration::masterdata.tt_business_area_key",
+		OUT ot_business_area            "sap.plc.db.administration::masterdata.tt_business_area" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	select business area	 
+ *****************************/
+ ot_business_area =   
+					 	SELECT
+							plcTable.BUSINESS_AREA_ID,
+							plcTable._VALID_FROM,
+							plcTable._VALID_TO,
+							plcTable._SOURCE,
+							plcTable._CREATED_BY,
+							null AS _VALID_FROM_FIRST_VERSION,
+							null AS _CREATED_BY_FIRST_VERSION,
+							plcTextTable.BUSINESS_AREA_DESCRIPTION
+					    FROM 
+					    	"sap.plc.db::basis.t_business_area" as plcTable
+							LEFT OUTER JOIN "sap.plc.db::basis.t_business_area__text" as plcTextTable 
+							ON  plcTable.BUSINESS_AREA_ID = plcTextTable.BUSINESS_AREA_ID 
+							AND plcTextTable.LANGUAGE = :iv_logon_language 
+							AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+							AND ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )  
+						WHERE plcTable._VALID_FROM <= :iv_master_data_timestamp 
+							AND ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null ) 
+							AND ( plcTable.BUSINESS_AREA_ID) in ( select BUSINESS_AREA_ID from :ot_business_area_key );
+END;

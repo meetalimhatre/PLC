@@ -1,0 +1,17 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_material_group" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"MATERIAL_GROUP_ID"	NVARCHAR(9),
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"MATERIAL_GROUP_ID"	NVARCHAR(9),
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_material_group', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

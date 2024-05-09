@@ -1,0 +1,36 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::metadata_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_metadata", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_metadata__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_metadata_item_attributes", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_metadata_selection_displayed", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_metadata_selection_filter", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

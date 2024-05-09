@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::basis.t_confidence_level" (
+  CONFIDENCE_LEVEL_ID INTEGER NOT NULL,
+  PRIMARY KEY(CONFIDENCE_LEVEL_ID)
+)

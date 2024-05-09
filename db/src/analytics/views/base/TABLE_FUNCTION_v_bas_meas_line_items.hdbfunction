@@ -1,0 +1,212 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_meas_line_items" 
+(
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000)
+)
+RETURNS TABLE (
+       "PROJECT_ID" NVARCHAR (35), 
+       "CALCULATION_VERSION_ID" INTEGER, 
+       "ITEM_ID" NVARCHAR (23), 
+       "ITEM_CATEGORY_ID" INTEGER, 
+       "IS_LEAF" TINYINT, 
+       "IS_ROLLED_UP_VALUE" TINYINT, 
+       "IS_OVERHEAD_ROLLED_UP" TINYINT, 
+       "COSTING_SHEET_ROW_ID" NVARCHAR (5), 
+       "COSTING_SHEET_ROW_TYPE" NVARCHAR (20), 
+       "COSTING_SHEET_OVERHEAD_ROW_ID" INTEGER, 
+       "ACCOUNT_ID" NVARCHAR (10), 
+       "COST" DECIMAL (28, 7), 
+       "COST_FIXED_PORTION" DECIMAL (28, 7), 
+       "COST_VARIABLE_PORTION" DECIMAL (28, 7), 
+       "TOTAL_COST_PER_UNIT" DECIMAL (28, 7), 
+       "COST2" DECIMAL (28, 7), 
+       "COST2_FIXED_PORTION" DECIMAL (28, 7), 
+       "COST2_VARIABLE_PORTION" DECIMAL (28, 7), 
+       "TOTAL_COST2_PER_UNIT" DECIMAL (28, 7), 
+       "COST3" DECIMAL (28, 7), 
+       "COST3_FIXED_PORTION" DECIMAL (28, 7), 
+       "COST3_VARIABLE_PORTION" DECIMAL (28, 7), 
+       "TOTAL_COST3_PER_UNIT" DECIMAL (28, 7), 
+       "PRICE" DECIMAL (28, 7), 
+       "PRICE_FIXED_PORTION" DECIMAL (28, 7), 
+       "PRICE_VARIABLE_PORTION" DECIMAL (28, 7), 
+       "TRANSACTION_CURRENCY_ID" NVARCHAR (3), 
+       "PRICE_UNIT" DECIMAL (28, 7), 
+       "PRICE_UNIT_UOM_ID" NVARCHAR (3),
+       "REPORT_CURRENCY_ID" NVARCHAR (3), 
+       "SURCHARGE" DECIMAL (28, 7),
+       "TOTAL_QUANTITY" DECIMAL (28, 7), 
+       "TOTAL_QUANTITY_UOM_ID" NVARCHAR (3),
+       "TARGET_COST" DECIMAL (28, 7), 
+       "TARGET_COST_CURRENCY_ID" NVARCHAR (3),
+       "BASE_QUANTITY" DECIMAL (28, 7), 
+       "BASE_QUANTITY_UOM_ID" NVARCHAR (3), 
+       "QUANTITY_PER_BASE_UNIT" DECIMAL (28, 7), 
+       "QUANTITY_PER_BASE_UNIT_UOM_ID" NVARCHAR (3),
+       "SALES_PRICE"  DECIMAL (28, 7), 
+       "SALES_PRICE_CURRENCY_ID" NVARCHAR (3), 
+       "PROJECT_SALES_PRICE" DECIMAL (28, 7), 
+       "PROJECT_SALES_PRICE_CURRENCY_ID" NVARCHAR (3), 
+       "TOTAL_QUANTITY_OF_VARIANTS" DECIMAL (28, 7)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+----------------------------------------------------------------------------------
+-- Select costs for different types of line items
+----------------------------------------------------------------------------------
+-- Select costing sheet rows with overheads
+lv_line_items = SELECT
+       csvalues.calculation_version_id,
+       csvalues.item_id,
+       csvalues.is_rolled_up_value, 
+       csvalues.is_overhead_rolled_up, 
+       csvalues.costing_sheet_row_id,
+       CASE 
+       	   WHEN "COSTING_SHEET_OVERHEAD_ROW_ID" = -1 THEN 'Base'
+       	   ELSE 'Overhead'
+       END as costing_sheet_row_type,
+       csvalues.costing_sheet_overhead_row_id,
+	   csvalues.account_id,        
+       csvalues.cost, 
+       csvalues.cost_fixed_portion, 
+       csvalues.cost_variable_portion,
+       csvalues.cost2, 
+       csvalues.cost2_fixed_portion, 
+       csvalues.cost2_variable_portion,
+       csvalues.cost3, 
+       csvalues.cost3_fixed_portion, 
+       csvalues.cost3_variable_portion
+FROM "sap.plc.analytics.views.base::f_sql_meas_costing_sheet_view"(:projectId,:versionId) csvalues
+	INNER JOIN "sap.plc.db::basis.t_calculation_version" calcVersion
+		on calcVersion.calculation_version_id = csvalues.calculation_version_id
+	INNER JOIN "sap.plc.db::basis.t_calculation" calculations
+	       on calculations.calculation_id = calcVersion.CALCULATION_ID
+       	AND (calculations.PROJECT_ID IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId)))
+	WHERE (csvalues.costing_sheet_overhead_row_id != -1 AND csvalues.costing_sheet_overhead_row_id IS NOT NULL) 
+		AND (csvalues.is_overhead_rolled_up = 1 or (csvalues.item_category_id=0 AND csvalues.is_overhead_rolled_up = 0))
+		AND (:versionId = '' OR csvalues.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId)))
+UNION ALL
+-- Select costs for leaf items
+SELECT
+       itemcosts.calculation_version_id,
+       itemcosts.item_id,
+       itemcosts.is_rolled_up_value, 
+       itemcosts.is_overhead_rolled_up, 
+       itemcosts.costing_sheet_row_id,
+       case
+          when itemcosts.costing_sheet_row_id IS NULL then NULL
+    	   else 'Base'
+       end as costing_sheet_row_type,
+       itemcosts.costing_sheet_overhead_row_id,
+	itemcosts.account_id,
+       itemcosts.price_for_total_quantity as cost, 
+       itemcosts.price_for_total_quantity_fixed_portion as cost_fixed_portion, 
+       itemcosts.price_for_total_quantity_variable_portion as cost_variable_portion,
+       itemcosts.price_for_total_quantity2 as cost2, 
+       itemcosts.price_for_total_quantity2_fixed_portion as cost2_fixed_portion, 
+       itemcosts.price_for_total_quantity2_variable_portion as cost2_variable_portion,
+       itemcosts.price_for_total_quantity3 as cost3, 
+       itemcosts.price_for_total_quantity3_fixed_portion as cost3_fixed_portion, 
+       itemcosts.price_for_total_quantity3_variable_portion as cost3_variable_portion
+FROM (SELECT * FROM "sap.plc.analytics.views.base::f_sql_meas_item_costs_view"(:projectId, :versionId)) itemcosts
+	INNER JOIN "sap.plc.db::basis.t_calculation_version" calcVersion
+		on calcVersion.calculation_version_id = itemcosts.calculation_version_id
+	INNER JOIN "sap.plc.db::basis.t_calculation" calculations
+		on calculations.calculation_id = calcVersion.CALCULATION_ID
+      	WHERE itemcosts.is_leaf = 1
+UNION ALL
+-- Select assemblies without overheads. They are shown with 0 values, just for completeness
+SELECT distinct
+       item.calculation_version_id,
+       item.item_id,
+       0 is_rolled_up_value, 
+       0 as is_overhead_rolled_up, 
+       null as costing_sheet_row_id,  
+       null as costing_sheet_overhead_row_id,
+       null as  costing_sheet_row_type,
+	   null as account_id,
+       0 AS cost, 
+       0 AS cost_fixed_portion, 
+       0 AS cost_variable_portion,
+       0 AS cost2, 
+       0 AS cost2_fixed_portion, 
+       0 AS cost2_variable_portion ,
+       0 AS cost3, 
+       0 AS cost3_fixed_portion, 
+       0 AS cost3_variable_portion 
+FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion  
+	INNER JOIN "sap.plc.db::basis.t_item" item
+		ON item.calculation_version_id=calcVersion.calculation_version_id
+              AND (:versionId = '' OR item.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId)))
+	INNER JOIN "sap.plc.db::basis.t_calculation_version" calcVersionsTable
+		on calcVersion.calculation_version_id = calcVersionsTable.calculation_version_id
+	INNER JOIN "sap.plc.db::basis.t_calculation" calculations
+		on calculations.calculation_id = calcVersionsTable.CALCULATION_ID
+              and (calculations.PROJECT_ID IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId)))
+	left outer JOIN (SELECT calculation_version_id, item_id, count(distinct costing_sheet_overhead_row_id) as overhead_count 
+			FROM "sap.plc.analytics.views.base::f_sql_meas_costing_sheet_view"(:projectId,:versionId) 
+			WHERE is_leaf=0  group by calculation_version_id, item_id) assemblies
+		ON assemblies.calculation_version_id = calcVersion.calculation_version_id AND assemblies.item_id = item.item_id
+WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER')) and ( assemblies.overhead_count = 1 or assemblies.overhead_count is null)
+;
+
+----------------------------------------------------------------------------------
+-- Add item-related fields
+----------------------------------------------------------------------------------
+
+var_out = SELECT
+	   itemcosts.project_id, 
+       itemcosts.calculation_version_id,
+       concat(itemcosts.calculation_version_id, concat('-', itemcosts.item_id)) as item_id,
+       itemcosts.item_category_id, 
+	   itemcosts.is_leaf,
+       csvalues.is_rolled_up_value, 
+       csvalues.is_overhead_rolled_up, 
+       csvalues.costing_sheet_row_id,
+       csvalues.costing_sheet_row_type,
+       csvalues.costing_sheet_overhead_row_id,
+       csvalues.account_id,        
+       csvalues.cost, 
+       csvalues.cost_fixed_portion, 
+       csvalues.cost_variable_portion,
+       itemcosts.total_cost_per_unit,
+       csvalues.cost2, 
+       csvalues.cost2_fixed_portion, 
+       csvalues.cost2_variable_portion,
+       itemcosts.total_cost2_per_unit,
+       csvalues.cost3, 
+       csvalues.cost3_fixed_portion, 
+       csvalues.cost3_variable_portion,
+       itemcosts.total_cost3_per_unit,
+       itemcosts.price,
+       itemcosts.price_fixed_portion,
+       itemcosts.price_variable_portion,
+       itemcosts.transaction_currency_id,
+       itemcosts.price_unit,
+       itemcosts.price_unit_uom_id,
+       itemcosts.report_currency_id,
+       itemcosts.surcharge,        
+       itemcosts.total_quantity,
+       itemcosts.total_quantity_uom_id,  
+       itemcosts.target_cost,
+       itemcosts.target_cost_currency_id,    
+       itemcosts.base_quantity,
+       itemcosts.base_quantity_uom_id,
+       itemcosts.quantity_per_base_unit,
+       itemcosts.quantity_per_base_unit_uom_id,
+       itemcosts.sales_price,
+       itemcosts.sales_price_currency_id,
+       itemcosts.project_sales_price,
+       itemcosts.project_sales_price_currency_id,
+       itemcosts.total_quantity_of_variants
+FROM :lv_line_items csvalues
+	LEFT OUTER JOIN (SELECT * FROM "sap.plc.analytics.views.base::f_sql_meas_item_costs_view"(:projectId, :versionId)) itemcosts
+		ON  csvalues.calculation_version_id = itemcosts.calculation_version_id 
+		AND csvalues.item_id = itemcosts.item_id
+;
+
+return :var_out;
+END;

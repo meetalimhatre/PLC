@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::basis.t_auto_complete_user" (
+  USER_ID NVARCHAR(256) NOT NULL,
+  PRIMARY KEY(USER_ID)
+)

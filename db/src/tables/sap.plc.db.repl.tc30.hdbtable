@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::repl.tc30" (
+  VERWE NVARCHAR(4) NOT NULL DEFAULT '',
+  PRIMARY KEY(VERWE)
+)

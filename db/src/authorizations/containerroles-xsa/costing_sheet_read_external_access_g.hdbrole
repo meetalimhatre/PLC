@@ -1,0 +1,60 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::costing_sheet_read_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_row", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_row__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_base_row", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_base", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_overhead", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_overhead_row", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_costing_sheet_row_dependencies", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "SELECT" ] 
+		}
+		]
+	}
+}

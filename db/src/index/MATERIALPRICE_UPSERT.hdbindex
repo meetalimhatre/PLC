@@ -1,0 +1,1 @@
+INDEX "sap.plc.db::MATERIALPRICE_UPSERT"ON "sap.plc.db::basis.t_material_price"(PRICE_ID,_VALID_TO);

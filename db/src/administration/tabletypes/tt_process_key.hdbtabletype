@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_process_key" AS TABLE (
+		PROCESS_ID NVARCHAR(12),
+		CONTROLLING_AREA_ID NVARCHAR(4))

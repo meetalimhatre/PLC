@@ -1,0 +1,62 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_MBEW" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_mbew_marc"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_identical_prices_count INT := 0;
+declare lv_source INT := 2;
+declare lv_price_id NVARCHAR(32);
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+select count(PRICE_SOURCE_ID) into lv_identical_rows_count
+        from "sap.plc.db::basis.t_material_price"
+          where "sap.plc.db::basis.t_material_price"."PRICE_SOURCE_ID" = :NEWROW."PRICE_SOURCE_ID"
+                  AND "sap.plc.db::basis.t_material_price"."MATERIAL_ID" = :NEWROW."MATNR"
+                  AND "sap.plc.db::basis.t_material_price"."PLANT_ID" = :NEWROW."WERKS"
+                  AND "sap.plc.db::basis.t_material_price"."VALID_FROM" = :NEWROW."VALID_FROM"
+                  AND "sap.plc.db::basis.t_material_price"."VENDOR_ID" = :NEWROW."VENDOR_ID"
+                  AND "sap.plc.db::basis.t_material_price"."PROJECT_ID" = :NEWROW."PROJECT_ID"
+                  AND "sap.plc.db::basis.t_material_price"."VALID_FROM_QUANTITY" = :NEWROW."VALID_FROM_QUANTITY"
+                  AND "sap.plc.db::basis.t_material_price"."_SOURCE" = :lv_source
+                  AND "sap.plc.db::basis.t_material_price"."PRICE_VARIABLE_PORTION" = :NEWROW."STPRS"
+                  AND "sap.plc.db::basis.t_material_price"."TRANSACTION_CURRENCY_ID" = :NEWROW."WAERS"
+                  AND "sap.plc.db::basis.t_material_price"."PRICE_UNIT_UOM_ID" = :NEWROW."MEINS"
+                  AND "sap.plc.db::basis.t_material_price"."PRICE_UNIT" = :NEWROW."PEINH"
+                  AND "sap.plc.db::basis.t_material_price"."_VALID_FROM" < :lv_current_utctimestamp 
+                  AND "sap.plc.db::basis.t_material_price"."_VALID_TO" IS NULL;
+                  
+IF :lv_identical_rows_count = 0 THEN
+    SELECT COUNT(PRICE_ID) into lv_identical_prices_count from "sap.plc.db::basis.t_material_price"
+            WHERE "sap.plc.db::basis.t_material_price"."PRICE_SOURCE_ID" = :NEWROW."PRICE_SOURCE_ID"
+                AND "sap.plc.db::basis.t_material_price"."MATERIAL_ID" = :NEWROW."MATNR"
+                AND "sap.plc.db::basis.t_material_price"."PLANT_ID" = :NEWROW."WERKS"
+                AND "sap.plc.db::basis.t_material_price"."VALID_FROM" = :NEWROW."VALID_FROM"
+                AND "sap.plc.db::basis.t_material_price"."VENDOR_ID" = :NEWROW."VENDOR_ID"
+                AND "sap.plc.db::basis.t_material_price"."PROJECT_ID" = :NEWROW."PROJECT_ID"
+                AND "sap.plc.db::basis.t_material_price"."VALID_FROM_QUANTITY" = :NEWROW."VALID_FROM_QUANTITY"
+                AND "sap.plc.db::basis.t_material_price"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_material_price"."_VALID_TO" IS NULL;
+
+    IF :lv_identical_prices_count = 0 THEN
+        SELECT CAST(SYSUUID AS NVARCHAR(32)) INTO lv_price_id FROM "sap.plc.db::DUMMY";
+    ELSE
+        SELECT PRICE_ID into lv_price_id from "sap.plc.db::basis.t_material_price"
+            WHERE "sap.plc.db::basis.t_material_price"."PRICE_SOURCE_ID" = :NEWROW."PRICE_SOURCE_ID"
+                AND "sap.plc.db::basis.t_material_price"."MATERIAL_ID" = :NEWROW."MATNR"
+                AND "sap.plc.db::basis.t_material_price"."PLANT_ID" = :NEWROW."WERKS"
+                AND "sap.plc.db::basis.t_material_price"."VALID_FROM" = :NEWROW."VALID_FROM"
+                AND "sap.plc.db::basis.t_material_price"."VENDOR_ID" = :NEWROW."VENDOR_ID"
+                AND "sap.plc.db::basis.t_material_price"."PROJECT_ID" = :NEWROW."PROJECT_ID"
+                AND "sap.plc.db::basis.t_material_price"."VALID_FROM_QUANTITY" = :NEWROW."VALID_FROM_QUANTITY"
+                AND "sap.plc.db::basis.t_material_price"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_material_price"."_VALID_TO" IS NULL;
+    END IF;
+    UPDATE "sap.plc.db::basis.t_material_price"
+            SET _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = user()  
+            WHERE "sap.plc.db::basis.t_material_price"."PRICE_ID" = :lv_price_id;
+    
+    INSERT INTO  "sap.plc.db::basis.t_material_price"
+    (PRICE_ID, PRICE_SOURCE_ID, MATERIAL_ID, PLANT_ID, VALID_FROM, VENDOR_ID, PROJECT_ID, VALID_FROM_QUANTITY, PRICE_FIXED_PORTION, PRICE_VARIABLE_PORTION, TRANSACTION_CURRENCY_ID, PRICE_UNIT_UOM_ID, PRICE_UNIT,_VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    VALUES (:lv_price_id, :NEWROW."PRICE_SOURCE_ID", :NEWROW."MATNR", :NEWROW."WERKS", :NEWROW."VALID_FROM", :NEWROW."VENDOR_ID", :NEWROW."PROJECT_ID", :NEWROW."VALID_FROM_QUANTITY", 0.00, :NEWROW."STPRS", :NEWROW."WAERS", :NEWROW."MEINS", :NEWROW."PEINH", :lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+END;

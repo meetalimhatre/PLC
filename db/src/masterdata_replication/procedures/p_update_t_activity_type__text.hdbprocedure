@@ -1,0 +1,127 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_activity_type__text" (
+    IN INPUT_TABLE TABLE (
+    	"ACTIVITY_TYPE_ID" NVARCHAR(10),
+    	"CONTROLLING_AREA_ID" NVARCHAR(4),
+    	"LANGUAGE" NVARCHAR(11),
+    	"ACTIVITY_TYPE_DESCRIPTION" NVARCHAR(250),
+    	"_SOURCE" TINYINT
+        ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+	lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+	SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+	    INTO lv_current_user 
+		FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";   
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )-- check if the MAIN OBJECT is existing (no other checks needed, since done on the main object)
+        select 
+            'ACTIVITY_TYPE_ID'                                                                      as FIELD_NAME ,
+            it.ACTIVITY_TYPE_ID                                                                     as FIELD_VALUE ,
+            'Unknown Activity Type ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID           as MESSAGE_TEXT ,
+            :lv_current_utctimestamp                                                                as MESSAGE_TIME ,
+            'ERROR'                                                                                 as MESSAGE_TYPE ,
+            't_activity_type__text'                                                                 as TABLE_NAME ,
+            'Replication_Update'                                                                    as OPERATION ,
+            :lv_run_id                                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where (it.ACTIVITY_TYPE_ID, it.CONTROLLING_AREA_ID) not in (select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID from "sap.plc.db::basis.t_activity_type")
+    ;
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'LANGUAGE'                                                                      as FIELD_NAME ,
+            it.LANGUAGE                                                                     as FIELD_VALUE ,
+            'Unknown Language for Activity Type ID ' || it.ACTIVITY_TYPE_ID                 as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                         as MESSAGE_TIME ,
+            'ERROR'                                                                         as MESSAGE_TYPE ,
+            't_activity_type__text'                                                         as TABLE_NAME,
+            'Replication_Update'                                                            as OPERATION ,
+            :lv_run_id                                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.LANGUAGE not in (select LANGUAGE from "sap.plc.db::basis.t_language")
+    ;
+
+    lt_update_records =
+        select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE, ACTIVITY_TYPE_DESCRIPTION, _SOURCE
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore not existing Controlling Area
+          and it.CONTROLLING_AREA_ID in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area") 
+		  and it.ACTIVITY_TYPE_ID in (select ACTIVITY_TYPE_ID from "sap.plc.db::basis.t_activity_type")
+          and it.LANGUAGE in (select LANGUAGE from "sap.plc.db::basis.t_language") 
+            -- ignore unchanged records 
+          --and (it.ACTIVITY_TYPE_ID, it.CONTROLLING_AREA_ID, it.LANGUAGE, IFNULL(it.ACTIVITY_TYPE_DESCRIPTION,''), it._SOURCE) 
+          --    not in 
+          except    
+              (select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE, ACTIVITY_TYPE_DESCRIPTION, _SOURCE
+                    from "sap.plc.db::basis.t_activity_type__text" as std
+                    where _VALID_TO IS NULL
+                    AND (std.ACTIVITY_TYPE_ID, std.CONTROLLING_AREA_ID, std.LANGUAGE) in (select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE from :INPUT_TABLE));
+    
+    SELECT COUNT(ACTIVITY_TYPE_DESCRIPTION) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_activity_type__text" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.ACTIVITY_TYPE_ID, tbl.CONTROLLING_AREA_ID, tbl.LANGUAGE)
+    		      in (select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE
+    			      from :lt_update_records as upd 
+    			      where upd.CONTROLLING_AREA_ID = tbl.CONTROLLING_AREA_ID
+    			        and upd.ACTIVITY_TYPE_ID = tbl.ACTIVITY_TYPE_ID
+    			        and upd.LANGUAGE = tbl.LANGUAGE
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- inser the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_activity_type__text" 
+    		(ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE, ACTIVITY_TYPE_DESCRIPTION, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE, ACTIVITY_TYPE_DESCRIPTION, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+    
+END

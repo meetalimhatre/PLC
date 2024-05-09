@@ -1,0 +1,15 @@
+TYPE "sap.plc.db.administration::masterdata.tt_uom" AS TABLE (
+		UOM_ID NVARCHAR(5),
+		DIMENSION_ID NVARCHAR(10),
+		NUMERATOR INTEGER,
+		DENOMINATOR INTEGER,
+		EXPONENT_BASE10 SMALLINT,
+		SI_CONSTANT DECIMAL(9, 6),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		_VALID_FROM_FIRST_VERSION TIMESTAMP,
+		_CREATED_BY_FIRST_VERSION NVARCHAR(256),
+		UOM_CODE NVARCHAR(5),
+		UOM_DESCRIPTION NVARCHAR(40))

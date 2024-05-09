@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_profit_center_key" AS TABLE (
+		PROFIT_CENTER_ID NVARCHAR(10),
+		CONTROLLING_AREA_ID NVARCHAR(4))

@@ -1,0 +1,16 @@
+FUNCTION "sap.plc.db.authorization.functions::f_privilege_to_order" ( privilege nvarchar(20) ) 
+	RETURNS privilegeOrder Integer
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER AS
+BEGIN
+
+privilegeOrder = 
+	CASE privilege
+	WHEN 'READ' 		THEN 0
+	WHEN 'CREATE_EDIT'	THEN 1
+	WHEN 'FULL_EDIT'	THEN 2
+	WHEN 'ADMINISTRATE'	THEN 3
+	ELSE -1
+	END;
+	
+END;

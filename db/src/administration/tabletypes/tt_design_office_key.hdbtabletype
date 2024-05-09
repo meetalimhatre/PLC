@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_design_office_key" AS TABLE (
+		DESIGN_OFFICE_ID NVARCHAR(3))

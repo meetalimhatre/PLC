@@ -1,0 +1,14 @@
+TYPE "sap.plc.db.administration::masterdata.tt_vendor" AS TABLE (
+		VENDOR_ID NVARCHAR(10),
+		VENDOR_NAME NVARCHAR(100), -- not localized
+		COUNTRY NVARCHAR(100),
+		POSTAL_CODE NVARCHAR(35),
+		REGION NVARCHAR(100),
+		CITY NVARCHAR(100),
+		STREET_NUMBER_OR_PO_BOX NVARCHAR(100),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256),
+		_VALID_FROM_FIRST_VERSION TIMESTAMP,
+		_CREATED_BY_FIRST_VERSION NVARCHAR(256))

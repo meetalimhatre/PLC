@@ -1,0 +1,1 @@
+INDEX "sap.plc.db::CALCVERSNAME" ON "sap.plc.db::basis.t_calculation_version" (CALCULATION_ID, CALCULATION_VERSION_NAME);

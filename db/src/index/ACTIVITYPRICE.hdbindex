@@ -1,0 +1,11 @@
+INDEX "sap.plc.db::ACTIVITYPRICE" ON "sap.plc.db::basis.t_activity_price" (
+    PRICE_SOURCE_ID,
+    CONTROLLING_AREA_ID,
+    COST_CENTER_ID,
+    ACTIVITY_TYPE_ID,
+    PROJECT_ID,
+    CUSTOMER_ID,
+    VALID_FROM,
+    VALID_FROM_QUANTITY,
+    _VALID_FROM
+);

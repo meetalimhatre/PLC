@@ -1,0 +1,4 @@
+[
+  "src/administration/procedures/p_price_source_read.hdbprocedure",
+  "src/administration/procedures/p_ref_price_source_read.hdbprocedure" 
+]

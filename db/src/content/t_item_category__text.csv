@@ -1,0 +1,141 @@
+ITEM_CATEGORY_ID,LANGUAGE,ITEM_CATEGORY_DESCRIPTION,CHILD_ITEM_CATEGORY_ID,ITEM_CATEGORY_NAME
+0,EN,Assigned automatically to the root item when you create a new calculation. This item category can only be used for the root item.,0,Calculation version
+1,EN,Can be used at the start of a design when you might not have a clear view of what material to use.,1,Document
+2,EN,Specific part of a product to be assembled. They are grouped according to purpose. Raw and semi-finished materials are used in assemblies to create finished products.,2,Material
+3,EN,Activity that is performed by people or machines within a company.,3,Internal Activity
+4,EN,"Activity that is provided by resources outside your company, such as the purchase of materials from an external vendor or the procurement of an external service.",4,External Activity
+5,EN,"A logistical operation that groups a continuous and connected series of activities together in a routing and is usually executed on one work center.
+A process can also be used to allocate indirect costs such as administrative, packaging, or human resources costs, to a product.",5,Process
+6,EN,"Material to be processed or service to be performed by an external vendor.
+You supply the material to be processed. The vendor processes the material or performs the service and returns the product to you for further production.",6,Subcontracting
+7,EN,"Represents machines and other resources that are dedicated to the production of a specific product.
+A resource can be the production of a special machine to make customized forms. A tool might be a drill bit that dulls and must be replaced several during the production of the product.",7,Resources and Tools
+8,EN,"Nondescript items that can be used in place of any item category.
+For example, you might add a one-time project cost as a variable item.",8,Variable Item
+9,EN,"Use this item category to add descriptions or comments above, after, or between items in your calculation version for better structuring.",9,Text Item
+10,EN,This item references another calculation version in which a part or assembly is calculated. This allows you to reuse the calculation version here.,10,Referenced Version
+0,DE,"Wird automatisch der Wurzelposition zugewiesen, wenn Sie eine neue Kalkulation erstellen. Dieser Positionstyp kann nur für die Wurzelposition verwendet werden.",0,Kalkulationsversion
+1,DE,"Kann zu Beginn des Produktentwurfs verwendet werden, wenn Sie noch nicht genau wissen, welches Material verwendet werden soll.",1,Dokument
+2,DE,"Spezifisches Teil eines herzustellenden Produkts. Sie werden nach Zweck gruppiert. Roh- und Halbfertigprodukte werden in Baugruppen verwendet, um Fertigprodukte herzustellen.",2,Material
+3,DE,"Leistung, die von Menschen oder Maschinen innerhalb Ihres Unternehmens erbracht wird.",3,Eigenleistung
+4,DE,"Leistung, die von Ressourcen außerhalb Ihres Unternehmens erbracht wird, wie z.B. Einkauf von Material von einem externen Lieferanten oder Beschaffung von einer externen Dienstleistung.",4,Fremdleistung
+5,DE,"Ein logistischer Vorgang, der aufeinanderfolgende und zusammengehörige Leistungen eines Arbeitsplans gruppiert , die normalerweise auf einem Arbeitsplatz ausgeführt werden. 
+Ein Prozess kann auch zur Verteilung von indirekten Kosten, z.B. Verwaltungskosten, Verpackungskosten oder Personalkosten, auf ein Produkt genutzt werden.",5,Prozess
+6,DE,"Von einem externen Lieferanten zu bearbeitendes Material oder zu erbringende Dienstleistung. Sie stellen das zu bearbeitende Material zur Verfügung.
+Der Lieferant bearbeitet das Material oder erbringt die Dienstleistung und gibt das Produkt zur weiteren Produktion an Sie zurück.",6,Lohnbearbeitung
+7,DE,"Entspricht Maschinen, Werkzeugen und andere Ressourcen, die zur Herstellung eines spezifischen Produktes bestimmt sind.
+Eine Ressource kann die Herstellung einer speziellen Maschine sein, um auftragsspezifische Teile zu fertigen. Ein Werkzeug kann eine Bohrkrone sein, die abstumpft und während des Fertigungsprozesses mehrmals ersetzt werden muss.",7,Fertigungshilfsmittel
+8,DE,"Undefinierbare Postionen, die anstelle eines Positionstyps verwendet werden können.",8,Variable Position
+9,DE,"Verwenden sie diesen Positonstyp, um zur besseren Strukturierung Beschreibungen oder Bemerkungen über, unter oder zwischen Positionen in Ihrer Kalkulation einzufügen.",9,Textposition
+10,DE,"Diese Position referenziert eine andere Kalkulationsversion, in der ein Bauteil oder eine Baugruppe berechnet wurde. Dadurch können Sie die Kalkulationsversion hier erneut verwenden.",10,Referenzierte Version
+0,ES,Asignado automáticamente a la posición raíz cuando crea un cálculo nuevo. Esta categoría de posición solo se puede utilizar para la posición raíz.,0,Versión del cálculo
+1,ES,Se puede utilizar al inicio de un diseño cuando todavía no se dispone de una vista clara del material que se va a utilizar.,1,Documento
+2,ES,Parte específica de un producto que se va a ensamblar. Se agruparán de acuerdo con una finalidad. Las materias primas y los productos semielaborados se utilizan en los ensamblajes para crear productos terminados.,2,Material
+3,ES,Actividad que llevan a cabo las personas o las máquinas de una empresa.,3,Actividad interna
+4,ES,"Actividad que proporcionan los recursos fuera de la sociedad, como la compra de materiales de un proveedor externo o el aprovisionamiento de un servicio externo.",4,Actividad externa
+5,ES,"Una operación logística que agrupa una serie continua y conectada de actividades en un enrutamiento y que se ejecuta normalmente en un puesto de trabajo.
+Un proceso también se puede utilizar para asignar costes indirectos, como costes administrativos, costes de embalaje o costes de recursos humanos, a un producto.",5,Proceso
+6,ES,"Material que se va a procesar o servicio que se va a prestar por parte de un proveedor externo.
+Suministre el material que se va a procesar. El proveedor procesa el material o presta el servicio y le devuelve el producto para su producción.",6,Subcontratación
+7,ES,"Máquinas y recursos especializados en la producción de un producto.
+Un recurso puede ser la producción de una máquina para realizar formas personalizadas. Una herramienta podría ser una broca que debe cambiarse con asiduidad durante la producción.",7,Recursos y herramientas
+8,ES,"Posiciones indefinidas que pueden utilizarse en lugar de cualquier categoría de posición.
+Por ejemplo, puede añadir un coste de proyecto único como posición variable.",8,Posición variable
+9,ES,"Utilice esta categoría de posición para añadir descripciones o comentarios arriba, después de o entre las posiciones en su versión del cálculo para una mejor estructuración.",9,Posición de texto
+10,ES,Esta posición hace referencia a otra versión del cálculo en la que se calcula una parte o un ensamblaje. Esto le permite reutilizar aquí la versión del cálculo.,10,Versión referenciada
+0,FR,Affecté automatiquement au poste racine lorsque vous créez un calcul. Cette catégorie de poste peut être utilisée uniquement pour le poste racine.,0,Version de calcul
+1,FR,"Peut être utilisé au début d''une conception, lorsque vous ne savez pas quel article utiliser.",1,Document
+2,FR,"Pièce spécifique d''un produit à assembler. Elles sont regroupées selon leur usage. Les matières premières et articles semi-finis sont utilisés dans des assemblages pour créer des produits finis.",2,Article
+3,FR,"Activité effectuée par des personnes ou des machines au sein d''une société.",3,Activité interne
+4,FR,"Activité fournie par des ressources externes à votre société, par exemple l''achat d''articles à un fournisseur externe ou l''approvisionnement d''un service externe.",4,Activité externe
+5,FR,"Une opération logistique qui regroupe dans une gamme une série continue d''activités interconnectées et qui sont habituellement exécutées sur un même poste de travail.
+Un processus peut également être utilisé pour imputer des coûts indirects à un produit, par exemple, les frais administratifs, les coûts d''emballage ou les coûts liés à la gestion des ressources humaines.",5,Processus
+6,FR,"Article à traiter ou service à réaliser par un fournisseur externe.
+Vous fournissez l''article à traiter. Le fournisseur traite l''article ou effectue le service, puis vous renvoie le produit pour la suite de la fabrication.",6,Sous-traitance
+7,FR,"Représente les machines et autres ressources dédiées à la fabrication d''un produit spécifique.
+Une ressource peut être la fabrication d''une machine spéciale permettant de faire des formes personnalisées. Un outil peut être une mèche de forage émoussée devant être remplacée plusieurs fois pendant la fabrication du produit.",7,Ressources et outils
+8,FR,"Postes non descriptifs pouvant être utilisés à la place de n''importe quelle catégorie de poste.
+Par exemple, vous pouvez ajouter un coût de projet unique en tant que poste variable.",8,Poste variable
+9,FR,"Utilisez cette catégorie de poste pour ajouter des descriptions ou des commentaires au-dessus, après ou entre les postes de votre version de calcul, pour une meilleure structure.",9,Poste de texte
+10,FR,"Ce poste fait référence à une autre version de calcul, dans laquelle une pièce ou un assemblage est calculé(e). Cette vous permet de réutiliser la version de calcul ici.",10,Version référencée
+0,IT,Attribuito automaticamente alla posizione radice quando si crea un nuovo calcolo. Questa categoria posizione può essere utilizzata solo per la posizione radice.,0,Versione di calcolo
+1,IT,Utilizzabile all’inizio di una progettazione per ottenere una visualizzazione chiara del materiale da utilizzare.,1,Documento
+2,IT,Pezzo specifico di un prodotto da assemblare. Raggruppati in base allo scopo. Materie prime e prodotti semilavorati vengono utilizzati negli assemblaggi per creare prodotti finiti.,2,Materiale
+3,IT,Attività eseguita da persone o macchinari all’interno della società.,3,Attività interna
+4,IT,"Attività fornita da risorse esterne alla società, ad es. l’acquisto di materiali da un fornitore esterno o l’approvvigionamento di un servizio esterno.",4,Attività esterna
+5,IT,"Operazione logistica che raggruppa in un ciclo di lavoro una serie continua e collegata di attività e che viene eseguita di norma in un unico centro di lavoro.
+Un processo si utilizza anche per allocare ad un prodotto i costi indiretti, ad es. i costi amministrativi, di imballaggio o derivanti da risorse umane.",5,Processo
+6,IT,Materiale da elaborare o servizio da eseguire da parte di un fornitore esterno. Si mette a disposizione il materiale da elaborare. Il fornitore elabora il materiale o esegue il servizio e restituisce il prodotto per l’ulteriore produzione.,6,Lavorazione esterna
+7,IT,"Rappresenta macchinari e altre risorse dedicate alla produzione di un prodotto specifico.
+Una risorsa può essere la produzione di un macchinario speciale per ottenere forme personalizzate. Un tool potrebbe essere una punta da trapano smussata che va sostituita più volte durante la produzione del prodotto.",7,Risorse e tools
+8,IT,"Posizioni non definite utilizzabili al posto di qualsiasi categoria posizione.
+Ad es., si potrebbe aggiungere costi progetto una tantum come posizione variabile.",8,Posizione variabile
+9,IT,"Utilizzare questa categoria posizione per aggiungere descrizioni o commenti sopra, sotto o tra le posizioni nella propria versione di calcolo per una migliore strutturazione.",9,Posizione testo
+10,IT,Questa posizione fa riferimento ad un’altra versione di calcolo in cui viene calcolato un pezzo o un assemblaggio. Ciò consente di riutilizzare qui la versione di calcolo.,10,Versione di riferimento
+0,JA-JP,新規計算の登録時に、ルート明細に自動で割り当てられます。この明細カテゴリは、ルート明細のみに使用できます。,0,計算バージョン
+1,JA-JP,使用する品目を明確に把握していない可能性がある場合において、設計の開始時に使用できます。,1,文書
+2,JA-JP,組み立てられる製品の特定の部品です。目的に基づいてグループ化されます。原材料と半製品は、最終製品を作成するための組立品目で使用されます。,2,品目
+3,JA-JP,会社内で従業員または機械によって実行される活動です。,3,内部活動
+4,JA-JP,社外のリソースによって提供される活動です。外部仕入先からの品目の購入や、外部サービスの調達などが含まれます。,4,外注活動
+5,JA-JP,"連続かつ接続された一連の活動を 1 つの作業手順にグループ化するロジスティクスオペレーションであり、通常は 1 つの作業区で実行されます。
+プロセスは管理費、梱包費、人件費などの間接費を 1 つの製品に割り当てる場合にも使用できます。",5,プロセス
+6,JA-JP,"外部仕入先によって処理される品目、または実行されるサービスです。
+処理される品目を供給します。仕入先は品目を処理するか、サービスを実行し、追加製造のため製品を返却します。",6,外注
+7,JA-JP,"特定の製品の製造に使用される機械およびその他の資源を示します。
+資源には、カスタマイズされた形態を作成するための特殊な機械の製造が含まれます。治工具には摩耗するため、製品の製造中に複数の交換が必要になるドリルビットなどが含まれます。",7,資源/治工具
+8,JA-JP,"任意の明細カテゴリの代わりに使用できる標準的な明細です。
+たとえば、ワンタイムプロジェクト原価を変動明細として追加できます。",8,変数明細
+9,JA-JP,この明細カテゴリを使用して、構造を改善するため、計算バージョンの明細の上、後、または間に説明やコメントを追加します。,9,テキスト明細
+10,JA-JP,この明細は部品または組立品目が計算される別の計算バージョンを参照します。これにより、計算バージョンを再利用できます。,10,参照バージョン
+0,PT,"Atribuído automaticamente ao item raiz quando você cria um novo cálculo. Esta categoria de item só pode ser utilizada para o item raiz.",0,Versão de cálculo
+1,PT,"Pode ser utilizado no início de um design quando você pode não ter uma visão clara de qual material utilizar.",1,Documento
+2,PT,"Parte específica de um produto a ser montado. Elas são agrupadas de acordo com o objetivo. Matérias-primas e materiais semi-acabados são utilizados em conjuntos para criar produtos acabados.",2,Material
+3,PT,"Atividade realizada por pessoas ou máquinas dentro de uma empresa.",3,Atividade interna
+4,PT,"Atividade fornecida por recursos fora da empresa, como a compra de materiais de um fornecedor externo ou o suprimento de um serviço externo.",4,Atividade externa
+5,PT,"Uma operação logística que agrupa uma série de atividades contínua e conectada em um roteiro e é geralmente executada em um centro de trabalho. Um processo também pode ser utilizado para alocar custos indiretos, como custos administrativos, de embalagem ou de recursos humanos, a um produto.",5,Processo
+6,PT,"Material a ser processado ou serviço a ser executado por um fornecedor externo. Você fornece o material a ser processado. O fornecedor processa o material ou executa o serviço e retorna o produto a você para produção posterior.",6,Subcontratação
+7,PT,"Representa máquinas e outros recursos dedicados à produção de um produto específico. Um recurso pode ser a produção de uma máquina especial para criar formas personalizadas. Uma ferramenta pode ser uma broca de perfuração que embota e deve ser substituída várias vezes durante a produção do produto.",7,Recursos e ferramentas
+8,PT,"Itens não descritivos que podem ser utilizados no lugar de qualquer categoria de item. Por exemplo, você pode adicionar o custo de um projeto ocasional como item variável.",8,Item variável
+9,PT,"Utilize esta categoria de item para adicionar descrições ou comentários acima, depois ou entre itens em sua versão de cálculo para uma melhor estruturação.",9,Item de texto
+10,PT,"Este item referencia outra versão de cálculo na qual uma parte ou um conjunto é calculado. Isto permite reutilizar a versão de cálculo aqui.",10,Versão referenciada
+0,RU,"Присваивается основной позиции автоматически при создании нового расчета. Этот тип позиции может использоваться только для основной позиции.",0,Версия расчета
+1,RU,"Может использоваться в начале проектирования, когда у вас может не быть четкого представления о том, какой материал использовать.",1,Документ
+2,RU,"Конкретная часть собираемого продукта. Они сгруппированы по назначению. Сырье и полуфабрикаты используются в монтажных узлах для создания готовой продукции.",2,Материал
+3,RU,"Работа, выполняемая сотрудниками или оборудованием внутри компании.",3,Собственные работы
+4,RU,"Работа, которая обеспечивается ресурсами за пределами вашей компании, например, закупка материалов у внешнего поставщика или закупка внешней услуги.",4,Работы со стороны
+5,RU,"Логистическая операция, которая объединяет непрерывную и связанную серию работ в технологической карте и обычно выполняется на одном рабочем месте. Процесс также можно использовать для распределения на продукт косвенных затрат, таких как административные затраты, затраты на упаковку или персонал.",5,Процесс
+6,RU,"Материал, подлежащий обработке, или услуга, выполняемая внешним поставщиком. Вы поставляете материал для обработки. Поставщик обрабатывает этот материал или оказывает услуги и возвращает вам продукт для дальнейшего производства.",6,Обработка давальческого материала	
+7,RU,"Представляет собой оборудование и другие ресурсы, предназначенные для производства определенного продукта. Ресурсом может быть производство специального оборудования для изготовления форм по индивидуальному заказу. Инструмент может представлять собой сверло, которое необходимо заменять несколько раз в процессе производства продукта.",7,Ресурсы и инструменты
+8,RU,"Позиции без описания, которые можно использовать вместо любого типа позиции. Например, вы можете добавить однократные затраты на проект как переменную позицию.",8,Переменная позиция
+9,RU,"Используйте этот тип позиции для добавления описаний или комментариев выше, ниже или между позициями в вашей версии расчета для лучшей структуризации.",9,Текстовая позиция
+10,RU,"Эта позиция ссылается на другую версию расчета, в которой рассчитывается деталь или монтажный узел. Это позволяет вам повторно использовать здесь эту версию расчета.",10,Ссылочная версия
+0,ZH-HANS,创建新计算时自动分配到根项目。此项目类别只能用于根项目。,0,计算版本
+1,ZH-HANS,在设计开始时不明确要使用的物料时使用。,1,凭证
+2,ZH-HANS,要装配的产品的特定部分。根据用途分组。原材料和半成品在装配中用于创建成品。,2,物料
+3,ZH-HANS,由公司内的人员或机器执行的作业。,3,内部作业
+4,ZH-HANS,由公司之外的资源提供的作业，例如从外部供应商采购物料或采购外部服务。,4,外部作业
+5,ZH-HANS,"将连续和已连接的作业序列分组在工艺路线中的物流操作，该操作通常在一个工作中心中执行。
+流程还可用于向产品分配间接成本，例如管理成本、包装成本或人力资源成本。",5,流程
+6,ZH-HANS,"将由外部供应商处理物料或执行服务。
+您提供要处理的物料。供应商处理物料或执行服务并将产品返回以进行进一步生产。",6,转包
+7,ZH-HANS,"表示专用于生产特定产品的机器和其他资源。
+资源可以是用于定制形式制造的特殊机器生产。工具可能是产品生产过程中会变钝并且必须多次更换的钻头。",7,资源和工具
+8,ZH-HANS,"可以用于替代任意项目类别的无特征项目。
+例如，可以将一次性项目成本添加为可变项目。",8,可变项目
+9,ZH-HANS,使用此项目类别在计算版本的项目前、后或中间添加描述或注释以优化结构。,9,文本项目
+10,ZH-HANS,此项目引用计算部件或装配的其他计算版本。此处允许重复使用计算版本。,10,引用版本
+0,ZH-HANT,會在您建立新版本時自動指派給根項目。此項目種類僅可針對根項目使用。,0,計算版本
+1,ZH-HANT,可在設計一開始，尚未對所要使用的物料具有明確方向時使用。,1,文件
+2,ZH-HANT,待組裝的產品特定部份，會根據目的分組。將在組件中使用原料和半成品以建立成品。,2,物料
+3,ZH-HANT,由公司內員工或機器所執行的作業。,3,內部作業
+4,ZH-HANT,由貴公司外的資源所提供的作業，如向外部供應商採購物料或外部服務採購。,4,外部作業
+5,ZH-HANT,"在途程中將一系列連續且相關聯的作業聚集的物流作業，通常會在一個工作中心執行。
+流程可用於將間接成本 (如管理、包裝或人力資源成本) 分配給產品。",5,流程
+6,ZH-HANT,"由外部供應商處理的物料或執行的服務。
+由您提供要處理的物料。供應商負責處理物料或執行服務，並將產品送回給您用於進一步生產。",6,分包
+7,ZH-HANT,"表示致力於特定產品生產的機器和其他資源。
+資源可為自訂形式的特殊機器生產。工具可能在產品生產期間鈍掉且必須數次替換的鑽頭。",7,資源和工具
+8,ZH-HANT,"可用於取代任何項目種類的未區別項目。
+例如，您可新增一次性計算版本成本作為變動項目。",8,變動項目
+9,ZH-HANT,在計畫版本中使用此項目種類在項目上方、下方或項目間新增說明或註解，以加強結構。,9,內文項目
+10,ZH-HANT,此項目參考計算部份或組件的其他計算版本。這可讓您在此重複使用計算版本。,10,參考版本

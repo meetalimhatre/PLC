@@ -1,0 +1,66 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_dimension_read" (
+		IN iv_logon_language          	NVARCHAR(11),
+		IN iv_master_data_timestamp   	TIMESTAMP,
+		IN iv_text_from_autocomplete	NVARCHAR(250),
+		IN iv_no_max_records            INTEGER,
+		IN iv_no_skip_records           INTEGER,
+		OUT ot_dimension				"sap.plc.db.administration::masterdata.tt_dimension" default empty,
+		OUT ot_dimension_text			"sap.plc.db::basis.t_dimension__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+--select ot_dimension
+	ot_dimension =
+				select
+					plcTable.DIMENSION_ID,
+					plcTable._VALID_FROM,
+					plcTable._VALID_TO,
+					plcTable._SOURCE,
+					plcTable._CREATED_BY,
+					minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+					minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+					plcTextTable.DIMENSION_DESCRIPTION
+				from "sap.plc.db::basis.t_dimension" as plcTable
+				inner join
+					(   select A._VALID_FROM, A.DIMENSION_ID, A._CREATED_BY 
+						from "sap.plc.db::basis.t_dimension" AS A 
+							inner join 
+							( select MIN(_VALID_FROM) AS _VALID_FROM, DIMENSION_ID
+								from "sap.plc.db::basis.t_dimension" 
+								group by DIMENSION_ID
+							) AS B
+							ON A._VALID_FROM = B._VALID_FROM AND A.DIMENSION_ID = B.DIMENSION_ID
+					) AS minValues
+					on plcTable.DIMENSION_ID = minValues.DIMENSION_ID
+						
+				left outer join "sap.plc.db::basis.t_dimension__text" as plcTextTable
+					on  plcTable.DIMENSION_ID = plcTextTable.DIMENSION_ID
+					and plcTextTable.LANGUAGE = :iv_logon_language
+					and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+					and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+				where plcTable._VALID_FROM <= :iv_master_data_timestamp
+					and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+					and ( LOWER(plcTable.DIMENSION_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+					or LOWER(plcTextTable.DIMENSION_DESCRIPTION) LIKE LOWER(:iv_text_from_autocomplete||'%') )                            
+	        	order by plcTable.DIMENSION_ID limit :iv_no_max_records offset :iv_no_skip_records;
+        
+        
+                
+	ot_dimension_text =
+			select
+				plcTextTable.DIMENSION_ID,
+				plcTextTable.LANGUAGE,
+				plcTextTable.DIMENSION_DESCRIPTION,
+				plcTextTable._VALID_FROM,
+				plcTextTable._VALID_TO,
+				plcTextTable._SOURCE,
+				plcTextTable._CREATED_BY
+			from "sap.plc.db::basis.t_dimension__text" as plcTextTable
+			where ( plcTextTable.DIMENSION_ID) in (select DIMENSION_ID from :ot_dimension)
+					and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+					and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+      
+END;

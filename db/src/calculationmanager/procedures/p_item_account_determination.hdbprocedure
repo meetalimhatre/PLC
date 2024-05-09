@@ -1,0 +1,326 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_account_determination" (
+		IN 	it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_account_determination_input",
+		IN	iv_session_id 				NVARCHAR(50),
+		IN	iv_cv_id 					INTEGER,
+		IN 	iv_controlling_area_id 		NVARCHAR(4),
+		IN 	iv_master_data_timestamp 	TIMESTAMP,
+		IN  iv_reevaluate 				BOOLEAN,-- if true, procedure disables change detection on items re-evaluates accounts no matter if the items have changes in relevant properties; 
+												-- if false, the change detection is enabled and accounts are only determined for items with changes on significant properties (user changes are preserved)
+		OUT ot_accounts 				"sap.plc.db.calculationmanager.procedures::ts_item_account_determination_output" default empty,
+		OUT ot_messages 				"sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+-- instant return if the input set is empty, for the sake of performance
+if is_empty(:it_items) then
+	return;
+end if;
+
+/*
+Procedure to execute account determination for items. 3 different types of account determination can be distinguished:
+
+ 1. Material-based Account Determination (Document, Material, External Activity, Subcontracting)
+################################################################################################################
+- is executed for all items of those categories if the items have changed MATERIAL_ID, PLANT_ID, VALUATION_CLASS_ID, MATERIAL_TYPE_ID or IS_DISABLING_ACCOUNT_DETERMINATION (field is set to 0) properties; if an item has no changes for those, the item is ignored,
+  unless the parameter iv_reevaluate is set to true	
+- uses table t_material_account_determination to determine potential accounts
+- t_material_account_determination can contain wild cards, which makes scoring necessary to find the account with the most specific account determination rule
+- if an account determination for a material-based item is executed (item is not ignored) and no matching rule is found for the item, the account for the item will be set to null
+
+2. Activity Type-based Account Determination (Activity Type)
+################################################################################################################
+- is only executed for items for which the ACTIVITY_TYPE_ID or IS_DISABLING_ACCOUNT_DETERMINATION (field is set to 0) is changed, unless the parameter iv_reevaluate is set to true
+- uses table t_activity_type
+
+3. Process-based Account Determination (Process)
+################################################################################################################
+- is only executed for items for which the PROCESS_ID or IS_DISABLING_ACCOUNT_DETERMINATION (field is set to 0) is changed, unless the parameter iv_reevaluate is set to true
+- uses table t_process
+
+Note:
+	For all other item categories no account determination is executed, BUT in case of a changed item category the account information will be reset (account=null) if for the item was no
+	no account determined in one of the 3 different account determination types.
+	
+	If the parameter iv_reevaluate is set to false, the procedure is running in change detection mode; this means that account determination is only executed if the relevant properties
+	(material_id, plant_id, process_id, activity_type_id) have changed. This should be the case if the procedure is run inside a scenario where user inputs for account_id shall
+	be preserved as long as the user changes a relevant property (e.g. in case of update item: don't override manually entered accounts). If iv_reevaluate = true is given, the change detection is disabled
+	and the procedure determines account for all given items. By this, the procedure also supports scenarios where the determination shall be done regardless of the changes on items (re-evalute
+	accounts after upate of MASTER_DATA_TIMESTAMP)
+
+Returns:
+- if an item is contained in the result set ot_accounts, then an account determination was executed for the item
+- the account id for an item in the result set can be:
+	- NVARCHAR(4) => account was found for the item
+	- null => account information were reset for the item, because no rule for item was found or the category of the item was changed
+- if an item is not contained in the result set (but was in the input set), then item was ignored during account determination; the old account information in t_item_temporary (ACCOUNT_ID) are still valid
+	=> must be done to respect manually entered valuess
+*/
+
+-- ################################################################################################################
+-- 		material-based account determination
+-- ################################################################################################################
+
+-- item selection
+-- material account determination is done for items of categories material, document, external activity, subcontracting; account determination is only triggered for items with changed material_id, 
+-- material_type_id, valuation_class_id, plant_id or is_disabling_account_determination (is compared with currently stored in the database), if the iv_reevaluate parameter is false (would override manually entered accounts)
+
+lt_material_items = select	item_id,
+							material_id,
+							material_type_id,
+							valuation_class_id,
+							plant_id,
+							is_disabling_account_determination
+				 	from 	:it_items as input
+					where 		input.material_id is not null
+					 		and input.material_id <> ''
+							and (
+							   		input.item_category_id = 1  or   				-- Document
+							   		input.item_category_id = 2  or   				-- Material
+							   		input.item_category_id = 4  or   				-- External Activity
+									input.item_category_id = 6       				-- Subcontracting
+								)
+							and ( input.is_disabling_account_determination = 0 or input.is_disabling_account_determination is null);
+					
+if :iv_reevaluate = false then
+	-- in this case the accounts for all materials should not be re-evaluted, BUT only if material_id, material_type_id, valuation_class_id, plant_id or is_disabling_account_determination have been changed
+	-- items with no changes for those properties (compared to the current db state) are removed from the set for which accounts need to be determined
+	lt_material_items = select	item_id,
+								material_id,
+								material_type_id,
+								valuation_class_id,
+								plant_id,
+								is_disabling_account_determination
+					 	from 	:lt_material_items
+					
+						except
+
+						select 	input.item_id, 											-- subtract all items, for which neither the plan_id, material_type_id, valuation_class_id nor the material_id was changed; 
+								input.material_id,										-- running an account determination for this would override an account also if the user changes a value that is not related 
+								input.material_type_id,									-- to the material account determination
+								input.valuation_class_id,
+								input.plant_id,
+								input.is_disabling_account_determination
+						from	:it_items as input										-- remember: this statement must also work for create and import, where nothing is in t_item_temporary
+							inner join  "sap.plc.db::basis.t_item_temporary" as db		-- (that's why we 'except' for this; 'not in' in the where-clause would have worse performance due to its row-based execution)
+								on 	input.item_id = db.item_id
+								and	db.session_id = :iv_session_id
+								and	db.calculation_version_id = :iv_cv_id
+						where		input.material_id = db.material_id 					-- IMPORTANT: account determination is not executed if material_id is null (first stmt); no special handling of nullable column here
+								-- IMPORTANT: = operator cannot be used to test against NULL-values (http://stackoverflow.com/a/5658472/1770617); ifnull-function used for comparison
+								-- if item_category_id is included here, account determination will be executed everytime the category changes; necessary
+								-- because otherwise we'd miss cases if the user changes to a account determination relevant category (e.g., variable item -> material)
+								and ((input.material_type_id is null and db.material_type_id is null) or input.material_type_id = db.material_type_id)				
+								and ((input.valuation_class_id is null and db.valuation_class_id is null) or input.valuation_class_id = db.valuation_class_id)		
+								and ((input.plant_id is null and db.plant_id is null) or input.plant_id = db.plant_id)		
+								and input.is_disabling_account_determination = db.is_disabling_account_determination										
+	
+								and input.item_category_id = db.item_category_id			
+								and db.is_deleted = 0;										
+end if;
+
+-- determine potential accounts
+-- t_material_account_determination contains constraints to associate a combination of controlling area, the material type, the valuation class and the plant with a specific account; each row with the set of constraints and the resulting 
+-- account is referenced as "rule" from now on
+--
+-- account determination rules have  2 special values in the columns material_type_id, plant_id and valuation_class_id:
+--		- '' (empty string) -> means that the constraint defined by this column matches if the input value is NULL; must be used this way, since those are key columns and can't be NULL
+--		- *  (asterisks) 	-> the wild card, means that the constraint defined by this column matches to any input value
+
+lt_potential_material_accounts_determination =	select 	item.item_id,								 																-- select more data than necessary for return structure to enable later more
+											account.material_type_id,																					-- precise account selection; see scoring below
+											account.plant_id,
+											account.valuation_class_id,
+											account.account_id
+									from 	:lt_material_items as item
+										inner join "sap.plc.db::basis.t_material_account_determination" as account													-- join with t_material_account_determination to get the accounts info in the set; if a value is NULL
+											on  account.controlling_area_id = :iv_controlling_area_id 	-- controlling_area_id is mandatory				-- is converted to '' by ifnull() in order to match the constraint defined in t_material_account_determination
+									where 		(ifnull(item.material_type_id, '') = account.material_type_id or account.material_type_id = '*')		-- by using the OR in the join condition and match the asterisks on the right hand side,
+											and (ifnull(item.plant_id, '') = account.plant_id or account.plant_id = '*') 								-- the wild mechanism is implemented
+											and (ifnull(item.valuation_class_id, '') = account.valuation_class_id or account.valuation_class_id = '*') 	-- !important: to join on item.plant_id, since the entries in plant are optional
+											and account._valid_from <= :iv_master_data_timestamp
+											and (account._valid_to > :iv_master_data_timestamp or account._valid_to is null);
+
+-- scoring
+-- through usage of wild cards, multiple rules could match an item; from business point of view the most specific rules (use less wild cards) should be selected;
+--   if rows use the same amount of wild cards, columns provide different
+-- importance/priorities: valuation_class_id > material_type_id > plant_id
+-- rule selection is based on scoring, with weights: valuation_class_id = 4; material_type_id = 3; plant_id = 2
+lt_scored_accounts = select item_id,
+							account_id,
+							(
+								case when valuation_class_id <> '*' then 4 else 0 end +		-- calculate the score by using case statements which return the weight of an column if it does not contain the asterisks
+								case when material_type_id <> '*' then 3 else 0 end +		-- the weights for the columns are defined as literals inside the case block; if the column contains '*' 0 would be returned
+								case when plant_id <> '*' then 2 else 0 end					-- as weight for this column
+							) as score														-- the calculated score is stored as additional column in the local table-typed variable :lt_scored_accounts
+					from :lt_potential_material_accounts_determination;
+
+-- final selection
+-- the previous statement calculated a score for each row/rule; the next selects the rule with the highest store for an item; this is done by inner join with a sub-query which selects the row with highest score of an item;
+-- not for all rows in :lt_material_items an account must be found; in this case no account is found, account_id must be null (to reset account information; happens if user switches to temporary material for example);
+-- an outer join on the ranked set from :lt_scored_accounts is used for that
+lt_determined_material_accounts_determination = 	select	items.item_id,
+											determined_accounts.account_id
+									from :lt_material_items as items
+									left outer join (												-- use outer join to select null as account_id in case no account could be determined for the item
+										select	scored_account.item_id,
+												scored_account.account_id
+											from :lt_scored_accounts as scored_account
+											inner join (
+												select	item_id,									-- sub-query to determine the highest score of a rule for an item; it's important to group by item_id in order
+														max(score) as score							-- to create the correct aggregate for the score
+												from :lt_scored_accounts
+												group by item_id
+											) 	as maxscore
+												on 	scored_account.item_id = maxscore.item_id		--  join on the item_id and on the maxscore in order to eliminate all the rules with an lower score than the maximum in the
+												and scored_account.score = maxscore.score 			--  final result set for the determined material accounts
+									) 	as determined_accounts
+									  	on items.item_id = determined_accounts.item_id
+                                    left outer join "sap.plc.db::basis.t_material" as masterdata_materials  --  join with t_material in order to ignore null as account id for temporary materials
+									  	on items.material_id = masterdata_materials.material_id
+										and (masterdata_materials._valid_to is null or masterdata_materials._valid_to > :iv_master_data_timestamp)
+									  	where determined_accounts.account_id is not null
+									  	    or masterdata_materials.material_id is not null
+										group by items.item_id, determined_accounts.account_id;
+
+
+
+-- ################################################################################################################
+-- 		activity type-based account determination
+-- ################################################################################################################
+-- item selection
+-- items of category internal activity are effected; activity_type_id must be != null or the empty string; account determination is triggered for items with changed activity_type_id or is_disabling_account_determination compared with
+-- currently stored in the database (would override manually entered accounts)
+
+lt_internal_activity_items = 	select 	item_id,
+										activity_type_id,
+										is_disabling_account_determination
+					 			from 	:it_items
+					 			where 	activity_type_id is not null
+					 					and activity_type_id <> ''
+						  				and item_category_id = 3	-- Internal Activity
+										and ( is_disabling_account_determination = 0 or is_disabling_account_determination is null);  
+if :iv_reevaluate = false then
+	-- in this case the accounts for all materials should not be re-evaluted, BUT only be executed for items with changes on activity_type_id or is_disabling_account_determination
+	-- items with no changed properties, compared to the current db state are removed from the set for which accounts need to be determined
+	lt_internal_activity_items = 	select 	item_id,
+											activity_type_id,
+											is_disabling_account_determination
+						 			from 	:lt_internal_activity_items								
+									
+									except
+
+									select		input.item_id, 											-- subtract all items, for which the activity_type_id wasn't changed; running an account determination for this
+												input.activity_type_id,
+												input.is_disabling_account_determination									-- override an account also if the user changes a value that is not related to the material account determination
+										from	:it_items as input
+											inner join  "sap.plc.db::basis.t_item_temporary" as db		-- remember: this statement must also work for create and import, where nothing is in t_item_temporary
+												on 		input.item_id = db.item_id 						-- (that's why we 'except' for this; 'not in' in the where-clause would have worse performance due to its row-based execution)
+													and	db.session_id = :iv_session_id
+													and	db.calculation_version_id = :iv_cv_id
+										where			input.activity_type_id = db.activity_type_id										-- IMPORTANT: account determination is not executed if activity_type_id is null (first stmt); no special handling of nullable column here
+										            and input.is_disabling_account_determination = db.is_disabling_account_determination
+													and input.item_category_id = db.item_category_id										-- if item_category_id is included here, account determination will be executed everytime the category changes; necessary
+													and db.is_deleted = 0; 																	-- because otherwise we'd miss cases if the user changes to a account determination relevant category
+end if;
+
+-- determine accounts:
+lt_determined_internal_activity_accounts = 	select 	item.item_id,
+													activity.account_id
+											from  :lt_internal_activity_items as item
+											inner join "sap.plc.db::basis.t_activity_type" as activity
+												on 	item.activity_type_id = activity.activity_type_id
+												and :iv_controlling_area_id = activity.controlling_area_id
+											where	 activity._valid_from <= :iv_master_data_timestamp
+												and (activity._valid_to > :iv_master_data_timestamp or activity._valid_to is null);
+
+-- ################################################################################################################
+--  process-based account determination
+-- ################################################################################################################
+-- item selection:
+-- items of category process are affected; process_id must be != null or the empty string; account determination is triggered for items with changed process_id or is_disabling_account_determination compared with
+-- currently stored in the database (would override manually entered accounts)
+lt_process_items = 	select 	item_id,
+										process_id,
+										is_disabling_account_determination
+					 			from 	:it_items
+					 			where 	process_id is not null
+					 					and process_id <> ''
+						  				and item_category_id = 5										-- Process
+										and ( is_disabling_account_determination = 0 or is_disabling_account_determination is null );  
+if :iv_reevaluate = false then
+	-- in this case the accounts for all materials should not be re-evaluted, BUT only be executed for items with changes on process_id or is_disabling_account_determination
+	-- items with no changed properties, compared to the current db state are removed from the set for which accounts need to be determined
+	lt_process_items = 	select 	item_id,
+											process_id,
+											is_disabling_account_determination
+									from 	:lt_process_items
+									
+									except
+
+									select	input.item_id, 													-- subtract all items, for which the process_id wasn't changed; running an account determination for this
+											input.process_id,
+											input.is_disabling_account_determination										-- override an account also if the user changes a value that is not related to the material account determination
+									from		:it_items as input
+										inner join  "sap.plc.db::basis.t_item_temporary" as db				-- remember: this statement must also work for create and import, where nothing is in t_item_temporary
+											on 	input.item_id = db.item_id 									-- (that's why we 'except' for this; 'not in' in the where-clause would have worse performance due to its row-based execution)
+											and	db.session_id = :iv_session_id
+											and	db.calculation_version_id = :iv_cv_id
+									where		input.process_id = db.process_id													-- IMPORTANT: account determination is not executed if process_id is null (first stmt); no special handling of nullable column here
+											and input.is_disabling_account_determination = db.is_disabling_account_determination
+											and input.item_category_id = db.item_category_id										-- if item_category_id is included here, account determination will be executed everytime the category changes; necessary
+											and db.is_deleted = 0;																	-- because otherwise we'd miss cases if the user changes to a account determination relevant category
+end if;
+
+-- determine accounts:
+lt_determined_process_accounts = 	select 	item.item_id,
+													process.account_id
+											from  :lt_process_items as item
+												inner join "sap.plc.db::basis.t_process" as process
+													on 	item.process_id = process.process_id
+													and :iv_controlling_area_id = process.controlling_area_id
+											where 		 process._valid_from <= :iv_master_data_timestamp
+													and (process._valid_to > :iv_master_data_timestamp or process._valid_to is null);
+
+-- ###############################################################################################################
+-- 		reset accounts after category change
+-- ################################################################################################################
+-- if an item changes its category, the account information should be reset; for this reason join with t_item_temporary and check if the item_category_id
+-- was changed; but do this only for items, which don't have a determined account yet (would override the other account determination)
+
+lt_all_determined_accounts = select * from :lt_determined_material_accounts_determination
+							union all
+							select * from :lt_determined_internal_activity_accounts
+							union all
+							select * from :lt_determined_process_accounts;
+					 
+
+lt_reset_accounts =	select 	items.item_id,
+							null as account_id
+					from :it_items as items
+						inner join "sap.plc.db::basis.t_item_temporary" as db
+								on 	items.item_id = db.item_id
+								and	db.session_id = :iv_session_id
+								and	db.calculation_version_id = :iv_cv_id
+						where		items.item_category_id <> db.item_category_id	-- join condition on the item_category_id, allows to determine if the category was changed compared to the item stored in db
+								and db.is_deleted = 0;
+
+-- ################################################################################################################
+-- 		finalize
+-- ################################################################################################################
+
+ot_accounts = 	select * from :lt_all_determined_accounts
+							union all
+							select * from :lt_reset_accounts;
+
+ot_messages = 	select	'ACCOUNTDETERMINATION_ACCOUNT_SET_INFO' as msg_id,
+						item_id as item_id,
+						null as md_id_1,
+						null as md_id_2,
+						null as md_id_3,
+						null as business_object,
+						null as price_source_id
+				from :ot_accounts;
+END;

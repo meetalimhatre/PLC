@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.defaultsettings::defaultsettings.tt_costing_sheet_key" AS TABLE (
+    COSTING_SHEET_ID NVARCHAR(15)
+)

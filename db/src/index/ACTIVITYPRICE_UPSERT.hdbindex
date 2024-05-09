@@ -1,0 +1,4 @@
+INDEX "sap.plc.db::ACTIVITYPRICE_UPSERT" ON "sap.plc.db::basis.t_activity_price" (
+    PRICE_ID,
+    _VALID_TO
+);

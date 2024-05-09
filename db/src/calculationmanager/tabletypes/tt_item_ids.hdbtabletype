@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.calculationmanager::calculationmanager_types.tt_item_ids" AS TABLE (
+    ITEM_ID INTEGER
+)

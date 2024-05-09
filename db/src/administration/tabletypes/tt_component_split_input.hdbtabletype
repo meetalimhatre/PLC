@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_component_split_input" AS TABLE (
+		COMPONENT_SPLIT_ID NVARCHAR(35),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

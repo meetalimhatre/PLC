@@ -1,0 +1,8 @@
+TYPE "sap.plc.db.defaultsettings::defaultsettings.tt_default_settings" AS TABLE (
+    CONTROLLING_AREA_ID NVARCHAR(4),
+    COMPANY_CODE_ID NVARCHAR(4),
+    PLANT_ID NVARCHAR(8),
+    REPORT_CURRENCY_ID NVARCHAR(3),
+    COMPONENT_SPLIT_ID NVARCHAR(35),
+    COSTING_SHEET_ID NVARCHAR(15)
+)

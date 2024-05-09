@@ -1,0 +1,45 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_check_formulas_costing_sheet_overhead_row" (
+            OUT errors "sap.plc.db.calcengine::calcengine_types.ts_costing_sheet_row_formula_errors" default empty
+      )
+      LANGUAGE SQLSCRIPT
+      SQL SECURITY INVOKER
+      READS SQL DATA AS
+BEGIN
+
+	lt_metadata = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			IS_CUSTOM,
+			ROLLUP_TYPE_ID,
+			REF_UOM_CURRENCY_PATH,
+			REF_UOM_CURRENCY_BUSINESS_OBJECT,
+			REF_UOM_CURRENCY_COLUMN_ID,
+			UOM_CURRENCY_FLAG,
+			SEMANTIC_DATA_TYPE,
+			SEMANTIC_DATA_TYPE_ATTRIBUTES,
+			PROPERTY_TYPE,
+			IS_USABLE_IN_FORMULA
+		FROM "sap.plc.db::basis.t_metadata";
+
+	lt_metadata_item_attributes = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			ITEM_CATEGORY_ID,
+			DEFAULT_VALUE
+      FROM "sap.plc.db::basis.t_metadata_item_attributes";
+
+    lt_formula = SELECT DISTINCT COLUMN_ID FROM "sap.plc.db::basis.t_formula" WHERE IS_FORMULA_USED = 1;
+      
+    lt_costing_sheet_overhead_row_formula = SELECT 	formula.FORMULA_ID,
+													formula.FORMULA_STRING,
+													formula.FORMULA_DESCRIPTION,
+													overhead_row.COSTING_SHEET_OVERHEAD_ID,
+													overhead_row.COSTING_SHEET_OVERHEAD_ROW_ID,
+													formula.OVERHEAD_CUSTOM
+													FROM "sap.plc.db::basis.t_costing_sheet_overhead_row_formula" formula, "sap.plc.db::basis.t_costing_sheet_overhead_row" overhead_row
+													WHERE formula.FORMULA_ID = overhead_row.FORMULA_ID;
+	
+	CALL "sap.plc.db::PLC_AREA_CHECK_FORMULAS_COSTING_SHEET_OVERHEAD_ROW_PROC"(:lt_formula, :lt_costing_sheet_overhead_row_formula, :lt_metadata, :lt_metadata_item_attributes, errors);
+END;

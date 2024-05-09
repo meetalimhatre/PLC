@@ -1,0 +1,10 @@
+{
+    "role": {
+        "name": "sap.plc.authorizations::replication_viewer",
+        "schema_privileges": [
+             {
+             "privileges": ["SELECT"]
+             }
+        ]
+    }
+}

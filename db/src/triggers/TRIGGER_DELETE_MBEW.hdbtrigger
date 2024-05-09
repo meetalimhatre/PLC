@@ -1,0 +1,19 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_MBEW" AFTER DELETE ON "sap.plc.db::repl.t_mbew_marc"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+  UPDATE "sap.plc.db::basis.t_material_price"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE "sap.plc.db::basis.t_material_price"."PRICE_SOURCE_ID" = :OLDROW."PRICE_SOURCE_ID"
+        AND "sap.plc.db::basis.t_material_price"."MATERIAL_ID" = :OLDROW."MATNR"
+        AND "sap.plc.db::basis.t_material_price"."PLANT_ID" = :OLDROW."WERKS"
+        AND "sap.plc.db::basis.t_material_price"."VALID_FROM" = :OLDROW."VALID_FROM"
+        AND "sap.plc.db::basis.t_material_price"."VENDOR_ID" = :OLDROW."VENDOR_ID"
+        AND "sap.plc.db::basis.t_material_price"."PROJECT_ID" = :OLDROW."PROJECT_ID"
+        AND "sap.plc.db::basis.t_material_price"."VALID_FROM_QUANTITY" = :OLDROW."VALID_FROM_QUANTITY"
+        AND "sap.plc.db::basis.t_material_price"."_VALID_FROM" < :lv_current_utctimestamp
+        AND "sap.plc.db::basis.t_material_price"."_VALID_TO" IS NULL;
+end
+;

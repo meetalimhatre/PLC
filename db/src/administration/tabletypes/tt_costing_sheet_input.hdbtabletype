@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_costing_sheet_input" AS TABLE (
+		COSTING_SHEET_ID NVARCHAR(15),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)

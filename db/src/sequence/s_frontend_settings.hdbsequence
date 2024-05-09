@@ -1,0 +1,1 @@
+SEQUENCE "sap.plc.db.sequence::s_frontend_settings" START WITH 100

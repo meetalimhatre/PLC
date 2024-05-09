@@ -1,0 +1,105 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_calcversion" (
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000),
+VAR_LANGUAGE NVARCHAR (11)
+)
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "CALCULATION_VERSION_NAME" NVARCHAR (500), "CALCULATION_ID" INTEGER, "CALCULATION_NAME" NVARCHAR (500), "STATUS_ID" NVARCHAR(20),
+				"CALCULATION_VERSION_TYPE" TINYINT, "CALCULATION_VERSION_TYPE_DESCRIPTION"  NVARCHAR (40),
+				"COSTING_SHEET_ID" NVARCHAR (15), "COSTING_SHEET_DESCRIPTION" NVARCHAR (250), "COMPONENT_SPLIT_ID" NVARCHAR (35), "COMPONENT_SPLIT_DESCRIPTION" NVARCHAR (250), 
+				"LANGUAGE" NVARCHAR (3), SALES_DOCUMENT NVARCHAR (100),
+				"CUSTOMER_ID" NVARCHAR (10), "CUSTOMER_NAME" NVARCHAR (100), 
+				"START_OF_PRODUCTION" DATE, "END_OF_PRODUCTION" DATE, "VALUATION_DATE" DATE, "LAST_MODIFIED_ON" TIMESTAMP, 
+				"IS_CURRENT" TINYINT, "IS_FROZEN" TINYINT, 
+				"LIFECYCLE_PERIOD" NVARCHAR (40), "BASE_VERSION_ID" INTEGER, "BASE_VERSION_NAME" NVARCHAR (100),
+				"EXCHANGE_RATE_TYPE_ID" NVARCHAR (20), "EXCHANGE_RATE_TYPE_DESCRIPTION" NVARCHAR (250),
+				"VARIANT_ID" INTEGER, "VARIANT_NAME" NVARCHAR (250)
+				)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER 
+  AS 
+
+BEGIN 
+ 	 var_out = SELECT
+		calcVersion.calculation_version_id,
+		calcVersion.calculation_version_name,
+		calc.calculation_id,
+		calc.calculation_name,
+		calcVersion.status_id,
+		calcVersion.calculation_version_type,
+		CASE WHEN calcVersion.calculation_version_type = 1 THEN 'Calculation Version'
+			 WHEN calcVersion.calculation_version_type = 2 THEN 'Lifecycle Version'
+			 WHEN calcVersion.calculation_version_type = 4 THEN 'Variant Base'
+			 WHEN calcVersion.calculation_version_type = 8 THEN 'Generated from Variant'
+			 WHEN calcVersion.calculation_version_type = 16 THEN 'Manual Lifecycle Version'
+		END as calculation_version_type_description,
+		calcVersion.costing_sheet_id,
+		costingsheettext.costing_sheet_description,
+		calcVersion.component_split_id,
+		componentsplittext.component_split_description,
+		VAR_LANGUAGE as language,
+		calcVersion.sales_document,
+		calcversion.customer_id,
+		customer.customer_name,
+		calcversion.start_of_production,
+		calcversion.end_of_production,
+		calcversion.valuation_date,
+		calcversion.last_modified_on,
+		CASE WHEN ( (calc.current_calculation_version_id = calcVersion.calculation_version_id) or 
+		          ( (calc.current_calculation_version_id = baseVersion.calculation_version_id) and calcVersion.calculation_version_type in (2,16)) )
+			THEN 1
+			ELSE 0
+		END as is_current,
+		IFNULL(calcVersion.is_frozen, 0) as is_frozen,
+		CASE WHEN calcVersion.lifecycle_period_from is null THEN null
+			 ELSE to_varchar(to_integer(calcVersion.lifecycle_period_from/12) + 1900)					-- convert lifecycle period to years. In V2.1+ also handling of months/quarters should be added.
+		END as lifecycle_period,
+		IFNULL(calcVersion.base_version_id, calcVersion.calculation_version_id) as base_version_id,		-- for base versions (e.g. type 1 or type 4), we set the base version id to itself to enable reporting aggregated by base versions
+		CASE WHEN calcVersion.calculation_version_type = 1 THEN calcVersion.calculation_version_name	-- for base versions, we return the name of the calculation version itself
+			 WHEN calcVersion.calculation_version_type = 2 THEN baseVersion.calculation_version_name    -- for lifecycle versions, we return the name of the base version
+			 WHEN calcVersion.calculation_version_type = 4 THEN calcVersion.calculation_version_name    -- for variant base versions, we return the name of the calculation version itself
+			 WHEN calcVersion.calculation_version_type = 8 THEN baseVersion.calculation_version_name    -- for versions generated from variants, we return the name of the variant base version
+			 WHEN calcVersion.calculation_version_type = 16 THEN baseVersion.calculation_version_name   -- for manual lifecycle versions, we return the name of the base version
+		END as base_version_name,
+		calcVersion.exchange_rate_type_id,
+		exchangeRateTypeText.exchange_rate_type_description,
+		calcVersion.variant_id,
+		variant.variant_name
+		
+FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion  
+            INNER JOIN "sap.plc.db::basis.t_calculation" calc 
+				ON calc.calculation_id = calcVersion.calculation_id
+				AND (:versionId = '' OR calcVersion.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId)))
+			INNER JOIN "sap.plc.db::basis.t_project" project 
+				ON project.project_id = calc.project_id
+				AND (project.PROJECT_ID IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId)))
+			LEFT OUTER JOIN "sap.plc.db.authorization::privileges.v_calculation_version_read" baseVersion 
+				ON baseVersion.calculation_version_id = calcVersion.base_version_id AND upper(baseVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+			LEFT OUTER JOIN "sap.plc.db::basis.t_component_split__text" componentsplittext
+                ON componentsplittext.component_split_id = calcVersion.component_split_id  
+                AND componentsplittext.component_split_id IN
+                	(SELECT component_split_id FROM "sap.plc.db::basis.t_component_split" WHERE controlling_area_id = project.controlling_area_id)
+                AND calcVersion.master_data_timestamp >= componentsplittext._valid_from 
+                AND (componentsplittext._valid_to IS NULL OR calcVersion.master_data_timestamp < componentsplittext._valid_to) 
+                AND componentsplittext.language = VAR_LANGUAGE				
+			LEFT OUTER JOIN "sap.plc.db::basis.t_costing_sheet__text" costingsheettext
+                ON costingsheettext.costing_sheet_id = calcVersion.costing_sheet_id  
+                AND costingsheettext.costing_sheet_id IN
+                	(SELECT costing_sheet_id FROM "sap.plc.db::basis.t_costing_sheet" WHERE controlling_area_id = project.controlling_area_id)
+                AND calcVersion.master_data_timestamp >= costingsheettext._valid_from 
+                AND (costingsheettext._valid_to IS NULL OR calcVersion.master_data_timestamp < costingsheettext._valid_to) 
+                AND costingsheettext.language = VAR_LANGUAGE
+			LEFT OUTER JOIN "sap.plc.db::basis.t_customer" customer
+            	ON customer.customer_id = project.customer_id
+	            AND customer._valid_to IS NULL 
+			LEFT OUTER JOIN "sap.plc.db::basis.t_exchange_rate_type__text" exchangeRateTypeText
+            	ON exchangeRateTypeText.exchange_rate_type_id = calcVersion.exchange_rate_type_id
+            	AND exchangeRateTypeText.language = VAR_LANGUAGE  
+            LEFT OUTER JOIN "sap.plc.db::basis.t_variant" variant
+            	ON variant.variant_id = calcVersion.variant_id
+WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+;
+
+
+
+return :var_out;
+END;

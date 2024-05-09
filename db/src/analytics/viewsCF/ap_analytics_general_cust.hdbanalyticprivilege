@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Privilege:analyticPrivilege xmlns:Privilege="http://www.sap.com/ndb/BiModelPrivilege.ecore" id="sap.plc.analytics.viewsCF::ap_analytics_general_cust" privilegeType="SQL_ANALYTIC_PRIVILEGE" schemaVersion="1.1">
+<descriptions defaultDescription="ap_analytics_general_cust"/>
+<securedModels>
+  <modelUri>sap.plc.analytics.viewsCF::V_EXT_DUMMY_CUST</modelUri>
+</securedModels>
+</Privilege:analyticPrivilege>

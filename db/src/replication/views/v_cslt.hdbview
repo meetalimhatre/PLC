@@ -1,0 +1,8 @@
+VIEW "sap.plc.db.replication.views::v_cslt" ( "LSTAR", "KOKRS", "KTEXT", "LANGU" ) AS select CSLT.LSTAR , CSLT.KOKRS , CSLT.KTEXT, CSLT.LANGU
+                from "sap.plc.db::repl.t_cslt" AS CSLT
+                	WHERE CSLT.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.t_cslt" AS CSLT1
+                								WHERE CSLT1.LSTAR = CSLT.LSTAR AND 
+                									  CSLT1.KOKRS = CSLT.KOKRS AND 
+                									  CSLT1.LANGU = CSLT.LANGU)
+					  AND CSLT.DATBI >= TO_DATS(CURRENT_DATE)

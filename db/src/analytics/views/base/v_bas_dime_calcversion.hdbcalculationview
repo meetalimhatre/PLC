@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" schemaVersion="3.0" id="sap.plc.analytics.views.base::v_bas_dime_calcversion" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DIMENSION" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true">
+  <descriptions/>
+  <localVariables>
+    <variable id="VAR_LANGUAGE" parameter="true">
+      <descriptions defaultDescription="VAR_LANGUAGE"/>
+      <variableProperties datatype="NVARCHAR" length="3" mandatory="true" scale="NaN" defaultValue="EN">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_language</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>LANGUAGE</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  
+    <variable id="projectId" parameter="true">
+      <descriptions defaultDescription=""/>
+      <variableProperties datatype="NVARCHAR" length="35" scale="NaN" mandatory="true">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+    <variable id="versionId" parameter="true">
+      <descriptions defaultDescription=""/>
+      <variableProperties datatype="INTEGER" length="10" scale="0" mandatory="false">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>calculation_version_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_calcversion">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_calcversion"/>
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_calcversion">
+      <targetVariable name="PROJECTID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_calcversion"/>
+      <localVariable>projectId</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_calcversion">
+      <targetVariable name="VERSIONID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_calcversion"/>
+      <localVariable>versionId</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="27"/>
+  <dataSources>
+    <DataSource id="TABLE_FUNCTION_v_bas_dime_calcversion" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_calcversion</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews/>
+  <logicalModel id="TABLE_FUNCTION_v_bas_dime_calcversion">
+    <descriptions/>
+    <attributes>
+      <attribute id="CALCULATION_VERSION_ID" key="true" order="1" attributeHierarchyActive="false" descriptionColumnName="CALCULATION_VERSION_NAME" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_VERSION_ID"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_NAME" hidden="true" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_VERSION_NAME"/>
+      </attribute>
+      <attribute id="CALCULATION_ID" order="3" attributeHierarchyActive="false" descriptionColumnName="CALCULATION_NAME" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_ID"/>
+      </attribute>
+      <attribute id="CALCULATION_NAME" hidden="true" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_NAME"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_TYPE" order="5" attributeHierarchyActive="false" descriptionColumnName="CALCULATION_VERSION_TYPE_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_TYPE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_VERSION_TYPE"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_TYPE_DESCRIPTION" hidden="true" order="6" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_TYPE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CALCULATION_VERSION_TYPE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="COSTING_SHEET_ID" order="7" attributeHierarchyActive="false" descriptionColumnName="COSTING_SHEET_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="COSTING_SHEET_ID"/>
+      </attribute>
+      <attribute id="COSTING_SHEET_DESCRIPTION" hidden="true" order="8" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="COSTING_SHEET_DESCRIPTION"/>
+      </attribute>
+      <attribute id="COMPONENT_SPLIT_ID" order="9" attributeHierarchyActive="false" descriptionColumnName="COMPONENT_SPLIT_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="COMPONENT_SPLIT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="COMPONENT_SPLIT_ID"/>
+      </attribute>
+      <attribute id="COMPONENT_SPLIT_DESCRIPTION" hidden="true" order="10" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="COMPONENT_SPLIT_DESCRIPTION"/>
+      </attribute>
+      <attribute id="LANGUAGE" order="11" attributeHierarchyActive="false" displayAttribute="false" hidden="true">
+        <descriptions defaultDescription="LANGUAGE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="LANGUAGE"/>
+      </attribute>
+      <attribute id="SALES_DOCUMENT" order="12" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="SALES_DOCUMENT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="SALES_DOCUMENT"/>
+      </attribute>
+      <attribute id="CUSTOMER_ID" order="13" attributeHierarchyActive="false" descriptionColumnName="CUSTOMER_NAME" displayAttribute="false">
+        <descriptions defaultDescription="CUSTOMER"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CUSTOMER_ID"/>
+      </attribute>
+      <attribute id="CUSTOMER_NAME" hidden="true" order="14" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="CUSTOMER_NAME"/>
+      </attribute>
+      <attribute id="START_OF_PRODUCTION" order="15" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="START_OF_PRODUCTION"/>
+      </attribute>
+      <attribute id="END_OF_PRODUCTION" order="16" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="END_OF_PRODUCTION"/>
+      </attribute>
+      <attribute id="VALUATION_DATE" order="17" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="VALUATION_DATE"/>
+      </attribute>
+      <attribute id="LAST_MODIFIED_ON" order="18" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="LAST_MODIFIED_ON"/>
+      </attribute>
+      <attribute id="IS_CURRENT" order="19" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_CURRENT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="IS_CURRENT"/>
+      </attribute>
+      <attribute id="IS_FROZEN" order="20" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_FROZEN"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="IS_FROZEN"/>
+      </attribute>
+      <attribute id="LIFECYCLE_PERIOD" order="21" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="LIFECYCLE_PERIOD"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="LIFECYCLE_PERIOD"/>
+      </attribute>
+      <attribute id="BASE_VERSION_ID" order="22" attributeHierarchyActive="false" descriptionColumnName="BASE_VERSION_NAME" displayAttribute="false">
+        <descriptions defaultDescription="BASE_VERSION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="BASE_VERSION_ID"/>
+      </attribute>
+      <attribute id="BASE_VERSION_NAME" hidden="true" order="23" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="BASE_VERSION_NAME"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="BASE_VERSION_NAME"/>
+      </attribute>
+      <attribute id="EXCHANGE_RATE_TYPE_ID" order="24" attributeHierarchyActive="false" descriptionColumnName="EXCHANGE_RATE_TYPE_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="EXCHANGE_RATE_TYPE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="EXCHANGE_RATE_TYPE_ID"/>
+      </attribute>
+      <attribute id="EXCHANGE_RATE_TYPE_DESCRIPTION" hidden="true" order="25" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="EXCHANGE_RATE_TYPE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="EXCHANGE_RATE_TYPE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="VARIANT_ID" order="26" attributeHierarchyActive="false" descriptionColumnName="VARIANT_NAME" displayAttribute="false">
+        <descriptions defaultDescription="VARIANT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="VARIANT_ID"/>
+      </attribute>
+      <attribute id="VARIANT_NAME" hidden="true" order="27" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="VARIANT_NAME"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="VARIANT_NAME"/>
+      </attribute>
+    
+      <attribute id="STATUS_ID" order="28" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="STATUS_ID"/>
+    
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_calcversion" columnName="STATUS_ID"/>
+    
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="40" y="85"/>
+        <rectangleSize height="0" width="0"/>
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

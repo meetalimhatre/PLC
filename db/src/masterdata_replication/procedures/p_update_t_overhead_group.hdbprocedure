@@ -1,0 +1,99 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_overhead_group" (
+    IN INPUT_TABLE TABLE (
+    	"OVERHEAD_GROUP_ID" NVARCHAR(10),
+    	"PLANT_ID" NVARCHAR(8),
+    	"_SOURCE" TINYINT
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+        SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+    
+        SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";
+        
+    
+    -- Insert into general Error Table
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+		TABLE_NAME,
+		OPERATION,
+		RUN_ID
+    )-- check if plant Id exists, not yet
+        select 
+            'PLANT_ID'                                                              as FIELD_NAME ,
+            it.PLANT_ID                                                             as FIELD_VALUE,
+            'Unknown Plant ID for Overhead Group ID ' || it.OVERHEAD_GROUP_ID       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                 as MESSAGE_TIME ,
+            'ERROR'                                                                 as MESSAGE_TYPE ,
+            't_overhead_group'                                                      as TABLE_NAME,
+            'Replication_Update'                                                    as OPERATION,
+			:lv_run_id                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PLANT_ID not in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null)
+    ;
+    
+    lt_update_records =
+        select OVERHEAD_GROUP_ID, PLANT_ID, _SOURCE
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY OVERHEAD_GROUP_ID, PLANT_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore not existing Plant
+          and it.PLANT_ID in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null) 
+            -- ignore unchanged records 
+          --and (it.OVERHEAD_GROUP_ID, it.PLANT_ID, it._SOURCE) 
+          --    not in 
+          except    
+              (select OVERHEAD_GROUP_ID, PLANT_ID, _SOURCE
+                    from "sap.plc.db::basis.t_overhead_group" as std
+                    where _VALID_TO IS NULL
+                    AND (std.OVERHEAD_GROUP_ID, std.PLANT_ID) in (select OVERHEAD_GROUP_ID, PLANT_ID from :INPUT_TABLE));
+
+    SELECT COUNT(OVERHEAD_GROUP_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_overhead_group" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.OVERHEAD_GROUP_ID, tbl.PLANT_ID)
+    		      in (select OVERHEAD_GROUP_ID, PLANT_ID
+    			      from :lt_update_records as upd 
+    			      where upd.OVERHEAD_GROUP_ID = tbl.OVERHEAD_GROUP_ID
+    			        and upd.PLANT_ID = tbl.PLANT_ID
+    		      )
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- inser the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_overhead_group" 
+    		(OVERHEAD_GROUP_ID, PLANT_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select OVERHEAD_GROUP_ID, PLANT_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+    
+END

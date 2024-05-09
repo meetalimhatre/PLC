@@ -1,0 +1,37 @@
+TYPE "sap.plc.db.administration::masterdata.tt_item_copy_master_data_input" AS TABLE (
+      ITEM_ID INTEGER,
+      ITEM_CATEGORY_ID INTEGER, /* 0 Calculation Version (Kalkulationsversion)
+       * 1 Component (Document) (Komponente (Dokument))
+       * 2 Component (Material) (Komponente (Material))
+       * 3 Internal Activity (Eigenleistung) 
+       * 4 External Activity (Fremdleistung) 
+       * 5 Process (Prozess) 
+       * 6 Subcontracting (Lohnbearbeitung) 
+       * 7 Resources and Tools (Fertigungshilfsmittel) 
+       * 8 Variable Item (Variable Position) 
+       * 9 Text Item (Textposition) */
+      ACCOUNT_ID NVARCHAR(10),
+      DOCUMENT_TYPE_ID NVARCHAR(3),
+      DOCUMENT_STATUS_ID NVARCHAR(2),
+      DOCUMENT_ID NVARCHAR(40),
+      DOCUMENT_VERSION NVARCHAR(2),
+      DOCUMENT_PART NVARCHAR(3),
+      MATERIAL_ID NVARCHAR(40),
+      MATERIAL_TYPE_ID NVARCHAR(4),
+      MATERIAL_GROUP_ID NVARCHAR(9),
+      OVERHEAD_GROUP_ID NVARCHAR(10),
+      VALUATION_CLASS_ID NVARCHAR(4),
+      ACTIVITY_TYPE_ID NVARCHAR(12),
+      PROCESS_ID NVARCHAR(12),
+      COMPANY_CODE_ID NVARCHAR(4),
+      COST_CENTER_ID NVARCHAR(10),
+      PLANT_ID NVARCHAR(8),
+      WORK_CENTER_ID NVARCHAR(15),
+      BUSINESS_AREA_ID NVARCHAR(15),
+      PROFIT_CENTER_ID NVARCHAR(10),
+      QUANTITY_UOM_ID NVARCHAR(3),
+      TOTAL_QUANTITY_UOM_ID NVARCHAR(3),
+      TRANSACTION_CURRENCY_ID NVARCHAR(3),
+      PRICE_UNIT_UOM_ID NVARCHAR(3),
+      TARGET_COST_CURRENCY_ID NVARCHAR(3),
+      VENDOR_ID NVARCHAR(10))

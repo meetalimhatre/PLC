@@ -1,0 +1,4 @@
+COLUMN TABLE "sap.plc.db::repl.t025" (
+  BKLAS NVARCHAR(4) NOT NULL DEFAULT '',
+  PRIMARY KEY(BKLAS)
+)

@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_uom_input" AS TABLE (
+		UOM_ID NVARCHAR(3),
+		MASTER_DATA_TIMESTAMP TIMESTAMP)	

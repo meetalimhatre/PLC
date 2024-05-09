@@ -1,0 +1,5 @@
+COLUMN TABLE "sap.plc.db::basis.t_system_message" (
+  "LANGUAGE" NVARCHAR(11) NOT NULL,
+  MESSAGE NVARCHAR(500) NOT NULL,
+  PRIMARY KEY("LANGUAGE")
+)

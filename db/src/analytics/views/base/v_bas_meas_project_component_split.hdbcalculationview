@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" schemaVersion="3.0" id="sap.plc.analytics.views.base::v_bas_meas_project_component_split" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="CUBE" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Aggregation" xscCompatibilityMode="true">
+  <descriptions defaultDescription="v_bas_meas_project_component_split"/>
+  <localVariables>
+    <variable id="VAR_ONLY_CURRENT" parameter="true">
+      <descriptions defaultDescription="VAR_ONLY_CURRENT"/>
+      <variableProperties datatype="TINYINT" defaultValue="0" mandatory="true">
+        <valueDomain type="StaticList">
+          <listEntry id="1">
+            <descriptions defaultDescription="Only Current Calculation Versions"/>
+          </listEntry>
+          <listEntry id="0">
+            <descriptions defaultDescription="All Calculation Versions"/>
+          </listEntry>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+    <variable id="projectId" parameter="true">
+      <descriptions defaultDescription="PROJECT"/>
+      <variableProperties datatype="NVARCHAR" length="35" scale="NaN" mandatory="true">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_meas_project_component_split">
+      <targetVariable name="VAR_ONLY_CURRENT" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_meas_project_component_split"/>
+      <localVariable>VAR_ONLY_CURRENT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_meas_project_component_split">
+      <targetVariable name="PROJECTID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_meas_project_component_split"/>
+      <localVariable>projectId</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="27"/>
+  <dataSources>
+    <DataSource id="TABLE_FUNCTION_v_bas_meas_project_component_split" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_meas_project_component_split</resourceUri>
+    </DataSource>
+  </dataSources>
+<snapshotProcedures/>
+<calculationViews/>
+  <logicalModel id="TABLE_FUNCTION_v_bas_meas_project_component_split">
+    <descriptions/>
+    <attributes>
+      <attribute id="PROJECT_ID" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PROJECT_ID"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_ID" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="CALCULATION_VERSION_ID"/>
+      </attribute>
+      <attribute id="ACCOUNT_ID" order="3" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="ACCOUNT_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="ACCOUNT_ID"/>
+      </attribute>
+      <attribute id="COST_COMPONENT_ID" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COST_COMPONENT_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_COMPONENT_ID"/>
+      </attribute>
+    
+      <attribute id="TRANSACTION_CURRENCY_ID" order="23" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TRANSACTION_CURRENCY_ID"/>
+    
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TRANSACTION_CURRENCY_ID"/>
+    
+      </attribute>
+      <attribute id="PRICE_UNIT_UOM_ID" order="25" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PRICE_UNIT_UOM_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PRICE_UNIT_UOM_ID"/>
+      </attribute>
+    
+      <attribute id="REPORT_CURRENCY_ID" order="36" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="REPORT_CURRENCY_ID"/>
+    
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="REPORT_CURRENCY_ID"/>
+    
+      </attribute>
+      <attribute id="TOTAL_QUANTITY_UOM_ID" order="37" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TOTAL_QUANTITY_UOM_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TOTAL_QUANTITY_UOM_ID"/>
+      </attribute>
+      <attribute id="TARGET_COST_CURRENCY_ID" order="38" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TARGET_COST_CURRENCY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TARGET_COST_CURRENCY_ID"/>
+      </attribute>
+      <attribute id="SALES_PRICE_CURRENCY_ID" order="39" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="SALES_PRICE_CURRENCY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="SALES_PRICE_CURRENCY_ID"/>
+      </attribute>
+      <attribute id="PROJECT_SALES_PRICE_CURRENCY_ID" order="40" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROJECT_SALES_PRICE_CURRENCY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PROJECT_SALES_PRICE_CURRENCY_ID"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures>
+      <measure id="COST" order="5" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST_FIXED_PORTION" order="6" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST_FIXED_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_FIXED_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST_VARIABLE_PORTION" order="7" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST_VARIABLE_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_VARIABLE_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST_PER_UNIT" order="8" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST_FIXED_PER_UNIT" order="9" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST_FIXED_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_FIXED_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST_VARIABLE_PER_UNIT" order="10" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST_VARIABLE_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST_VARIABLE_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+
+      <measure id="COST2" order="11" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2"/>
+      
+
+        <exceptionAggregationMetadata/>
+
+      </measure>
+      <measure id="COST2_FIXED_PORTION" order="12" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2_FIXED_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2_FIXED_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST2_VARIABLE_PORTION" order="13" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2_VARIABLE_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2_VARIABLE_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST2_PER_UNIT" order="14" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST2_FIXED_PER_UNIT" order="15" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2_FIXED_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2_FIXED_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST2_VARIABLE_PER_UNIT" order="16" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST2_VARIABLE_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST2_VARIABLE_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+
+      <measure id="COST3" order="17" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3"/>
+      
+
+        <exceptionAggregationMetadata/>
+
+      </measure>
+      <measure id="COST3_FIXED_PORTION" order="18" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3_FIXED_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3_FIXED_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST3_VARIABLE_PORTION" order="19" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3_VARIABLE_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3_VARIABLE_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST3_PER_UNIT" order="20" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST3_FIXED_PER_UNIT" order="21" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3_FIXED_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3_FIXED_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="COST3_VARIABLE_PER_UNIT" order="22" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="COST3_VARIABLE_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="COST3_VARIABLE_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+
+      <measure id="TOTAL_QUANTITY" order="24" semanticType="quantity" aggregationType="sum" engineAggregation="avg" measureType="quantity">
+        <descriptions defaultDescription="TOTAL_QUANTITY"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TOTAL_QUANTITY"/>
+      
+
+        <exceptionAggregationMetadata/>
+
+      </measure>
+      <measure id="TARGET_COST" order="26" semanticType="amount" aggregationType="sum" engineAggregation="avg" measureType="amount">
+        <descriptions defaultDescription="TARGET_COST"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TARGET_COST"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="SALES_PRICE" order="27" semanticType="amount" aggregationType="sum" engineAggregation="avg" measureType="amount">
+        <descriptions defaultDescription="SALES_PRICE"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="SALES_PRICE"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="PROJECT_SALES_PRICE" order="28" semanticType="amount" aggregationType="sum" engineAggregation="avg" measureType="amount">
+        <descriptions defaultDescription="PROJECT_SALES_PRICE"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PROJECT_SALES_PRICE"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+    
+      <measure id="PRICE_FIXED_PORTION" order="29" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="PRICE_FIXED_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PRICE_FIXED_PORTION"/>
+      
+    
+        <exceptionAggregationMetadata/>
+    
+      </measure>
+      <measure id="PRICE_VARIABLE_PORTION" order="30" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="PRICE_VARIABLE_PORTION"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PRICE_VARIABLE_PORTION"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="PRICE" order="31" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="PRICE"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PRICE"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+    
+      <measure id="PRICE_UNIT" order="32" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="PRICE_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="PRICE_UNIT"/>
+      
+    
+        <exceptionAggregationMetadata/>
+    
+      </measure>
+    
+      <measure id="TOTAL_COST_PER_UNIT" order="33" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TOTAL_COST_PER_UNIT"/>
+      
+    
+        <exceptionAggregationMetadata/>
+    
+      </measure>
+      <measure id="TOTAL_COST2_PER_UNIT" order="34" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST2_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TOTAL_COST2_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+      <measure id="TOTAL_COST3_PER_UNIT" order="35" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST3_PER_UNIT"/>
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_project_component_split" columnName="TOTAL_COST3_PER_UNIT"/>
+      
+        <exceptionAggregationMetadata/>
+      </measure>
+    </baseMeasures>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  
+    <localDimensions/>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="91.99999999999997" y="112"/>
+        <rectangleSize height="64" width="369"/>
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

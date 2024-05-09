@@ -1,0 +1,46 @@
+PROCEDURE "sap.plc.db.calcengine.procedures::p_uom_conversion" ( 
+            IN iv_calculation_version_id    INTEGER,
+            IN iv_session_id                NVARCHAR(50),
+            IN it_items_to_convert TABLE(
+            	ITEM_ID       INTEGER,
+            	SOURCE_VALUE  DECIMAL(28,7),
+                SOURCE_UOM_ID NVARCHAR(3),
+                TARGET_UOM_ID NVARCHAR(3)
+            ),
+            OUT ot_items_converted TABLE (
+            	ITEM_ID         INTEGER,
+            	CONVERTED_VALUE DECIMAL(28,7),
+            	ERROR_CODE      INTEGER,
+            	ERROR_DETAILS   NVARCHAR(1000)
+            )
+	) 
+    LANGUAGE SQLSCRIPT
+    SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+	-- This procedure uses CONVERT_UOM function of AFL to convert input table of values with source and target UoM.
+
+	-- scalar variable for storing masterdata_timestamp of calculation version
+	DECLARE lv_master_data_timestamp TIMESTAMP;
+
+	-- get master data timestamp of given calculation version	
+	SELECT master_data_timestamp INTO lv_master_data_timestamp
+		FROM "sap.plc.db::basis.t_calculation_version_temporary"
+		WHERE session_id=:iv_session_id and calculation_version_id=:iv_calculation_version_id;
+		 
+	-- get valid UoM conversion data for given master data timestamp
+	lt_uom = SELECT
+			UOM_ID,
+			DIMENSION_ID,
+			NUMERATOR,
+			DENOMINATOR,
+			EXPONENT_BASE10,
+			SI_CONSTANT
+	    FROM "sap.plc.db::basis.t_uom"
+	    WHERE _valid_from <= :lv_master_data_timestamp and (_valid_to IS NULL or _valid_to > :lv_master_data_timestamp);
+	
+	-- do actual conversion in the AFL
+	call "sap.plc.db::PLC_AREA_CONVERT_UOM_PROC"(:it_items_to_convert, :lt_uom, ot_items_converted);
+
+END;
+

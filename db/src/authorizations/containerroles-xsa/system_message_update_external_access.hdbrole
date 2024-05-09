@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::system_message_update_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_system_message", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,4 @@
+TYPE "sap.plc.db.administration::masterdata.tt_activity_type_key" AS TABLE (
+		ACTIVITY_TYPE_ID NVARCHAR(12),
+		CONTROLLING_AREA_ID NVARCHAR(4)
+	)

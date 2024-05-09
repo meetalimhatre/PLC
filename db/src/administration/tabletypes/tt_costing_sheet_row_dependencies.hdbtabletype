@@ -1,0 +1,8 @@
+TYPE "sap.plc.db.administration::masterdata.tt_costing_sheet_row_dependencies" AS TABLE (
+		SOURCE_ROW_ID NVARCHAR(5),
+		TARGET_ROW_ID NVARCHAR(5),
+		COSTING_SHEET_ID NVARCHAR(15),
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256))

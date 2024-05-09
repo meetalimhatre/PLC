@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::document_status_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_document_status", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_document_status__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

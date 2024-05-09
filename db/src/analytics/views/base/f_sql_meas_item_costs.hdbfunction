@@ -1,0 +1,65 @@
+FUNCTION "sap.plc.analytics.views.base::f_sql_meas_item_costs" (versionId INTEGER)
+RETURNS TABLE ("ITEM_ID" INTEGER, "CALCULATION_VERSION_ID" INTEGER, "IS_LEAF" INTEGER, "PRICE" DECIMAL(29,7), "PRICE_FIXED_PORTION" DECIMAL(28,7), "PRICE_VARIABLE_PORTION" DECIMAL(28,7), "TARGET_COST" DECIMAL(28,7)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN
+
+lt_refs = SELECT
+                node_id as REF_VERSION_ID,
+                PARENT_ID as MASTER_VERSION_ID
+            FROM HIERARCHY (
+                SOURCE (
+                    SELECT
+                        REFERENCED_CALCULATION_VERSION_ID as NODE_ID,
+                        CALCULATION_VERSION_ID as PARENT_ID
+                    FROM "sap.plc.db::basis.t_item"
+                    WHERE ITEM_CATEGORY_ID = 10
+                    ORDER BY CALCULATION_VERSION_ID )
+                START WHERE CALCULATION_VERSION_ID = :versionId
+                ORPHAN IGNORE );
+
+var_out = SELECT item.item_id,
+item.calculation_version_id,
+IFNULL(itemhierarchy.is_leaf, 0) AS is_leaf,
+IFNULL(item.price,
+			CASE itemhierarchy.is_leaf
+				WHEN 1 THEN (
+					-- Select appropriate fixed price
+					(CASE item.price_fixed_portion_is_manual WHEN 0 THEN item.price_fixed_portion_calculated ELSE item.price_fixed_portion END)
+					+
+					-- Select appropriate variable price
+					(CASE item.price_variable_portion_is_manual WHEN 0 THEN item.price_variable_portion_calculated ELSE item.price_variable_portion END)
+					)
+				ELSE (item.price_fixed_portion_calculated + item.price_variable_portion_calculated)
+			END
+		) as price,
+CASE itemhierarchy.is_leaf
+			WHEN 1 THEN (CASE item.price_fixed_portion_is_manual WHEN 0 THEN item.price_fixed_portion_calculated ELSE item.price_fixed_portion END) 
+			ELSE item.price_fixed_portion_calculated
+		END AS price_fixed_portion,
+CASE itemhierarchy.is_leaf
+			WHEN 1 THEN (CASE item.price_variable_portion_is_manual WHEN 0 THEN item.price_variable_portion_calculated ELSE item.price_variable_portion END) 
+			ELSE item.price_variable_portion_calculated
+		END AS price_variable_portion,
+CASE item.target_cost_is_manual
+			WHEN 0 THEN item.target_cost_calculated
+			ELSE item.target_cost
+		END as target_cost
+FROM "sap.plc.db::basis.t_item" item
+LEFT OUTER JOIN :lt_refs as refVersions
+	ON refVersions.ref_version_id = item.calculation_version_id
+LEFT OUTER JOIN (
+			SELECT item.item_id, item.calculation_version_id, 1 as is_leaf FROM "sap.plc.db::basis.t_item" item
+			LEFT OUTER JOIN "sap.plc.db::basis.t_item" childitems
+				ON childitems.calculation_version_id = item.calculation_version_id AND childitems.parent_item_id = item.item_id
+			WHERE childitems.parent_item_id IS NULL
+		) itemhierarchy
+	ON itemhierarchy.calculation_version_id = item.calculation_version_id AND itemhierarchy.item_id = item.item_id
+WHERE refVersions.REF_VERSION_ID is not null or item.CALCULATION_VERSION_ID = :versionId
+;
+
+
+return :var_out;
+END

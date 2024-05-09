@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::valuation_class_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_valuation_class", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_valuation_class__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

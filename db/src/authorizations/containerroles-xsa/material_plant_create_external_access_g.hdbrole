@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::material_plant_create_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_material_plant", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		]
+	}
+}

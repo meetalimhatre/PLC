@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.administration::masterdata.tt_costing_sheet_base" AS TABLE (
+		COSTING_SHEET_BASE_ID INTEGER,
+		COST_PORTION INTEGER, -- 1=Fixed cost only, 2=Variable cost only, 3=Overall cost (fixed+variable)
+		_VALID_FROM TIMESTAMP, -- used to define the validity of master data
+		_VALID_TO TIMESTAMP, -- used to define the validity of master data
+		_SOURCE TINYINT, -- used to define the source of master data
+		_CREATED_BY NVARCHAR(256))

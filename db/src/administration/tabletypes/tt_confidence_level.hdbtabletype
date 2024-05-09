@@ -1,0 +1,3 @@
+TYPE "sap.plc.db.administration::masterdata.tt_confidence_level" AS TABLE (
+		CONFIDENCE_LEVEL_ID INTEGER,
+	   	CONFIDENCE_LEVEL_DESCRIPTION NVARCHAR(250))

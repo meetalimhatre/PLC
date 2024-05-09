@@ -1,0 +1,2 @@
+TYPE "sap.plc.db.administration::masterdata.tt_item_id" AS TABLE (
+     	ITEM_ID INTEGER)
