@@ -1,0 +1,38 @@
+{
+  "instance_min_count": 1,
+  "instance_max_count": 2,
+  "scaling_rules": [
+    {
+      "metric_type": "memoryutil",
+      "breach_duration_secs": 900,
+      "threshold": 90,
+      "operator": ">",
+      "cool_down_secs": 1200,
+      "adjustment": "+1"
+    },
+    {
+      "metric_type": "memoryutil",
+      "breach_duration_secs": 900,
+      "threshold": 50,
+      "operator": "<",
+      "cool_down_secs": 600,
+      "adjustment": "-1"
+    },
+    {
+      "metric_type": "cpu",
+      "breach_duration_secs": 900,
+      "threshold": 90,
+      "operator": ">",
+      "cool_down_secs": 1200,
+      "adjustment": "+1"
+    },
+    {
+      "metric_type": "cpu",
+      "breach_duration_secs": 900,
+      "threshold": 50,
+      "operator": "<",
+      "cool_down_secs": 600,
+      "adjustment": "-1"
+    }
+  ]
+}

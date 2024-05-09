@@ -1,0 +1,114 @@
+{
+    "global-search": {
+        "get": {
+            "tags": [
+                "globalSearch"
+            ],
+            "summary": "Search based on a given filter for a specific project, calculation , calculation-version or in all these entities",
+            "description": "Search based on a given filter for a specific project, calculation , calculation-version or in all these entities",
+            "operationId": "globalSearchGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: a and b  - will search object that contains a and b in name, Id, Customer_Name, LastModifyBy, CreatedBy. Can have combination of OR and AND statements",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "sortedColumnId",
+                    "in": "query",
+                    "description": "Sort results by a specific column id. Posibilities are listed bellow.",
+                    "required": false,
+                    "type": "string",
+                    "enum": [
+                        "ENTITY_TYPE",
+                        "ENTITY_NAME",
+                        "ENTITY_ID",
+                        "CUSTOMER_NAME",
+                        "TOTAL_COST",
+                        "TOTAL_QUANTITY",
+                        "CREATED_ON",
+                        "CREATED_BY",
+                        "LAST_MODIFIED_ON",
+                        "LAST_MODIFIED_BY"
+                    ]
+                },
+                {
+                    "name": "sortedDirection",
+                    "in": "query",
+                    "description": "Sort results by a direction: Ascending or Descending",
+                    "required": false,
+                    "type": "string",
+                    "enum": [
+                        "Ascending",
+                        "Descending"
+                    ]
+                },
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Type of the object to search in. Can be project, calculation , calculation-version or in all these entities",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "All",
+                        "Calculation",
+                        "CalculationVersion",
+                        "Project"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GlobalSearchGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_READ": [
+                        "read:projects"
+                    ]
+                },
+                {
+                    "Privileges.CALCULATIONS_READ": [
+                        "read:calculations"
+                    ]
+                },
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    }
+}

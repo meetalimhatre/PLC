@@ -1,0 +1,77 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_valuation_class_read" (
+		IN iv_logon_language 			NVARCHAR(11),
+		IN iv_master_data_timestamp 	TIMESTAMP,
+		IN iv_text_from_autocomplete    NVARCHAR(250),
+	    IN iv_filter_string 			NVARCHAR(5000),
+		IN iv_no_max_records 			INTEGER, 
+		IN iv_no_skip_records         	INTEGER,
+        OUT ot_valuation_class 			"sap.plc.db.administration::masterdata.tt_valuation_class" default empty,
+        OUT ot_valuation_class_text 	"sap.plc.db::basis.t_valuation_class__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+	Select valuation classes
+ ***************************************************/
+ 
+ --select valuation classes
+ 	ot_valuation_class_union =
+ 						select
+ 							plcTable.VALUATION_CLASS_ID,
+ 							plcTable._VALID_FROM,
+ 							plcTable._VALID_TO,
+ 							plcTable._SOURCE,
+ 							plcTable._CREATED_BY,
+ 							minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+ 							minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+ 							plcTextTable.VALUATION_CLASS_DESCRIPTION
+ 						from "sap.plc.db::basis.t_valuation_class" as plcTable
+ 						inner join
+							(   select A._VALID_FROM, A.VALUATION_CLASS_ID, A._CREATED_BY 
+								from "sap.plc.db::basis.t_valuation_class" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM, VALUATION_CLASS_ID
+										from "sap.plc.db::basis.t_valuation_class" 
+										group by VALUATION_CLASS_ID
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.VALUATION_CLASS_ID = B.VALUATION_CLASS_ID
+							) AS minValues
+							on plcTable.VALUATION_CLASS_ID = minValues.VALUATION_CLASS_ID
+						left outer join "sap.plc.db::basis.t_valuation_class__text" as plcTextTable
+							on  plcTable.VALUATION_CLASS_ID = plcTextTable.VALUATION_CLASS_ID
+							and plcTextTable.LANGUAGE = :iv_logon_language
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+						where plcTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+							and ( LOWER(plcTable.VALUATION_CLASS_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+						or LOWER(plcTextTable.VALUATION_CLASS_DESCRIPTION) LIKE LOWER(:iv_text_from_autocomplete||'%') )
+						 order by plcTable.VALUATION_CLASS_ID;	 
+
+ot_valuation_class_filter = APPLY_FILTER(:ot_valuation_class_union, :iv_filter_string) ;      
+	
+ot_valuation_class =  
+		select VALUATION_CLASS_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION,
+ 			   VALUATION_CLASS_DESCRIPTION 
+ 		from :ot_valuation_class_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+
+						 	
+
+--select valuation class text
+ot_valuation_class_text =
+						select
+							plcTextTable.VALUATION_CLASS_ID,
+							plcTextTable.LANGUAGE,
+							plcTextTable.VALUATION_CLASS_DESCRIPTION,
+							plcTextTable._VALID_FROM,
+							plcTextTable._VALID_TO,
+							plcTextTable._SOURCE,
+							plcTextTable._CREATED_BY
+						from "sap.plc.db::basis.t_valuation_class__text" as plcTextTable
+						where ( plcTextTable.VALUATION_CLASS_ID ) in ( select VALUATION_CLASS_ID from :ot_valuation_class )
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);						
+END;

@@ -1,0 +1,1 @@
+column table "sap.plc_test.xs.db.generation::t_item" (item_id integer, calculation_version_id integer, primary key(item_id, calculation_version_id))

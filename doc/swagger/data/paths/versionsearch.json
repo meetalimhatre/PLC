@@ -1,0 +1,87 @@
+{
+    "versionsearch": {
+        "get": {
+            "tags": [
+                "versionsearch"
+            ],
+            "summary": "Gets the calculation versions",
+            "description": "",
+            "operationId": "versionSearchGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Maximum number of results",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: filter=substringof(%271%27,calculation_version_name)%20or%20substringof(%271%27,calculation_name)",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "orderby",
+                    "in": "query",
+                    "description": "Order the items returned. Ex: orderby=calculation_id will sort the items returned by the calculation_id property",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/versionSearchResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/BadRequest"
+                    }
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CalcVerOpen": [
+                        "read:versionsearch"
+                    ]
+                }
+            ]
+        }
+    }
+}

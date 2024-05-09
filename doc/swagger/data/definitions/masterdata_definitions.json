@@ -1,0 +1,234 @@
+{
+    "definitions": {
+        "MasterdataGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "masterdata": {
+							"type": "object",
+							"properties": {
+								"COMPONENT_SPLIT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ComponentSplitModel"
+									}
+								},
+								"SELECTED_ACCOUNT_GROUPS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationSelectedAccountGroupModel"
+									}
+								},
+								"COSTING_SHEET_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetModel"
+									}
+								},
+								"COSTING_SHEET_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseRowModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadRowModel"
+									}
+								},
+								"COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowDependenciesModel"
+									}
+								},
+								"ACCOUNT_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AccountGroupModel"
+									}
+								},
+								"WORK_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/WorkCenterModel"
+									}
+								},
+								"WORK_CENTER_CATEGORY_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"PROCESS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ProcessModel"
+									}
+								},
+								"OVERHEAD_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupModel"
+									}
+								},
+								"PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+									}
+								},
+								"COST_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CostCenterModel"
+									}
+								},
+								"PROFIT_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterModel"
+									}
+								},
+								"ACTIVITY_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ActivityTypeModel"
+									}
+								},
+								"ACCOUNT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountModel"
+									}
+								},
+								"COMPANY_CODE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+									}
+								},
+								"CONTROLLING_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+									}
+								},
+								"BUSINESS_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/BusinessAreaModel"
+									}
+								},
+								"MATERIAL_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialModel"
+									}
+								},
+								"MATERIAL_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupModel"
+									}
+								},
+								"MATERIAL_PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantModel"
+									}
+								},
+								"MATERIAL_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeModel"
+									}
+								},
+								"VALUATION_CLASS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassModel"
+									}
+								},
+								"VENDOR_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorModel"
+									}
+								},
+								"CUSTOMER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+									}
+								},
+								"DOCUMENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentModel"
+									}
+								},
+								"DOCUMENT_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeModel"
+									}
+								},
+								"DOCUMENT_STATUS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentStatusModel"
+									}
+								},
+								"DESIGN_OFFICE_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"UNIT_OF_MEASURE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureModel"
+									}
+								},
+								"CURRENCY_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+									}
+								},
+								"EXCHANGE_RATE_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetModel"
+									}
+								}
+							}
+						}
+                    }
+                }
+            }
+        }      
+    }
+}

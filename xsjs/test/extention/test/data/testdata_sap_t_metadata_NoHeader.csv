@@ -1,0 +1,2 @@
+Item,Item,CUST_BOOLEAN_INT,1,0,101,500,,,,,0,BooleanInt,precision=24; scale=7,,5,,,,1,,,,,,
+Item,Item,CUST_DECIMAL_WITH_REF_CUSTOM_CURRENCY,1,0,101,502,,Item,Item,CUST_DECIMAL_WITH_REF_CUSTOM_CURRENCY_UNIT,0,Decimal,precision=24; scale=7,,2,,,,1,,,,,,

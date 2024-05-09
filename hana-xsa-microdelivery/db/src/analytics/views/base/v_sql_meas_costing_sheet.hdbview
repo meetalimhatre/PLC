@@ -1,0 +1,58 @@
+VIEW "sap.plc.analytics.views.base::v_sql_meas_costing_sheet" ( 
+	"CALCULATION_VERSION_ID", 
+	"ITEM_ID", 
+	"ITEM_CATEGORY_ID", 
+	"IS_LEAF", 
+	"IS_ROLLED_UP_VALUE", 
+	"IS_OVERHEAD_ROLLED_UP", 
+	"COSTING_SHEET_ROW_ID", 
+	"COSTING_SHEET_OVERHEAD_ROW_ID", 
+	"ACCOUNT_ID", 
+	"COST", 
+	"COST_FIXED_PORTION", 
+	"COST_VARIABLE_PORTION", 
+	"COST2", 
+	"COST2_FIXED_PORTION", 
+	"COST2_VARIABLE_PORTION",
+	"COST3", 
+	"COST3_FIXED_PORTION", 
+	"COST3_VARIABLE_PORTION"
+	) AS SELECT
+       item.calculation_version_id,
+       item.item_id,
+       item.item_category_id, 
+	   IFNULL(itemhierarchy.is_leaf, 0) AS is_leaf,
+       item_cvcs.is_rolled_up_value, 
+       csoverhead.is_rolled_up AS is_overhead_rolled_up, 
+       csrow.costing_sheet_row_id,  
+       ifnull(item_cvcs.costing_sheet_overhead_row_id, -1),
+	   item_cvcs.account_id,        
+       item_cvcs.cost, 
+       item_cvcs.cost_fixed_portion, 
+       item_cvcs.cost_variable_portion,
+	   item_cvcs.cost2, 
+       item_cvcs.cost2_fixed_portion, 
+       item_cvcs.cost2_variable_portion,
+	   item_cvcs.cost3, 
+       item_cvcs.cost3_fixed_portion, 
+       item_cvcs.cost3_variable_portion
+FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+	INNER JOIN "sap.plc.db::basis.t_costing_sheet_row" csrow
+		ON csrow.costing_sheet_id = calcVersion.costing_sheet_id  
+        AND calcVersion.master_data_timestamp >= csrow._valid_from AND (csrow._valid_to IS NULL OR calcVersion.master_data_timestamp < csrow._valid_to) 
+	INNER JOIN "sap.plc.db::basis.t_item" item
+		ON item.calculation_version_id=calcVersion.calculation_version_id
+   	LEFT OUTER JOIN (
+			SELECT item.item_id, item.calculation_version_id, 1 as is_leaf FROM "sap.plc.db::basis.t_item" item
+			LEFT OUTER JOIN "sap.plc.db::basis.t_item" childitems
+				ON childitems.calculation_version_id = item.calculation_version_id AND childitems.parent_item_id = item.item_id
+			WHERE childitems.parent_item_id IS NULL
+		) itemhierarchy
+		ON itemhierarchy.calculation_version_id = item.calculation_version_id and itemhierarchy.item_id = item.item_id
+	LEFT OUTER JOIN  "sap.plc.db::basis.t_costing_sheet_overhead" csoverhead
+		ON csrow.costing_sheet_overhead_id = csoverhead.costing_sheet_overhead_id
+		AND calcVersion.master_data_timestamp >= csoverhead._valid_from AND (csoverhead._valid_to IS NULL OR calcVersion.master_data_timestamp < csoverhead._valid_to)                
+	LEFT OUTER JOIN "sap.plc.db::basis.t_item_calculated_values_costing_sheet" item_cvcs
+        ON item.item_id = item_cvcs.item_id AND item.calculation_version_id=item_cvcs.calculation_version_id 
+		AND csrow.costing_sheet_row_id = item_cvcs.costing_sheet_row_id  
+WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER')) WITH READ ONLY

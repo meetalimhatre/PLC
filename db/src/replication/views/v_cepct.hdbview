@@ -1,0 +1,8 @@
+VIEW "sap.plc.db.replication.views::v_cepct" ( "PRCTR", "KOKRS", "KTEXT", "LANGU" ) AS select CEPCT.PRCTR , CEPCT.KOKRS , CEPCT.KTEXT , CEPCT.LANGU 
+                from "sap.plc.db::repl.t_cepct" AS CEPCT
+                	WHERE CEPCT.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.t_cepct" AS CEPCT1
+                								WHERE CEPCT1.PRCTR = CEPCT.PRCTR AND 
+                									  CEPCT1.KOKRS = CEPCT.KOKRS AND 
+                									  CEPCT1.LANGU = CEPCT.LANGU)
+                	  AND CEPCT.DATBI >= TO_DATS(CURRENT_DATE)

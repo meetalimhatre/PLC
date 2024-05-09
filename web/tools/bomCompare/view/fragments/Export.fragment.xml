@@ -1,0 +1,22 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout" 
+    xmlns:core="sap.ui.core">
+    <Dialog  id="export" type="Message" title="{i18n>XTIT_exportTitle}">
+        <content>
+            <Label text="{i18n>XFLD_nameOfFile}" labelFor="inputText" />
+            <Input
+                id="inputTextName"
+                placeholder="{i18n>XFLD_nameOfFilePlaceholder}"
+                value="{view>/ExportName}"
+                class="sapUiSmallMarginBottom" />
+        </content>
+        <beginButton>
+            <Button text="{i18n>XBUT_btnSave}"  press=".onExport"/>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>XBUT_cancel}"  press=".onClose('export')"/>
+        </endButton>
+      </Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+		<title>Bom Compare</title>
+		<script id="sap-ui-bootstrap"
+            src="../../../resources/sap-ui-core.js"
+			data-sap-ui-libs="sap.m"
+			data-sap-ui-theme="sap_fiori_3"
+            data-sap-ui-xx-bindingSyntax="complex"
+            data-sap-ui-oninit="module:Integration/initMockServer"
+			data-sap-ui-resourceroots='{
+                "localService": "./localService",
+                "Integration": "./",
+                "core": "../../tools/commonUi5/core",
+                "ui": "../../tools/bomCompare",
+                "mdr.ui": "../../tools/repl",
+                "retentionperiods.ui": "../../tools/retentionPeriods"
+            }'>
+		</script>
+		<script>
+			sap.ui.getCore().attachInit(function() {
+				sap.ui.require([
+					"localService/mockserver",
+					"sap/m/Shell",
+                    "sap/ui/core/ComponentContainer",
+                    "sap/ui/model/odata/v2/ODataModel",
+				], function (mockserver, Shell, ComponentContainer, ODataModel) {
+
+                    // "Integration/mockServer.html",
+                    //     "../tools/retentionPeriods/manifest.json",
+                    //     "Integration/localService/**/**.json",
+                    //     "../tools/commonUi5/i18n/**.properties",
+                    //     "../tools/commonui5/core/css/images/SAP_Logo.png",
+                    //     "Integration/mockServer.html",
+                    //     "../tools/repl/manifest.json",
+                    //     "Integration/mockServer.html",
+                    //     "../tools/bomCompare/manifest.json"
+
+                    var url = new URL(location.href);
+                    var appName = url.searchParams.get("app");
+					new sap.ui.core.ComponentContainer({
+                        name: appName,
+                        height: '100%'
+                    }).placeAt('content');
+                });
+			});
+		</script>
+	</head>
+	<body class="sapUiBody" id="content">
+	</body>
+</html>

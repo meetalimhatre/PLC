@@ -1,0 +1,88 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_get_uom_exchange_currency" ( 
+        IN iv_logon_language                	NVARCHAR(11),
+        IN it_uom								"sap.plc.db.administration::masterdata.tt_uom_input",
+        IN it_currency							"sap.plc.db.administration::masterdata.tt_currency_input",
+        IN it_exchange_rate_type				"sap.plc.db.administration::masterdata.tt_exchange_rate_type_key",
+        OUT ot_uom								"sap.plc.db.administration::masterdata.tt_uom" default empty,
+        OUT ot_currency							"sap.plc.db.administration::masterdata.tt_currency" default empty,
+        OUT ot_exchange_rate_type	        	"sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty
+    )
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*****************************************************************************************************************************  
+This procedure was created to support the delivery of specific units of measure, currencies, exchange rate types based on a given context
+ *****************************************************************************************************************************/
+--select unit of measures
+ot_uom = SELECT distinct
+ 				plcTable.UOM_ID AS UOM_ID,
+ 				plcTable.DIMENSION_ID,
+ 				plcTable.NUMERATOR,
+ 				plcTable.DENOMINATOR,
+ 				plcTable.EXPONENT_BASE10,
+ 				plcTable.SI_CONSTANT,
+ 				plcTable._VALID_FROM,
+ 				plcTable._VALID_TO,
+ 				plcTable._SOURCE,
+ 				plcTable._CREATED_BY,
+ 				null as _VALID_FROM_FIRST_VERSION,
+				null as _CREATED_BY_FIRST_VERSION,
+ 				plcTextTable.UOM_CODE,
+ 				plcTextTable.UOM_DESCRIPTION
+ 		FROM "sap.plc.db::basis.t_uom" as plcTable
+ 		INNER JOIN :it_uom as ids
+ 			on plcTable.UOM_ID = ids.UOM_ID
+			and plcTable._VALID_FROM <= ids.master_data_timestamp
+			and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+		LEFT OUTER JOIN "sap.plc.db::basis.t_uom__text" as plcTextTable 
+	        on  plcTable.UOM_ID = plcTextTable.UOM_ID 
+	        and plcTextTable.LANGUAGE = :iv_logon_language
+            and plcTextTable._VALID_FROM <= ids.master_data_timestamp
+            and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null )
+        WHERE plcTable._VALID_FROM <= ids.master_data_timestamp
+            and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null );
+
+--select currencies
+ot_currency = SELECT distinct
+	 			plcTable.CURRENCY_ID as CURRENCY_ID,
+	 			plcTable._VALID_FROM as _VALID_FROM,
+	 			plcTable._VALID_TO as _VALID_TO,
+	 			plcTable._SOURCE as _SOURCE,
+	 			plcTable._CREATED_BY as _CREATED_BY,
+	 			null as _VALID_FROM_FIRST_VERSION,
+				null as _CREATED_BY_FIRST_VERSION,
+	 			plcTextTable.CURRENCY_CODE as CURRENCY_CODE,
+	 			plcTextTable.CURRENCY_DESCRIPTION as CURRENCY_DESCRIPTION
+ 			FROM "sap.plc.db::basis.t_currency" as plcTable
+ 			INNER JOIN :it_currency as ids
+ 				on plcTable.CURRENCY_ID = ids.CURRENCY_ID
+				and plcTable._VALID_FROM <= ids.master_data_timestamp
+				and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+ 			LEFT OUTER JOIN "sap.plc.db::basis.t_currency__text" as plcTextTable
+                on  plcTable.CURRENCY_ID = plcTextTable.CURRENCY_ID
+                and plcTextTable.LANGUAGE = :iv_logon_language
+                and plcTextTable._VALID_FROM <= ids.master_data_timestamp
+                and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null )
+            WHERE plcTable._VALID_FROM <= ids.master_data_timestamp
+                and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null );
+                
+--select exchange rate type
+lt_exchange_rate_type = select distinct
+				      plcTable.EXCHANGE_RATE_TYPE_ID,
+				      plcTable.CREATED_ON,
+				      plcTable.CREATED_BY,
+				      plcTable.LAST_MODIFIED_ON,
+				      plcTable.LAST_MODIFIED_BY,
+				      plcTextTable.EXCHANGE_RATE_TYPE_DESCRIPTION
+				   from "sap.plc.db::basis.t_exchange_rate_type" as plcTable
+				   inner join :it_exchange_rate_type as ids
+				   	  on  plcTable.EXCHANGE_RATE_TYPE_ID = ids.EXCHANGE_RATE_TYPE_ID 
+				   	left outer join "sap.plc.db::basis.t_exchange_rate_type__text" as plcTextTable 
+						on  plcTable.EXCHANGE_RATE_TYPE_ID = plcTextTable.EXCHANGE_RATE_TYPE_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language; 
+
+ot_exchange_rate_type = select EXCHANGE_RATE_TYPE_ID, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, EXCHANGE_RATE_TYPE_DESCRIPTION
+			     		from :lt_exchange_rate_type;
+END;

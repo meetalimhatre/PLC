@@ -1,0 +1,39 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_cost_component" (VAR_LANGUAGE NVARCHAR (11))
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "LANGUAGE" NVARCHAR (11), "COST_COMPONENT_ID" INTEGER, "COST_COMPONENT_DESCRIPTION" NVARCHAR (250)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = 
+	SELECT
+		calcVersion.calculation_version_id,
+		accountgrouptext.language,
+		accountgrouptext.account_group_id as cost_component_id,
+		accountgrouptext.account_group_description as cost_component_description
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion 
+		LEFT OUTER JOIN "sap.plc.db::basis.t_account_group__text" accountgrouptext
+			ON calcVersion.master_data_timestamp >= accountgrouptext._valid_from 
+			AND (accountgrouptext._valid_to IS NULL OR calcVersion.master_data_timestamp < accountgrouptext._valid_to) 
+		AND accountgrouptext.language = VAR_LANGUAGE
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+	
+UNION 
+	-- Add the 'Unassigned Costs' row
+	SELECT 
+		calcVersion.calculation_version_id,
+		accountgrouptext.language,
+		-1 as cost_component_id,
+		'Unassigned Costs' as cost_component_description --    TODO: select the local text for this from a special table	
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion 		
+		LEFT OUTER JOIN "sap.plc.db::basis.t_account_group__text" accountgrouptext
+			ON calcVersion.master_data_timestamp >= accountgrouptext._valid_from 
+			AND (accountgrouptext._valid_to IS NULL OR calcVersion.master_data_timestamp < accountgrouptext._valid_to) 
+			AND accountgrouptext.language = VAR_LANGUAGE
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+;               
+
+
+return :var_out;
+END;

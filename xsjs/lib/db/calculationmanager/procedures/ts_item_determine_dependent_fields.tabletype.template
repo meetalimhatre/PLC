@@ -1,0 +1,40 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_item_determine_dependent_fields" AS TABLE (
+	"ITEM_ID" INTEGER NOT NULL,
+	"ITEM_DESCRIPTION" NVARCHAR(250),
+	"MATERIAL_ID" NVARCHAR(40),
+	"MATERIAL_TYPE_ID" NVARCHAR(4),
+	"MATERIAL_GROUP_ID" NVARCHAR(9),
+	"IS_PHANTOM_MATERIAL" TINYINT,
+	"IS_CONFIGURABLE_MATERIAL" TINYINT,
+	"DOCUMENT_TYPE_ID" NVARCHAR(3),
+	"DOCUMENT_ID" NVARCHAR(40),
+	"DOCUMENT_VERSION" NVARCHAR(2),
+	"DOCUMENT_PART" NVARCHAR(3),
+	"DOCUMENT_STATUS_ID" NVARCHAR(2),
+	"PLANT_ID" NVARCHAR(12),
+	"WORK_CENTER_ID" NVARCHAR(15),
+	"WORK_CENTER_CATEGORY" NVARCHAR(50),
+	"EFFICIENCY" DECIMAL(28, 7),
+	"COMPANY_CODE_ID" NVARCHAR(4),
+	"OVERHEAD_GROUP_ID" NVARCHAR(10),
+	"VALUATION_CLASS_ID" NVARCHAR(4),
+	"DESIGN_OFFICE_ID" NVARCHAR(3),
+	"COST_CENTER_ID" NVARCHAR(10),
+	"ACTIVITY_TYPE_ID" NVARCHAR(12),
+	"ITEM_CATEGORY_ID" INTEGER NOT NULL,
+	"PROCESS_ID" NVARCHAR(12)
+	{{#if Cost_Center.customFields}}
+		{{ddl_masterdataCustomFields Cost_Center}}
+	{{/if}}	
+	{{#if Material.customFields}}
+		{{ddl_masterdataCustomFields Material}}
+	{{/if}}	
+	{{#if Material_Plant.customFields}}
+		{{ddl_masterdataCustomFields Material_Plant}}
+	{{/if}}
+	{{#if Work_Center.customFields}}
+		{{ddl_masterdataCustomFields Work_Center}}
+	{{/if}}
+)
+
+

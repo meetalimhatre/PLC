@@ -1,0 +1,7 @@
+VIEW "sap.plc.db.replication.views::v_cskb" ( "KSTAR", "KOKRS" ) AS select CSKB.KSTAR , CSKB.KOKRS
+                from "sap.plc.db::repl.cskb" AS CSKB
+                	WHERE CSKB.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.cskb" AS CSKB1
+                								WHERE CSKB1.KSTAR = CSKB.KSTAR AND 
+                									  CSKB1.KOKRS = CSKB.KOKRS  )
+					  AND CSKB.DATBI >= TO_DATS(CURRENT_DATE)

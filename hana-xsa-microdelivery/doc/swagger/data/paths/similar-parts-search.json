@@ -1,0 +1,89 @@
+{
+    "similar-parts-search": {
+        "post": {
+            "tags": [
+                "similar-parts-search"
+            ],
+            "summary": "Find the similar parts of a material or item",
+            "description": "Search the similar results of an item according to the given weight of attributes, the source of search data can be configured as master data or calculation versions data.",
+            "operationId": "similarPartsSearchPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Both attributes and source should be configured",
+                    "required": true,
+                    "schema": {
+                      "$ref": "../definitions/similar_parts-definitions.json#/definitions/SimilarPartsRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request. In case of valid request, an array of objects is returned, with each object representing a list of similar items corresponding to a query item in the request.",
+                    "schema": {
+                        "$ref": "../definitions/similar_parts-definitions.json#/definitions/SimilarPartsResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATIONS_READ": [
+                        "read:calculations"
+                    ]
+                },
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.PROJECTS_READ": [
+                        "read:projects"
+                    ]
+                }
+            ]
+        }
+    }
+}

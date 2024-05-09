@@ -1,0 +1,1 @@
+VIEW "sap.plc_test.xs.db.generation::v_item" AS SELECT ITEM_ID FROM "sap.plc.db::basis.t_item"

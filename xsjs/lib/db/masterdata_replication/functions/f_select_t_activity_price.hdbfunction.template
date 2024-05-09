@@ -1,0 +1,51 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_activity_price" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	PRICE_SOURCE_ID                 NVARCHAR(20),
+	CONTROLLING_AREA_ID             NVARCHAR(4),
+	COST_CENTER_ID                  NVARCHAR(10),
+	ACTIVITY_TYPE_ID                NVARCHAR(12),
+	PROJECT_ID                      NVARCHAR(35),
+	CUSTOMER_ID                     NVARCHAR(10),
+	VALID_FROM                      DATE,
+	VALID_TO                        DATE,
+	VALID_FROM_QUANTITY             DECIMAL(28, 7),
+	VALID_TO_QUANTITY               DECIMAL(28, 7),
+	PRICE_FIXED_PORTION             DECIMAL(28, 7),
+	PRICE_VARIABLE_PORTION          DECIMAL(28, 7),
+	TRANSACTION_CURRENCY_ID         NVARCHAR(3),
+	PRICE_UNIT                      DECIMAL(28, 7),
+	PRICE_UNIT_UOM_ID               NVARCHAR(3),
+	_SOURCE                         TINYINT         -- 1: PLC / 2: ERP
+	{{#if Activity_Price.customFields}}
+		{{ddl_masterdataCustomFieldsWithoutUnit Activity_Price}}
+	{{/if}}
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"PRICE_SOURCE_ID"	NVARCHAR(20),
+		"CONTROLLING_AREA_ID"	NVARCHAR(4),
+		"COST_CENTER_ID"	NVARCHAR(10),
+		"ACTIVITY_TYPE_ID"	NVARCHAR(12),
+		"PROJECT_ID"	NVARCHAR(35),
+		"CUSTOMER_ID"	NVARCHAR(10),
+		"VALID_FROM"	DATE,
+		"VALID_TO"	DATE,
+		"VALID_FROM_QUANTITY"	DECIMAL(28, 7),
+		"VALID_TO_QUANTITY"	DECIMAL(28, 7),
+		"PRICE_FIXED_PORTION"	DECIMAL(28, 7),
+		"PRICE_VARIABLE_PORTION"	DECIMAL(28, 7),
+		"TRANSACTION_CURRENCY_ID"	NVARCHAR(3),
+		"PRICE_UNIT"	DECIMAL(28, 7),
+		"PRICE_UNIT_UOM_ID"	NVARCHAR(3),
+		"_SOURCE"	TINYINT	               -- 1: PLC / 2: ERP
+		{{#if Activity_Price.customFields}}
+			{{ddl_masterdataCustomFieldsWithoutUnit Activity_Price}}
+		{{/if}}
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_activity_price', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

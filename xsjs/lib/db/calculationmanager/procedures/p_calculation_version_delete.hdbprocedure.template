@@ -1,0 +1,94 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_calculation_version_delete" (
+		IN calculationVersionId INTEGER,
+		OUT affectedRows 		INTEGER
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+declare lifecycle_version_type INTEGER = 2;
+declare manual_lifecycle_version_type INTEGER = 16;
+
+--------------------------------------------------------------------------------------------
+-- Deletes one base calculation version and all its lifecycle versions. 
+-- It is assumed that the calculation version is closed. This and other checks are done in xs business logic.
+--------------------------------------------------------------------------------------------
+
+lt_versions_to_delete = 
+	select calculation_version_id
+		from "sap.plc.db::basis.t_calculation_version"
+		where calculation_version_id = :calculationVersionId   	-- given version
+		or ( base_version_id = :calculationVersionId         -- lifecycle versions are deleted but not versions generated from variants (which both use `base_version_id`)
+			and	( calculation_version_type = :lifecycle_version_type or calculation_version_type = :manual_lifecycle_version_type  ));
+
+-- set BASE_VERSION_ID to null for the versions generated from variant
+update "sap.plc.db::basis.t_calculation_version"
+set "BASE_VERSION_ID" = null
+where "BASE_VERSION_ID" = :calculationVersionId;
+
+{{#if Item.customFields}}
+--delete from item_ext table
+delete from {{t_extensionTable Item}} 
+	WHERE calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+{{/if}}
+
+
+---------------------------------------------------
+-- Delete its items of calculation and their calculated values
+---------------------------------------------------
+delete from "sap.plc.db::basis.t_item"  
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+	
+delete from "sap.plc.db::basis.t_item_calculated_values_component_split" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_calculated_values_costing_sheet" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_referenced_version_component_split" 
+	where master_calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+---------------------------------------------------
+-- Clear calculation version id field in project_lifecycle_configuration
+---------------------------------------------------
+
+update "sap.plc.db::basis.t_project_lifecycle_configuration" set calculation_version_id = null
+where calculation_version_id = :calculationVersionId;
+
+---------------------------------------------------
+-- Delete saved calculation version 
+---------------------------------------------------
+select calculation_version_id 
+	from "sap.plc.db::basis.t_calculation_version" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete) for update;
+	
+-- Delete the version if it is not referenced in other versions. 
+--  If the deleted version is referenced, it is not deleted resulting in rowcount = 0, leading to rollback of whole transaction in xs logic.
+--  This check is done at the end of procedure to minimize the duration of locking. 
+ delete from "sap.plc.db::basis.t_calculation_version"  
+ 	where calculation_version_id in 
+ 		(select calculation_version_id from :lt_versions_to_delete);
+
+SELECT ::rowcount INTO affectedRows FROM "sap.plc.db::DUMMY";
+
+---------------------------------------------------
+-- Delete tag assignment
+---------------------------------------------------
+delete from "sap.plc.db::basis.t_entity_tags" where
+	entity_id in (select calculation_version_id from :lt_versions_to_delete) and entity_type = 'V';
+
+---------------------------------------------------
+-- Delete variant matrix if exists
+---------------------------------------------------
+DELETE FROM "sap.plc.db::basis.t_variant_item"
+WHERE variant_id IN (
+	SELECT variant_id FROM "sap.plc.db::basis.t_variant" 
+	WHERE calculation_version_id = :calculationVersionId
+);
+
+--delete variant matrix if the base version has not been saved before
+DELETE FROM "sap.plc.db::basis.t_variant"
+WHERE calculation_version_id = :calculationVersionId;		
+END
+
+

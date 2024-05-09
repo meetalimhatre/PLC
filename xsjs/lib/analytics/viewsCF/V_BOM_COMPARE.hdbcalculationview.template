@@ -1,0 +1,907 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:DataFoundation="http://www.sap.com/ndb/BiModelDataFoundation.ecore" xmlns:Dimension="http://www.sap.com/ndb/BiModelDimension.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" id="sap.plc.analytics.viewsCF::V_BOM_COMPARE" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="false">
+<descriptions defaultDescription="V_BOM_COMPARE"/>
+<localVariables>
+  <variable id="versionId1" parameter="true">
+    <descriptions defaultDescription="versionId1"/>
+    <variableProperties datatype="INTEGER" defaultValue="0" mandatory="true">
+      <valueDomain type="empty"/>
+      <selection multiLine="false" type="SingleValue"/>
+    </variableProperties>
+  </variable>
+  <variable id="versionId2" parameter="true">
+    <descriptions defaultDescription="versionId2"/>
+    <variableProperties datatype="INTEGER" defaultValue="0" mandatory="true">
+      <valueDomain type="empty"/>
+      <selection multiLine="false" type="SingleValue"/>
+    </variableProperties>
+  </variable>
+  <variable id="languageId" parameter="true">
+    <descriptions defaultDescription="languageId"/>
+    <variableProperties datatype="NVARCHAR" defaultValue="EN" length="11" mandatory="true" scale="0">
+      <valueDomain type="empty"/>
+      <selection multiLine="false" type="SingleValue"/>
+    </variableProperties>
+  </variable>
+</localVariables>
+<variableMappings/>
+<dataSources/>
+<calculationViews>
+  <calculationView xsi:type="Calculation:TableFunctionView" id="Fact_table" tableFunctionName="sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bom_compare">
+    <viewAttributes/>
+    <calculatedViewAttributes/>
+    <variableMapping xsi:type="Variable:VariableMapping">
+      <targetVariable name="VERSIONID1"/>
+      <localVariable>versionId1</localVariable>
+    </variableMapping>
+    <variableMapping xsi:type="Variable:VariableMapping">
+      <targetVariable name="VERSIONID2"/>
+      <localVariable>versionId2</localVariable>
+    </variableMapping>
+    <variableMapping xsi:type="Variable:VariableMapping">
+      <targetVariable name="LANGUAGEID"/>
+      <localVariable>languageId</localVariable>
+    </variableMapping>
+  </calculationView>
+</calculationViews>
+<logicalModel id="Fact_table">
+ <attributes>
+  <attribute id="ACCOUNT_ID" order="1" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ACCOUNT_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="ACCOUNT_ID" />
+  </attribute>
+  <attribute id="ACCOUNT_ID_BOMC2" order="2" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ACCOUNT_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ACCOUNT_ID_BOMC2" />
+  </attribute>
+  <attribute id="ACTIVITY_TYPE_ID" order="3" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ACTIVITY_TYPE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="ACTIVITY_TYPE_ID" />
+  </attribute>
+  <attribute id="ACTIVITY_TYPE_ID_BOMC2" order="4" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ACTIVITY_TYPE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ACTIVITY_TYPE_ID_BOMC2" />
+  </attribute>
+  <attribute id="BASE_QUANTITY_IS_MANUAL" order="5" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="BASE_QUANTITY_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY_IS_MANUAL" />
+  </attribute>
+  <attribute id="BASE_QUANTITY_IS_MANUAL_BOMC2" order="6" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="BASE_QUANTITY_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="BUSINESS_AREA_ID" order="7" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="BUSINESS_AREA_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="BUSINESS_AREA_ID" />
+  </attribute>
+  <attribute id="BUSINESS_AREA_ID_BOMC2" order="8" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="BUSINESS_AREA_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="BUSINESS_AREA_ID_BOMC2" />
+  </attribute>
+  <attribute id="CALCULATION_VERSION_ID" order="9" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CALCULATION_VERSION_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="CALCULATION_VERSION_ID" />
+  </attribute>
+  <attribute id="CALCULATION_VERSION_ID_BOMC2" order="10" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CALCULATION_VERSION_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="CALCULATION_VERSION_ID_BOMC2" />
+  </attribute>
+  <attribute id="COMMENT" order="11" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COMMENT" />
+    <keyMapping columnObjectName="Fact_table" columnName="COMMENT" />
+  </attribute>
+  <attribute id="COMMENT_BOMC2" order="12" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COMMENT_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="COMMENT_BOMC2" />
+  </attribute>
+  <attribute id="COMPANY_CODE_ID" order="13" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COMPANY_CODE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="COMPANY_CODE_ID" />
+  </attribute>
+  <attribute id="COMPANY_CODE_ID_BOMC2" order="14" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COMPANY_CODE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="COMPANY_CODE_ID_BOMC2" />
+  </attribute>
+  <attribute id="CONFIDENCE_LEVEL_ID" order="15" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CONFIDENCE_LEVEL_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="CONFIDENCE_LEVEL_ID" />
+  </attribute>
+  <attribute id="CONFIDENCE_LEVEL_ID_BOMC2" order="16" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CONFIDENCE_LEVEL_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="CONFIDENCE_LEVEL_ID_BOMC2" />
+  </attribute>
+  <attribute id="COST_CENTER_ID" order="17" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COST_CENTER_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="COST_CENTER_ID" />
+  </attribute>
+  <attribute id="COST_CENTER_ID_BOMC2" order="18" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="COST_CENTER_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="COST_CENTER_ID_BOMC2" />
+  </attribute>
+  <attribute id="CREATED_BY" order="19" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CREATED_BY" />
+    <keyMapping columnObjectName="Fact_table" columnName="CREATED_BY" />
+  </attribute>
+  <attribute id="CREATED_BY_BOMC2" order="20" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CREATED_BY_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="CREATED_BY_BOMC2" />
+  </attribute>
+  <attribute id="CREATED_ON" order="21" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CREATED_ON" />
+    <keyMapping columnObjectName="Fact_table" columnName="CREATED_ON" />
+  </attribute>
+  <attribute id="CREATED_ON_BOMC2" order="22" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CREATED_ON_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="CREATED_ON_BOMC2" />
+  </attribute>
+  <attribute id="DESIGN_OFFICE_ID" order="23" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DESIGN_OFFICE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="DESIGN_OFFICE_ID" />
+  </attribute>
+  <attribute id="DESIGN_OFFICE_ID_BOMC2" order="24" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DESIGN_OFFICE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DESIGN_OFFICE_ID_BOMC2" />
+  </attribute>
+  <attribute id="DETERMINED_ACCOUNT_ID" order="25" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DETERMINED_ACCOUNT_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="DETERMINED_ACCOUNT_ID" />
+  </attribute>
+  <attribute id="DETERMINED_ACCOUNT_ID_BOMC2" order="26" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DETERMINED_ACCOUNT_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DETERMINED_ACCOUNT_ID_BOMC2" />
+  </attribute>
+  <attribute id="DOCUMENT_ID" order="27" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_ID" />
+  </attribute>
+  <attribute id="DOCUMENT_ID_BOMC2" order="28" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_ID_BOMC2" />
+  </attribute>
+  <attribute id="DOCUMENT_PART" order="29" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_PART" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_PART" />
+  </attribute>
+  <attribute id="DOCUMENT_PART_BOMC2" order="30" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_PART_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_PART_BOMC2" />
+  </attribute>
+  <attribute id="DOCUMENT_STATUS_ID" order="31" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_STATUS_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_STATUS_ID" />
+  </attribute>
+  <attribute id="DOCUMENT_STATUS_ID_BOMC2" order="32" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_STATUS_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_STATUS_ID_BOMC2" />
+  </attribute>
+  <attribute id="DOCUMENT_TYPE_ID" order="33" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_TYPE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_TYPE_ID" />
+  </attribute>
+  <attribute id="DOCUMENT_TYPE_ID_BOMC2" order="34" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_TYPE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_TYPE_ID_BOMC2" />
+  </attribute>
+  <attribute id="DOCUMENT_VERSION" order="35" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_VERSION" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_VERSION" />
+  </attribute>
+  <attribute id="DOCUMENT_VERSION_BOMC2" order="36" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="DOCUMENT_VERSION_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="DOCUMENT_VERSION_BOMC2" />
+  </attribute>
+  <attribute id="EFFICIENCY" order="37" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="EFFICIENCY" />
+    <keyMapping columnObjectName="Fact_table" columnName="EFFICIENCY" />
+  </attribute>
+  <attribute id="EFFICIENCY_BOMC2" order="38" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="EFFICIENCY_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="EFFICIENCY_BOMC2" />
+  </attribute>
+  <attribute id="ENGINEERING_CHANGE_NUMBER_ID" order="39" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ENGINEERING_CHANGE_NUMBER_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="ENGINEERING_CHANGE_NUMBER_ID" />
+  </attribute>
+  <attribute id="ENGINEERING_CHANGE_NUMBER_ID_BOMC2" order="40" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ENGINEERING_CHANGE_NUMBER_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ENGINEERING_CHANGE_NUMBER_ID_BOMC2" />
+  </attribute>
+  <attribute id="HIGHLIGHT_GREEN" order="41" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_GREEN" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_GREEN" />
+  </attribute>
+  <attribute id="HIGHLIGHT_GREEN_BOMC2" order="42" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_GREEN_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_GREEN_BOMC2" />
+  </attribute>
+  <attribute id="HIGHLIGHT_ORANGE" order="43" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_ORANGE" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_ORANGE" />
+  </attribute>
+  <attribute id="HIGHLIGHT_ORANGE_BOMC2" order="44" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_ORANGE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_ORANGE_BOMC2" />
+  </attribute>
+  <attribute id="HIGHLIGHT_YELLOW" order="45" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_YELLOW" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_YELLOW" />
+  </attribute>
+  <attribute id="HIGHLIGHT_YELLOW_BOMC2" order="46" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="HIGHLIGHT_YELLOW_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="HIGHLIGHT_YELLOW_BOMC2" />
+  </attribute>
+  <attribute id="IS_ACTIVE" order="47" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_ACTIVE" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_ACTIVE" />
+  </attribute>
+  <attribute id="IS_ACTIVE_BOMC2" order="48" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_ACTIVE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_ACTIVE_BOMC2" />
+  </attribute>
+  <attribute id="IS_CONFIGURABLE_MATERIAL" order="49" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_CONFIGURABLE_MATERIAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_CONFIGURABLE_MATERIAL" />
+  </attribute>
+  <attribute id="IS_CONFIGURABLE_MATERIAL_BOMC2" order="50" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_CONFIGURABLE_MATERIAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_CONFIGURABLE_MATERIAL_BOMC2" />
+  </attribute>
+  <attribute id="IS_DISABLING_ACCOUNT_DETERMINATION" order="51" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_DISABLING_ACCOUNT_DETERMINATION" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_DISABLING_ACCOUNT_DETERMINATION" />
+  </attribute>
+  <attribute id="IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" order="52" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" />
+  </attribute>
+  <attribute id="IS_DISABLING_PRICE_DETERMINATION" order="53" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_DISABLING_PRICE_DETERMINATION" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_DISABLING_PRICE_DETERMINATION" />
+  </attribute>
+  <attribute id="IS_DISABLING_PRICE_DETERMINATION_BOMC2" order="54" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_DISABLING_PRICE_DETERMINATION_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_DISABLING_PRICE_DETERMINATION_BOMC2" />
+  </attribute>
+  <attribute id="IS_LEAF" order="55" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_LEAF" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_LEAF" />
+  </attribute>
+  <attribute id="IS_LEAF_BOMC2" order="56" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_LEAF_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_LEAF_BOMC2" />
+  </attribute>
+  <attribute id="IS_PHANTOM_MATERIAL" order="57" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_PHANTOM_MATERIAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_PHANTOM_MATERIAL" />
+  </attribute>
+  <attribute id="IS_PHANTOM_MATERIAL_BOMC2" order="58" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_PHANTOM_MATERIAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_PHANTOM_MATERIAL_BOMC2" />
+  </attribute>
+  <attribute id="IS_PRICE_SPLIT_ACTIVE" order="59" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_PRICE_SPLIT_ACTIVE" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_PRICE_SPLIT_ACTIVE" />
+  </attribute>
+  <attribute id="IS_PRICE_SPLIT_ACTIVE_BOMC2" order="60" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_PRICE_SPLIT_ACTIVE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_PRICE_SPLIT_ACTIVE_BOMC2" />
+  </attribute>
+  <attribute id="IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" order="61" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" />
+  </attribute>
+  <attribute id="ITEM_CATEGORY_ID" order="62" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_CATEGORY_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_CATEGORY_ID" />
+  </attribute>
+  <attribute id="ITEM_CATEGORY_ID_BOMC2" order="63" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_CATEGORY_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_CATEGORY_ID_BOMC2" />
+  </attribute>
+  <attribute id="ITEM_DESCRIPTION" order="64" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_DESCRIPTION" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_DESCRIPTION" />
+  </attribute>
+  <attribute id="ITEM_DESCRIPTION_BOMC2" order="65" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_DESCRIPTION_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_DESCRIPTION_BOMC2" />
+  </attribute>
+  <attribute id="ITEM_ID" order="66" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_ID" />
+  </attribute>
+  <attribute id="ITEM_ID_BOMC2" order="67" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_ID_BOMC2" />
+  </attribute>
+  <attribute id="ITEM_KEY" order="68" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_KEY" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_KEY" />
+  </attribute>
+  <attribute id="ITEM_ORDER" order="69" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="ITEM_ORDER" />
+    <keyMapping columnObjectName="Fact_table" columnName="ITEM_ORDER" />
+  </attribute>
+  <attribute id="LAST_MODIFIED_BY" order="70" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LAST_MODIFIED_BY" />
+    <keyMapping columnObjectName="Fact_table" columnName="LAST_MODIFIED_BY" />
+  </attribute>
+  <attribute id="LAST_MODIFIED_BY_BOMC2" order="71" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LAST_MODIFIED_BY_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="LAST_MODIFIED_BY_BOMC2" />
+  </attribute>
+  <attribute id="LAST_MODIFIED_ON" order="72" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LAST_MODIFIED_ON" />
+    <keyMapping columnObjectName="Fact_table" columnName="LAST_MODIFIED_ON" />
+  </attribute>
+  <attribute id="LAST_MODIFIED_ON_BOMC2" order="73" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LAST_MODIFIED_ON_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="LAST_MODIFIED_ON_BOMC2" />
+  </attribute>
+  <attribute id="LEVEL" order="74" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LEVEL" />
+    <keyMapping columnObjectName="Fact_table" columnName="LEVEL" />
+  </attribute>
+  <attribute id="LEVEL_BOMC2" order="75" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LEVEL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="LEVEL_BOMC2" />
+  </attribute>
+  <attribute id="LOT_SIZE_IS_MANUAL" order="76" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LOT_SIZE_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="LOT_SIZE_IS_MANUAL" />
+  </attribute>
+  <attribute id="LOT_SIZE_IS_MANUAL_BOMC2" order="77" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="LOT_SIZE_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="LOT_SIZE_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="MATERIAL_GROUP_ID" order="78" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_GROUP_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_GROUP_ID" />
+  </attribute>
+  <attribute id="MATERIAL_GROUP_ID_BOMC2" order="79" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_GROUP_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_GROUP_ID_BOMC2" />
+  </attribute>
+  <attribute id="MATERIAL_ID" order="80" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_ID" />
+  </attribute>
+  <attribute id="MATERIAL_ID_BOMC2" order="81" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_ID_BOMC2" />
+  </attribute>
+  <attribute id="MATERIAL_SOURCE" order="82" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_SOURCE" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_SOURCE" />
+  </attribute>
+  <attribute id="MATERIAL_SOURCE_BOMC2" order="83" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_SOURCE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_SOURCE_BOMC2" />
+  </attribute>
+  <attribute id="MATERIAL_TYPE_ID" order="84" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_TYPE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_TYPE_ID" />
+  </attribute>
+  <attribute id="MATERIAL_TYPE_ID_BOMC2" order="85" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="MATERIAL_TYPE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="MATERIAL_TYPE_ID_BOMC2" />
+  </attribute>
+  <attribute id="NODE_ID" order="86" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="NODE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="NODE_ID" />
+  </attribute>
+  <attribute id="NODE_ID_BOMC2" order="87" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="NODE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="NODE_ID_BOMC2" />
+  </attribute>
+  <attribute id="OVERHEAD_GROUP_ID" order="88" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="OVERHEAD_GROUP_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="OVERHEAD_GROUP_ID" />
+  </attribute>
+  <attribute id="OVERHEAD_GROUP_ID_BOMC2" order="89" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="OVERHEAD_GROUP_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="OVERHEAD_GROUP_ID_BOMC2" />
+  </attribute>
+  <attribute id="PARENT_ID" order="90" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PARENT_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PARENT_ID" />
+  </attribute>
+  <attribute id="PARENT_ID_BOMC2" order="91" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PARENT_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PARENT_ID_BOMC2" />
+  </attribute>
+  <attribute id="PARENT_ITEM_ID" order="92" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PARENT_ITEM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PARENT_ITEM_ID" />
+  </attribute>
+  <attribute id="PARENT_ITEM_ID_BOMC2" order="93" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PARENT_ITEM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PARENT_ITEM_ID_BOMC2" />
+  </attribute>
+  <attribute id="PARENT_KEY" order="94" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PARENT_KEY" />
+    <keyMapping columnObjectName="Fact_table" columnName="PARENT_KEY" />
+  </attribute>
+  <attribute id="PLANT_ID" order="95" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PLANT_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PLANT_ID" />
+  </attribute>
+  <attribute id="PLANT_ID_BOMC2" order="96" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PLANT_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PLANT_ID_BOMC2" />
+  </attribute>
+  <attribute id="PREDECESSOR_ITEM_ID" order="97" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PREDECESSOR_ITEM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PREDECESSOR_ITEM_ID" />
+  </attribute>
+  <attribute id="PREDECESSOR_ITEM_ID_BOMC2" order="98" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PREDECESSOR_ITEM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PREDECESSOR_ITEM_ID_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_BOMC2" order="99" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_FIXED_PORTION_IS_MANUAL" order="100" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_FIXED_PORTION_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_FIXED_PORTION_IS_MANUAL" />
+  </attribute>
+  <attribute id="PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" order="101" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_ID" order="102" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_ID" />
+  </attribute>
+  <attribute id="PRICE_ID_BOMC2" order="103" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_ID_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_SOURCE_ID" order="104" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_SOURCE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_SOURCE_ID" />
+  </attribute>
+  <attribute id="PRICE_SOURCE_ID_BOMC2" order="105" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_SOURCE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_SOURCE_ID_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_SOURCE_TYPE_ID" order="106" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_SOURCE_TYPE_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_SOURCE_TYPE_ID" />
+  </attribute>
+  <attribute id="PRICE_SOURCE_TYPE_ID_BOMC2" order="107" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_SOURCE_TYPE_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_SOURCE_TYPE_ID_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_UNIT_IS_MANUAL" order="108" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_UNIT_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_IS_MANUAL" />
+  </attribute>
+  <attribute id="PRICE_UNIT_IS_MANUAL_BOMC2" order="109" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_UNIT_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_UNIT_UOM_ID" order="110" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_UNIT_UOM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_UOM_ID" />
+  </attribute>
+  <attribute id="PRICE_UNIT_UOM_ID_BOMC2" order="111" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_UNIT_UOM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_UOM_ID_BOMC2" />
+  </attribute>
+  <attribute id="PRICE_VARIABLE_PORTION_IS_MANUAL" order="112" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PRICE_VARIABLE_PORTION_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="PRICE_VARIABLE_PORTION_IS_MANUAL" />
+  </attribute>
+  <attribute id="PROCESS_ID" order="113" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PROCESS_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PROCESS_ID" />
+  </attribute>
+  <attribute id="PROCESS_ID_BOMC2" order="114" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PROCESS_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PROCESS_ID_BOMC2" />
+  </attribute>
+  <attribute id="PROFIT_CENTER_ID" order="115" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PROFIT_CENTER_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="PROFIT_CENTER_ID" />
+  </attribute>
+  <attribute id="PROFIT_CENTER_ID_BOMC2" order="116" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PROFIT_CENTER_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PROFIT_CENTER_ID_BOMC2" />
+  </attribute>
+  <attribute id="PURCHASING_DOCUMENT" order="117" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PURCHASING_DOCUMENT" />
+    <keyMapping columnObjectName="Fact_table" columnName="PURCHASING_DOCUMENT" />
+  </attribute>
+  <attribute id="PURCHASING_DOCUMENT_BOMC2" order="118" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PURCHASING_DOCUMENT_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PURCHASING_DOCUMENT_BOMC2" />
+  </attribute>
+  <attribute id="PURCHASING_GROUP" order="119" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PURCHASING_GROUP" />
+    <keyMapping columnObjectName="Fact_table" columnName="PURCHASING_GROUP" />
+  </attribute>
+  <attribute id="PURCHASING_GROUP_BOMC2" order="120" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="PURCHASING_GROUP_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="PURCHASING_GROUP_BOMC2" />
+  </attribute>
+  <attribute id="QUANTITY_IS_MANUAL" order="121" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_IS_MANUAL" />
+  </attribute>
+  <attribute id="QUANTITY_IS_MANUAL_BOMC2" order="122" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="QUANTITY_PER_BASE_UNIT_UOM_ID" order="123" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+  </attribute>
+  <attribute id="QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" order="124" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" />
+  </attribute>
+  <attribute id="QUANTITY_UOM_ID" order="125" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_UOM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_UOM_ID" />
+  </attribute>
+  <attribute id="QUANTITY_UOM_ID_BOMC2" order="126" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="QUANTITY_UOM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="QUANTITY_UOM_ID_BOMC2" />
+  </attribute>
+  <attribute id="RANK" order="127" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="RANK" />
+    <keyMapping columnObjectName="Fact_table" columnName="RANK" />
+  </attribute>
+  <attribute id="RANK_BOMC2" order="128" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="RANK_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="RANK_BOMC2" />
+  </attribute>
+  <attribute id="REFERENCED_CALCULATION_VERSION_ID" order="129" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="REFERENCED_CALCULATION_VERSION_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="REFERENCED_CALCULATION_VERSION_ID" />
+  </attribute>
+  <attribute id="REFERENCED_CALCULATION_VERSION_ID_BOMC2" order="130" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="REFERENCED_CALCULATION_VERSION_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="REFERENCED_CALCULATION_VERSION_ID_BOMC2" />
+  </attribute>
+  <attribute id="SURCHARGE" order="131" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="SURCHARGE" />
+    <keyMapping columnObjectName="Fact_table" columnName="SURCHARGE" />
+  </attribute>
+  <attribute id="SURCHARGE_BOMC2" order="132" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="SURCHARGE_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="SURCHARGE_BOMC2" />
+  </attribute>
+  <attribute id="TARGET_COST_CURRENCY_ID" order="133" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TARGET_COST_CURRENCY_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="TARGET_COST_CURRENCY_ID" />
+  </attribute>
+  <attribute id="TARGET_COST_CURRENCY_ID_BOMC2" order="134" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TARGET_COST_CURRENCY_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="TARGET_COST_CURRENCY_ID_BOMC2" />
+  </attribute>
+  <attribute id="TARGET_COST_IS_MANUAL" order="135" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TARGET_COST_IS_MANUAL" />
+    <keyMapping columnObjectName="Fact_table" columnName="TARGET_COST_IS_MANUAL" />
+  </attribute>
+  <attribute id="TARGET_COST_IS_MANUAL_BOMC2" order="136" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TARGET_COST_IS_MANUAL_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="TARGET_COST_IS_MANUAL_BOMC2" />
+  </attribute>
+  <attribute id="TOTAL_QUANTITY_DEPENDS_ON" order="137" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TOTAL_QUANTITY_DEPENDS_ON" />
+    <keyMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_DEPENDS_ON" />
+  </attribute>
+  <attribute id="TOTAL_QUANTITY_DEPENDS_ON_BOMC2" order="138" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TOTAL_QUANTITY_DEPENDS_ON_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_DEPENDS_ON_BOMC2" />
+  </attribute>
+  <attribute id="TOTAL_QUANTITY_UOM_ID" order="139" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TOTAL_QUANTITY_UOM_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_UOM_ID" />
+  </attribute>
+  <attribute id="TOTAL_QUANTITY_UOM_ID_BOMC2" order="140" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TOTAL_QUANTITY_UOM_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_UOM_ID_BOMC2" />
+  </attribute>
+  <attribute id="TRANSACTION_CURRENCY_ID" order="141" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TRANSACTION_CURRENCY_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="TRANSACTION_CURRENCY_ID" />
+  </attribute>
+  <attribute id="TRANSACTION_CURRENCY_ID_BOMC2" order="142" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="TRANSACTION_CURRENCY_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="TRANSACTION_CURRENCY_ID_BOMC2" />
+  </attribute>
+  <attribute id="VALUATION_CLASS_ID" order="143" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="VALUATION_CLASS_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="VALUATION_CLASS_ID" />
+  </attribute>
+  <attribute id="VALUATION_CLASS_ID_BOMC2" order="144" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="VALUATION_CLASS_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="VALUATION_CLASS_ID_BOMC2" />
+  </attribute>
+  <attribute id="VENDOR_ID" order="145" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="VENDOR_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="VENDOR_ID" />
+  </attribute>
+  <attribute id="VENDOR_ID_BOMC2" order="146" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="VENDOR_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="VENDOR_ID_BOMC2" />
+  </attribute>
+  <attribute id="WORK_CENTER_CATEGORY" order="147" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="WORK_CENTER_CATEGORY" />
+    <keyMapping columnObjectName="Fact_table" columnName="WORK_CENTER_CATEGORY" />
+  </attribute>
+  <attribute id="WORK_CENTER_CATEGORY_BOMC2" order="148" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="WORK_CENTER_CATEGORY_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="WORK_CENTER_CATEGORY_BOMC2" />
+  </attribute>
+  <attribute id="WORK_CENTER_ID" order="149" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="WORK_CENTER_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="WORK_CENTER_ID" />
+  </attribute>
+  <attribute id="WORK_CENTER_ID_BOMC2" order="150" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="WORK_CENTER_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="WORK_CENTER_ID_BOMC2" />
+  </attribute>
+  <attribute id="CHILD_ITEM_CATEGORY_ID" order="151" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CHILD_ITEM_CATEGORY_ID" />
+    <keyMapping columnObjectName="Fact_table" columnName="CHILD_ITEM_CATEGORY_ID" />
+  </attribute>
+  <attribute id="CHILD_ITEM_CATEGORY_ID_BOMC2" order="152" displayAttribute="false" attributeHierarchyActive="false">
+    <descriptions defaultDescription="CHILD_ITEM_CATEGORY_ID_BOMC2" />
+    <keyMapping columnObjectName="Fact_table" columnName="CHILD_ITEM_CATEGORY_ID_BOMC2" />
+  </attribute>
+  {{#if Item.customFields}}
+	    {{cv_customFieldsAttributesBomCompare Item}}
+    {{/if}}
+</attributes>
+  <calculatedAttributes/>  
+<baseMeasures>
+  <measure id="BASE_QUANTITY" order="1" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="BASE_QUANTITY" />
+    <measureMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY" />
+  </measure>
+  <measure id="BASE_QUANTITY_BOMC2" order="2" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="BASE_QUANTITY_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY_BOMC2" />
+  </measure>
+  <measure id="BASE_QUANTITY_CALCULATED" order="3" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="BASE_QUANTITY_CALCULATED" />
+    <measureMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY_CALCULATED" />
+  </measure>
+  <measure id="BASE_QUANTITY_CALCULATED_BOMC2" order="4" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="BASE_QUANTITY_CALCULATED_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY_CALCULATED_BOMC2" />
+  </measure>
+  <measure id="IS_RELEVANT_TO_COSTING_IN_ERP" order="5" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="IS_RELEVANT_TO_COSTING_IN_ERP" />
+    <measureMapping columnObjectName="Fact_table" columnName="IS_RELEVANT_TO_COSTING_IN_ERP" />
+  </measure>
+  <measure id="LOCAL_CONTENT" order="6" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOCAL_CONTENT" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOCAL_CONTENT" />
+  </measure>
+  <measure id="LOCAL_CONTENT_BOMC2" order="7" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOCAL_CONTENT_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOCAL_CONTENT_BOMC2" />
+  </measure>
+  <measure id="LOT_SIZE" order="8" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOT_SIZE" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOT_SIZE" />
+  </measure>
+  <measure id="LOT_SIZE_BOMC2" order="9" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOT_SIZE_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOT_SIZE_BOMC2" />
+  </measure>
+  <measure id="LOT_SIZE_CALCULATED" order="10" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOT_SIZE_CALCULATED" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOT_SIZE_CALCULATED" />
+  </measure>
+  <measure id="LOT_SIZE_CALCULATED_BOMC2" order="11" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="LOT_SIZE_CALCULATED_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="LOT_SIZE_CALCULATED_BOMC2" />
+  </measure>
+  <measure id="OTHER_COST" order="12" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST" />
+  </measure>
+  <measure id="OTHER_COST_BOMC2" order="13" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST_BOMC2" />
+  </measure>
+  <measure id="OTHER_COST_FIXED_PORTION" order="14" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST_FIXED_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST_FIXED_PORTION" />
+  </measure>
+  <measure id="OTHER_COST_FIXED_PORTION_BOMC2" order="15" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST_FIXED_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST_FIXED_PORTION_BOMC2" />
+  </measure>
+  <measure id="OTHER_COST_VARIABLE_PORTION" order="16" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST_VARIABLE_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST_VARIABLE_PORTION" />
+  </measure>
+  <measure id="OTHER_COST_VARIABLE_PORTION_BOMC2" order="17" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="OTHER_COST_VARIABLE_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="OTHER_COST_VARIABLE_PORTION_BOMC2" />
+  </measure>
+  <measure id="PRICE" order="18" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE" />
+  </measure>
+  <measure id="PRICE_FIXED_PORTION" order="19" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FIXED_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FIXED_PORTION" />
+  </measure>
+  <measure id="PRICE_FIXED_PORTION_BOMC2" order="20" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FIXED_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FIXED_PORTION_BOMC2" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY" order="21" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY_BOMC2" order="22" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY_BOMC2" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" order="23" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" order="24" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" order="25" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" />
+  </measure>
+  <measure id="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" order="26" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" />
+  </measure>
+  <measure id="PRICE_UNIT" order="27" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_UNIT" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_UNIT" />
+  </measure>
+  <measure id="PRICE_UNIT_BOMC2" order="28" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_UNIT_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_BOMC2" />
+  </measure>
+  <measure id="PRICE_UNIT_CALCULATED" order="29" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_UNIT_CALCULATED" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_CALCULATED" />
+  </measure>
+  <measure id="PRICE_UNIT_CALCULATED_BOMC2" order="30" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_UNIT_CALCULATED_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_CALCULATED_BOMC2" />
+  </measure>
+  <measure id="PRICE_VARIABLE_PORTION" order="31" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_VARIABLE_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_VARIABLE_PORTION" />
+  </measure>
+  <measure id="PRICE_VARIABLE_PORTION_BOMC2" order="32" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_VARIABLE_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_VARIABLE_PORTION_BOMC2" />
+  </measure>
+  <measure id="PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" order="33" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" />
+  </measure>
+  <measure id="QUANTITY" order="34" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY" />
+  </measure>
+  <measure id="QUANTITY_BOMC2" order="35" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_BOMC2" />
+  </measure>
+  <measure id="QUANTITY_CALCULATED" order="36" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY_CALCULATED" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_CALCULATED" />
+  </measure>
+  <measure id="QUANTITY_CALCULATED_BOMC2" order="37" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY_CALCULATED_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_CALCULATED_BOMC2" />
+  </measure>
+  <measure id="QUANTITY_PER_BASE_UNIT" order="38" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_PER_BASE_UNIT" />
+  </measure>
+  <measure id="QUANTITY_PER_BASE_UNIT_BOMC2" order="39" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_PER_BASE_UNIT_BOMC2" />
+  </measure>
+  <measure id="TARGET_COST" order="40" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TARGET_COST" />
+    <measureMapping columnObjectName="Fact_table" columnName="TARGET_COST" />
+  </measure>
+  <measure id="TARGET_COST_BOMC2" order="41" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TARGET_COST_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TARGET_COST_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST" order="42" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST" />
+  </measure>
+  <measure id="TOTAL_COST_BOMC2" order="43" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST_FIXED_PORTION" order="44" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_FIXED_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_FIXED_PORTION" />
+  </measure>
+  <measure id="TOTAL_COST_FIXED_PORTION_BOMC2" order="45" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_FIXED_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_FIXED_PORTION_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT" order="46" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT_BOMC2" order="47" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT_FIXED_PORTION" order="48" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT_FIXED_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT_FIXED_PORTION" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" order="49" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT_VARIABLE_PORTION" order="50" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT_VARIABLE_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT_VARIABLE_PORTION" />
+  </measure>
+  <measure id="TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" order="51" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" />
+  </measure>
+  <measure id="TOTAL_COST_VARIABLE_PORTION" order="52" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_VARIABLE_PORTION" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_VARIABLE_PORTION" />
+  </measure>
+  <measure id="TOTAL_COST_VARIABLE_PORTION_BOMC2" order="53" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_COST_VARIABLE_PORTION_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_VARIABLE_PORTION_BOMC2" />
+  </measure>
+  <measure id="TOTAL_QUANTITY" order="54" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_QUANTITY" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY" />
+  </measure>
+  <measure id="TOTAL_QUANTITY_BOMC2" order="55" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_QUANTITY_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_BOMC2" />
+  </measure>
+  <measure id="TOTAL_QUANTITY_OF_VARIANTS" order="56" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_QUANTITY_OF_VARIANTS" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_OF_VARIANTS" />
+  </measure>
+  <measure id="TOTAL_QUANTITY_OF_VARIANTS_BOMC2" order="57" aggregationType="sum" measureType="simple">
+    <descriptions defaultDescription="TOTAL_QUANTITY_OF_VARIANTS_BOMC2" />
+    <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_OF_VARIANTS_BOMC2" />
+  </measure>
+</baseMeasures>
+  <calculatedMeasures/>
+  <restrictedMeasures/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="40" y="85"/>
+    </shape>
+  
+    <shape expanded="true" modelObjectName="Fact_table" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="100" y="226"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+  </shapes>
+</layout>
+</Calculation:scenario>

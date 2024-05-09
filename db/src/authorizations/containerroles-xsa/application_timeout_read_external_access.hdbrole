@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::application_timeout_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_application_timeout", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

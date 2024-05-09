@@ -1,0 +1,24 @@
+<mvc:View
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+    class='display-view upgrade-view'
+    controllerName='ui.controller.InstanceBasedPrivilege'>
+    <VBox width='800px'>
+        <items>
+            <VBox height="3rem" class="page-title-wrapper" alignItems="Center" justifyContent="Center">
+                        <items>
+                            <Title class="title page-title" level="H1" text="Instance Based Privilege Migration"
+                            ></Title>
+                        </items>
+            </VBox>
+            <List class="InstanceBasedList">
+                <InputListItem label="USER_NAME">
+                    <Input placeholder="the grantee user names, use ';' to split" value="{/userName}"/>
+                </InputListItem>
+            </List>
+            <Button text="Save" press="startClick" id="start-button" class="start-button" />
+        </items>
+    </VBox>
+</mvc:View>

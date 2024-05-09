@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::currency_create_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_currency", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_currency__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,20 @@
+{
+  "name": "dummy-app",
+  "version": "1.0.0",
+  "description": "Dummy App",
+  "contributors": [
+    {
+      "name": "SAP SE",
+      "email": "SAPProductLifecycleCosting@sap.com",
+      "url": "https://www.sap.com/products/product-lifecycle-costing.html"
+    }
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+  },
+  "engines": {
+    "node": "^14.x"
+  },
+  "scripts": {
+  }
+}

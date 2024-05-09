@@ -1,0 +1,1121 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_masterdata_read" ( 
+        IN iv_logon_language                	NVARCHAR(11),
+        IN it_component_split           		"sap.plc.db.administration::masterdata.tt_component_split_input",
+        IN it_costing_sheet			 		    "sap.plc.db.administration::masterdata.tt_costing_sheet_input",
+        IN it_account_groups            		"sap.plc.db.administration::masterdata.tt_account_groups_input",
+		IN it_price_components					"sap.plc.db.administration::masterdata.tt_price_component_input",
+		IN it_work_center               		"sap.plc.db.administration::masterdata.tt_work_center_input",
+        IN it_process          					"sap.plc.db.administration::masterdata.tt_process_input",
+        IN it_activity_type             		"sap.plc.db.administration::masterdata.tt_activity_type_input",
+        IN it_cost_center               		"sap.plc.db.administration::masterdata.tt_cost_center_input",
+		IN it_profit_center             		"sap.plc.db.administration::masterdata.tt_profit_center_input",
+		IN it_account							"sap.plc.db.administration::masterdata.tt_accounts_input",
+		IN it_material_plant            		"sap.plc.db.administration::masterdata.tt_material_plant_input",
+		IN it_overhead_group		            "sap.plc.db.administration::masterdata.tt_overhead_group_input",
+		IN it_plant                     		"sap.plc.db.administration::masterdata.tt_plant_input",
+		IN it_company_code              		"sap.plc.db.administration::masterdata.tt_company_code_input",
+		IN it_controlling_area          		"sap.plc.db.administration::masterdata.tt_controlling_area_input",
+		IN it_business_area             		"sap.plc.db.administration::masterdata.tt_business_area_input",
+        IN it_material                  		"sap.plc.db.administration::masterdata.tt_material_input",
+        IN it_material_group            		"sap.plc.db.administration::masterdata.tt_material_group_input",
+        IN it_material_type             		"sap.plc.db.administration::masterdata.tt_material_type_input",
+		IN it_document                          "sap.plc.db.administration::masterdata.tt_document_input",
+        IN it_document_type                     "sap.plc.db.administration::masterdata.tt_document_type_input",
+        IN it_document_status                   "sap.plc.db.administration::masterdata.tt_document_status_input",
+        IN it_design_office          			"sap.plc.db.administration::masterdata.tt_design_office_input",
+        IN it_vendor                    		"sap.plc.db.administration::masterdata.tt_vendor_input",
+        IN it_customer                          "sap.plc.db.administration::masterdata.tt_customer_input",
+        IN it_valuation_class             		"sap.plc.db.administration::masterdata.tt_valuation_class_input",
+        IN it_uom								"sap.plc.db.administration::masterdata.tt_uom_input",
+        IN it_currency							"sap.plc.db.administration::masterdata.tt_currency_input",
+        IN it_exchange_rate_type				"sap.plc.db.administration::masterdata.tt_exchange_rate_type_key",
+        --entries related to component split
+        OUT ot_component_split           		"sap.plc.db.administration::masterdata.tt_component_split" default empty,
+        OUT ot_component_split_account_group  	"sap.plc.db::basis.t_component_split_account_group" default empty,
+        --entries related to costing sheet
+        OUT ot_costing_sheet			 		"sap.plc.db.administration::masterdata.tt_costing_sheet" default empty,
+        OUT ot_costing_sheet_row		 		"sap.plc.db.administration::masterdata.tt_costing_sheet_row" default empty,
+        OUT ot_costing_sheet_base				"sap.plc.db.administration::masterdata.tt_costing_sheet_base" default empty,
+        OUT ot_costing_sheet_base_row			"sap.plc.db.administration::masterdata.tt_costing_sheet_base_row" default empty,
+        OUT ot_costing_sheet_overhead			"sap.plc.db.administration::masterdata.tt_costing_sheet_overhead" default empty,
+        OUT ot_costing_sheet_overhead_row		"sap.plc.db.administration::masterdata.tt_costing_sheet_overhead_row" default empty,
+        OUT ot_costing_sheet_row_dependencies	"sap.plc.db.administration::masterdata.tt_costing_sheet_row_dependencies" default empty,
+        --entries related to account groups
+        OUT ot_account_groups            		"sap.plc.db.administration::masterdata.tt_account_groups" default empty,
+		--entries related to price components
+		OUT ot_price_components					"sap.plc.db.administration::masterdata.tt_price_component" default empty,
+        --masterdata
+		OUT ot_work_center               		"sap.plc.db.administration::masterdata.tt_work_center" default empty,
+		OUT ot_process          				"sap.plc.db.administration::masterdata.tt_process" default empty,
+        OUT ot_activity_type             		"sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+        OUT ot_cost_center               		"sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_profit_center             		"sap.plc.db.administration::masterdata.tt_profit_center" default empty,
+		OUT ot_accounts							"sap.plc.db.administration::masterdata.tt_accounts" default empty,
+		OUT ot_overhead_group		            "sap.plc.db.administration::masterdata.tt_overhead_group" default empty,
+		OUT ot_material_plant            		"sap.plc.db.administration::masterdata.tt_material_plant" default empty,
+		OUT ot_plant                     		"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_company_code              		"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_controlling_area          		"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_business_area             		"sap.plc.db.administration::masterdata.tt_business_area" default empty,
+        OUT ot_material                  		"sap.plc.db.administration::masterdata.tt_material" default empty,
+        OUT ot_material_group            		"sap.plc.db.administration::masterdata.tt_material_group" default empty,
+        OUT ot_material_type             		"sap.plc.db.administration::masterdata.tt_material_type" default empty,
+        OUT ot_document                         "sap.plc.db.administration::masterdata.tt_document" default empty,
+        OUT ot_document_type                    "sap.plc.db.administration::masterdata.tt_document_type" default empty,
+        OUT ot_document_status                  "sap.plc.db.administration::masterdata.tt_document_status" default empty,
+        OUT ot_design_office         			"sap.plc.db.administration::masterdata.tt_design_office" default empty, 
+        OUT ot_vendor                    		"sap.plc.db.administration::masterdata.tt_vendor" default empty,
+        OUT ot_customer                         "sap.plc.db.administration::masterdata.tt_customer" default empty, 
+        OUT ot_valuation_class             		"sap.plc.db.administration::masterdata.tt_valuation_class" default empty,
+        OUT ot_uom								"sap.plc.db.administration::masterdata.tt_uom" default empty,
+        OUT ot_currency							"sap.plc.db.administration::masterdata.tt_currency" default empty,
+        OUT ot_exchange_rate_type	        	"sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty
+    )
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+/*****************************************************************************************************************************  
+	Read masterdata (ONLY masterdata related to the list of controlling areas(it_controlling_area) will be selected 
+ *****************************************************************************************************************************/
+
+--select company codes, plants for controlling_areas, as these will be used later on for filtering data related to same contolling areas
+lt_company_code_plant_ca = select distinct 
+								 cc.COMPANY_CODE_ID, 
+				 				 cc.CONTROLLING_AREA_ID, 
+				 				 cc.COMPANY_CODE_CURRENCY_ID, 
+				 				 plant.PLANT_ID
+			 				 from "sap.plc.db::basis.t_company_code" as cc 
+			 				 inner join :it_controlling_area as ca
+							   on   cc.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID
+							 inner join "sap.plc.db::basis.t_plant" as plant
+							   on   cc.COMPANY_CODE_ID = plant.COMPANY_CODE_ID;
+	
+
+--select data regarding component split
+lt_component_split = select distinct
+						  plcTable.COMPONENT_SPLIT_ID, 
+						  plcTable.CONTROLLING_AREA_ID,
+						  plcTable._VALID_FROM, 
+						  plcTable._VALID_TO,
+						  plcTable._SOURCE,
+						  plcTable._CREATED_BY,
+						  null AS _VALID_FROM_FIRST_VERSION,
+						  null as _CREATED_BY_FIRST_VERSION,
+						  plcTextTable.COMPONENT_SPLIT_DESCRIPTION as COMPONENT_SPLIT_DESCRIPTION,
+						  ids.master_data_timestamp
+					   from "sap.plc.db::basis.t_component_split" as plcTable
+					   inner join :it_component_split as ids
+					   on   plcTable.COMPONENT_SPLIT_ID = ids.COMPONENT_SPLIT_ID
+                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null) 
+                       inner join :it_controlling_area as ca
+					   		on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID				   	
+					   left outer join "sap.plc.db::basis.t_component_split__text" as plcTextTable 
+                        	on  plcTable.COMPONENT_SPLIT_ID = plcTextTable.COMPONENT_SPLIT_ID 
+                       		and plcTextTable.LANGUAGE = :iv_logon_language 
+                        	and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+                        	and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_component_split =  select distinct COMPONENT_SPLIT_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO,
+						_SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COMPONENT_SPLIT_DESCRIPTION
+					  from :lt_component_split;	
+						
+lt_component_split_account_group = select distinct
+	 						  plcTable.ACCOUNT_GROUP_ID, 
+							  plcTable.COMPONENT_SPLIT_ID,
+							  plcTable._VALID_FROM, 
+							  plcTable._VALID_TO,
+							  plcTable._SOURCE,
+							  plcTable._CREATED_BY,
+							  ids.master_data_timestamp 
+                             from "sap.plc.db::basis.t_component_split_account_group" as plcTable
+ 		                     inner join :lt_component_split as ids
+	 		                      on plcTable.COMPONENT_SPLIT_ID = ids.COMPONENT_SPLIT_ID
+	                        	  and plcTable._VALID_FROM <= ids.master_data_timestamp 
+	                        	  and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null);
+							
+ot_component_split_account_group = select distinct ACCOUNT_GROUP_ID, COMPONENT_SPLIT_ID, _VALID_FROM, _VALID_TO,
+							  _SOURCE, _CREATED_BY
+							from :lt_component_split_account_group;
+						
+--select data regarding costing sheet
+lt_costing_sheet =  SELECT distinct  
+						plcTable.COSTING_SHEET_ID, 
+						plcTable.CONTROLLING_AREA_ID,
+						plcTable.IS_TOTAL_COST2_ENABLED,
+						plcTable.IS_TOTAL_COST3_ENABLED,
+						plcTable._VALID_FROM, 
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY, 
+						null AS _VALID_FROM_FIRST_VERSION,
+						null as _CREATED_BY_FIRST_VERSION,
+						plcTextTable.COSTING_SHEET_DESCRIPTION,
+						plcTextTable.TOTAL_COST2_DESCRIPTION,
+						plcTextTable.TOTAL_COST3_DESCRIPTION,						
+						ids.master_data_timestamp
+					FROM "sap.plc.db::basis.t_costing_sheet" AS plcTable 
+					inner join :it_costing_sheet as ids
+					    on  plcTable.COSTING_SHEET_ID = ids.COSTING_SHEET_ID
+                        and plcTable._VALID_FROM <= ids.master_data_timestamp 
+                        and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null)
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID		
+					left outer join "sap.plc.db::basis.t_costing_sheet__text" AS plcTextTable 
+						ON  plcTable.COSTING_SHEET_ID = plcTextTable.COSTING_SHEET_ID
+						AND plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+                        and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_costing_sheet = select distinct COSTING_SHEET_ID, CONTROLLING_AREA_ID, IS_TOTAL_COST2_ENABLED, IS_TOTAL_COST3_ENABLED, _VALID_FROM, _VALID_TO,
+					  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COSTING_SHEET_DESCRIPTION, TOTAL_COST2_DESCRIPTION, TOTAL_COST3_DESCRIPTION
+				   from :lt_costing_sheet;
+
+lt_costing_sheet_row = 	SELECT distinct  
+							plcTable.COSTING_SHEET_ROW_ID, 
+							plcTable.COSTING_SHEET_ID,
+							plcTable.COSTING_SHEET_ROW_TYPE,
+							plcTable.COSTING_SHEET_BASE_ID,
+							plcTable.ACCOUNT_GROUP_AS_BASE_ID,
+							plctable.COSTING_SHEET_OVERHEAD_ID,
+							plcTable.CALCULATION_ORDER,
+							plcTable.IS_RELEVANT_FOR_TOTAL,
+							plcTable.IS_RELEVANT_FOR_TOTAL2,
+							plcTable.IS_RELEVANT_FOR_TOTAL3,
+							plcTable._VALID_FROM, 
+							plcTable._VALID_TO,
+							plcTable._SOURCE,
+							plcTable._CREATED_BY, 
+							null AS _VALID_FROM_FIRST_VERSION,
+							null as _CREATED_BY_FIRST_VERSION,
+							plcTextTable.COSTING_SHEET_ROW_DESCRIPTION AS COSTING_SHEET_ROW_DESCRIPTION,
+							ids.master_data_timestamp  
+						FROM "sap.plc.db::basis.t_costing_sheet_row" AS plcTable 
+						inner join :lt_costing_sheet as ids	
+						 	on  plcTable.COSTING_SHEET_ID = ids.COSTING_SHEET_ID
+                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null) 
+						LEFT OUTER JOIN "sap.plc.db::basis.t_costing_sheet_row__text" AS plcTextTable 
+							ON  plcTable.COSTING_SHEET_ROW_ID = plcTextTable.COSTING_SHEET_ROW_ID
+							AND plcTable.COSTING_SHEET_ID = plcTextTable.COSTING_SHEET_ID  		
+							AND plcTextTable.LANGUAGE = :iv_logon_language 
+							AND plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+							AND ( plcTextTable._VALID_TO > ids.master_data_timestamp OR plcTextTable._VALID_TO is null );
+
+ot_costing_sheet_row = select distinct COSTING_SHEET_ROW_ID, COSTING_SHEET_ID, COSTING_SHEET_ROW_TYPE, COSTING_SHEET_BASE_ID,
+	                       ACCOUNT_GROUP_AS_BASE_ID, COSTING_SHEET_OVERHEAD_ID, CALCULATION_ORDER, IS_RELEVANT_FOR_TOTAL, IS_RELEVANT_FOR_TOTAL2, IS_RELEVANT_FOR_TOTAL3, _VALID_FROM, _VALID_TO, 
+						  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COSTING_SHEET_ROW_DESCRIPTION
+					   from :lt_costing_sheet_row;
+
+lt_costing_sheet_base_input = select distinct COSTING_SHEET_BASE_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_row;
+					   					   
+ot_costing_sheet_base = SELECT distinct
+                        	plcTable.COSTING_SHEET_BASE_ID,
+                            plcTable.COST_PORTION,
+                            plcTable._VALID_FROM, 
+							plcTable._VALID_TO,
+							plcTable._SOURCE,
+							plcTable._CREATED_BY
+						FROM "sap.plc.db::basis.t_costing_sheet_base" AS plcTable 
+						inner join :lt_costing_sheet_base_input as ids	
+						 	on  plcTable.COSTING_SHEET_BASE_ID = ids.COSTING_SHEET_BASE_ID
+                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null);						
+		
+ot_costing_sheet_base_row = SELECT distinct
+								plcTable.COSTING_SHEET_BASE_ID,
+								plcTable.ITEM_CATEGORY_ID,
+								plcTable.SUBITEM_STATE,
+								plcTable._VALID_FROM, 
+								plcTable._VALID_TO,
+								plcTable._SOURCE,
+								plcTable._CREATED_BY,
+								plcTable.CHILD_ITEM_CATEGORY_ID					
+							FROM "sap.plc.db::basis.t_costing_sheet_base_row" AS plcTable 
+							inner join :lt_costing_sheet_base_input as ids	
+							 	on  plcTable.COSTING_SHEET_BASE_ID = ids.COSTING_SHEET_BASE_ID
+	                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+	                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null);	
+
+lt_costing_sheet_overhead_input = select distinct COSTING_SHEET_OVERHEAD_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_row;
+
+lt_costing_sheet_overhead = SELECT distinct
+                                plcTable.COSTING_SHEET_OVERHEAD_ID,
+								plcTable.CREDIT_ACCOUNT_ID,
+								plcTable.CREDIT_FIXED_COST_PORTION,
+								plcTable.IS_ROLLED_UP,
+								plcTable._VALID_FROM, 
+								plcTable._VALID_TO,
+								plcTable._SOURCE,
+								plcTable._CREATED_BY,
+                                plcTable.USE_DEFAULT_FIXED_COST_PORTION,
+								ids.master_data_timestamp 
+							FROM "sap.plc.db::basis.t_costing_sheet_overhead" AS plcTable 
+							inner join :lt_costing_sheet_overhead_input as ids	
+							 	on  plcTable.COSTING_SHEET_OVERHEAD_ID = ids.COSTING_SHEET_OVERHEAD_ID
+	                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+	                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null);	
+
+ot_costing_sheet_overhead = select distinct COSTING_SHEET_OVERHEAD_ID, CREDIT_ACCOUNT_ID, CREDIT_FIXED_COST_PORTION,
+								IS_ROLLED_UP, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, USE_DEFAULT_FIXED_COST_PORTION
+						    from :lt_costing_sheet_overhead;
+		
+lt_costing_sheet_overhead_row =	SELECT distinct
+									plcTable.COSTING_SHEET_OVERHEAD_ROW_ID,
+									plcTable.COSTING_SHEET_OVERHEAD_ID,
+									plcTable.VALID_FROM,
+									plcTable.VALID_TO,
+									plcTable.CONTROLLING_AREA_ID,
+									plcTable.COMPANY_CODE_ID,
+									plcTable.BUSINESS_AREA_ID,
+									plcTable.PROFIT_CENTER_ID,
+									plcTable.PLANT_ID,
+									plcTable.OVERHEAD_GROUP_ID,
+									plcTable.OVERHEAD_PERCENTAGE,
+									plcTable.PROJECT_ID,
+									plcTable.ACTIVITY_TYPE_ID,
+									plcTable.COST_CENTER_ID,
+									plcTable.WORK_CENTER_ID,
+									plcTable.OVERHEAD_QUANTITY_BASED,
+									plcTable.OVERHEAD_CURRENCY_ID,
+									plcTable.OVERHEAD_PRICE_UNIT,
+									plcTable.OVERHEAD_PRICE_UNIT_UOM_ID,
+									plcTable.CREDIT_FIXED_COST_PORTION,
+									plcTable._VALID_FROM,
+									plcTable._VALID_TO,
+									plcTable._SOURCE,
+									plcTable._CREATED_BY,
+									ids.master_data_timestamp
+								FROM "sap.plc.db::basis.t_costing_sheet_overhead_row" AS plcTable 
+								inner join :lt_costing_sheet_overhead_input as ids	
+								 	on  plcTable.COSTING_SHEET_OVERHEAD_ID = ids.COSTING_SHEET_OVERHEAD_ID
+		                        	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+		                        	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null)
+		                        inner join :it_controlling_area as ca
+					   				on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID;
+	
+ot_costing_sheet_overhead_row = select distinct COSTING_SHEET_OVERHEAD_ROW_ID, COSTING_SHEET_OVERHEAD_ID, VALID_FROM, VALID_TO, CONTROLLING_AREA_ID, COMPANY_CODE_ID,
+									BUSINESS_AREA_ID, PROFIT_CENTER_ID, PLANT_ID, OVERHEAD_GROUP_ID, OVERHEAD_PERCENTAGE, PROJECT_ID,
+									ACTIVITY_TYPE_ID, COST_CENTER_ID, WORK_CENTER_ID,
+									OVERHEAD_QUANTITY_BASED, OVERHEAD_CURRENCY_ID, OVERHEAD_PRICE_UNIT, OVERHEAD_PRICE_UNIT_UOM_ID, CREDIT_FIXED_COST_PORTION, _VALID_FROM,
+									_VALID_TO, _SOURCE, _CREATED_BY
+						    	from :lt_costing_sheet_overhead_row;
+						    		
+ot_costing_sheet_row_dependencies =	SELECT distinct
+										plcTable.SOURCE_ROW_ID,
+										plcTable.TARGET_ROW_ID,
+										plcTable.COSTING_SHEET_ID,
+										plcTable._VALID_FROM,
+										plcTable._VALID_TO,
+										plcTable._SOURCE,
+										plcTable._CREATED_BY
+									FROM "sap.plc.db::basis.t_costing_sheet_row_dependencies" AS plcTable 
+									inner join :lt_costing_sheet as ids
+									    on  plcTable.COSTING_SHEET_ID = ids.COSTING_SHEET_ID
+				                        and plcTable._VALID_FROM <= ids.master_data_timestamp 
+				                        and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null);
+
+--select account groups			
+lt_account_group_input = select distinct ACCOUNT_GROUP_ID, MASTER_DATA_TIMESTAMP from
+							( select  ACCOUNT_GROUP_ID, MASTER_DATA_TIMESTAMP from :lt_component_split_account_group
+				               union all
+				              select  ACCOUNT_GROUP_AS_BASE_ID as ACCOUNT_GROUP_ID, MASTER_DATA_TIMESTAMP  FROM :lt_costing_sheet_row
+				               union all 
+				              select  ACCOUNT_GROUP_ID, MASTER_DATA_TIMESTAMP FROM :it_account_groups);
+		
+lt_account_groups = select distinct
+					 	plcTable.ACCOUNT_GROUP_ID,
+					 	plcTable.CONTROLLING_AREA_ID,
+					 	plcTable.COST_PORTION,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null as _VALID_FROM_FIRST_VERSION,
+						null as _CREATED_BY_FIRST_VERSION,
+						plcTextTable.ACCOUNT_GROUP_DESCRIPTION,
+						ids.master_data_timestamp
+					from "sap.plc.db::basis.t_account_group" as plcTable
+					inner join :lt_account_group_input as ids	
+					 	on  plcTable.ACCOUNT_GROUP_ID = ids.ACCOUNT_GROUP_ID
+                    	and plcTable._VALID_FROM <= ids.master_data_timestamp 
+                    	and (plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null)
+					inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID
+					left outer join "sap.plc.db::basis.t_account_group__text" as plcTextTable
+						on  plcTable.ACCOUNT_GROUP_ID = plcTextTable.ACCOUNT_GROUP_ID
+						and plcTextTable.LANGUAGE = :iv_logon_language
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+		                and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_account_groups = select distinct ACCOUNT_GROUP_ID, CONTROLLING_AREA_ID, COST_PORTION, _VALID_FROM,
+						_VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, ACCOUNT_GROUP_DESCRIPTION
+			    	from :lt_account_groups;
+
+lt_price_components = select plcTable.PRICE_ID, plcTable._VALID_FROM, plcTable.ACCOUNT_ID, plcTable.PRICE_FIXED, plcTable.PRICE_VARIABLE, plcTable.CONTROLLING_AREA_ID, ids.MASTER_DATA_TIMESTAMP
+									from "sap.plc.db::basis.t_price_component" plcTable
+										inner join :it_price_components as ids
+									on plcTable.PRICE_ID = ids.PRICE_ID
+										inner join "sap.plc.db::basis.t_activity_price" activityPrices
+											on plcTable.PRICE_ID = activityPrices.PRICE_ID
+											and plcTable._VALID_FROM = activityPrices._VALID_FROM
+										inner join :it_controlling_area controllingArea
+										on plcTable.CONTROLLING_AREA_ID = controllingArea.CONTROLLING_AREA_ID
+									where activityPrices._VALID_FROM <= ids.master_data_timestamp and 
+										(activityPrices._VALID_TO is null or activityPrices._VALID_TO > ids.master_data_timestamp) and
+										activityPrices.VALID_FROM <= ids.valuation_date and 
+										(activityPrices.VALID_TO is null or activityPrices.VALID_TO >= ids.valuation_date)
+								union all
+								select plcTable.PRICE_ID, plcTable._VALID_FROM, plcTable.ACCOUNT_ID, plcTable.PRICE_FIXED, plcTable.PRICE_VARIABLE, plcTable.CONTROLLING_AREA_ID, ids.MASTER_DATA_TIMESTAMP
+									from "sap.plc.db::basis.t_price_component" plcTable
+										inner join :it_price_components as ids
+									on plcTable.PRICE_ID = ids.PRICE_ID
+										inner join "sap.plc.db::basis.t_material_price" materialPrices
+											on plcTable.PRICE_ID = materialPrices.PRICE_ID
+											and plcTable._VALID_FROM = materialPrices._VALID_FROM
+										inner join :it_controlling_area controllingArea
+										on plcTable.CONTROLLING_AREA_ID = controllingArea.CONTROLLING_AREA_ID
+									where materialPrices._VALID_FROM <= ids.master_data_timestamp and 
+										(materialPrices._VALID_TO is null or materialPrices._VALID_TO > ids.master_data_timestamp) and
+										materialPrices.VALID_FROM <= ids.valuation_date and 
+										(materialPrices.VALID_TO is null or materialPrices.VALID_TO >= ids.valuation_date);
+
+--select price components
+ot_price_components = select distinct PRICE_ID, _VALID_FROM, ACCOUNT_ID, PRICE_FIXED, PRICE_VARIABLE, CONTROLLING_AREA_ID
+							from :lt_price_components;
+
+--select work center
+lt_work_center = select distinct
+				      plcTable.WORK_CENTER_ID,
+				      plcTable.PLANT_ID,
+				      plcTable.WORK_CENTER_CATEGORY,
+				      plcTable.CONTROLLING_AREA_ID,
+				      plcTable.COST_CENTER_ID,
+				      plcTable.WORK_CENTER_RESPONSIBLE,
+				      plcTable.EFFICIENCY,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+			      	  null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.WORK_CENTER_DESCRIPTION,
+				      ids.master_data_timestamp
+				      {{customFieldsWithTablePrefix Work_Center}} 
+				   from "sap.plc.db::basis.t_work_center" as plcTable
+				   inner join :it_work_center as ids
+				   	  on  plcTable.WORK_CENTER_ID = ids.WORK_CENTER_ID 
+					  and plcTable.PLANT_ID = ids.PLANT_ID 
+					  and plcTable._VALID_FROM <= ids.master_data_timestamp 
+					  and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+					inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID				  			
+				   	left outer join "sap.plc.db::basis.t_work_center__text" as plcTextTable 
+						on  plcTable.WORK_CENTER_ID = plcTextTable.WORK_CENTER_ID 
+						and plcTable.PLANT_ID = plcTextTable.PLANT_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null )
+						left outer join {{t_extensionTable Work_Center}} as plcExtTable ON
+						plcTable.WORK_CENTER_ID = plcExtTable.WORK_CENTER_ID
+						and plcTable.PLANT_ID = plcExtTable.PLANT_ID
+				        and plcTable._VALID_FROM = plcExtTable._VALID_FROM ;
+
+ot_work_center = select distinct WORK_CENTER_ID, PLANT_ID, WORK_CENTER_CATEGORY, CONTROLLING_AREA_ID, COST_CENTER_ID, WORK_CENTER_RESPONSIBLE, EFFICIENCY, _VALID_FROM,
+						_VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, WORK_CENTER_DESCRIPTION
+			     		{{customFields Work_Center}}
+			     		from :lt_work_center;
+						    
+--select process 
+lt_process = select distinct 
+						plcTable.PROCESS_ID,
+						plcTable.CONTROLLING_AREA_ID,
+						plcTable.ACCOUNT_ID,
+						plcTable.COMMENT,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE, 
+						plcTable._CREATED_BY,
+			            null AS _VALID_FROM_FIRST_VERSION,
+		                null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.PROCESS_DESCRIPTION,
+						ids.master_data_timestamp
+					from "sap.plc.db::basis.t_process" as plcTable 
+					inner join :it_process as ids
+				   	  on  plcTable.PROCESS_ID = ids.PROCESS_ID 
+					  and plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID 
+					  and plcTable._VALID_FROM <= ids.master_data_timestamp 
+					  and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID					   					
+					left outer join "sap.plc.db::basis.t_process__text" as plcTextTable 
+						on  plcTable.PROCESS_ID = plcTextTable.PROCESS_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null ); 
+			
+ot_process = select distinct PROCESS_ID, CONTROLLING_AREA_ID, ACCOUNT_ID, COMMENT, _VALID_FROM,
+						_VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, PROCESS_DESCRIPTION
+			     from :lt_process;
+	
+--select cost center
+lt_cost_center_input = select distinct COST_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from
+						( select  COST_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :it_cost_center
+			               union all 
+			              select  COST_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP FROM :lt_work_center);
+			              
+lt_cost_center = select  distinct
+						plcTable.COST_CENTER_ID,
+						plcTable.CONTROLLING_AREA_ID, 
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE, 
+						plcTable._CREATED_BY,
+			            null AS _VALID_FROM_FIRST_VERSION,
+		                null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.COST_CENTER_DESCRIPTION,
+						ids.master_data_timestamp
+						{{customFieldsWithTablePrefix Cost_Center}} 
+					from "sap.plc.db::basis.t_cost_center" as plcTable 
+					inner join :lt_cost_center_input as ids
+						on	plcTable.COST_CENTER_ID = ids.COST_CENTER_ID
+						and plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID					 
+					left outer join "sap.plc.db::basis.t_cost_center__text" as plcTextTable 
+						on  plcTable.COST_CENTER_ID = plcTextTable.COST_CENTER_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null )
+					left outer join {{t_extensionTable Cost_Center}} as plcExtTable ON
+						plcTable.COST_CENTER_ID = plcExtTable.COST_CENTER_ID
+						and plcTable.CONTROLLING_AREA_ID = plcExtTable.CONTROLLING_AREA_ID
+				        and plcTable._VALID_FROM = plcExtTable._VALID_FROM ;
+
+ot_cost_center = select distinct COST_CENTER_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO,
+						_SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COST_CENTER_DESCRIPTION
+						{{customFields Cost_Center}}
+						from :lt_cost_center;						 
+					   
+--select profit center
+lt_profit_center_input = select distinct PROFIT_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from
+						( select  PROFIT_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :it_profit_center
+			               union all 
+			              select  PROFIT_CENTER_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP FROM :lt_costing_sheet_overhead_row);
+			              
+lt_profit_center = select distinct
+				       plcTable.PROFIT_CENTER_ID,
+				       plcTable.CONTROLLING_AREA_ID,
+				       plcTable._VALID_FROM,
+				       plcTable._VALID_TO,
+				       plcTable._SOURCE,
+				       plcTable._CREATED_BY,
+				       null as _VALID_FROM_FIRST_VERSION,
+					   null as _CREATED_BY_FIRST_VERSION,
+					   plcTextTable.PROFIT_CENTER_DESCRIPTION,
+					   ids.master_data_timestamp
+   	                from "sap.plc.db::basis.t_profit_center" as plcTable 
+   	                inner join :lt_profit_center_input as ids
+   	                	on	plcTable.PROFIT_CENTER_ID = ids.PROFIT_CENTER_ID
+						and plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID					 			
+					left outer join "sap.plc.db::basis.t_profit_center__text" as plcTextTable 
+						on  plcTable.PROFIT_CENTER_ID = plcTextTable.PROFIT_CENTER_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+					
+ot_profit_center = select PROFIT_CENTER_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO,
+						_SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, PROFIT_CENTER_DESCRIPTION
+						from :lt_profit_center;
+													    
+--select activity type
+lt_activity_type = select distinct
+					  plcTable.ACTIVITY_TYPE_ID,
+				      plcTable.CONTROLLING_AREA_ID,
+				      plcTable.ACCOUNT_ID,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+				      null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.ACTIVITY_TYPE_DESCRIPTION,
+					  ids.master_data_timestamp
+   	                from "sap.plc.db::basis.t_activity_type" as plcTable 
+   	                inner join :it_activity_type as ids
+   	                	on	plcTable.ACTIVITY_TYPE_ID = ids.ACTIVITY_TYPE_ID
+						and plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID									
+					left outer join "sap.plc.db::basis.t_activity_type__text" as plcTextTable 
+						on  plcTable.ACTIVITY_TYPE_ID = plcTextTable.ACTIVITY_TYPE_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_activity_type = select distinct ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, ACCOUNT_ID, _VALID_FROM, _VALID_TO,
+					  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, ACTIVITY_TYPE_DESCRIPTION
+				   from :lt_activity_type;
+
+--select accounts
+lt_account_input = select distinct ACCOUNT_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from
+					  (select ACCOUNT_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :it_account
+						 union all
+					   select ACCOUNT_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_activity_type
+					     union
+                       select ACCOUNT_ID, CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_price_components
+                       );
+				   
+lt_account =	select distinct
+				       plcTable.ACCOUNT_ID,
+				       plcTable.CONTROLLING_AREA_ID,
+				       plcTable._VALID_FROM,
+				       plcTable._VALID_TO,
+				       plcTable._SOURCE,
+				       plcTable._CREATED_BY,
+				       null as _VALID_FROM_FIRST_VERSION,
+					   null as _CREATED_BY_FIRST_VERSION,
+					   plcTextTable.ACCOUNT_DESCRIPTION,
+					   ids.master_data_timestamp
+   	                from "sap.plc.db::basis.t_account" as plcTable 
+   	                inner join :lt_account_input as ids
+   	                	on	plcTable.ACCOUNT_ID = ids.ACCOUNT_ID
+						and plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+                    inner join :it_controlling_area as ca
+						on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID						 			
+					left outer join "sap.plc.db::basis.t_account__text" as plcTextTable 
+						on  plcTable.ACCOUNT_ID = plcTextTable.ACCOUNT_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_accounts = select distinct ACCOUNT_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO,
+				  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, ACCOUNT_DESCRIPTION
+			   from :lt_account;
+
+--select material plant
+lt_material_plant =	select distinct
+				      plcTable.MATERIAL_ID,
+				      plcTable.PLANT_ID,
+				      plcTable.OVERHEAD_GROUP_ID,
+				      plcTable.VALUATION_CLASS_ID,
+				      plcTable.MATERIAL_LOT_SIZE,
+				      plcTable.MATERIAL_LOT_SIZE_UOM_ID,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+				      null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+					  ids.master_data_timestamp
+					  {{customFieldsWithTablePrefix Material_Plant}}
+   	                from "sap.plc.db::basis.t_material_plant" as plcTable 
+   	                inner join :it_material_plant as ids
+   	                	on	plcTable.MATERIAL_ID = ids.MATERIAL_ID
+						and plcTable.PLANT_ID = ids.PLANT_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+                    inner join :lt_company_code_plant_ca as company_code_plant_ca
+						on plcTable.PLANT_ID = company_code_plant_ca.PLANT_ID
+					left outer join {{t_extensionTable Material_Plant}} as plcExtTable ON
+						plcTable.MATERIAL_ID = plcExtTable.MATERIAL_ID
+						and plcTable.PLANT_ID = plcExtTable.PLANT_ID
+				        and plcTable._VALID_FROM = plcExtTable._VALID_FROM;
+
+ot_material_plant = select distinct MATERIAL_ID, null as MATERIAL_DESCRIPTION, PLANT_ID, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, MATERIAL_LOT_SIZE, MATERIAL_LOT_SIZE_UOM_ID, _VALID_FROM, _VALID_TO,
+					   _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION
+					   {{customFields Material_Plant}}
+				    from :lt_material_plant;
+				    
+--select overhead group
+lt_overhead_input = select distinct OVERHEAD_GROUP_ID, PLANT_ID, MASTER_DATA_TIMESTAMP from
+				  (select OVERHEAD_GROUP_ID, PLANT_ID, MASTER_DATA_TIMESTAMP from :it_overhead_group
+					 union all
+				   select OVERHEAD_GROUP_ID, PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_material_plant
+					 union all
+				   select OVERHEAD_GROUP_ID, PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_overhead_row);
+
+lt_overhead_group =	select distinct
+				       plcTable.OVERHEAD_GROUP_ID,
+				       plcTable.PLANT_ID,
+				       plcTable._VALID_FROM,
+				       plcTable._VALID_TO,
+				       plcTable._SOURCE,
+				       plcTable._CREATED_BY,
+				       null as _VALID_FROM_FIRST_VERSION,
+					   null as _CREATED_BY_FIRST_VERSION,
+					   plcTextTable.OVERHEAD_GROUP_DESCRIPTION,
+					   ids.master_data_timestamp
+   	                from "sap.plc.db::basis.t_overhead_group" as plcTable 
+   	                inner join :lt_overhead_input as ids
+   	                	on	plcTable.OVERHEAD_GROUP_ID = ids.OVERHEAD_GROUP_ID
+						and plcTable.PLANT_ID = ids.PLANT_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )
+					inner join :lt_company_code_plant_ca as company_code_plant_ca
+						on plcTable.PLANT_ID = company_code_plant_ca.PLANT_ID 
+					left outer join "sap.plc.db::basis.t_overhead_group__text" as plcTextTable 
+						on  plcTable.OVERHEAD_GROUP_ID = plcTextTable.OVERHEAD_GROUP_ID 
+						and plcTable.PLANT_ID = plcTextTable.PLANT_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_overhead_group = select distinct OVERHEAD_GROUP_ID, PLANT_ID, _VALID_FROM, _VALID_TO,
+					   _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, OVERHEAD_GROUP_DESCRIPTION
+				    from :lt_overhead_group;
+				    				    		              
+--select plant	
+lt_plant_input = select distinct PLANT_ID, MASTER_DATA_TIMESTAMP from
+				  (select PLANT_ID, MASTER_DATA_TIMESTAMP from :it_plant
+					 union all
+				   select PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_overhead_group
+				   	 union all
+				   select PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_material_plant
+				     union all
+	           	   select PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_work_center
+	           	     union all
+	               select PLANT_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_overhead_row
+				   );	   
+				   				   
+lt_plant = select distinct
+		      plcTable.PLANT_ID,
+		      plcTable.COMPANY_CODE_ID,		      
+		      plcTable.COUNTRY,
+		      plcTable.POSTAL_CODE,
+		      plcTable.REGION,
+		      plcTable.CITY,
+		      plcTable.STREET_NUMBER_OR_PO_BOX,
+		      plcTable._VALID_FROM,
+		      plcTable._VALID_TO,
+		      plcTable._SOURCE,
+		      plcTable._CREATED_BY,
+		      null as _VALID_FROM_FIRST_VERSION,
+		      null as _CREATED_BY_FIRST_VERSION,
+		      plcTextTable.PLANT_DESCRIPTION,
+		      ids.master_data_timestamp
+		    from "sap.plc.db::basis.t_plant" as plcTable 
+		    inner join :lt_plant_input as ids
+				on plcTable.PLANT_ID = ids.PLANT_ID
+				and plcTable._VALID_FROM <= ids.master_data_timestamp
+				and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+			inner join :lt_company_code_plant_ca as company_code_plant_ca
+				on plcTable.COMPANY_CODE_ID = company_code_plant_ca.COMPANY_CODE_ID 				
+			left outer join "sap.plc.db::basis.t_plant__text" as plcTextTable 
+				on  plcTable.PLANT_ID = plcTextTable.PLANT_ID 
+				and plcTextTable.LANGUAGE = :iv_logon_language 
+				and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+				and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+ot_plant = select distinct PLANT_ID, COMPANY_CODE_ID, COUNTRY, POSTAL_CODE, REGION,CITY, STREET_NUMBER_OR_PO_BOX ,_VALID_FROM, _VALID_TO,
+				 _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, PLANT_DESCRIPTION
+			 from :lt_plant;
+
+--select company code                      					   
+lt_company_code_input = select distinct COMPANY_CODE_ID, MASTER_DATA_TIMESTAMP from
+						  (select COMPANY_CODE_ID, MASTER_DATA_TIMESTAMP from :it_company_code
+							 union all
+						   select COMPANY_CODE_ID, MASTER_DATA_TIMESTAMP from :lt_plant
+						     union all
+					       select COMPANY_CODE_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_overhead_row);
+				   
+lt_company_code = select distinct 
+	 				 plcTable.COMPANY_CODE_ID, 
+	 				 plcTable.CONTROLLING_AREA_ID, 
+	 				 plcTable.COMPANY_CODE_CURRENCY_ID, 
+	 				 plcTable._VALID_FROM, 
+	 				 plcTable._VALID_TO, 
+	 				 plcTable._SOURCE, 
+	 				 plcTable._CREATED_BY,
+		             null AS _VALID_FROM_FIRST_VERSION,
+		             null AS _CREATED_BY_FIRST_VERSION,
+	 				 plcTextTable.COMPANY_CODE_DESCRIPTION ,
+	 				 ids.master_data_timestamp
+ 				 from "sap.plc.db::basis.t_company_code" as plcTable 
+ 				 inner join :lt_company_code_input as ids
+					on plcTable.COMPANY_CODE_ID = ids.COMPANY_CODE_ID
+					and plcTable._VALID_FROM <= ids.master_data_timestamp
+					and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+				 inner join :it_controlling_area as ca
+					on plcTable.CONTROLLING_AREA_ID = ca.CONTROLLING_AREA_ID			
+ 				 left outer join "sap.plc.db::basis.t_company_code__text" as plcTextTable 
+ 				 	on  plcTable.COMPANY_CODE_ID = plcTextTable.COMPANY_CODE_ID 
+ 				 	and plcTextTable.LANGUAGE = :iv_logon_language  
+					and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);	
+
+ot_company_code = select distinct COMPANY_CODE_ID, CONTROLLING_AREA_ID, COMPANY_CODE_CURRENCY_ID,_VALID_FROM, _VALID_TO,
+				 	_SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COMPANY_CODE_DESCRIPTION
+			 	  from :lt_company_code;
+
+--select controlling area  
+lt_controlling_area_input = select distinct CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from
+							  (select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :it_controlling_area
+								 union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_cost_center
+							   	 union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_profit_center
+							   	 union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_activity_type
+							   	 union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_account
+							   	 union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_company_code
+							     union all
+							   select CONTROLLING_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_component_split);
+				   
+ot_controlling_area = select distinct
+		 				 plcTable.CONTROLLING_AREA_ID, 
+		 				 plcTable.CONTROLLING_AREA_CURRENCY_ID, 
+		 				 plcTable._VALID_FROM, 
+		 				 plcTable._VALID_TO, 
+		 				 plcTable._SOURCE, 
+		 				 plcTable._CREATED_BY,
+			             null AS _VALID_FROM_FIRST_VERSION,
+			             null AS _CREATED_BY_FIRST_VERSION,
+		 				 plcTextTable.CONTROLLING_AREA_DESCRIPTION
+	 				 from "sap.plc.db::basis.t_controlling_area" as plcTable 
+	 				 inner join :lt_controlling_area_input as ids
+						on plcTable.CONTROLLING_AREA_ID = ids.CONTROLLING_AREA_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+	 				 left outer join "sap.plc.db::basis.t_controlling_area__text" as plcTextTable 
+	 				 	on  plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+	 				 	and plcTextTable.LANGUAGE = :iv_logon_language  
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);	
+			 	  					    	                        				 
+--select business area 
+lt_business_area_input = select distinct BUSINESS_AREA_ID, MASTER_DATA_TIMESTAMP from 
+							(select BUSINESS_AREA_ID, MASTER_DATA_TIMESTAMP from :it_business_area
+	                          union all
+	                         select BUSINESS_AREA_ID, MASTER_DATA_TIMESTAMP from :lt_costing_sheet_overhead_row);
+	                         
+ot_business_area = select distinct
+				      plcTable.BUSINESS_AREA_ID,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+				      null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.BUSINESS_AREA_DESCRIPTION
+	                from "sap.plc.db::basis.t_business_area" as plcTable
+	                inner join :lt_business_area_input as ids
+					   on plcTable.BUSINESS_AREA_ID = ids.BUSINESS_AREA_ID
+					   and plcTable._VALID_FROM <= ids.master_data_timestamp
+					   and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )  					
+					left outer join "sap.plc.db::basis.t_business_area__text" as plcTextTable 
+						on  plcTable.BUSINESS_AREA_ID = plcTextTable.BUSINESS_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);	
+							       
+--select material
+lt_material_input = select distinct MATERIAL_ID, MASTER_DATA_TIMESTAMP from
+						  (select MATERIAL_ID, MASTER_DATA_TIMESTAMP from :it_material
+							 union all
+						   select MATERIAL_ID, MASTER_DATA_TIMESTAMP from :lt_material_plant);
+				   
+lt_material = select  distinct
+	 			  plcTable.MATERIAL_ID,
+			      plcTable.BASE_UOM_ID,
+			      plcTable.MATERIAL_GROUP_ID,
+			      plcTable.MATERIAL_TYPE_ID,
+			      plcTable.IS_CREATED_VIA_CAD_INTEGRATION,
+			      plcTable.IS_PHANTOM_MATERIAL,
+			      plcTable.IS_CONFIGURABLE_MATERIAL,
+			      plcTable._VALID_FROM,
+			      plcTable._VALID_TO,
+			      plcTable._SOURCE,
+			      plcTable._CREATED_BY,
+		          null as _VALID_FROM_FIRST_VERSION,
+			      null as _CREATED_BY_FIRST_VERSION,
+			      plcTextTable.MATERIAL_DESCRIPTION,
+	 			  ids.master_data_timestamp
+	 			  {{customFieldsWithTablePrefix Material}} 
+ 				 from "sap.plc.db::basis.t_material" as plcTable 
+ 				 inner join :lt_material_input as ids
+					on plcTable.MATERIAL_ID = ids.MATERIAL_ID
+					and plcTable._VALID_FROM <= ids.master_data_timestamp
+					and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+ 				 left outer join "sap.plc.db::basis.t_material__text" as plcTextTable 
+ 				 	on  plcTable.MATERIAL_ID = plcTextTable.MATERIAL_ID 
+ 				 	and plcTextTable.LANGUAGE = :iv_logon_language  
+					and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null)
+				 left outer join {{t_extensionTable Material}} as plcExtTable ON
+					plcTable.MATERIAL_ID = plcExtTable.MATERIAL_ID
+			        and plcTable._VALID_FROM = plcExtTable._VALID_FROM ;	
+				
+ot_material = select distinct MATERIAL_ID, BASE_UOM_ID, MATERIAL_GROUP_ID, MATERIAL_TYPE_ID, IS_CREATED_VIA_CAD_INTEGRATION,
+			      IS_PHANTOM_MATERIAL, IS_CONFIGURABLE_MATERIAL, _VALID_FROM, _VALID_TO,
+				  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, MATERIAL_DESCRIPTION
+				  {{customFields Material}}
+			 	 from :lt_material;
+					  
+--select material group
+lt_material_group_input = select distinct MATERIAL_GROUP_ID, MASTER_DATA_TIMESTAMP from
+						  (select MATERIAL_GROUP_ID, MASTER_DATA_TIMESTAMP from :it_material_group
+							 union all
+						   select MATERIAL_GROUP_ID, MASTER_DATA_TIMESTAMP from :lt_material);
+						   
+ot_material_group = select distinct
+				      plcTable.MATERIAL_GROUP_ID,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+				      null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.MATERIAL_GROUP_DESCRIPTION
+				    from "sap.plc.db::basis.t_material_group" as plcTable
+				    inner join :lt_material_group_input as ids
+					   on plcTable.MATERIAL_GROUP_ID = ids.MATERIAL_GROUP_ID
+					   and plcTable._VALID_FROM <= ids.master_data_timestamp
+					   and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )  
+		            left outer join "sap.plc.db::basis.t_material_group__text" as plcTextTable 
+		              on  plcTable.MATERIAL_GROUP_ID = plcTextTable.MATERIAL_GROUP_ID 
+		              and plcTextTable.LANGUAGE = :iv_logon_language 
+					  and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					  and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null); 
+
+--select material type
+lt_material_type_input = select distinct MATERIAL_TYPE_ID, MASTER_DATA_TIMESTAMP from
+						  (select MATERIAL_TYPE_ID, MASTER_DATA_TIMESTAMP from :it_material_type
+							 union all
+						   select MATERIAL_TYPE_ID, MASTER_DATA_TIMESTAMP from :lt_material);
+ot_material_type = select distinct
+				      plcTable.MATERIAL_TYPE_ID,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+				      null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.MATERIAL_TYPE_DESCRIPTION
+				    from "sap.plc.db::basis.t_material_type" as plcTable 
+				    inner join :lt_material_type_input as ids
+					   on plcTable.MATERIAL_TYPE_ID = ids.MATERIAL_TYPE_ID
+					   and plcTable._VALID_FROM <= ids.master_data_timestamp
+					   and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )  
+		            left outer join "sap.plc.db::basis.t_material_type__text" as plcTextTable 
+		              on  plcTable.MATERIAL_TYPE_ID = plcTextTable.MATERIAL_TYPE_ID 
+		              and plcTextTable.LANGUAGE = :iv_logon_language 
+ 					  and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					  and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null); 
+
+--select valuation class
+lt_valuation_class_input = select distinct VALUATION_CLASS_ID, MASTER_DATA_TIMESTAMP from
+						  (select VALUATION_CLASS_ID, MASTER_DATA_TIMESTAMP from :it_valuation_class
+							 union all
+						   select VALUATION_CLASS_ID, MASTER_DATA_TIMESTAMP from :lt_material_plant);
+
+ot_valuation_class = select distinct
+						plcTable.VALUATION_CLASS_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null AS _VALID_FROM_FIRST_VERSION,
+						null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.VALUATION_CLASS_DESCRIPTION
+					from "sap.plc.db::basis.t_valuation_class" as plcTable
+					inner join :lt_valuation_class_input as ids
+					   on plcTable.VALUATION_CLASS_ID = ids.VALUATION_CLASS_ID
+					   and plcTable._VALID_FROM <= ids.master_data_timestamp
+					   and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+					left outer join "sap.plc.db::basis.t_valuation_class__text" as plcTextTable
+					   on  plcTable.VALUATION_CLASS_ID = plcTextTable.VALUATION_CLASS_ID
+					   and plcTextTable.LANGUAGE = :iv_logon_language
+ 					   and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					   and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null); 
+
+--select document
+lt_document = SELECT distinct
+					plcTable.DOCUMENT_TYPE_ID,
+					plcTable.DOCUMENT_ID,
+					plcTable.DOCUMENT_VERSION,
+					plcTable.DOCUMENT_PART,
+					plcTable.IS_CREATED_VIA_CAD_INTEGRATION,
+					plcTable.DOCUMENT_STATUS_ID,
+					plcTable.DESIGN_OFFICE_ID,
+					plcTable._VALID_FROM,
+					plcTable._VALID_TO,
+					plcTable._SOURCE,
+					plcTable._CREATED_BY,
+					null as _VALID_FROM_FIRST_VERSION,
+					null as _CREATED_BY_FIRST_VERSION,
+					plcTextTable.DOCUMENT_DESCRIPTION,
+				 	ids.master_data_timestamp
+				FROM "sap.plc.db::basis.t_document" plcTable
+				inner join :it_document as ids
+					on plcTable.DOCUMENT_TYPE_ID = ids.DOCUMENT_TYPE_ID
+					and plcTable.DOCUMENT_ID = ids.DOCUMENT_ID
+					and plcTable.DOCUMENT_VERSION = ids.DOCUMENT_VERSION
+					and plcTable.DOCUMENT_PART = ids.DOCUMENT_PART
+					and plcTable._VALID_FROM <= ids.master_data_timestamp
+					and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )  
+				LEFT OUTER JOIN "sap.plc.db::basis.t_document__text" plcTextTable
+					ON  plcTable.DOCUMENT_TYPE_ID = plcTextTable.DOCUMENT_TYPE_ID 
+					and plcTable.DOCUMENT_ID = plcTextTable.DOCUMENT_ID
+					and plcTable.DOCUMENT_VERSION = plcTextTable.DOCUMENT_VERSION
+					and plcTable.DOCUMENT_PART = plcTextTable.DOCUMENT_PART
+					and plcTextTable.LANGUAGE = :iv_logon_language 
+					and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+					and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null); 
+
+ot_document = select distinct DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, IS_CREATED_VIA_CAD_INTEGRATION,
+			      DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID, _VALID_FROM, _VALID_TO,
+				  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, DOCUMENT_DESCRIPTION
+			  from :lt_document;
+
+--select document-type
+lt_document_type_input = select distinct DOCUMENT_TYPE_ID, MASTER_DATA_TIMESTAMP from
+						  (select DOCUMENT_TYPE_ID, MASTER_DATA_TIMESTAMP from :it_document_type
+							 union all
+						   select DOCUMENT_TYPE_ID, MASTER_DATA_TIMESTAMP from :lt_document);
+
+ot_document_type = SELECT distinct
+						plcTable.DOCUMENT_TYPE_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null as _VALID_FROM_FIRST_VERSION,
+						null as _CREATED_BY_FIRST_VERSION,
+						plcTextTable.DOCUMENT_TYPE_DESCRIPTION
+					FROM "sap.plc.db::basis.t_document_type" plcTable 
+					inner join :lt_document_type_input as ids
+						on plcTable.DOCUMENT_TYPE_ID = ids.DOCUMENT_TYPE_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null )  
+					LEFT OUTER JOIN "sap.plc.db::basis.t_document_type__text" plcTextTable
+						ON  plcTable.DOCUMENT_TYPE_ID = plcTextTable.DOCUMENT_TYPE_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null); 
+
+--select document-status
+lt_document_status_input = select distinct DOCUMENT_TYPE_ID, DOCUMENT_STATUS_ID, MASTER_DATA_TIMESTAMP from
+						  (select DOCUMENT_TYPE_ID, DOCUMENT_STATUS_ID, MASTER_DATA_TIMESTAMP from :it_document_status
+							 union all
+						   select DOCUMENT_TYPE_ID, DOCUMENT_STATUS_ID, MASTER_DATA_TIMESTAMP from :lt_document);
+
+ot_document_status = SELECT distinct
+						plcTable.DOCUMENT_TYPE_ID,
+						plcTable.DOCUMENT_STATUS_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null as _VALID_FROM_FIRST_VERSION,
+						null as _CREATED_BY_FIRST_VERSION,
+						plcTextTable.DOCUMENT_STATUS_DESCRIPTION
+					FROM "sap.plc.db::basis.t_document_status" plcTable 
+					inner join :lt_document_status_input as ids
+						on plcTable.DOCUMENT_TYPE_ID = ids.DOCUMENT_TYPE_ID
+						and plcTable.DOCUMENT_STATUS_ID = ids.DOCUMENT_STATUS_ID
+						and plcTable._VALID_FROM <= ids.master_data_timestamp
+						and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+					LEFT OUTER JOIN "sap.plc.db::basis.t_document_status__text" plcTextTable
+						ON  plcTable.DOCUMENT_STATUS_ID = plcTextTable.DOCUMENT_STATUS_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= ids.master_data_timestamp 
+						and (plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null);
+
+--select design office
+lt_design_office_input = select distinct DESIGN_OFFICE_ID, MASTER_DATA_TIMESTAMP from
+                                    (select DESIGN_OFFICE_ID, MASTER_DATA_TIMESTAMP from :it_design_office
+							            union all
+						             select DESIGN_OFFICE_ID, MASTER_DATA_TIMESTAMP from :lt_document);
+
+ot_design_office = select distinct
+								plcTable.DESIGN_OFFICE_ID,
+								plcTable._VALID_FROM,
+								plcTable._VALID_TO,
+								plcTable._SOURCE,
+								plcTable._CREATED_BY,
+								null AS _VALID_FROM_FIRST_VERSION,
+								null AS _CREATED_BY_FIRST_VERSION,
+								plcTextTable.DESIGN_OFFICE_DESCRIPTION
+							from "sap.plc.db::basis.t_design_office" as plcTable
+							inner join :lt_design_office_input as ids
+								on plcTable.DESIGN_OFFICE_ID = ids.DESIGN_OFFICE_ID
+								and plcTable._VALID_FROM <= ids.master_data_timestamp
+								and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null ) 
+							left outer join "sap.plc.db::basis.t_design_office__text" as plcTextTable
+								on  plcTable.DESIGN_OFFICE_ID = plcTextTable.DESIGN_OFFICE_ID
+								and plcTextTable.LANGUAGE = :iv_logon_language
+								and plcTextTable._VALID_FROM <= ids.master_data_timestamp
+								and ( plcTextTable._VALID_TO > ids.master_data_timestamp or plcTextTable._VALID_TO is null );	
+						
+--select vendor			
+ot_vendor = select distinct
+		      plcTable.VENDOR_ID,
+		      plcTable.VENDOR_NAME,
+		      plcTable.COUNTRY,
+		      plcTable.POSTAL_CODE,
+		      plcTable.REGION,
+		      plcTable.CITY,
+		      plcTable.STREET_NUMBER_OR_PO_BOX,
+		      plcTable._VALID_FROM,
+		      plcTable._VALID_TO,
+		      plcTable._SOURCE,
+		      plcTable._CREATED_BY,
+		      null as _VALID_FROM_FIRST_VERSION,
+			  null as _CREATED_BY_FIRST_VERSION	
+			from "sap.plc.db::basis.t_vendor" as plcTable
+			inner join :it_vendor as ids
+				on plcTable.VENDOR_ID = ids.VENDOR_ID
+				and plcTable._VALID_FROM <= ids.master_data_timestamp
+				and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null );		    
+
+--select customer
+ot_customer = SELECT distinct
+				plcTable.CUSTOMER_ID,
+				plcTable.CUSTOMER_NAME,
+				plcTable.COUNTRY,
+				plcTable.POSTAL_CODE,
+				plcTable.REGION,
+				plcTable.CITY,
+				plcTable.STREET_NUMBER_OR_PO_BOX,
+				plcTable._VALID_FROM,
+				plcTable._VALID_TO,
+				plcTable._SOURCE, 
+				plcTable._CREATED_BY,
+				null as _VALID_FROM_FIRST_VERSION,
+				null as _CREATED_BY_FIRST_VERSION
+			FROM "sap.plc.db::basis.t_customer" as plcTable 
+			inner join :it_customer as ids
+				on plcTable.CUSTOMER_ID = ids.CUSTOMER_ID
+				and plcTable._VALID_FROM <= ids.master_data_timestamp
+				and ( plcTable._VALID_TO > ids.master_data_timestamp or plcTable._VALID_TO is null );	
+				
+call "sap.plc.db.calculationmanager.procedures::p_get_uom_exchange_currency"( 
+    :iv_logon_language,
+    :it_uom,
+    :it_currency,
+    :it_exchange_rate_type,
+    ot_uom,
+    ot_currency,
+    ot_exchange_rate_type
+);
+END;

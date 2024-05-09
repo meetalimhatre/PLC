@@ -1,0 +1,109 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_price_determination" ( 
+		IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN iv_calculation_version_id    INTEGER,
+		IN iv_session_id 				NVARCHAR(50),	
+		IN it_calculation_version       "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",
+    	IN iv_reevaluate                NVARCHAR(1),
+		OUT ot_determined_prices 	    "sap.plc.db.calculationmanager.procedures::ts_item_price_determination_output" default empty,
+		OUT ot_messages                 "sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+	
+	lc_calculated_price     INTEGER DEFAULT 4;
+	lv_uom_price			NVARCHAR(3);
+	lv_report_currency_id NVARCHAR(3);
+BEGIN
+lv_report_currency_id = :it_calculation_version.report_currency_id[1];
+
+-- for all exisiting items, p_item_price_determination_trigger must be called
+-- the other update price determination procedure expects only leaf items => filter out any other items
+lt_all_parents = select distinct parent_item_id from "sap.plc.db::basis.t_item_temporary"
+		 					where calculation_version_id = :iv_calculation_version_id
+		 					and session_id = :iv_session_id
+							and parent_item_id is not null
+							and is_deleted = 0
+				 union
+				 select distinct parent_item_id from :it_items 									
+							where parent_item_id is not null;
+
+lt_existing_items = select input.*
+					from :it_items as input
+						inner join "sap.plc.db::basis.t_item_temporary" as db
+							on 	input.item_id = db.item_id
+							and db.session_id = :iv_session_id
+							and db.calculation_version_id = :iv_calculation_version_id
+							and input.item_id not in (select parent_item_id from :lt_all_parents)
+					where :iv_reevaluate = '';  
+
+call "sap.plc.db.calculationmanager.procedures::p_item_price_determination_trigger"
+  		(
+  			:lt_existing_items, 
+			:iv_calculation_version_id,
+  			:iv_session_id,
+			:it_calculation_version,
+  			:lt_determined_prices_for_existing_items, 
+  			:lt_messages_prices_for_existing_items
+  		);
+
+-- for all new items, p_price_determination_create must be called
+-- the create price determination procedure expects only leaf items => filter out any other items
+
+lt_new_items = 	select *
+				from :it_items
+				where 
+					item_id not in (select item_id from :lt_existing_items union select parent_item_id from :lt_all_parents); 
+
+call "sap.plc.db.calculationmanager.procedures::p_item_price_determination_all"
+  		(
+			:iv_calculation_version_id,
+  			:lt_new_items, 
+			:it_calculation_version,
+  			:lt_determined_prices_for_new_items, 
+  			:lt_messages_prices_for_new_items
+  		);
+
+select total_quantity_uom_id into lv_uom_price										
+	from "sap.plc.db::basis.t_item_temporary" 
+	where 	parent_item_id is null 
+			and calculation_version_id = :iv_calculation_version_id 
+			and session_id = iv_session_id;
+			
+-- reset price fields for parents	
+lt_parents_prices_reset = select 
+							item.item_id, 
+							item.vendor_id,
+ 							null as price_fixed_portion, 
+ 							null as price_variable_portion, 
+ 							:lv_report_currency_id as transaction_currency_id,
+						 	1.0 as price_unit, 
+						 	:lv_uom_price as price_unit_uom_id,
+							0 as is_price_split_active,
+							null as price_id,
+						 	price_source.confidence_level_id,
+						 	price_source.price_source_id,
+						 	price_source.price_source_type_id,
+						 	null as purchasing_group,
+			 		        null as purchasing_document,
+			 		        item.local_content
+		                    {{masterdataCustomFields Material_Price}}
+	 		                {{masterdataCustomFields Activity_Price}}
+						 from :it_items as item
+						 inner join (select top 1 * from "sap.plc.db::basis.t_price_source" where price_source_type_id = lc_calculated_price) as price_source		
+						 	on 1=1
+						 where item.item_id in (select parent_item_id from :lt_all_parents);
+
+ot_determined_prices = 	select * from :lt_determined_prices_for_existing_items
+						union all
+						select * from :lt_determined_prices_for_new_items
+						union all
+						select * from :lt_parents_prices_reset;			
+
+ ot_messages = select * from :lt_messages_prices_for_existing_items
+ 				 union all
+ 			   select * from :lt_messages_prices_for_new_items;
+
+END;
+
+

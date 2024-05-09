@@ -1,0 +1,64 @@
+{
+    "init-session": {
+        "post": {
+            "tags": [
+                "init-session"
+            ],
+            "summary": "Init back-end session",
+            "description": "",
+            "operationId": "init-session",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "language",
+                    "in": "query",
+                    "description": "Sets the init session language",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "DE",
+                        "EN",
+                        "JA-JP",
+                        "ZH-HANS",
+                        "ZH-HANT"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/InitSessionPostResponse"                        
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "read:init-session"
+                    ]
+                }
+            ]
+        }
+    }
+}

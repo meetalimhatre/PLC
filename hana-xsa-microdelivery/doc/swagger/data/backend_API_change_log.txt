@@ -1,0 +1,3101 @@
+=================================== PLC API version 2.0.0, Release 28-10-2016 ===================================
+                                    Initial version of PLC API documentation.
+==================================================================================================================
+
+=================================== PLC API version 2.1.0, Release 24-02-2017 ===================================
+                                PLC API services changes from the previous version.
+
+1. administration?business_object=Account
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"ACCOUNT_ENTITIES": [],
+						"ACCOUNT_TEXT_ENTITIES": [{
+							"ACCOUNT_ID": "#AC11",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"LANGUAGE": "EN",
+							"ACCOUNT_DESCRIPTION": "EN Test Updated"
+						}, {
+							"ACCOUNT_ID": "#AC11",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"LANGUAGE": "DE",
+							"ACCOUNT_DESCRIPTION": "DE Test Updated"
+						}]
+					}
+				}
+
+2. administration?business_object=Vendor
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"VENDOR_ENTITIES": [{
+							"VENDOR_ID": "V4",
+							"VENDOR_NAME": "N4",
+							"COUNTRY": "C4",
+							"POSTAL_CODE": "4",
+							"REGION": "C",
+							"CITY": "C",
+							"STREET_NUMBER_OR_PO_BOX": "4"
+						}]
+					}
+				}
+3. administration?business_object=Activity_Price
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"ACTIVITY_PRICE_ENTITIES": [{
+							"PRICE_SOURCE_ID": "PLC_STANDARD_PRICE",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"COST_CENTER_ID": "#CC3",
+							"ACTIVITY_TYPE_ID": "#AT1",
+							"PROJECT_ID": "*",
+							"VALID_FROM": "2015-08-01T00:00:00",
+							"PRICE_FIXED_PORTION": 111.11,
+							"PRICE_VARIABLE_PORTION": 123.45,
+							"PRICE_TRANSACTION_CURRENCY_ID": "TST",
+							"PRICE_UNIT": 1,
+							"PRICE_UNIT_UOM_ID": "TST"
+						}]
+					}
+				}
+
+4. administration?business_object=Activity_Type
+
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"ACTIVITY_TYPE_ENTITIES": [{
+							"ACTIVITY_TYPE_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}, {
+							"ACTIVITY_TYPE_ID": "INS2",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}],
+						"ACTIVITY_TYPE_TEXT_ENTITIES": [{
+							"ACTIVITY_TYPE_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"ACTIVITY_TYPE_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"ACTIVITY_TYPE_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"ACTIVITY_TYPE_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"ACTIVITY_TYPE_ID": "INS2",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"ACTIVITY_TYPE_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+5. administration?business_object=Business_Area
+
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"BUSINESS_AREA_ENTITIES": [{
+							"BUSINESS_AREA_ID": "INS1"
+						}, {
+							"BUSINESS_AREA_ID": "INS2"
+						}],
+						"BUSINESS_AREA_TEXT_ENTITIES": [{
+							"BUSINESS_AREA_ID": "INS1",
+							"BUSINESS_AREA_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"BUSINESS_AREA_ID": "INS1",
+							"BUSINESS_AREA_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"BUSINESS_AREA_ID": "INS2",
+							"BUSINESS_AREA_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+6. administration?business_object=Business_Process
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+7. administration?business_object=Company_Code
+
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"COMPANY_CODE_ENTITIES": [{
+							"COMPANY_CODE_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}, {
+							"COMPANY_CODE_ID": "INS2",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}],
+						"COMPANY_CODE_TEXT_ENTITIES": [{
+							"COMPANY_CODE_ID": "INS1",
+							"COMPANY_CODE_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"COMPANY_CODE_ID": "INS1",
+							"COMPANY_CODE_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"COMPANY_CODE_ID": "INS2",
+							"COMPANY_CODE_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+8. administration?business_object=Confidence_Level
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+9. administration?business_object=Controlling_Area
+
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"CONTROLLING_AREA_ENTITIES": [{
+							"CONTROLLING_AREA_ID": "CA1"
+						}, {
+							"CONTROLLING_AREA_ID": "CA2"
+						}],
+						"CONTROLLING_AREA_TEXT_ENTITIES": [{
+							"CONTROLLING_AREA_ID": "CA1",
+							"CONTROLLING_AREA_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"CONTROLLING_AREA_ID": "CA1",
+							"CONTROLLING_AREA_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"CONTROLLING_AREA_ID": "CA2",
+							"CONTROLLING_AREA_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+10. administration?business_object=Cost_Center
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"COST_CENTER_ENTITIES": [{
+							"COST_CENTER_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}, {
+							"COST_CENTER_ID": "INS2",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}],
+						"COST_CENTER_TEXT_ENTITIES": [{
+							"COST_CENTER_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"COST_CENTER_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"COST_CENTER_ID": "INS1",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"COST_CENTER_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"COST_CENTER_ID": "INS2",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"COST_CENTER_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+11. administration?business_object=Currency_Conversion
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"CURRENCY_CONVERSION_ENTITIES": [{
+							"FROM_CURRENCY_ID": "EUR",
+							"TO_CURRENCY_ID": "GBP",
+							"FROM_FACTOR": 1,
+							"TO_FACTOR": 1,
+							"RATE": 1,
+							"VALID_FROM": "2015-06-02T00:00:00Z"
+						}]
+					}
+				}
+
+12. administration?business_object=Dimension
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+13. administration?business_object=Document
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+14. administration?business_object=Document_Type
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+15. administration?business_object=Currency
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"CURRENCY_ENTITIES": [{
+							"CURRENCY_ID": "TST"
+						}],
+						"CURRENCY_TEXT_ENTITIES": [{
+							"CURRENCY_ID": "TST",
+							"LANGUAGE": "EN",
+							"CURRENCY_CODE": "TST",
+							"CURRENCY_DESCRIPTION": "Test currency 1"
+						}, {
+							"CURRENCY_ID": "TST",
+							"LANGUAGE": "DE",
+							"CURRENCY_CODE": "TST",
+							"CURRENCY_DESCRIPTION": "Test currency 2"
+						}]
+					}
+				}
+
+16. administration?business_object=Laboratory_Design_Office
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+17. administration?business_object=Customer
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"CUSTOMER_ENTITIES": [{
+							"CUSTOMER_ID": "C3",
+							"CUSTOMER_NAME": "N3",
+							"COUNTRY": "C3",
+							"POSTAL_CODE": "3",
+							"REGION": "C",
+							"CITY": "C",
+							"STREET_NUMBER_OR_PO_BOX": "3"
+						}]
+					}
+				}
+
+18. administration?business_object=Document_Status
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+19. administration?business_object=Language
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+20. administration?business_object=Material
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_ENTITIES": [{
+							"MATERIAL_ID": "INS1"
+						}, {
+							"MATERIAL_ID": "INS2"
+						}],
+						"MATERIAL_TEXT_ENTITIES": [{
+							"MATERIAL_ID": "INS1",
+							"MATERIAL_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"MATERIAL_ID": "INS1",
+							"MATERIAL_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"MATERIAL_ID": "INS2",
+							"MATERIAL_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+21. administration?business_object=Material_Account
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_ACCOUNT_ENTITIES": [{
+							"CONTROLLING_AREA_ID": "#CA1",
+							"MATERIAL_TYPE_ID": "#FIN",
+							"PLANT_ID": "#PT1",
+							"VALUATION_CLASS_ID": "*",
+							"ACCOUNT_ID": "#AC11"
+						}]
+					}
+				}
+
+22. administration?business_object=Material_Group
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_GROUP_ENTITIES": [{
+							"MATERIAL_GROUP_ID": "INS1"
+						}, {
+							"MATERIAL_GROUP_ID": "INS2"
+						}],
+						"MATERIAL_GROUP_TEXT_ENTITIES": [{
+							"MATERIAL_GROUP_ID": "INS1",
+							"MATERIAL_GROUP_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"MATERIAL_GROUP_ID": "INS1",
+							"MATERIAL_GROUP_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"MATERIAL_GROUP_ID": "INS2",
+							"MATERIAL_GROUP_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+23. administration?business_object=Material_Plant
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_PLANT_ENTITIES": [{
+							"MATERIAL_ID": "#100-100",
+							"PLANT_ID": "#PT1"
+						}]
+					}
+				}
+
+24. administration?business_object=Material_Price
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_PRICE_ENTITIES": [{
+							"PRICE_SOURCE_ID": "ERP_STANDARD_PRICE",
+							"MATERIAL_ID": "MAT1",
+							"PLANT_ID": "#PT1",
+							"VENDOR_ID": "#VD1",
+							"PROJECT_ID": "#P1",
+							"VALID_FROM": "2015-06-21T00:00:00Z",
+							"PRICE_FIXED_PORTION": 123.45,
+							"PRICE_VARIABLE_PORTION": 234.56,
+							"PRICE_TRANSACTION_CURRENCY_ID": "TST",
+							"PRICE_UNIT": 1,
+							"PRICE_UNIT_UOM_ID": "TST"
+						}]
+					}
+				}
+
+25. administration?business_object=Material_Type
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"MATERIAL_TYPE_ENTITIES": [{
+							"MATERIAL_TYPE_ID": "INS1"
+						}, {
+							"MATERIAL_TYPE_ID": "MAT1"
+						}],
+						"MATERIAL_TYPE_TEXT_ENTITIES": [{
+							"MATERIAL_TYPE_ID": "INS1",
+							"MATERIAL_TYPE_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"MATERIAL_TYPE_ID": "INS1",
+							"MATERIAL_TYPE_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"MATERIAL_TYPE_ID": "MAT1",
+							"MATERIAL_TYPE_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+26. administration?business_object=Overhead_Group
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"OVERHEAD_GROUP_ENTITIES": [{
+							"OVERHEAD_GROUP_ID": "O4",
+							"PLANT_ID": "#PT1"
+						}, {
+							"OVERHEAD_GROUP_ID": "O5",
+							"PLANT_ID": "#PT1"
+						}],
+						"OVERHEAD_GROUP_TEXT_ENTITIES": [{
+							"OVERHEAD_GROUP_ID": "O4",
+							"PLANT_ID": "#PT1",
+							"OVERHEAD_GROUP_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"OVERHEAD_GROUP_ID": "O4",
+							"PLANT_ID": "#PT1",
+							"OVERHEAD_GROUP_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"OVERHEAD_GROUP_ID": "O5",
+							"PLANT_ID": "#PT1",
+							"OVERHEAD_GROUP_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+27. administration?business_object=Plant
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"PLANT_ENTITIES": [{
+							"PLANT_ID": "INS1",
+							"COMPANY_CODE_ID": "#C1"
+						}, {
+							"PLANT_ID": "INS2",
+							"COMPANY_CODE_ID": "#C1"
+						}],
+						"PLANT_TEXT_ENTITIES": [{
+							"PLANT_ID": "INS1",
+							"PLANT_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"PLANT_ID": "INS1",
+							"PLANT_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"PLANT_ID": "INS2",
+							"PLANT_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+28. administration?business_object=Profit_Center
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"PROFIT_CENTER_ENTITIES": [{
+							"PROFIT_CENTER_ID": "P4",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}, {
+							"PROFIT_CENTER_ID": "P5",
+							"CONTROLLING_AREA_ID": "#CA1"
+						}],
+						"PROFIT_CENTER_TEXT_ENTITIES": [{
+							"PROFIT_CENTER_ID": "P4",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"PROFIT_CENTER_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"PROFIT_CENTER_ID": "P4",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"PROFIT_CENTER_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"PROFIT_CENTER_ID": "P5",
+							"CONTROLLING_AREA_ID": "#CA1",
+							"PROFIT_CENTER_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+29. administration?business_object=Unit_Of_Measure
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"UNIT_OF_MEASURE_ENTITIES": [{
+							"UOM_ID": "TST",
+							"DIMENSION_ID": "AREA",
+							"NUMERATOR": 1,
+							"DENOMINATOR": 1,
+							"EXPONENT_BASE10": 0,
+							"SI_CONSTANT": 0
+						}],
+						"UNIT_OF_MEASURE_TEXT_ENTITIES": [{
+							"UOM_ID": "TST",
+							"LANGUAGE": "EN",
+							"UOM_CODE": "d",
+							"UOM_DESCRIPTION": "Test entry 1"
+						}, {
+							"UOM_ID": "TST",
+							"LANGUAGE": "DE",
+							"UOM_CODE": "d",
+							"UOM_DESCRIPTION": "Test entry 2"
+						}]
+					}
+				}
+
+30. administration?business_object=Valuation_Class
+    +GET
+		+added new parameter "skip" used to skip a number of objects
+
+    +POST
+		+changed request body to accept also UPSERT property - this will trigger an update or insert of the entity requested.
+			Ex:
+				{
+					"UPSERT": {
+						"VALUATION_CLASS_ENTITIES": [{
+							"VALUATION_CLASS_ID": "INS1"
+						}, {
+							"VALUATION_CLASS_ID": "INS2"
+						}],
+						"VALUATION_CLASS_TEXT_ENTITIES": [{
+							"VALUATION_CLASS_ID": "INS1",
+							"VALUATION_CLASS_DESCRIPTION": "Test1 EN",
+							"LANGUAGE": "EN"
+						}, {
+							"VALUATION_CLASS_ID": "INS1",
+							"VALUATION_CLASS_DESCRIPTION": "Test1 DE",
+							"LANGUAGE": "DE"
+						}, {
+							"VALUATION_CLASS_ID": "INS2",
+							"VALUATION_CLASS_DESCRIPTION": "Test2 EN",
+							"LANGUAGE": "EN"
+						}]
+					}
+				}
+
+31. administration?business_object= {AccountGroup, ComponentSplit, CostingSheet, CostingSheetRow}
+    	+GET
+		- moved lock status information from head.metadata.<business_object> to body.DEFAULT_SETTINGS.LOCK_STATUS
+			Ex:
+			 "LOCK_STATUS" : {
+          		"IS_LOCKED" :"1",
+				"USER_ID" : "Rolf"
+			}
+
+32. calculations
+	+GET
+		- added new parameter "calculation_id" to get calculations by their id (accepts a comma separated list)
+		- removed Response 404: simply returns an empty or reduced list of calculations if invalid project ids, calculation_ids or combinations of both are provided.
+		- added new parameter "topPerProject" that specify the number of calculations that must be retrieved for each project. Default value is 100.
+	+POST
+		- removed section head.metadata.CalculationVersions
+		- Response 200
+				- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+	+DEL
+		- Added error code returned if any calculation version of calculation is under lifecycle calculation: GENERAL_ENTITY_PART_OF_CALCULATION_ERROR
+
+33. calculation-versions
+	+POST
+		- moved properties IS_DIRTY and IS_WRITEABLE from section head.metadata.CalculationVersions to body.transactionaldata[0].CALCULATION_VERSIONS[0]
+		- Added error codes regarding lifecycle calculation version: LIFECYCLE_CALCULATIONVERSION_IS_STILL_OPENED_ERROR, LIFECYCLE_CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR and GENERAL_ENTITY_PART_OF_CALCULATION_ERROR
+		- Response 200
+				- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+
+	+PUT
+		- Response 200
+				- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+
+	+DEL
+		- Added error code returned if the calculation version is under lifecycle calculation: GENERAL_ENTITY_PART_OF_CALCULATION_ERROR
+	+GET
+
+34. layouts New service
+	+GET
+		+ returns all corporate and current user layouts
+	+POST
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate layouts
+		+ create corporate or personal layouts
+		+ returns the id of the created layout
+	+PUT
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate layouts
+		+ edit existing layouts (change name, display columns or hidden fields)
+		+ returns the id of the changed layout
+	+DELETE
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate layouts
+		+ delete existing layout
+		- removed section head.metadata.CalculationVersions
+
+35. calculated-results
+	+GET
+		- Response: removed section head.metadata.CalculationVersions
+		- Response 200
+			- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+
+36. default_settings
+	+GET
+		- Response: moved lock status information from head.metadata.DefaultSettings to body.DEFAULT_SETTINGS.LOCK_STATUS
+			Ex:
+			 "LOCK_STATUS" : {
+          		"IS_LOCKED" :"1",
+				"USER_ID" : "Rolf"
+			}
+
+37. items
+	+PUT
+		- Response 200
+				- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+
+	+POST, DEL
+		- Response: moved property IS_DIRTY from section head.metadata.CalculationVersions to body.transactionaldata[0]
+		- Response 200
+				- added in body->calculated->ITEM_CALCULATED_FIELDS three more properties:
+
+			 	"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "decimal"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "decimal"
+				}
+
+38. metadata
+	+GET
+		- Response: moved property IS_LOCKED from section head.metadata.metadata to property LOCK_ACTIVE_USERS_STATUS in body.LOCK_ACTIVE_USERS_STATUS
+			Ex:
+			LOCK_ACTIVE_USERS_STATUS": {
+	          	"IS_LOCKED" :"true",
+				"ACTIVE_USERS" : [
+					USER_ID: "user_1",
+		 			LANGUAGE: "EN",
+		 			SECONDS_BETWEEN: "3"
+				]
+			}
+
+39. init-session
+	+POST
+		- Response: moved property head.metadata.plcServerVersion to property body.APPLICATION.SERVER_VERSION
+
+40. tasks (new resource)
+	+GET
+		- Returns long-running tasks in the system
+		- If id parameter is not set, all currently executed tasks are returned
+		- If parameter id is set, the specific task for the id is returned (no matter the task status)
+		- Is currently only used for the calculation of lifecycle versions
+
+41. customfieldsformula
+	+GET
+		- Added new value "Masterdata" for parameter "business_object".
+			Ex: This URL "/customfieldsformula?business_object=Masterdata&is_custom=true" returns all the custom fields for all masterdata business objects.
+		- LOCK_STATUS moved from head.metadata.Default_Settings to body.DEFAULT_SETTINGS
+	+POST
+		- Request:
+			+ changed to accept the following Masterdata business objects: Material Price, Material (General data), Material (Plant-specific data), Cost Center.
+			+ for Masterdata custom fields only one attribute is allowed in the request body
+			+ for Masterdata custom fields formulas are not supported
+			Ex:
+			{
+   				"CREATE":[
+			      {
+			         "PATH":"Material",
+			         "BUSINESS_OBJECT":"Material",
+			         "COLUMN_ID":"CMAT_TEST2", // Column ID must start with "CMAT_", "CMPR_", "CMPL_", "CCEN_" depending on the Masterdata business object
+			         "SIDE_PANEL_GROUP_ID":501,
+			         "REF_UOM_CURRENCY_BUSINESS_OBJECT":null,
+			         "REF_UOM_CURRENCY_COLUMN_ID":null,
+			         "REF_UOM_CURRENCY_PATH":null,
+			         "ROLLUP_TYPE_ID":0,
+			         "SEMANTIC_DATA_TYPE":"Decimal",
+			         "UOM_CURRENCY_FLAG":0,
+			         "ATTRIBUTES":[ {
+			               "BUSINESS_OBJECT":"Material",
+			               "COLUMN_ID":"CMAT_TEST2",
+			               "PATH":"Material",
+			               "ITEM_CATEGORY_ID":-1,
+			               "DEFAULT_VALUE":"12"
+			            }],
+			         "TEXT":[{
+			               "PATH":"Material",
+			               "COLUMN_ID":"CMAT_TEST2",
+			               "LANGUAGE":"EN"
+			            }],
+			         "FORMULAS":[]
+			      }
+			   ],
+			   "UPDATE":[],
+			   "DELETE":[]
+			}
+
+42. privileges (new resource)
+	+GET
+		+ returns all privileges for an entity
+		+ entity_type parameter is mandatory
+		+ entity_id parameter is mandatory
+	+POST
+		+ batch implementation
+		+ creates users and groups privileges for an entity
+		+ changes privileges of users and groups for an entity
+		+ deletes users and group privileges for an entity
+
+43. projects
+	+POST
+		- Added value "calculate_lifecycle_versions" for parameter "action"
+		- Triggers calculation of lifecycle versions f
+		- Ex:
+		      /projects?{id}&action=calculate_lifecycle_versions
+	+DEL
+		- Added error code returned if any calculation version of the project is under lifecycle calculation: GENERAL_ENTITY_PART_OF_CALCULATION_ERROR
+44. project/quantities (new sub-resouce)
+	+GET
+		- Retrieves defined total quantities for calcuations within the project
+		- The project is specified with id parameter
+	+PUT
+		- Updates total quantities for calcuations within the project
+		- Body of request replaces completely the existing total quantity definitions (if any)
+		- The project is specified with id parameter
+45. groups (new resource)
+	+GET
+		+ returns all groups from the system
+		+ lock - locks the Groups business object for current user
+		+ id - returns the groups together with the users and subgroups membership
+		+ searchAutocomplete - returns all groups that start with string
+	+POST
+		+ batch implementation
+		+ creates groups and the user and subgroups memberships
+		+ changes descriptions of groups
+		+ deletes groups, user memberships and subgroup memberships
+
+
+
+==================================================================================================================
+
+=================================== PLC API version 2.2.0, Release 22-08-2017 ===================================
+                                PLC API services changes from the previous version.
+
+
+1. plc-users
+    +GET
+        + returns all users from the system
+        + searchAutoComplete - returns all users that start with string
+        + top - returns a maximum number of users from the system
+        + Ex:  plc-users?searchAutocomplete=i33
+                {
+                    "body": {
+                        "PLC_USERS": [
+                            {
+                                "USER_ID": "I332841"
+                            },
+                            {
+                                "USER_ID": "I332852"
+                            },
+                            {
+                                "USER_ID": "I332920"
+                            },
+                            {
+                                "USER_ID": "I332988"
+                            },
+                            {
+                                "USER_ID": "I333101"
+                            }
+                        ]
+                    },
+                    "head": {}
+                }
+ 2. work-centers
+     +GET
+        + returns all work centers from the system
+        + searchAutoComplete - returns all work centers that start with string
+        + top - returns a maximum number of work centers from the system
+        + skip - skips a number of work centers from the system
+        + custom fields for work center
+
+        +Ex: administration?business_object=Work_Center&top=1
+        {
+		  	"body": {
+			    "masterdata": {
+			      "WORK_CENTER_ENTITIES": [
+			        {
+			          "WORK_CENTER_ID": "#WC1",
+			          "PLANT_ID": "#PT1",
+			          "WORK_CENTER_CATEGORY": "LABOR",
+			          "CONTROLLING_AREA_ID": "#CA1",
+			          "COST_CENTER_ID": "#CC1",
+			          "WORK_CENTER_RESPONSIBLE": "#CONTROLLER",
+			          "EFFICIENCY": "30",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER",
+			          "_VALID_FROM_FIRST_VERSION": "2000-01-01T00:00:00.000Z",
+			          "_CREATED_BY_USER_ID_FIRST_VERSION": " #CONTROLLER",
+			          "WORK_CENTER_DESCRIPTION": "Supervising Stamping 1 "
+			        }
+			      ],
+			      "WORK_CENTER_TEXT_ENTITIES": [
+			        {
+			          "WORK_CENTER_ID": "#WC1",
+			          "PLANT_ID": "#PT1",
+			          "LANGUAGE": "EN",
+			          "WORK_CENTER_DESCRIPTION": "Supervising Stamping 1 ",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER"
+			        },
+			        {
+			          "WORK_CENTER_ID": "#WC1",
+			          "PLANT_ID": "#PT1",
+			          "LANGUAGE": "DE",
+			          "WORK_CENTER_DESCRIPTION": "Uberwachung Stanzen 2",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER"
+			        }
+			      ],
+			      "CONTROLLING_AREA_ENTITIES": [
+			        {
+			          "CONTROLLING_AREA_ID": "#CA1",
+			          "CONTROLLING_AREA_CURRENCY_ID": "EUR",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER",
+			          "_VALID_FROM_FIRST_VERSION": null,
+			          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+			          "CONTROLLING_AREA_DESCRIPTION": "Controlling Area 1"
+			        }
+			      ],
+			      "PLANT_ENTITIES": [
+			        {
+			          "PLANT_ID": "#PT1",
+			          "COMPANY_CODE_ID": "#C1",
+			          "COUNTRY": "Germany",
+			          "POSTAL_CODE": "12345",
+			          "REGION": null,
+			          "CITY": "Dresden",
+			          "STREET_NUMBER_OR_PO_BOX": "Werkstraße 1",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER",
+			          "_VALID_FROM_FIRST_VERSION": null,
+			          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+			          "PLANT_DESCRIPTION": "Plant 1"
+			        }
+			      ],
+			      "COST_CENTER_ENTITIES": [
+			        {
+			          "COST_CENTER_ID": "#CC1",
+			          "CONTROLLING_AREA_ID": "#CA1",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER",
+			          "_VALID_FROM_FIRST_VERSION": null,
+			          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+			          "COST_CENTER_DESCRIPTION": "Cost Center 1"
+			        }
+			      ],
+			      "COMPANY_CODE_ENTITIES": [
+			        {
+			          "COMPANY_CODE_ID": "#C1",
+			          "CONTROLLING_AREA_ID": "#CA1",
+			          "COMPANY_CODE_CURRENCY_ID": "EUR",
+			          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+			          "_VALID_TO": null,
+			          "_SOURCE": 1,
+			          "_CREATED_BY_USER_ID": " #CONTROLLER",
+			          "_VALID_FROM_FIRST_VERSION": null,
+			          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+			          "COMPANY_CODE_DESCRIPTION": "Company 1"
+			        }
+			      ]
+			    }
+			  },
+			  "head": {}
+			}
+
+	+POST
+		+ batch implementation
+		+ creates work centers and work centers texts
+		+ changes descriptions of work centers
+		+ deletes work centers
+		+ upserts work centers
+		+ custom fields for work center
+
+		+Ex: administration?business_object=Work_Center
+		{
+		  "body": {
+		    "masterdata": {
+		      "CREATE": {
+		        "WORK_CENTER_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC11",
+		            "PLANT_ID": "#PT1",
+		            "WORK_CENTER_CATEGORY": "LABOR",
+		            "COST_CENTER_ID": "#CC1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "WORK_CENTER_RESPONSIBLE": "#CONTROLLER",
+		            "EFFICIENCY": "40",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ],
+		        "WORK_CENTER_TEXT_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC11",
+		            "PLANT_ID": "#PT1",
+		            "LANGUAGE": "EN",
+		            "WORK_CENTER_DESCRIPTION": "#WC1",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ]
+		      },
+		      "UPSERT": {
+		        "WORK_CENTER_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC11",
+		            "PLANT_ID": "#PT1",
+		            "WORK_CENTER_CATEGORY": "LABOR",
+		            "COST_CENTER_ID": "#CC1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "WORK_CENTER_RESPONSIBLE": "#CONTROLLER",
+		            "EFFICIENCY": "40",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ],
+		        "WORK_CENTER_TEXT_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC11",
+		            "PLANT_ID": "#PT1",
+		            "LANGUAGE": "EN",
+		            "WORK_CENTER_DESCRIPTION": "#WC1",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ]
+		      },
+		      "UPDATE": {
+		        "WORK_CENTER_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC1",
+		            "PLANT_ID": "#PT1",
+		            "WORK_CENTER_CATEGORY": "LABOR",
+		            "COST_CENTER_ID": "#CC1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "WORK_CENTER_RESPONSIBLE": "#CONTROLLER",
+		            "EFFICIENCY": "30",
+		            "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": " #CONTROLLER"
+		          },
+		          {
+		            "WORK_CENTER_ID": "#WC1",
+		            "PLANT_ID": "#PT1",
+		            "WORK_CENTER_CATEGORY": "LABOR",
+		            "COST_CENTER_ID": "#CC1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "WORK_CENTER_RESPONSIBLE": "#CONTROLLER",
+		            "EFFICIENCY": "40",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ],
+		        "WORK_CENTER_TEXT_ENTITIES": [
+		          {
+		            "WORK_CENTER_ID": "#WC1",
+		            "PLANT_ID": "#PT1",
+		            "LANGUAGE": "EN",
+		            "WORK_CENTER_DESCRIPTION": "Work Center 1",
+		            "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": " #CONTROLLER"
+		          },
+		          {
+		            "WORK_CENTER_ID": "#WC1",
+		            "PLANT_ID": "#PT1",
+		            "LANGUAGE": "EN",
+		            "WORK_CENTER_DESCRIPTION": "#WC1",
+		            "_VALID_FROM": "2017-05-30T11:45:30.272Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ]
+		      },
+		      "DELETE": {
+		        "WORK_CENTER_ENTITIES": [],
+		        "WORK_CENTER_TEXT_ENTITIES": []
+		      }
+		    }
+		  },
+		  "head": {}
+		}
+3. items
+	+GET
+		- Response: removed property IS_HIGHLIGHTED
+		- Response: added optional properties HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW
+			"HIGHLIGHT_GREEN": {
+				"type": "integer
+			},
+			"HIGHLIGHT_ORANGE": {
+				"type": "integer
+			},
+			"HIGHLIGHT_YELLOW": {
+				"type": "integer
+			}
+        - Response: added property PRICE_APPLIED_SURCHARGE
+	+POST, PUT
+		- Request: removed property IS_HIGHLIGHTED
+		- Request: added optional properties HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW
+			"HIGHLIGHT_GREEN": {
+				"type": "integer
+			},
+			"HIGHLIGHT_ORANGE": {
+				"type": "integer
+			},
+			"HIGHLIGHT_YELLOW": {
+				"type": "integer
+			}
+4. items
+	+GET
+	+POST
+		- added custom fields for work center
+
+5. customfieldsformula
+	+GET
+	+POST
+		-added the following masterdata business object: Work Center.
+			Ex:
+			{
+   				"CREATE":[
+			      {
+			         "PATH":"Material",
+			         "BUSINESS_OBJECT":"Material",
+			         "COLUMN_ID":"CMAT_TEST2", // Column ID must start with "CMAT_", "CMPR_", "CMPL_", "CCEN_" depending on the Masterdata business object
+			         "SIDE_PANEL_GROUP_ID":501,
+			         "REF_UOM_CURRENCY_BUSINESS_OBJECT":null,
+			         "REF_UOM_CURRENCY_COLUMN_ID":null,
+			         "REF_UOM_CURRENCY_PATH":null,
+			         "ROLLUP_TYPE_ID":0,
+			         "SEMANTIC_DATA_TYPE":"Decimal",
+			         "UOM_CURRENCY_FLAG":0,
+			         "ATTRIBUTES":[ {
+			               "BUSINESS_OBJECT":"Work_Center",
+			               "COLUMN_ID":"CWCE_TEST1",
+			               "PATH":"Work_Center",
+			               "ITEM_CATEGORY_ID":-1,
+			               "DEFAULT_VALUE":"12"
+			            }],
+			         "TEXT":[{
+			               "PATH":"Work_Center",
+			               "COLUMN_ID":"CWCE_TEST2",
+			               "LANGUAGE":"EN"
+			            }],
+			         "FORMULAS":[]
+			      }
+			   ],
+			   "UPDATE":[],
+			   "DELETE":[]
+			}
+
+6. frontend-settings
+    +GET
+        + returns all corporate and current user frontend settings
+        + requires parameter "type" which describes the type of settings that should be retrieved
+        + Ex:  frontend-settings?type=Filter
+        {
+            "body": {
+				"SETTINGS": [{
+					"SETTING_ID": 1,
+					"SETTING_NAME": "Corporate Filter 1",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": null,
+					"SETTING_CONTENT": "Base64EncodedString"
+				},
+				{
+					"SETTING_ID": 2,
+					"SETTING_NAME": "My Filter 1",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": "#CONTROLLER",
+					"SETTING_CONTENT": "Base64EncodedString"
+				}]
+			},
+			"head": {}
+		}
+	+POST
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate frontend settings
+		+ create corporate or personal frontend settings
+		+ Ex: frontend-settings?is_corporate=true
+		{
+            "body": {
+				"SETTINGS": [{
+					"SETTING_ID": 1,
+					"HANDLE_ID": -1,
+					"SETTING_NAME": "Corporate Filter 1",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": null,
+					"SETTING_CONTENT": "Base64EncodedString"
+				},
+				{
+					"SETTING_ID": 2,
+					"HANDLE_ID": -2,
+					"SETTING_NAME": "My Filter 1",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": "#CONTROLLER",
+					"SETTING_CONTENT": "Base64EncodedString"
+				}]
+			},
+			"head": {}
+		}
+	+PUT
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate frontend settings
+		+ edit existing frontend settings (change name or content)
+		+ Ex: frontend-settings?is_corporate=true
+		{
+            "body": {
+				"SETTINGS": [{
+					"SETTING_ID": 1,
+					"SETTING_NAME": "Updated Filter Name",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": "#CONTROLLER",
+					"SETTING_CONTENT": "Base64EncodedString"
+				},
+				{
+					"SETTING_ID": 2,
+					"SETTING_NAME": "Filter Name 2",
+					"SETTING_TYPE": "Filter",
+					"USER_ID": "#CONTROLLER",
+					"SETTING_CONTENT": "UpdatedBase64EncodedString"
+				}]
+			},
+			"head": {}
+		}
+	+DELETE
+		+ is_corporate parameter is mandatory
+		+ special privilege for corporate frontend settings
+		+ delete existing frontend settings
+
+7. data-protection
+    +GET
+        + erase personal data (user id, customer id, vendor id) when all applicable validity periods have expired
+        + special privilege for read, update and delete personal data
+        + userId - updates user id with 'DELETED'
+        + deleteUser - deletes users from User Groups, Projects Privileges, etc
+        + customerId - updates customer id with placeholder 'DELETED' and deletes customer from PLC
+        + vendorId - updates vendor id with placeholder 'DELETED' and vendor customer from PLC
+        + projectId - replaces personal data (user id, customer id, vendor id) related to a project with 'DELETED'
+        + Ex:  data-protection?userId=U123456&deleteUser=true&customerId=CUSTOMER1&vendorId=VENDOR1&projectId=PROJECT1
+                {
+                    "body": {
+                        "UPDATE": {
+							"PLACEHOLDER": "User U123456 successfully replaced with placeholder 'DELETED'",
+							"FORMULA": "Formula Id 1234 contains personal data for User Id U123456. Adjust formula to remove the user. "
+						},
+						"DELETE_INSTANCE_BASED": "User U123456 is the only administrator of PROJECT2. Asign another administrator and try again.
+						"DELETE_USER": {
+							"DELETE": "User U123456 successfully deleted",
+							"PRIVILEGES": "Project privileges successfully removed for user U123456."
+						},
+						"DELETE_CUSTOMER": {
+							"PLACEHOLDER": "Customer CUSTOMER1 successfully marked as 'DELETED'.",
+							"CUSTOMER": "Customer CUSTOMER1 successfully deleted.",
+							"FORMULA": ""
+						},
+						"DELETE_VENDOR": {
+							"PLACEHOLDER": "Vendor VENDOR1 successfully marked as 'DELETED'.",
+							"VENDOR": "Vendor VENDOR1 successfully deleted.",
+							"FORMULA": ""
+						},
+						"PROJECT_DATA_PROTECTION": "Personal data was successfully deleted for project PROJECT1."
+                    },
+                    "head": {}
+                }
+8. projects/activity-price-surcharges
+	+GET
+		+ Delivers the definition for all activity price surcharges in the project
+	+PUT
+		+ Replaces all defined activity price surcharges with the data of the request body
+
+9. projects/material-price-surcharges
+	+GET
+		+ Delivers the definition for all material price surcharges in the project
+	+PUT
+		+ Replaces all defined material price surcharges with the data of the request body
+
+10. data model changes
+	+t_metadata__text and t_metadata__text_staging
+		DISPLAY_DESCRIPTION was increased from NVARCHAR(250) to NVARCHAR(5000)
+
+11./administration?business_object=Account
+    +POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+12./administration?business_object=AccountGroup
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+13./administration?business_object=ActivityPrice
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+14./administration?business_object=ActivityType
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+15./administration?business_object=BusinessArea
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+16./administration?business_object=BusinessProcess
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+17./administration?business_object=CompanyCode
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+18./administration?business_object=ConfidenceLevel
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+19./administration?business_object=ControllingArea
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+20./administration?business_object=CostCenter
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+21./administration?business_object=CurrencyConversion
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+22./administration?business_object=Currency
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+23./administration?business_object=Dimension
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+24./administration?business_object=Document
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+25./administration?business_object=DocumentStatus
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+26./administration?business_object=DocumentType
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+27./administration?business_object=LaboratoryDesignOffice
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+28./administration?business_object=Language
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+29./administration?business_object=Material
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+30./administration?business_object=MaterialAccount
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+31./administration?business_object=MaterialGroup
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+32./administration?business_object=MaterialPlant
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+33./administration?business_object=MaterialPrice
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+34./administration?business_object=MaterialType
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+35./administration?business_object=OverheadGroup
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+36./administration?business_object=Plant
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+37./administration?business_object=ProfitCenter
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+38./administration?business_object=UnitOfMeasure
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+39./administration?business_object=ValuationClass
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+40./administration?business_object=WorkCenter
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+41./administration?business_object=ComponentSplit
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+42./administration?business_object=CostingSheet
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+43./administration?business_object=CostingSheetRow
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+44./administration?business_object=PriceSource
+	+POST
+    	+added a new parameter boolean "ignoreBadData" to let users choose if they want to ignore the bad data and commit the good data only
+
+
+
+==================================================================================================================
+
+=================================== PLC API version 2.2.1, Release 29-09-2017 ===================================
+                                PLC API services changes from the previous version.
+
+1. calculation-version
+    +POST
+    +PUT
+		+added new parameter "compressedResult" used for reducing the size of the response
+		+on the response a new object was added ITEMS_COMPRESSED which contains the item properties and and an array of values for all the items
+		+it is visible for open calculation version on POST requests (action = open) and on updateMasterdataTimestamp for PUT requests
+
+
+
+==================================================================================================================
+
+=================================== PLC API version 2.3.0, Release 15-11-2017 ===================================
+                                PLC API services changes from the previous version.
+1. business-process
+     +GET
+        + added COMMENT to BUSINESS_PROCESS_ENTITIES
+        + Ex for the new get response:
+        {
+		  "body": {
+		    "masterdata": {
+		      "BUSINESS_PROCESS_ENTITIES": [
+		        {
+		          "BUSINESS_PROCESS_ID": "#BP1",
+		          "CONTROLLING_AREA_ID": "#CA1",
+		          "ACCOUNT_ID": "#AC41",
+		          "COMMENT": null,
+		          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		          "_VALID_TO": null,
+		          "_SOURCE": 1,
+		          "_CREATED_BY_USER_ID": " #CONTROLLER",
+		          "_VALID_FROM_FIRST_VERSION": "2000-01-01T00:00:00.000Z",
+		          "_CREATED_BY_USER_ID_FIRST_VERSION": " #CONTROLLER",
+		          "BUSINESS_PROCESS_DESCRIPTION": "Plan work"
+		        }
+		      ],
+		      "CONTROLLING_AREA_ENTITIES": [
+		        {
+		          "CONTROLLING_AREA_ID": "#CA1",
+		          "CONTROLLING_AREA_CURRENCY_ID": "EUR",
+		          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		          "_VALID_TO": null,
+		          "_SOURCE": 1,
+		          "_CREATED_BY_USER_ID": " #CONTROLLER",
+		          "_VALID_FROM_FIRST_VERSION": null,
+		          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+		          "CONTROLLING_AREA_DESCRIPTION": "Controlling Area 1"
+		        }
+		      ],
+		      "ACCOUNT_ENTITIES": [
+		        {
+		          "ACCOUNT_ID": "#AC41",
+		          "CONTROLLING_AREA_ID": "#CA1",
+		          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		          "_VALID_TO": null,
+		          "_SOURCE": 1,
+		          "_CREATED_BY_USER_ID": " #CONTROLLER",
+		          "_VALID_FROM_FIRST_VERSION": null,
+		          "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+		          "ACCOUNT_DESCRIPTION": "Plan work (Account 41)"
+		        }
+		      ],
+		      "BUSINESS_PROCESS_TEXT_ENTITIES": [
+		        {
+		          "BUSINESS_PROCESS_ID": "#BP1",
+		          "CONTROLLING_AREA_ID": "#CA1",
+		          "LANGUAGE": "DE",
+		          "BUSINESS_PROCESS_DESCRIPTION": "Arbeitsvorbereitung",
+		          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		          "_VALID_TO": null,
+		          "_SOURCE": 1,
+		          "_CREATED_BY_USER_ID": " #CONTROLLER"
+		        },
+		        {
+		          "BUSINESS_PROCESS_ID": "#BP1",
+		          "CONTROLLING_AREA_ID": "#CA1",
+		          "LANGUAGE": "EN",
+		          "BUSINESS_PROCESS_DESCRIPTION": "Plan work",
+		          "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+		          "_VALID_TO": null,
+		          "_SOURCE": 1,
+		          "_CREATED_BY_USER_ID": " #CONTROLLER"
+		        }
+		      ]
+		    }
+		  },
+		  "head": {}
+		}
+
+	+POST
+		+ batch implementation
+		+ create, update, upsert, delete business processes and business processes texts
+		+ changes descriptions of business processes
+
+		+Ex:
+		+Create request:
+		{
+		  "CREATE": {
+		    "BUSINESS_PROCESS_ENTITIES": [
+		      {
+		        "BUSINESS_PROCESS_ID": "#B1",
+		        "CONTROLLING_AREA_ID": "#CA1",
+		        "ACCOUNT_ID": "#AC41",
+		        "COMMENT": "COMMENT"		      }
+		    ],
+		    "BUSINESS_PROCESS_TEXT_ENTITIES": [
+		      {
+		        "BUSINESS_PROCESS_ID": "#B1",
+		        "CONTROLLING_AREA_ID": "#CA1",
+		        "LANGUAGE": "EN",
+		        "BUSINESS_PROCESS_DESCRIPTION": "Description"		      }
+		    ]
+		  }
+		}
+		+Ex:
+		+Create response:
+		{
+		  "body": {
+		    "masterdata": {
+		      "CREATE": {
+		        "BUSINESS_PROCESS_ENTITIES": [
+		          {
+		            "BUSINESS_PROCESS_ID": "#B1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "ACCOUNT_ID": "#AC41",
+		            "_VALID_FROM": "2017-08-25T12:00:51.957Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279",
+		            "COMMENT": "COMMENT"
+		          }
+		        ],
+		        "BUSINESS_PROCESS_TEXT_ENTITIES": [
+		          {
+		            "BUSINESS_PROCESS_ID": "#B1",
+		            "CONTROLLING_AREA_ID": "#CA1",
+		            "LANGUAGE": "EN",
+		            "BUSINESS_PROCESS_DESCRIPTION": "Description",
+		            "_VALID_FROM": "2017-08-25T12:00:51.957Z",
+		            "_VALID_TO": null,
+		            "_SOURCE": 1,
+		            "_CREATED_BY_USER_ID": "I335279"
+		          }
+		        ]
+		      },
+		      "UPSERT": {},
+		      "UPDATE": {},
+		      "DELETE": {}
+		    }
+		  },
+		  "head": {}
+		}
+
+2. exchange-rate-type
+     +GET
+        + returns all exchange rate types from the system
+        + searchAutoComplete - returns all exchange rate types that start with string
+        + top - returns a maximum number of exchange rate types from the system
+        + skip - skips a number of exchange rate types from the system
+        + filter - filter exchange rate types entities
+
+        + Ex for the get response:
+        {
+          "body": {
+            "masterdata": {
+              "EXCHANGE_RATE_TYPE_ENTITIES": [
+                {
+                  "EXCHANGE_RATE_TYPE_ID": "BUY",
+                  "CREATED_AT": "2000-01-01T00:00:00.000Z",
+                  "CREATED_BY_USER_ID": "#CONTROLLER",
+                  "LAST_MODIFIED_AT": "2000-01-01T00:00:00.000Z",
+                  "LAST_MODIFIED_BY_USER_ID": "#CONTROLLER",
+                  "EXCHANGE_RATE_TYPE_DESCRIPTION": "Buying Rate"
+                }
+              ],
+              "EXCHANGE_RATE_TYPE_TEXT_ENTITIES": [
+                {
+                  "EXCHANGE_RATE_TYPE_ID": "BUY",
+                  "LANGUAGE": "EN",
+                  "EXCHANGE_RATE_TYPE_DESCRIPTION": "Buying Rate",
+                  "CREATED_AT": "2000-01-01T00:00:00.000Z",
+                  "CREATED_BY_USER_ID": "#CONTROLLER",
+                  "LAST_MODIFIED_AT": "2000-01-01T00:00:00.000Z",
+                  "LAST_MODIFIED_BY_USER_ID": "#CONTROLLER"
+                },
+                {
+                  "EXCHANGE_RATE_TYPE_ID": "BUY",
+                  "LANGUAGE": "DE",
+                  "EXCHANGE_RATE_TYPE_DESCRIPTION": "Ankaufskurs",
+                  "CREATED_AT": "2000-01-01T00:00:00.000Z",
+                  "CREATED_BY_USER_ID": "#CONTROLLER",
+                  "LAST_MODIFIED_AT": "2000-01-01T00:00:00.000Z",
+                  "LAST_MODIFIED_BY_USER_ID": "#CONTROLLER"
+                }
+              ]
+            }
+          },
+          "head": {}
+        }
+
+	+POST
+		+ batch implementation
+		+ create, update, upsert, delete exchange rate types and exchange rate types texts
+		+ changes descriptions of exchange rate type
+
+		+Ex:
+		+Create request:
+		{
+          "CREATE": {
+            "EXCHANGE_RATE_TYPE_ENTITIES": [
+              {
+                "EXCHANGE_RATE_TYPE_ID": "STANDARD"
+              }
+            ],
+            "EXCHANGE_RATE_TYPE_TEXT_ENTITIES": [
+              {
+                "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                "EXCHANGE_RATE_TYPE_DESCRIPTION": "Standard Rate",
+                "LANGUAGE": "EN"
+              }
+            ]
+          }
+        }
+		+Ex:
+		+Create response:
+		{
+          "body": {
+            "masterdata": {
+              "CREATE": {
+                "EXCHANGE_RATE_TYPE_ENTITIES": [
+                  {
+                    "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                    "CREATED_AT": "2017-09-06T12:12:48.796Z",
+                    "CREATED_BY_USER_ID": "I335279",
+                    "LAST_MODIFIED_AT": "2017-09-06T12:12:48.796Z",
+                    "LAST_MODIFIED_BY_USER_ID": "I335279"
+                  }
+                ],
+                "EXCHANGE_RATE_TYPE_TEXT_ENTITIES": [
+                  {
+                    "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                    "EXCHANGE_RATE_TYPE_DESCRIPTION": "Standard Rate",
+                    "LANGUAGE": "EN",
+                    "CREATED_AT": "2017-09-06T12:12:48.796Z",
+                    "CREATED_BY_USER_ID": "I335279",
+                    "LAST_MODIFIED_AT": "2017-09-06T12:12:48.796Z",
+                    "LAST_MODIFIED_BY_USER_ID": "I335279"
+                  }
+                ]
+              }
+            }
+          },
+          "head": {}
+        }
+
+3. customfieldsformula (the CF are reflected on the item and administration?business_object=ActivityPrice services)
+	+GET
+	+POST
+		-added the following masterdata business object: Activity Price.
+			Ex:
+			{
+	            "CREATE": [{
+	            	"SIDE_PANEL_GROUP_ID": 501,
+	            	"ATTRIBUTES": [{
+	            		"ITEM_CATEGORY_ID": -1,
+	            		"DEFAULT_VALUE": "0",
+	            		"BUSINESS_OBJECT": "Activity_Price",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	}],
+	            	"TEXT": [{
+	            		"LANGUAGE": "ZH-HANT",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	},
+	            	{
+	            		"LANGUAGE": "EN",
+	            		"DISPLAY_NAME": "TM",
+	            		"DISPLAY_DESCRIPTION": "Marius",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	},
+	            	{
+	            		"LANGUAGE": "ZH-HANS",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	},
+	            	{
+	            		"LANGUAGE": "JA-JP",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	},
+	            	{
+	            		"LANGUAGE": "DE",
+	            		"COLUMN_ID": "CAPR_TEST",
+	            		"PATH": "Activity_Price"
+	            	}],
+	            	"REF_UOM_CURRENCY_BUSINESS_OBJECT": "",
+	            	"REF_UOM_CURRENCY_COLUMN_ID": "",
+	            	"REF_UOM_CURRENCY_PATH": "",
+	            	"ROLLUP_TYPE_ID": 0,
+	            	"SEMANTIC_DATA_TYPE": "BooleanInt",
+	            	"UOM_CURRENCY_FLAG": 0,
+	            	"FORMULAS": [],
+	            	"BUSINESS_OBJECT": "Activity_Price",
+	            	"COLUMN_ID": "CAPR_TEST",
+	            	"PATH": "Activity_Price"
+	            }],
+	            "UPDATE": [],
+	            "DELETE": []
+            }
+
+    4. work-center
+        + GET
+        + added BUSINESS_PROCESS_ENTITIES, WORK_CENTER_PROCESS_ENTITIES, ACTIVITY_TYPE_ENTITIES, WORK_CENTER_ACTIVITY_TYPE_ENTITIES
+        + Ex for the new get response:
+        {
+            "WORK_CENTER_ENTITIES": [
+            {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "WORK_CENTER_CATEGORY": "MACHINE",
+                "COST_CENTER_ID": "1111",
+                "CONTROLLING_AREA_ID": "0001",
+                "WORK_CENTER_RESPONSIBLE": "I309362",
+                "EFFICIENCY": 80,
+                "_VALID_FROM": "2015-01-01:12:12:12.000",
+                "CREATED_BY_USER_ID": "I309362"
+            }
+            ],
+            "WORK_CENTER_TEXT_ENTITIES": [
+            {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "LANGUAGE": "EN",
+                "WORK_CENTER_DESCRIPTION": "Test #WK1",
+                "_VALID_FROM": "2015-01-01:12:12:12.000",
+                "CREATED_BY_USER_ID": "I309362"
+            }
+        ],
+            "BUSINESS_PROCESS_ENTITIES": [
+            {
+                "BUSINESS_PROCESS_ID": "#PR112",
+                "CONTROLLING_AREA_ID": "#CA1",
+                "ACCOUNT_ID": "#AC11",
+                "COMMENT": "DIN 111 Stamping Process",
+                "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+                "_VALID_TO": null,
+                "_SOURCE": 1,
+                "_CREATED_BY_USER_ID": " #CONTROLLER",
+                "_VALID_FROM_FIRST_VERSION": null,
+                "_CREATED_BY_USER_ID_FIRST_VERSION": null,
+                "BUSINESS_PROCESS_DESCRIPTION": "Stamping 112"
+            }
+        ],
+            "WORK_CENTER_PROCESS_ENTITIES":[
+            {
+                "BUSINESS_PROCESS_ID": "#BP1",
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID":"PL1",
+                "CONTROLLING_AREA_ID":"#CA1",
+                "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+                "_VALID_TO": null,
+                "_SOURCE": 1,
+                "_CREATED_BY_USER_ID": " #CONTROLLER",
+            }
+            ],
+            "WORK_CENTER_ACTIVITY_ENTITIES": [
+            {
+                "WORK_CENTER_ID": "#WCEN111",
+                "PLANT_ID": "#PT1",
+                "CONTROLLING_AREA_ID": "#CA1",
+                "ACTIVITY_TYPE_ID": "#AT2",
+                "BUSINESS_PROCESS_ID": "#BP1",
+                "QUANTITY": "10",
+                "QUANTITY_UOM_ID": "MIN",
+                "QUANTITY_DEPENDENCY_MODE": 2,
+                "COSTING_LOT_SIZE": "100",
+                "_VALID_FROM": "2017-10-05T13:49:48.736Z",
+                "_VALID_TO": null,
+                "_SOURCE": 1,
+                "_CREATED_BY_USER_ID": "I054806"
+            }
+        ],
+            "ACTIVITY_TYPE_ENTITIES": [
+            {
+                "ACTIVITY_TYPE_ID": "#AT1",
+                "CONTROLLING_AREA_ID": "#CA1",
+                "ACCOUNT_ID": "#AC21",
+                "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+                "_VALID_TO": null,
+                "_SOURCE": 1,
+                "_CREATED_BY_USER_ID": "#CONTROLLER",
+                "_VALID_FROM_FIRST_VERSION": "2000-01-01T00:00:00.000Z",
+                "_CREATED_BY_USER_ID_FIRST_VERSION": "#CONTROLLER",
+                "ACTIVITY_TYPE_DESCRIPTION": "Activity Type 1 (setup)"
+        }]}
+
+    +POST
+        + create, upsert, delete work center processes
+        + create, upsert, update, delete work center activities
+        +Ex:
+        +Create request:
+        {
+            "CREATE":{
+
+        "WORK_CENTER_ENTITIES": [
+        {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "WORK_CENTER_CATEGORY": "MACHINE",
+                "COST_CENTER_ID": "1111",
+                "CONTROLLING_AREA_ID": "0001",
+                "WORK_CENTER_RESPONSIBLE": "I309362",
+                "EFFICIENCY": 80,
+        }],
+        "WORK_CENTER_TEXT_ENTITIES": [
+        {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "LANGUAGE": "EN",
+                "WORK_CENTER_DESCRIPTION": "Test #WK1"
+        }],
+        "WORK-CENTER_PROCESS_ENTITIES":[
+            {
+                "WORK_CENTER_ID": "#WK1" ,
+                "CONTROLLING_AREA_ID":"#CA1",
+                "PLANT_ID":"#PL1",
+                "BUSINESS_PROCESS_ID": "#BP1"
+            },
+            {
+                "WORK_CENTER_ID": "#WK1" ,
+                "CONTROLLING_AREA_ID":"#CA1",
+                "PLANT_ID":"#PL1",
+                "BUSINESS_PROCESS_ID": "#BP2"
+            }],
+        "WORK_CENTER_ACTIVITY_ENTITIES" : [
+            {
+                "WORK_CENTER_ID" : "#WK1",
+                "CONTROLLING_AREA_ID" : "#CA1",
+                "PLANT_ID" : "PL1",
+                "ACTIVITY_TYPE_ID" : "AT1",
+                "BUSINESS_PROCESS_ID" : "BP1",
+                "QUANTITY" : 20,
+                "QUANTITY_UOM_ID" : "H",
+                "QUANTITY_DEPENDENCY_MODE" : 2,
+                "COSTING_LOT_SIZE" : 100
+            }]}
+        +Ex:
+        +Create response:
+            "CREATE":{
+
+        "WORK_CENTER_ENTITIES": [
+                    {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "WORK_CENTER_CATEGORY":  "MACHINE",
+                "COST_CENTER_ID": "1111",
+                "CONTROLLING_AREA_ID": "0001",
+                "WORK_CENTER_RESPONSIBLE": "I309362",
+                "EFFICIENCY": 80
+                "_VALID_FROM":"2015-01-01:12:12:12.000",
+                }],
+
+        "WORK_CENTER_TEXT_ENTITIES": [
+                {
+                "WORK_CENTER_ID": "#WK1",
+                "PLANT_ID": "#P1",
+                "LANGUAGE": "EN",
+                "WORK_CENTER_DESCRIPTION": "Test #WK1",
+                "_VALID_FROM":"2015-01-01:12:12:12.000",
+                }],
+        "WORK_CENTER_PROCESS_ENTITIES":[
+            {
+                "WORK_CENTER_ID": "#WK1" ,
+                "CONTROLLING_AREA_ID":"#CA1",
+                "PLANT_ID":"#PL1",
+                "BUSINESS_PROCESS_ID": "#BP1",
+                "_VALID_FROM":"2015-01-01:12:12:12.000"
+            },
+            {
+                "WORK_CENTER_ID": "#WK1" ,
+                "CONTROLLING_AREA_ID":"#CA1",
+                "PLANT_ID":"#PL1",
+                "BUSINESS_PROCESS_ID": "#BP2",
+                "_VALID_FROM":"2015-01-01:12:12:12.000"
+            }],
+        "WORK_CENTER_ACTIVITY_ENTITIES" : [
+            {
+                "WORK_CENTER_ID" : "#WK1",
+                "CONTROLLING_AREA_ID" : "#CA1",
+                "PLANT_ID" : "PL1",
+                "ACTIVITY_TYPE_ID" : "AT1",
+                "BUSINESS_PROCESS_ID" : "BP1",
+                "QUANTITY" : 20,
+                "QUANTITY_UOM_ID" : "H",
+                "QUANTITY_DEPENDENCY_MODE" : 2,
+                "COSTING_LOT_SIZE" : 100,
+                "_VALID_FROM":"2015-01-01:12:12:12.000"
+            }]};
+
+5. currency-conversion
+    +GET
+        + added EXCHANGE_RATE_TYPE_ID to CURRENCY_CONVERSION_ENTITIES
+        + Ex for the new get response:
+        {
+          "body": {
+            "masterdata": {
+              "CURRENCY_CONVERSION_ENTITIES": [
+                {
+                  "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                  "FROM_CURRENCY_ID": "EUR",
+                  "TO_CURRENCY_ID": "BRL",
+                  "FROM_FACTOR": 1,
+                  "TO_FACTOR": 1,
+                  "RATE": "3.18385",
+                  "VALID_FROM": "2015-01-01T00:00:00.000Z",
+                  "_VALID_FROM": "2000-01-01T00:00:00.000Z",
+                  "_VALID_TO": null,
+                  "_SOURCE": 1,
+                  "_CREATED_BY_USER_ID": "#CONTROLLER",
+                  "_VALID_FROM_FIRST_VERSION": "2000-01-01T00:00:00.000Z",
+                  "_CREATED_BY_USER_ID_FIRST_VERSION": "#CONTROLLER"
+                }
+              ]
+            }
+          },
+          "head": {}
+        }
+    +POST
+		+ batch implementation
+		+ create, update, upsert, delete currency conversion
+		+Ex:
+		+Delete request:
+		{
+          "CREATE": {
+            "CURRENCY_CONVERSION_ENTITIES": [ ]
+          },
+          "UPDATE": {
+            "CURRENCY_CONVERSION_ENTITIES": [ ]
+          },
+          "UPSERT": {
+            "CURRENCY_CONVERSION_ENTITIES": [ ]
+          },
+          "DELETE": {
+            "CURRENCY_CONVERSION_ENTITIES": [
+              {
+                "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                "FROM_CURRENCY_ID": "EUR",
+                "TO_CURRENCY_ID": "USD",
+                "FROM_FACTOR": 1,
+                "TO_FACTOR": 1,
+                "RATE": "1.5342",
+                "VALID_FROM": "2017-09-15",
+                "_VALID_FROM": "2017-09-15T11:56:39.567Z"
+              }
+            ]
+          }
+        }
+		+Ex:
+		+Delete response:
+		{
+          "body": {
+            "masterdata": {
+              "CREATE": {},
+              "UPSERT": {},
+              "UPDATE": {},
+              "DELETE": {
+                "CURRENCY_CONVERSION_ENTITIES": [
+                  {
+                    "FROM_CURRENCY_ID": "EUR",
+                    "TO_CURRENCY_ID": "USD",
+                    "FROM_FACTOR": 1,
+                    "TO_FACTOR": 1,
+                    "RATE": "1.5342",
+                    "VALID_FROM": "2017-09-15T00:00:00.000Z",
+                    "_VALID_FROM": "2017-09-15T11:56:39.567Z",
+                    "_VALID_TO": "2017-09-15T12:03:54.352Z",
+                    "_SOURCE": 1,
+                    "_CREATED_BY_USER_ID": "#CONTROLLER",
+                    "EXCHANGE_RATE_TYPE_ID": "STANDARD"
+                  }
+                ]
+              }
+            }
+          },
+          "head": {}
+        }
+
+6. /administration?business_object=Activity_Price
+	+ added CUSTOMER_ID key column
+	+ GET
+		+ Added CUSTOMER_ENTITIES to the response
+	+ POST
+		+ CUSTOMER_ID is a mandatory property (since is part of the key) that needs to be send on the request
+		  for insert, create, update and delete
+		+ CUSTOMER_ID must exist when used in Activity Price if it is not the wildcard (*) => validation
+
+7. /administration?business_object=Material_Price
+	+ added CUSTOMER_ID key column
+	+ GET
+		+ Added CUSTOMER_ENTITIES to the response
+	+ POST
+		+ CUSTOMER_ID is a mandatory property (since is part of the key) that needs to be send on the request
+		  for insert, create, update and delete
+		+ CUSTOMER_ID must exist when used in Activity Price if it is not the wildcard (*) => validation
+8. items
+    +POST
+      - Changed privilege required to call POST. Now additionally MATERIAL_PRICE_READ, ACTIVITY_RATE_READ, ACCOUNT_READ, ACCOUNT_GROUP_READ, MATERIAL_ACCOUNT_READ,
+        VALUATION_CLASS_READ, BUSINESS_PROCESS_READ, COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, WORK_CENTER_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ,
+        MATERIAL_READ, MATERIAL_PLANT_READ, DOCUMENT_READ, DOCUMENT_TYPE_READ, CUSTOMER_READ, VENDOR_READ, COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ,
+        COST_CENTER_READ, ACTIVITY_TYPE_READ, SALES_ORGANIZATION_READ, DOCUMENT_STATUS_READ
+    +PUT
+      - Changed privilege required to call POST. Now additionally MATERIAL_PRICE_READ, ACTIVITY_RATE_READ, ACCOUNT_READ, ACCOUNT_GROUP_READ, MATERIAL_ACCOUNT_READ,
+        VALUATION_CLASS_READ, BUSINESS_PROCESS_READ, COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, WORK_CENTER_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ,
+        MATERIAL_READ, MATERIAL_PLANT_READ, DOCUMENT_READ, DOCUMENT_TYPE_READ, CUSTOMER_READ, VENDOR_READ, COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ,
+        COST_CENTER_READ, ACTIVITY_TYPE_READ, SALES_ORGANIZATION_READ, DOCUMENT_STATUS_READ
+      - Added new parameter "compressedResult" used for reducing the size of the response
+      - On the response, transactional data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+      - Example for the new response:
+        "transactionaldata": [
+            {
+                "SESSION_ID": [
+                    "I332852"
+                ],
+                "ITEM_ID": [
+                    27
+                ],
+                "CALCULATION_VERSION_ID": [
+                    5
+                ],
+                "PARENT_ITEM_ID": [
+                    1
+                ],
+                "IS_ACTIVE": [
+                    1
+                ],
+                "HIGHLIGHT_GREEN": [
+                    0
+                ],
+                "HIGHLIGHT_ORANGE": [
+                    0
+                ],
+                "HIGHLIGHT_YELLOW": [
+                    0
+                ],
+                "ITEM_CATEGORY_ID": [
+                    2
+                ],
+                "IS_PHANTOM_MATERIAL": [
+                    0
+                ],
+                "IS_CONFIGURABLE_MATERIAL": [
+                    0
+                ],
+                "PURCHASING_GROUP": [
+                    ""
+                ],
+                "PURCHASING_DOCUMENT": [
+                    ""
+                ],
+                "COSTING_LOT_SIZE_IS_MANUAL": [
+                    1
+                ],
+                "COMPANY_CODE_ID": [
+                    "#C2"
+                ],
+                "PLANT_ID": [
+                    "#PT2"
+                ],
+                "QUANTITY_FOR_ONE_ASSEMBLY": [
+                    "1"
+                ],
+                "QUANTITY_FOR_ONE_ASSEMBLY_IS_MANUAL": [
+                    1
+                ],
+                "QUANTITY_FOR_ONE_ASSEMBLY_UOM_ID": [
+                    "PC"
+                ],
+                "QUANTITY_DEPENDENCY_MODE": [
+                    1
+                ],
+                "IS_RELEVANT_TO_COSTING_IN_ERP": [
+                    0
+                ],
+                "BASE_QUANTITY": [
+                    "1"
+                ],
+                "PRICE_FIXED_PORTION": [
+                    "0"
+                ],
+                "PRICE_FIXED_PORTION_IS_MANUAL": [
+                    1
+                ],
+                "PRICE_VARIABLE_PORTION": [
+                    "0"
+                ],
+                "PRICE_VARIABLE_PORTION_IS_MANUAL": [
+                    1
+                ],
+                "PRICE_TRANSACTION_CURRENCY_ID": [
+                    "EUR"
+                ],
+                "PRICE_UNIT": [
+                    "1"
+                ],
+                "PRICE_UNIT_IS_MANUAL": [
+                    1
+                ],
+                "PRICE_UNIT_UOM_ID": [
+                    "PC"
+                ],
+                "PRICE_SOURCE_ID": [
+                    "PLC_MANUAL_PRICE"
+                ],
+                "PRICE_SOURCE_TYPE": [
+                    3
+                ],
+                "TARGET_COST_IS_MANUAL": [
+                    1
+                ],
+                "TARGET_COST_CURRENCY_ID": [
+                    "EUR"
+                ],
+                "CREATED_AT": [
+                    "2017-10-11T15:59:23.394Z"
+                ],
+                "CREATED_BY_USER_ID": [
+                    "I332852"
+                ],
+                "LAST_MODIFIED_AT": [
+                    "2017-10-11T15:59:23.394Z"
+                ],
+                "LAST_MODIFIED_BY_USER_ID": [
+                    "I332852"
+                ],
+                "IS_DIRTY": [
+                    1
+                ],
+                "IS_DELETED": [
+                    0
+                ],
+                "HANDLE_ID": [
+                    -1
+                ]
+            }
+        ]
+        - Added new parameter "omitItems" used for reducing the size of the response. ITEMS will contain an empty array if omitItems is set to true
+            - It is visible for create item on POST requests and update item on PUT requests
+            - It is not allowed to use omitItems = true and compressedResult = true in the same request
+9. /projects
+    +GET
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+    +POST
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+        - Changed privilege required to call POST. Now additionally COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, CUSTOMER_READ, CONTROLLING_AREA_READ,
+          COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ, ACCOUNT_GROUP_READ, COST_CENTER_READ, ACTIVITY_RATE_READ required
+    +PUT
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+        - Changed privilege required to call PUT. Now additionally COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, CUSTOMER_READ, CONTROLLING_AREA_READ,
+          COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ, ACCOUNT_GROUP_READ, COST_CENTER_READ, ACTIVITY_RAT
+10. projects/activity-price-surcharges
+    +POST
+        - Changed privilege required to call POST. Now additionally COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, CUSTOMER_READ, CONTROLLING_AREA_READ,
+          COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ, ACCOUNT_GROUP_READ, COST_CENTER_READ, ACTIVITY_RAT
+    +PUT
+        - Changed privilege required to call PUT. Now additionally COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, CUSTOMER_READ, CONTROLLING_AREA_READ,
+          COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ, ACCOUNT_GROUP_READ, COST_CENTER_READ, ACTIVITY_RAT
+12.   /calculations
+    +POST
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID for CALCULATION_VERSIONS
+        - Changed privilege required to call POST. Now additionally MATERIAL_PRICE_READ, ACTIVITY_RATE_READ, ACCOUNT_READ, ACCOUNT_GROUP_READ, MATERIAL_ACCOUNT_READ,
+          VALUATION_CLASS_READ, BUSINESS_PROCESS_READ, COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, WORK_CENTER_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ,
+          MATERIAL_READ, MATERIAL_PLANT_READ, DOCUMENT_READ, DOCUMENT_TYPE_READ, CUSTOMER_READ, VENDOR_READ, COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ,
+          COST_CENTER_READ, ACTIVITY_TYPE_READ, SALES_ORGANIZATION_READ, DOCUMENT_STATUS_READ
+
+13. /calculation-versions
+    +GET
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+    +POST
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+        - Changed privilege required to call POST. Now additionally MATERIAL_PRICE_READ, ACTIVITY_RATE_READ, ACCOUNT_READ, ACCOUNT_GROUP_READ, MATERIAL_ACCOUNT_READ,
+          VALUATION_CLASS_READ, BUSINESS_PROCESS_READ, COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, WORK_CENTER_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ,
+          MATERIAL_READ, MATERIAL_PLANT_READ, DOCUMENT_READ, DOCUMENT_TYPE_READ, CUSTOMER_READ, VENDOR_READ, COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ,
+          COST_CENTER_READ, ACTIVITY_TYPE_READ, SALES_ORGANIZATION_READ, DOCUMENT_STATUS_READ
+    +PUT
+        - Returns now EXCHANGE_RATE_TYPE_ENTITIES
+        - Added to transactionaldata a new column: EXCHANGE_RATE_TYPE_ID
+        - Changed privilege required to call PUT. Now additionally MATERIAL_PRICE_READ, ACTIVITY_RATE_READ, ACCOUNT_READ, ACCOUNT_GROUP_READ, MATERIAL_ACCOUNT_READ,
+          VALUATION_CLASS_READ, BUSINESS_PROCESS_READ, COSTING_SHEET_READ, COMPONENT_SPLIT_READ, PLANT_READ, WORK_CENTER_READ, MATERIAL_TYPE_READ, MATERIAL_GROUP_READ,
+          MATERIAL_READ, MATERIAL_PLANT_READ, DOCUMENT_READ, DOCUMENT_TYPE_READ, CUSTOMER_READ, VENDOR_READ, COMPANY_CODE_READ, PROFIT_CENTER_READ, BUSINESS_AREA_READ,
+          COST_CENTER_READ, ACTIVITY_TYPE_READ, SALES_ORGANIZATION_READ, DOCUMENT_STATUS_READ
+        - Added new parameter "omitItems" used for reducing the size of the response. ITEMS will contain an empty array if omitItems is set to true
+            - It is visible for copy, save, save-as and freeze on POST requests, update on PUT requests and the GET request
+            - It is not allowed to use omitItems = true and compressedResult = true in the same request
+            - Ex for GET. The new GET response with omitItems set to true:
+                {
+                      "body": {
+                          "transactionaldata": [
+                          {
+                          "CALCULATION_VERSIONS": [
+                              {
+                              "CALCULATION_VERSION_ID": 2826,
+                              "CALCULATION_ID": 1049,
+                              "CALCULATION_VERSION_NAME": "Version 1",
+                              "CALCULATION_VERSION_TYPE": 1,
+                              "ROOT_ITEM_ID": 1,
+                              "CUSTOMER_ID": null,
+                              "SALES_PRICE": null,
+                              "SALES_PRICE_CURRENCY_ID": null,
+                              "REPORT_CURRENCY_ID": "EUR",
+                              "COSTING_SHEET_ID": null,
+                              "COMPONENT_SPLIT_ID": null,
+                              "SALES_DOCUMENT": null,
+                              "START_OF_PRODUCTION": null,
+                              "END_OF_PRODUCTION": null,
+                              "VALUATION_DATE": "2017-10-16T00:00:00.000Z",
+                              "LAST_SAVED_AT": "2017-10-16T08:01:33.312Z",
+                              "LAST_SAVED_BY_USER_ID": "I343474",
+                              "MASTER_DATA_TIMESTAMP": "2017-10-16T07:42:22.021Z",
+                              "LIFECYCLE_PERIOD_FROM": null,
+                              "BASE_VERSION_ID": null,
+                              "LAST_USED_AT": null,
+                              "IS_FROZEN": null,
+                              "VARIANT_ID": null,
+                              "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+                              "ITEMS": []
+                              }],
+                              "CALCULATIONS": [],
+                              "PROJECTS": []
+                          }],
+                      "masterdata": {
+                          "UNIT_OF_MEASURE_ENTITIES": [],
+                          "CURRENCY_ENTITIES": [],
+                          "EXCHANGE_RATE_TYPE_ENTITIES": []
+                      }
+                  },
+                      "head": {}
+              }
+
+14. /similar-parts-search (new resource)
+    +POST
+        - returns similar parts results according to the given weight of attributes from master data or calculation versions
+
+15. calculated-results
+    +GET
+ 	+added new parameter "compressedResult" used for reducing the size of the response
+ 	+on the response, calculated data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+
+16. calculations
+    +POST
+    +on the response, calculated data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+
+17. calculation-versions
+    +POST
+    +on the response, calculated data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+    +PUT
+    +on the response, calculated data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+
+18. items
+	+POST
+	+on the response, calculated data will be either an object with arrays of values for each property, if the "compressedResult" parameter is set to true, or an array of objects if the parameter is set on false or not sent.
+
+19. Variants (new resource)
+	+GET
+		+ returns all variants for a specific calculation version (in preparation for next release)
+
+==================================================================================================================
+
+=================================== PLC API version 2.3.1, Release 05-02-2018 ===================================
+                                PLC API services changes from the previous version.
+1. data-protection
+    +DELETE
+        + same behaviour as before, using HTTP DELETE instead of HTTP GET now for data protection compliance reason
+        + personal data ids are send in the body
+        + Example:
+        {
+            "USER": {
+                "USER_ID": "YourId",
+                "DELETE_USER": true
+            },
+            "CUSTOMER_ID": "YourCustomerId",
+            "VENDOR_ID": "YourVendorId",
+            "PROJECT_ID": "YourProjectId"
+        }
+
+
+
+=================================== PLC API version 3.0.0, Release 28-04-2018 ===================================
+                                PLC API services changes from the previous version.
+
+1. /calculation-versions/id/variants/id (new resource)
+    +GET
+				- returns the specified variant header
+				- added new optional parameter "expand". It represents an association of the variant. Currently only the value "ITEMS" is allowed, which includes items in the response.
+
+2. /masterdata
+	+ added a new resource called masterdata that has a mandatory parameter called: calculation_version_id
+	+ returns all masterdata values for a given calculation version id
+	+ GET
+		+ Example call: /masterdata?calculation_version_id=1116
+
+3. /calculation-versions/id/variants/id
+    +PATCH
+				- update of a specific variant
+
+4. /calculation-versions/id/variants
+    +PATCH
+				- updates the order of variants by setting the PREDECESSOR_VARIANT_ID
+				- input: an array of variant ids
+				- output: specific variant header for the input ids
+			  - Example of request body: [{"VARIANT_ID": 1},
+								               {"VARIANT_ID": 2},
+															 {"VARIANT_ID": 3}]
+
+5. /calculation-versions/id/variants
+		+POST
+				- create a variant with the variant items.
+				- input: variant header and it's items
+				- output: returns the variant header
+				- only a variant can be created because of performance reasons.
+				- the request shouldn't have the fields VARIANT_ID or CALCULATION_VERSION_ID
+				- Example of request body: 
+						{
+							"VARIANT_NAME": "#Variant Test",
+							"EXCHANGE_RATE_TYPE_ID": "STANDARD",
+							"TOTAL_QUANTITY": 1,
+							"TOTAL_QUANTITY_UOM_ID": "PC",
+							"REPORT_CURRENCY_ID": "EUR",
+							"SALES_PRICE": 1,
+							"SALES_PRICE_CURRENCY_ID": "EUR",
+							"ITEMS": [{
+									"ITEM_ID": 9952,
+									"IS_INCLUDED": 1
+											 }]
+						}
+
+6. /calculation-versions/id/variants/id
+		+DELETE
+				- delete a variant and it's itmes
+				- input: nothing is send in the body of the delete request
+				- output: returns empty head and body objects
+				- if the request contains a body a exception is thrown
+				- Example of response when variant is deleted: 
+						{
+								"head": {},
+								"body": {}
+						}
+
+7. /calculation-versions/calculation_version_id/variant-calculator
+		+POST
+			 - Triggers the calculation of variants related to a specific base version (:calculation_version_id). 
+			 - The calculation is transient => calculation results are not saved in the database
+			 - The request body contains the variant headers and their items compressed: every item attribute is sent as an array
+			 - Returns the variant headers and their items compressed with the total costs and quantities calculated accordingly to the request body. 
+	         - example of request body that calculates only one variant:
+	           [{
+            	 "VARIANT_ID": 1,
+							 "EXCHANGE_RATE_TYPE_ID": "STANDARD",
+            	 "ITEMS": {
+            	 		 	 "ITEM_ID": [1, 2, 3],
+              	 		 "QUANTITY": [10,20,30],
+              			 "QUANTITY_UOM_ID": [100,200,300]
+            	 }
+                }]
+
+8. /calculation-versions/calculation_version_id/variant-calculator/variant_id
+		+PUT
+			 - Triggers the calculation of a specific variant (:variant_id) related to a specific base version (:calculation_version_id)
+			 - The calculation is persistent => calculation results are saved in the database
+			 - The request body is empty 		
+			 - The response body is empty
+
+9. /calculations
+		+GET
+			- added a new optional parameter "searchAutocomplete" of type string. It is used to search among all the calculations on which the user has privileges.
+			- the search is done based on the search criteria. 
+			- this new parameter is used to get calculations for which the CALCULATION_NAME or CALCULATION_ID contain the search criteria.
+			  - call example: ../dispatcher.xsjs/calculations?searchAutocomplete=pump
+
+10. /calculation-versions/calculation_version_id/variant-generator/variant_id
+		+POST
+			 - generates a new calculation version and it's items
+			 - only the items that have the property IS_INCLUDED set to 1 will be created with the new generated calcuations version
+			 - information from both the :calculation_version_id and the :variant_id is used for the new generated calculation version
+			 - input: -> The body can contain only the TARGET_CALCULATION_ID and / or CALCULATION_VERSION_NAME or an empty body
+			 - output: returns the variant header that contains the LAST_GENERATED_VERSION_ID
+			 - Example of request body: 
+						{
+							"TARGET_CALCULATION_ID": 1,
+							"CALCULATION_VERSION_NAME": "CalculationVersion1 - Variant1"
+						}
+
+11. /calculations
+		+GET
+			- added a new optional parameter "top" of type integer. It is used to return a specific total number of calculations
+			- if not sent, it will be set to its default value: 100
+			- this parameter can be used together with the other parameters. 
+			  - call example: ../dispatcher.xsjs/calculations?top=5
+
+12. /calculation-versions/:calculation_version_id
+		+GET
+			- returns extra referencesdata in the response that contains:
+				1. CALCULATION_VERSIONS - the referenced versions and their items
+				2. CALCULATIONS - calculations to which the references versions belong to
+			  3. PROJECTS - the projects to which the calculations belong to
+			  4. MASTERDATA
+			- referencesdata referes to the versions that are used in the calculation version as a reference
+
+13. /calculation-versions/id/variants/id
+    +PATCH
+				- added virtual property of type BooleanInt CHANGES_ACCEPTED. If CHANGES_ACCEPTED is send 1 (true) the LAST_ACCEPTED_AT will have the same timestamp as LAST_MODIFIED_AT;
+
+14. /calculation-versions/id/
+    +PATCH
+				- locks a single calculation version without the need to open the calculation version to enable write locks
+					for different lock contexts (e.g. calculation version is locked due use in a variant matrix)
+					
+15. /administration?business_object=Account	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only ACCOUNT_ENTITIES.
+            
+16. /administration?business_object=ActivityType	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only ACTIVITY_TYPE_ENTITIES.
+            
+17. /administration?business_object=BusinessArea	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only BUSINESS_AREA_ENTITIES.
+            
+18. /administration?business_object=BusinessProcess	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only BUSINESS_PROCESS_ENTITIES.
+            
+19. /administration?business_object=CompanyCode	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only COMPANY_CODE_ENTITIES and CONTROLLING_AREA_ENTITIES.
+            
+20. /administration?business_object=ControllingArea	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only CONTROLLING_AREA_ENTITIES.
+                         
+21. /administration?business_object=CostCenter	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only COST_CENTER_ENTITIES.
+            
+22. /administration?business_object=Document	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only DOCUMENT_ENTITIES.
+            
+23. /administration?business_object=DocumentStatus	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only DOCUMENT_STATUS_ENTITIES and DOCUMENT_TYPE_ENTITIES.
+            
+24. /administration?business_object=DocumentType	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only DOCUMENT_TYPE_ENTITIES.
+            
+25. /administration?business_object=ExchangeRateType	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only EXCHANGE_RATE_TYPE_ENTITIES.
+            
+26. /administration?business_object=LaboratoryDesignOffice	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only LABORATORY_DESIGN_OFFICE_ENTITIES.
+            
+27. /administration?business_object=Material	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only MATERIAL_ENTITIES.
+            
+28. /administration?business_object=MaterialGroup	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only MATERIAL_GROUP_ENTITIES.
+            
+29. /administration?business_object=MaterialType	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only MATERIAL_TYPE_ENTITIES.
+            
+30. /administration?business_object=Plant	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only PLANT_ENTITIES, COMPANY_CODE_ENTITIES and CONTROLLING_AREA_ENTITIES.
+            
+31. /administration?business_object=PriceSource	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only PRICE_SOURCE_ENTITIES.
+  
+32. /administration?business_object=ProfitCenter	
+        +GET:
+            - When the searchAutocomplete parameter is set, the response will contain only PROFIT_CENTER_ENTITIES.
+                        
+33. /administration?business_object=AccountGroup
+		+GET:
+			- Added new parameter "searchAutocomplete" used to get accounts groups for which the ACCOUNT_GROUP_ID or ACCOUNT_GROUP_DESCRIPTION contain the search criteria.
+34. /items
+		+POST:
+		    - Added new "noResponseBody" url parameter. In case the parameter value is "true" there will be no response body returned.
+
+34. /items
+		+POST:
+		    - Added new "noResponseBody" url parameter. In case the parameter value is "true" there will be no response body returned.
+
+
+34. /items
+		+POST:
+		    - Added new "noResponseBody" url parameter. In case the parameter value is "true" there will be no response body returned.
+
+
+34. /items
+		+POST:
+		    - Added new "noResponseBody" url parameter. In case the parameter value is "true" there will be no response body returned.
+
+
+=================================== PLC API version 4.0.0, Release 07-09-2018 ===================================
+                                PLC API services changes from the previous version.
+
+1.  /init-session
+		+Removed column: DIMENSION_ID, TRIGGERS_CALC_ENGINE, IS_REQUIRED_FOR_COMPLETENESS, IS_ACTIVE
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+		+Renamed column HAS_CHILDREN to SUBITEM_STATE
+
+2. 	/calculations
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+
+3.	/calculation-versions
+		+Removed column PREDECESSOR_VERSION_ID
+		+Renamed column LAST_SAVED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_SAVED_BY_USER_ID to LAST_MODIFIED_BY
+
+4.  /variants
+		+Removed column TOTAL_QUANTITY
+		+Removed column TOTAL_QUANTITY_UOM_ID
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column LAST_ACCEPTED_AT to LAST_REMOVED_MARKINGS_ON
+		+Renamed column LAST_ACCEPTED_BY_USER_ID to LAST_ACCEPTED_BY
+		+Renamed column LAST_CALCULATED_AT to LAST_CALCULATED_ON
+		+Renamed column LAST_CALCULATED_BY_USER_ID to LAST_CALCULATED_BY
+	
+5. 	/customfieldsformula	
+		+Removed IS_ACTIVE from metadata attributes
+		+Removed IS_REQUIRED_FOR_COMPLETENESS from metadata attributes
+		+Removed DIMENSION_ID from metadata
+		+Removed TRIGGERS_CALC_ENGIN from metadata
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY		
+		+Renamed column HAS_CHILDREN to SUBITEM_STATE
+
+6. /items
+		+Removed column GROSS_WEIGHT
+		+Removed column GROSS_WEIGHT_CALCULATED
+		+Removed column GROSS_WEIGHT_IS_MANUAL
+		+Removed column NET_WEIGHT
+		+Removed column NET_WEIGHT_CALCULATED
+		+Removed column NET_WEIGHT_IS_MANUAL
+		+Removed column VOLUME
+		+Removed column VOLUME_CALCULATED
+		+Removed column VOLUME_IS_MANUAL
+		+Removed column WEIGHT_UOM_ID
+		+Removed column STATUS
+		+Renamed column BUSINESS_PROCESS_ID to PROCESS_ID
+		+Renamed column BUSINESS_PROCESS_DESCRIPTION to PROCESS_DESCRIPTION
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+		+Renamed column LABORATORY_DESIGN_OFFICE_ID to DESIGN_OFFICE_ID
+		+Renamed column PRICE_APPLIED_SURCHARGE to SURCHARGE
+		+Renamed column PRICE_SOURCE_TYPE to PRICE_SOURCE_TYPE_ID
+		+Renamed column PRICE_TRANSACTION_CURRENCY_ID to TRANSACTION_CURRENCY_ID
+		+Renamed column QUANTITY_DEPENDENCY_MODE to TOTAL_QUANTITY_DEPENDS_ON
+		+Renamed column QUANTITY_FOR_ONE_ASSEMBLY to QUANTITY
+		+Renamed column QUANTITY_FOR_ONE_ASSEMBLY_UOM_ID to QUANTITY_UOM_ID
+		+Renamed column QUANTITY_FOR_ONE_ASSEMBLY_CALCULATED to QUANTITY_CALCULATED
+		+Renamed column QUANTITY_FOR_ONE_ASSEMBLY_IS_MANUAL to QUANTITY_IS_MANUAL
+		+Renamed column COSTING_LOT_SIZE to LOT_SIZE
+		+Renamed column COSTING_LOT_SIZE_CALCULATED to LOT_SIZE_CALCULATED
+		+Renamed column COSTING_LOT_SIZE_IS_MANUAL to LOT_SIZE_IS_MANUAL
+
+7. /projects	
+		+Removed column IS_FROZEN
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+		+Renamed column LAST_SAVED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_SAVED_BY_USER_ID to LAST_MODIFIED_BY
+	
+8./administration?business_object=Account
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Renamed column _CREATED_BY_USER_FIRST_VERSION to _CREATED_BY_FIRST_VERSION
+
+9. /administration?business_object=Account_Group
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Renamed column _CREATED_BY_USER_FIRST_VERSION to _CREATED_BY_FIRST_VERSION
+
+10. /administration?business_object=Activity_Price
+		+Renamed column PRICE_TRANSACTION_CURRENCY_ID to TRANSACTION_CURRENCY_ID
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+11. /administration?business_object=Activity_Type
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+12. /administration?business_object=Business_Area
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+13. /administration?business_object=Business_Process 
+		+Renamed service to /administration?business_object=Process
+		+Renamed column BUSINESS_PROCESS_ID to PROCESS_ID
+		+Renamed column BUSINESS_PROCESS_DESCRIPTION to PROCESS_DESCRIPTION
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+14. /administration?business_object=Company_Code
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+15. /administration?business_object=Component_Split
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Removed column TABLE_REFERENCE_ID
+		+Removed column FIELD_REFERENCE_ID
+
+16. /administration?business_object=Confidence_Level
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+17. /administration?business_object=Controlling_Area
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+18. /administration?business_object=Costing_Sheet
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+19. /administration?business_object=Costing_Sheet_Row
+		+Renamed column IF_AN_AGGREGATE to SUBITEM_STATE
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Renamed column OVERHEAD_PRICE_UOM_ID to OVERHEAD_PRICE_UNIT_UOM_ID
+
+20. /administration?business_object=Cost_Center
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+21. /administration?business_object=Currency_Conversion
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+22. /administration?business_object=Currency
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+23. /administration?business_object=Customer
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+24. /administration?business_object=Dimension
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+25. /administration?business_object=Document
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Renamed column LABORATORY_DESIGN_OFFICE_ID to DESIGN_OFFICE_ID
+
+26. /administration?business_object=Document_Status
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+27. /administration?business_object=Document_Type
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+28. /administration?business_object=Exchange_Rate_Type
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+
+29. /administration?business_object=Laboratory_Design_Office
+		+Renamed service to /administration?business_object=Design_Office
+		+Renamed column LABORATORY_DESIGN_OFFICE_ID to DESIGN_OFFICE_ID
+		+Renamed column LABORATORY_DESIGN_OFFICE_DESCRIPTION to DESIGN_OFFICE_DESCRIPTION
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+30. /administration?business_object=Language
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+31. /administration?business_object=Material
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+32. /administration?business_object=Material_Account
+		+Renamed service to /administration?business_object=Material_Account_Determination
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+33. /administration?business_object=Material_Group
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+34. /administration?business_object=Material_Plant
+		+Renamed column MATERIAL_COSTING_LOT_SIZE to MATERIAL_LOT_SIZE
+		+Renamed column MATERIAL_COSTING_LOT_SIZE_UOM_ID to MATERIAL_LOT_SIZE_UOM_ID
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+35. /administration?business_object=Material_Price
+		+Renamed column PRICE_TRANSACTION_CURRENCY_ID to TRANSACTION_CURRENCY_ID
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+36. /administration?business_object=Material_Type
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+37. /administration?business_object=Overhead_Group
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+38. /administration?business_object=Plant
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+39. /administration?business_object=Price_Source
+		+Renamed column PRICE_SOURCE_TYPE to PRICE_SOURCE_TYPE_ID
+		+Renamed column CREATED_AT to CREATED_ON
+		+Renamed column LAST_MODIFIED_AT to LAST_MODIFIED_ON
+		+Renamed column LAST_MODIFIED_BY_USER_ID to LAST_MODIFIED_BY
+		+Renamed column CREATED_BY_USER_ID to CREATED_BY
+
+40. /administration?business_object=Profit_Center
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+41. /administration?business_object=Unit_Of_Measure
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+42. /administration?business_object=Valuation_Class
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+43. /administration?business_object=Vendor
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+
+44. /administration?business_object=Work_Center
+		+Renamed column COSTING_LOT_SIZE to LOT_SIZE
+		+Renamed column _CREATED_BY_USER_ID to _CREATED_BY
+		+Renamed column BUSINESS_PROCESS_ID to PROCESS_ID
+		+Renamed column BUSINESS_PROCESS_DESCRIPTION to PROCESS_DESCRIPTION
+
+45. /data-protection
+    +POST
+	    + get personal data for a given entity (entity can be )
+		+ same behaviour as before, using HTTP DELETE instead of HTTP GET now for data protection compliance reason       + personal data ids are send in the body
+        + Example:
+        {
+            "USER": {
+                "USER_ID": "YourId",
+                "DELETE_USER": true
+            },
+            "CUSTOMER_ID": "YourCustomerId",
+            "VENDOR_ID": "YourVendorId",
+            "PROJECT_ID": "YourProjectId"
+        }
+46. data-protection
+    +DELETE
+        + changed request and response:
+			+backend request + response have changed.
+			+added info message PERSONAL_DATA_IN_FORMULA to response if the user, customer or vendor id is found in a formula
+			+request example:
+				{	
+            		"USER_ID": YourId,
+            		"CUSTOMER_ID": "YourCustomerId",
+            		"VENDOR_ID": "YourVendorId",
+            		"PROJECT_ID": "YourProjectId"
+        		}
+			+response example (if the user, customer or vendor id is used in a formula):
+				{
+    				"body": {},
+    				"head": {
+    				    "messages": [
+    				        {
+    				            "code": "PERSONAL_DATA_IN_FORMULA",
+    				            "severity": "Info",
+    				            "details": ""
+    				        }
+    				    ]
+    				}
+				}
+			+basic response:
+				{
+    				"body": {},
+    				"head": {}
+				}
+47. /administration?business_object=Activity_Price
+		+Added key column PRICE_ID
+
+48. /administration?business_object=Material_Price
+		+Added key column PRICE_ID
+
+49. /projects
+		+Added mandatory column MATERIAL_PRICE_STRATEGY_ID
+		+Added mandatory column ACTIVITY_PRICE_STRATEGY_ID
+		+GET
+			+Added parameter folderId used to retrieve only the project entries inside the specified folderId
+			+Added property "ENTITY_ID" to the response
+			+Added property "PATH" to the response
+		+POST
+      +changed request
+			+request example. added the PATH property. This is an optional property. If it is not on the create request the project will be created on the root location otherwise it will be created under the location specified in the given PATH.
+				{
+					"PROJECT_ID": "PRJ1",
+    			"PROJECT_NAME": "Test Project",
+    			"CONTROLLING_AREA_ID": "#CA1",
+    			"REPORT_CURRENCY_ID": "EUR",
+    			"LIFECYCLE_PERIOD_INTERVAL": 12,
+    			"PATH": "11/22/33/42"
+				}
+			+Entity not found Error if the folder where the project should be created does not exist in the database
+			+Validation Error if the given PATH is not the same as the PATH for the requested folder in the database
+			+A new entity relation is inserted in the entity relation table.
+
+50. /calculation-versions
+		+Added mandatory column MATERIAL_PRICE_STRATEGY_ID
+		+Added mandatory column ACTIVITY_PRICE_STRATEGY_ID
+
+51. /calculation-versions/{calculation_version_id}
+		+Added mandatory column MATERIAL_PRICE_STRATEGY_ID
+		+Added mandatory column ACTIVITY_PRICE_STRATEGY_ID
+
+52. /recover-calculation-versions
+		+Added mandatory column MATERIAL_PRICE_STRATEGY_ID
+		+Added mandatory column ACTIVITY_PRICE_STRATEGY_ID
+
+53. /projects
+	+POST
+		+Added parameter overwriteManualVersions which tells if the manual lifecycle versions need to be overwritten or not; By default is false
+		+Ex:
+		      /projects?{id}&action=calculate_lifecycle_versions&overwriteManualVersions=false
+	+PUT
+		+Added in the request body two new parameters. TARGE_PATH and SOURCE_PATH. These are used to move a project from a folder to another.
+		+TARGE_PATH is the location where the project will be moved.
+		+SOURCE_PATH is the current location of the project.
+		+The moving of a folder is valid only if:
+			+both parameters are on the request
+			+they contain different valid values
+			+the target folder must exist and it's path in the database has to be the same as the path on the request
+			+the source entity (project) must exist and it's path in the database has to be the same as the path on the request
+			+a project cannot be moved to it's already existing location
+			+example of a valid request body:
+				{
+    			"PROJECT_ID": "TEST1",
+    			"PROJECT_NAME": "TEST1",
+    			"CONTROLLING_AREA_ID": "#CA1",
+    			"COMMENT": "Changes",
+    			"REPORT_CURRENCY_ID": "EUR",
+    			"LIFECYCLE_PERIOD_INTERVAL": 12,
+    			"TARGET_PATH": "11/22/33",
+    			"SOURCE_PATH": "11/1"
+				}
+
+ 54. /administration?business_object=Price_Source
+		+removed service from this swagger documentation since it is included in the new backend API
+
+ 55. /calculation-versions/ New Url Parameter
+	+GET
+		+ Added returnLifecycle boolean parameter.
+		+ If returnLifecycle is set to false the response will not contain the lifecycle versions.
+		+ If returnLifecycle is set to true or is not send the service will behave as it did in previous versions.
+		+ The returned calculaton versions will contain a new property HAS_LIFECYCLES. 1 if the calculation version contains lifecyles and 0 if not
+
+ 56. /calculation-versions/{calculation_version_id}/lifecycles New Service
+	+GET
+		+ returns all lifecycle calculation versions for the specified calculation_version_id
+		+ if no lifecycles exist an empty array will be returned
+		+ if the calculation version doesn't exist an entity not found error will be thrown
+
+57. /global-search
+    +GET
+	    + added new field PROJECT_PATH in the response body
+
+58. /calculation-versions/ 
+	+GET masterdata
+		+ Added PRICE COMPONENTS ENTITIES on masterdata get response
+
+59. /items/
+	+POST,GET,PUT
+		+Added in the request body two new fields: PRICE_ID and IS_PRICE_SPLIT_ACTIVE
+
+60. /global-search
+    +GET
+	    + added two new fields: BASE_VERSION_ID, BASE_VERSION_NAME and CALCULATION_VERSION_TYPE in the response body
+
+
+
+	=================================== PLC API version 4.2.0, Release 07-09-2018 ===================================
+                                PLC API services changes from the previous version.
+
+1.  /administration?filter=COSTING_SHEET_ID%3d%23COGSL&business_object=Costing_Sheet_Row
+
+	+ Created new table : t_costing_sheet_overhead_row_formula:
+		FORMULA_ID : Integer not null;
+   	  	FORMULA_STRING: LargeString not null;
+   	  	FORMULA_DESCRIPTION: String(5000);
+
+	+ Added Formula_ID column to the table t_costing_sheet_overhead_row
+
+	+GET
+		+ added three new fields: FORMULA_ID, FORMULA_STRING, FORMULA_DESCRIPTION in the response body
+2. /items
+		+POST:
+		    - Added new "noResponseBody" url parameter. In case the parameter value is "true" there will be no response body returned.
+3. projects/material-price-surcharges
+	+GET/+PUT
+		+ Added two new rules for material surcharge: Material + Plant(determination sequence 1) and Material(determination sequence 2)
+
+4.  /calculations
+	+POST
+		+ added new property, STATUS_ID. for calculation version response body
+	/calculation-versions
+	+GET
+		+ added new property, STATUS_ID, for calculation version response body
+	+PUT
+		+ added new property, STATUS_ID, for calculation version request body
+	+POST
+		+ added new property, STATUS_ID, for calculation version request body
+	/calculation-versions/:calculation_version_id
+	+GET
+		+ added new property, STATUS_ID, for calculation version response body
+	calculation-versions/:calculation_version_id/lifecycles
+	+GET
+		+ added new property, STATUS_ID, for calculation version response body
+
+5. /items/
+        -added new column IS_DISABLING_ACCOUNT_DETERMINATION in t_item and t_item_temporary
+
+6. /calculation-versions/id/variants
+		+GET/+POST
+			+ added one new field: VARIANT_TYPE.
+		+GET/+PUT
+			+ added one new field: TOTAL_SALES_PRICE.
+
+7. /items
+		+GET/+PUT
+			+ added one new field: TOTAL_QUANTITY_OF_VARIANTS.
+
+
+	=================================== PLC API version 4.3.0, Release 30-08-2020 ===================================
+                                PLC API services changes from the previous version.
+
+1. /projects/quantities
+		- remove GET and PUT rest services.
+
+2. /items/
+		- added new column DETERMINED_ACCOUNT_ID in t_item and t_item_temporary
+
+
+	=================================== PLC API version 4.4.0, Release 30-11-2021 ===================================
+                                PLC API services changes from the previous version.
+
+1. /analytics/services.xsodata/BOM_COMPARE(versionId1={id1},versionId2={id2},languageId={langId})/Execute
+		- Added the GET service
+
+2. /sap/plc/xs/rest/dispatcher.xsjs/layouts
+		- Added the "layout_type" parameter to the GET service
+		- Added the 401, 403, 502, 503 codes for the GET service
+		- Added the 401, 502, 503 codes for the POST service
+		- Added the 401, 405, 502, 503 codes for the PUT service
+		- Added the 401, 405, 502, 503 codes for the DELETE service
+
+3. Updated the GET layouts 200 response body
+
+4. /analytics/services.xsodata/versionsearch
+		- Added the GET service
+
+5. /analytics/services.xsodata/$metadata
+		- Added the GET service
+
+6. Added the "details" property to the MessageGeneralValidationError response object
+
+7. /sap/plc/xs/rest/dispatcher.xsjs/retention-periods
+		- Added GET, POST, PUT, DELETE services to create, insert, delete and read retention periods
+		- Added new column VALID_FOR in table t_personal_data_validity
+		- Retention periods can be defined for specific ids or for general cases
+		- Retention periods can be maintained for user, customer, vendor and project
+
+8. /items/
+		- added new column CHILD_ITEM_CATEGORY_ID in t_item and t_item_temporary
+
+9. /CostingSheet/
+		- added new column CHILD_ITEM_CATEGORY_ID in t_costing_sheet_base_row		
+

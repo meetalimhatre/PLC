@@ -1,0 +1,19 @@
+PROCEDURE "sap.plc_test.testtools.calculation::p_recalculate_all_versions_sequentially" ( ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+-- This is a helper script to recalculate all calculation versions. Existing calculation results will be deleted before.
+
+-- delete all stored calculation results
+truncate table "sap.plc.db::basis.t_item_calculated_values_costing_sheet";
+truncate table "sap.plc.db::basis.t_item_calculated_values_component_split";
+truncate table "sap.plc.db::basis.t_item_referenced_version_component_split";
+
+-- select all calculation versions
+lt_versions = select calculation_version_id from "sap.plc.db::basis.t_calculation_version";
+
+-- do the actual recalculation of the given versions
+call "sap.plc_test.testtools.calculation::p_recalculate_calculation_versions_sequentially"(:lt_versions);
+
+END

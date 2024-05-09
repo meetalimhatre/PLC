@@ -1,0 +1,17 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_CBPT__TEXT" AFTER DELETE ON "sap.plc.db::repl.t_cbpt"
+REFERENCING OLD ROW OLDROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+if ( :OLDROW."DATBI" >= TO_DATS(CURRENT_DATE) ) THEN
+    UPDATE "sap.plc.db::basis.t_process__text"
+        SET _VALID_TO = :lv_current_utctimestamp 
+        WHERE "sap.plc.db::basis.t_process__text"."PROCESS_ID" = :OLDROW."PRZNR"
+            AND "sap.plc.db::basis.t_process__text"."CONTROLLING_AREA_ID" = :OLDROW."KOKRS"
+            AND "sap.plc.db::basis.t_process__text"."LANGUAGE" = :OLDROW."LANGU" 
+            AND "sap.plc.db::basis.t_process__text"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_process__text"."_VALID_TO" IS NULL;
+END IF;
+end ;

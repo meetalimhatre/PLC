@@ -1,0 +1,59 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_delete_customer" (
+    IN INPUT_TABLE TABLE (
+    	CUSTOMER_ID   NVARCHAR(10)
+    )
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+	lv_current_user nvarchar(256);
+	lv_current_utctimestamp	timestamp;
+
+BEGIN
+
+	SELECT current_utctimestamp
+		INTO lv_current_utctimestamp
+		FROM "sap.plc.db::DUMMY";
+
+	SELECT SESSION_CONTEXT('APPLICATIONUSER')
+		INTO lv_current_user
+		FROM "sap.plc.db::DUMMY";
+
+	DELETE FROM "sap.plc.db::basis.t_customer" WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    {{#if Material_Price.customFields}}
+        DELETE FROM "sap.plc.db::basis.t_material_price_ext" WHERE (PRICE_ID, _VALID_FROM) IN (
+                                                                                    SELECT PRICE_ID, _VALID_FROM
+                                                                                    FROM "sap.plc.db::basis.t_material_price"
+                                                                                    WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE)
+                                                                                );
+    {{/if}}
+
+    {{#if Activity_Price.customFields}}
+        DELETE FROM "sap.plc.db::basis.t_activity_price_ext" WHERE (PRICE_ID, _VALID_FROM) IN (
+                                                                                    SELECT PRICE_ID, _VALID_FROM
+                                                                                    FROM "sap.plc.db::basis.t_activity_price"
+                                                                                    WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE)
+                                                                                );
+    {{/if}}
+
+    DELETE FROM "sap.plc.db::basis.t_material_price" WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    DELETE FROM "sap.plc.db::basis.t_activity_price" WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::basis.t_calculation_version"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = :lv_current_user
+    WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::basis.t_calculation_version_temporary"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = :lv_current_user 
+    WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::basis.t_project"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = :lv_current_user 
+    WHERE CUSTOMER_ID IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::map.t_replication_log" SET FIELD_VALUE = 'DELETED' WHERE FIELD_NAME = 'CUSTOMER_ID' AND FIELD_VALUE IN (SELECT CUSTOMER_ID FROM :INPUT_TABLE);
+
+END; 

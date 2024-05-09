@@ -1,0 +1,24 @@
+<mvc:View  
+    xmlns="sap.m" 
+    xmlns:tnt="sap.tnt" 
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    height="100%" 
+    xmlns:ui="ui.view" 
+    controllerName='ui.controller.App' >
+    <Page>
+        <tnt:ToolHeader>
+            <Image src="css/images/SAP_Logo.png" />
+            <Text text="Product Lifecycle Costing Install Page" wrapping="false" />
+        </tnt:ToolHeader>
+        <OverflowToolbar>
+            <Button id="backButton" type="Back" press="onNavBack"/>
+            <ToolbarSpacer/>
+			<Button icon="sap-icon://log" type="Transparent" text="{i18n>XBUT_logout}" press="onLogout"/>
+        </OverflowToolbar>
+        <content>
+            <App id="rootControl">
+            </App>
+        </content>
+    </Page>  
+</mvc:View>

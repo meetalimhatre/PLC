@@ -1,0 +1,6 @@
+TYPE "sap.plc.db.authorization.procedures::ts_privilege_object_filter" AS TABLE (
+	OBJECT_TYPE NVARCHAR(127),
+	OBJECT_ID NVARCHAR(35)
+)
+
+

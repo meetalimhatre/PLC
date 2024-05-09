@@ -1,0 +1,24 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::price_determination_strategy_update_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_price_determination_strategy", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_price_determination_strategy__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_price_determination_strategy_price_source", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,19 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_custom_fields_currency_get" ( 
+		IN 	iv_cv_id 	  						INTEGER,
+        OUT ot_items_custom_fields_currency 	"sap.plc.db.calculationmanager.procedures::ts_item_custom_fields_currency" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+	
+BEGIN
+
+    -- Get values for the custom fields for a specific calculation
+    ot_items_custom_fields_currency = SELECT ITEM_ID, CALCULATION_VERSION_ID
+                                        {{#if Item.customFields}}
+                                            {{customFieldsWithCurrency Item}}
+                                        {{/if}}
+                                        FROM "sap.plc.db::basis.t_item_temporary_ext"
+                                        WHERE CALCULATION_VERSION_ID = :iv_cv_id;
+
+END

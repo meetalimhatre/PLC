@@ -1,0 +1,4 @@
+PROCEDURE "sap.plc_test.xs.db.generation::p_item" () LANGUAGE SQLSCRIPT AS BEGIN
+DELETE FROM {{t_extensionTable Item}};
+SELECT ITEM_ID, CALCULATION_VERSION_ID {{customFields Item}} FROM {{t_temporaryExtensionTable Item}};
+END

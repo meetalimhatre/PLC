@@ -1,0 +1,376 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_costing_sheet_row_read" ( 
+		IN iv_logon_language					NVARCHAR(11),
+		IN iv_master_data_timestamp				TIMESTAMP,
+		IN iv_text_from_autocomplete	    	NVARCHAR(250),
+		IN iv_filter_string	                    NVARCHAR(5000),
+	    OUT ot_costing_sheet_row				"sap.plc.db.administration::masterdata.tt_costing_sheet_row" default empty,
+	    OUT ot_costing_sheet_row__text			"sap.plc.db::basis.t_costing_sheet_row__text" default empty,
+	    OUT ot_costing_sheet_base				"sap.plc.db::basis.t_costing_sheet_base" default empty,
+	    OUT ot_costing_sheet_base_row			"sap.plc.db::basis.t_costing_sheet_base_row" default empty,
+	    OUT ot_costing_sheet_overhead			"sap.plc.db::basis.t_costing_sheet_overhead" default empty,
+	    OUT ot_costing_sheet_overhead_row		"sap.plc.db.administration::masterdata.tt_costing_sheet_overhead_row_ext" default empty,
+	    OUT ot_account_group					"sap.plc.db::basis.t_account_group" default empty,
+	    OUT ot_account_group__text				"sap.plc.db::basis.t_account_group__text" default empty,
+	    OUT ot_costing_sheet_row_dependencies	"sap.plc.db::basis.t_costing_sheet_row_dependencies" default empty,
+	    OUT ot_accounts							"sap.plc.db.administration::masterdata.tt_accounts" default empty,
+	    OUT ot_company_code						"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+	    OUT ot_business_area            		"sap.plc.db.administration::masterdata.tt_business_area" default empty,
+	    OUT ot_profit_center             		"sap.plc.db.administration::masterdata.tt_profit_center" default empty,
+	    OUT ot_plant                     		"sap.plc.db.administration::masterdata.tt_plant" default empty,
+	    OUT ot_overhead_group	  			    "sap.plc.db.administration::masterdata.tt_overhead_group" default empty,
+		OUT ot_activity_type                    "sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+		OUT ot_cost_center                      "sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_work_center                      "sap.plc.db.administration::masterdata.tt_work_center" default empty,
+	    OUT ot_controlling_area    				"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+	    OUT ot_costing_sheet   					"sap.plc.db.administration::masterdata.tt_costing_sheet" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	SELECT costing sheet row
+ *****************************/
+ 
+  tt_costing_sheet_row_all =
+  	SELECT  
+		plcTable.COSTING_SHEET_ROW_ID, 
+		plcTable.COSTING_SHEET_ID,
+		plcTable.COSTING_SHEET_ROW_TYPE,
+		plcTable.COSTING_SHEET_BASE_ID,
+		plcTable.ACCOUNT_GROUP_AS_BASE_ID,
+		plctable.COSTING_SHEET_OVERHEAD_ID,
+		plcTable.CALCULATION_ORDER,
+		plcTable.IS_RELEVANT_FOR_TOTAL,
+		plcTable.IS_RELEVANT_FOR_TOTAL2,
+		plcTable.IS_RELEVANT_FOR_TOTAL3,
+		plcTable._VALID_FROM, 
+		plcTable._VALID_TO,
+		plcTable._SOURCE,
+		plcTable._CREATED_BY, 
+		minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+		minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+		IFNULL(plcTextTable.COSTING_SHEET_ROW_DESCRIPTION, '') AS COSTING_SHEET_ROW_DESCRIPTION  
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_row" AS plcTable 
+		INNER JOIN
+		(
+			SELECT 
+				A._VALID_FROM, A.COSTING_SHEET_ROW_ID, A.COSTING_SHEET_ID, A._CREATED_BY 
+			FROM
+				"sap.plc.db::basis.t_costing_sheet_row" AS A 
+				INNER JOIN
+				(
+					SELECT 
+						MIN(B._VALID_FROM) AS _VALID_FROM, B.COSTING_SHEET_ROW_ID, B.COSTING_SHEET_ID
+					FROM 
+						"sap.plc.db::basis.t_costing_sheet_row" B 
+					GROUP BY B.COSTING_SHEET_ROW_ID, B.COSTING_SHEET_ID
+				) AS B
+				ON A._VALID_FROM = b._VALID_FROM AND A.COSTING_SHEET_ROW_ID = B.COSTING_SHEET_ROW_ID AND A.COSTING_SHEET_ID = B.COSTING_SHEET_ID
+		) AS minValues
+		ON  plcTable.COSTING_SHEET_ROW_ID = minValues.COSTING_SHEET_ROW_ID AND plcTable.COSTING_SHEET_ID = minValues.COSTING_SHEET_ID
+				
+		LEFT OUTER JOIN "sap.plc.db::basis.t_costing_sheet_row__text" AS plcTextTable 
+		ON  plcTable.COSTING_SHEET_ROW_ID = plcTextTable.COSTING_SHEET_ROW_ID
+		AND plcTable.COSTING_SHEET_ID = plcTextTable.COSTING_SHEET_ID  		
+		AND plcTextTable.LANGUAGE = :iv_logon_language 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND ( plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null )  
+	WHERE 
+		plcTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND ( plcTable._VALID_TO > :iv_master_data_timestamp OR plcTable._VALID_TO is null ) 
+		AND LOWER(plcTable.COSTING_SHEET_ID) LIKE LOWER('%'||:iv_text_from_autocomplete||'%')
+	GROUP BY
+		plcTable.COSTING_SHEET_ROW_ID, 
+		plcTable.COSTING_SHEET_ID,
+		plcTable.COSTING_SHEET_ROW_TYPE,
+		plcTable.COSTING_SHEET_BASE_ID,
+		plcTable.ACCOUNT_GROUP_AS_BASE_ID,
+		plctable.COSTING_SHEET_OVERHEAD_ID,
+		plcTable.CALCULATION_ORDER,
+		plcTable.IS_RELEVANT_FOR_TOTAL,
+		plcTable.IS_RELEVANT_FOR_TOTAL2,
+		plcTable.IS_RELEVANT_FOR_TOTAL3,
+		plcTable._VALID_FROM, 
+		plcTable._VALID_TO,
+		plcTable._SOURCE,
+		plcTable._CREATED_BY, 
+		minValues._VALID_FROM,
+		minValues._CREATED_BY,
+		plcTextTable.COSTING_SHEET_ROW_DESCRIPTION;
+		
+ ot_costing_sheet_row = APPLY_FILTER(:tt_costing_sheet_row_all, :iv_filter_string) ;
+ 
+  ot_account_group__text =
+	SELECT 
+		plcTextTable.ACCOUNT_GROUP_ID,
+		plcTextTable.LANGUAGE,
+		plcTextTable.ACCOUNT_GROUP_DESCRIPTION, 
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY
+	FROM 
+		"sap.plc.db::basis.t_account_group__text" AS plcTextTable 
+	WHERE 
+		( plcTextTable.ACCOUNT_GROUP_ID) in ( SELECT ACCOUNT_GROUP_AS_BASE_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null);
+					
+ ot_costing_sheet_row__text =
+	SELECT 
+		plcTextTable.COSTING_SHEET_ID,
+		plcTextTable.COSTING_SHEET_ROW_ID, 
+		plcTextTable.LANGUAGE,
+		plcTextTable.COSTING_SHEET_ROW_DESCRIPTION, 
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_row__text" AS plcTextTable 
+	WHERE 
+		( plcTextTable.COSTING_SHEET_ID, plcTextTable.COSTING_SHEET_ROW_ID) in ( SELECT COSTING_SHEET_ID, COSTING_SHEET_ROW_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+
+ ot_costing_sheet_base = 
+ 	SELECT 
+		plcTextTable.COSTING_SHEET_BASE_ID,
+		plcTextTable.COST_PORTION, 
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_base" AS plcTextTable 
+	WHERE 
+		( plcTextTable.COSTING_SHEET_BASE_ID) in ( SELECT COSTING_SHEET_BASE_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+		
+ ot_costing_sheet_base_row = 
+ 	SELECT 
+		plcTextTable.COSTING_SHEET_BASE_ID,
+		plcTextTable.ITEM_CATEGORY_ID,
+		plcTextTable.SUBITEM_STATE, 
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY,
+		plcTextTable.CHILD_ITEM_CATEGORY_ID
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_base_row" AS plcTextTable 
+	WHERE 
+		( plcTextTable.COSTING_SHEET_BASE_ID) in ( SELECT COSTING_SHEET_BASE_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+		
+  ot_account_group = 
+ 	SELECT 
+		plcTextTable.ACCOUNT_GROUP_ID,
+		plcTextTable.CONTROLLING_AREA_ID,
+		plcTextTable.COST_PORTION, 
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY
+	FROM 
+		"sap.plc.db::basis.t_account_group" AS plcTextTable 
+	WHERE 
+		( plcTextTable.ACCOUNT_GROUP_ID) in ( SELECT ACCOUNT_GROUP_AS_BASE_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+		
+  ot_costing_sheet_overhead = 
+ 	SELECT 
+		plcTextTable.COSTING_SHEET_OVERHEAD_ID,
+		plcTextTable.CREDIT_ACCOUNT_ID,
+		plcTextTable.CREDIT_FIXED_COST_PORTION,
+		plcTextTable.IS_ROLLED_UP,
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY,
+        plcTextTable.USE_DEFAULT_FIXED_COST_PORTION
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_overhead" AS plcTextTable 
+	WHERE 
+		( plcTextTable.COSTING_SHEET_OVERHEAD_ID) in ( SELECT COSTING_SHEET_OVERHEAD_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+		
+	ot_costing_sheet_overhead_row = 
+ 	SELECT 
+		plcTextTable.COSTING_SHEET_OVERHEAD_ROW_ID,
+		plcTextTable.COSTING_SHEET_OVERHEAD_ID,
+		plcTextTable.VALID_FROM,
+		plcTextTable.VALID_TO,
+		plcTextTable.CONTROLLING_AREA_ID,
+		plcTextTable.COMPANY_CODE_ID,
+		plcTextTable.BUSINESS_AREA_ID,
+		plcTextTable.PROFIT_CENTER_ID,
+		plcTextTable.PLANT_ID,
+		plcTextTable.OVERHEAD_GROUP_ID,
+		plcTextTable.OVERHEAD_PERCENTAGE,
+		plcTextTable.PROJECT_ID,
+		plcTextTable.ACTIVITY_TYPE_ID,
+		plcTextTable.COST_CENTER_ID,
+		plcTextTable.WORK_CENTER_ID,
+		plcTextTable.OVERHEAD_QUANTITY_BASED,
+		plcTextTable.OVERHEAD_CURRENCY_ID,
+		plcTextTable.OVERHEAD_PRICE_UNIT,
+		plcTextTable.OVERHEAD_PRICE_UNIT_UOM_ID,
+		plcTextTable.CREDIT_FIXED_COST_PORTION,
+		overheadRowFormulaTable.FORMULA_ID as FORMULA_ID,
+		overheadRowFormulaTable.FORMULA_STRING as FORMULA_STRING,
+		overheadRowFormulaTable.FORMULA_DESCRIPTION as FORMULA_DESCRIPTION,
+		overheadRowFormulaTable.OVERHEAD_CUSTOM as OVERHEAD_CUSTOM,
+		plcTextTable._VALID_FROM,
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY,
+		minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+		minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_overhead_row" AS plcTextTable 
+	INNER JOIN
+		(  --determine the first version and the user who created it
+			SELECT 
+				A._VALID_FROM, A.COSTING_SHEET_OVERHEAD_ROW_ID, A.COSTING_SHEET_OVERHEAD_ID, A._CREATED_BY 
+			FROM
+				"sap.plc.db::basis.t_costing_sheet_overhead_row" AS A 
+				INNER JOIN
+				(
+				-- select oldest date then join it with its respective user
+					SELECT 
+						MIN(B._VALID_FROM) AS _VALID_FROM, B.COSTING_SHEET_OVERHEAD_ROW_ID, B.COSTING_SHEET_OVERHEAD_ID 
+					FROM 
+						"sap.plc.db::basis.t_costing_sheet_overhead_row" B 
+					GROUP BY B.COSTING_SHEET_OVERHEAD_ROW_ID, B.COSTING_SHEET_OVERHEAD_ID
+				) AS B
+				ON A.COSTING_SHEET_OVERHEAD_ROW_ID = B.COSTING_SHEET_OVERHEAD_ROW_ID AND A.COSTING_SHEET_OVERHEAD_ID = B.COSTING_SHEET_OVERHEAD_ID 
+				AND A._VALID_FROM = B._VALID_FROM
+		) AS minValues
+		ON  plcTextTable.COSTING_SHEET_OVERHEAD_ROW_ID = minValues.COSTING_SHEET_OVERHEAD_ROW_ID AND
+		plcTextTable.COSTING_SHEET_OVERHEAD_ID = minValues.COSTING_SHEET_OVERHEAD_ID
+	LEFT OUTER JOIN "sap.plc.db::basis.t_costing_sheet_overhead_row_formula" AS overheadRowFormulaTable
+	ON plcTextTable.FORMULA_ID = overheadRowFormulaTable.FORMULA_ID
+	WHERE
+		( plcTextTable.COSTING_SHEET_OVERHEAD_ID) in ( SELECT COSTING_SHEET_OVERHEAD_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+		
+	ot_costing_sheet_row_dependencies = 
+ 	SELECT 
+		plcTextTable.SOURCE_ROW_ID,
+		plcTextTable.TARGET_ROW_ID,
+		plcTextTable.COSTING_SHEET_ID,
+		plcTextTable._VALID_FROM, 
+		plcTextTable._VALID_TO,
+		plcTextTable._SOURCE,
+		plcTextTable._CREATED_BY
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet_row_dependencies" AS plcTextTable 
+	WHERE 
+		( plcTextTable.COSTING_SHEET_ID) in ( SELECT COSTING_SHEET_ID FROM :ot_costing_sheet_row ) 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND (plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null) ;
+ 
+ ot_costing_sheet = SELECT  
+		plcTable.COSTING_SHEET_ID, 
+		plcTable.CONTROLLING_AREA_ID,
+		plcTable.IS_TOTAL_COST2_ENABLED,
+		plcTable.IS_TOTAL_COST3_ENABLED,
+		plcTable._VALID_FROM, 
+		plcTable._VALID_TO,
+		plcTable._SOURCE,
+		plcTable._CREATED_BY, 
+		minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+		minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+		plcTextTable.COSTING_SHEET_DESCRIPTION,
+		plcTextTable.TOTAL_COST2_DESCRIPTION,
+		plcTextTable.TOTAL_COST3_DESCRIPTION
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet" AS plcTable 
+		INNER JOIN
+		(
+			SELECT 
+				A._VALID_FROM, A.COSTING_SHEET_ID, A._CREATED_BY 
+			FROM
+				"sap.plc.db::basis.t_costing_sheet" AS A 
+				INNER JOIN
+				(
+					SELECT 
+						MIN(B._VALID_FROM) AS _VALID_FROM, B.COSTING_SHEET_ID
+					FROM 
+						"sap.plc.db::basis.t_costing_sheet" B 
+					GROUP BY B.COSTING_SHEET_ID
+				) AS B
+				ON A.COSTING_SHEET_ID = B.COSTING_SHEET_ID AND A._VALID_FROM = b._VALID_FROM
+		) AS minValues
+		ON  plcTable.COSTING_SHEET_ID = minValues.COSTING_SHEET_ID
+		LEFT OUTER JOIN "sap.plc.db::basis.t_costing_sheet__text" AS plcTextTable 
+		ON  plcTable.COSTING_SHEET_ID = plcTextTable.COSTING_SHEET_ID
+		AND plcTextTable.LANGUAGE = :iv_logon_language 
+		AND plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		AND ( plcTextTable._VALID_TO > :iv_master_data_timestamp OR plcTextTable._VALID_TO is null )  
+	WHERE
+	plcTable._VALID_FROM <= :iv_master_data_timestamp 
+	AND ( plcTable._VALID_TO > :iv_master_data_timestamp OR plcTable._VALID_TO is null )
+	order by plcTable.COSTING_SHEET_ID;
+/***************************** 
+	Select referenced objects 
+ *****************************/	
+-- select accounts 
+tt_accounts_key = 
+	SELECT 
+		DISTINCT costingSheetOverHead.CREDIT_ACCOUNT_ID AS ACCOUNT_ID, costingSheet.CONTROLLING_AREA_ID
+	FROM 
+		"sap.plc.db::basis.t_costing_sheet" AS costingSheet INNER JOIN 
+		"sap.plc.db::basis.t_costing_sheet_row" AS costingSheetRow ON costingSheet.COSTING_SHEET_ID = costingSheetRow.COSTING_SHEET_ID INNER JOIN
+		"sap.plc.db::basis.t_costing_sheet_overhead" as costingSheetOverHead ON costingSheetRow.COSTING_SHEET_OVERHEAD_ID = costingSheetOverHead.COSTING_SHEET_OVERHEAD_ID;	
+		
+ call "sap.plc.db.administration.procedures::p_ref_accounts_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_accounts_key,ot_accounts);	
+                     	
+-- select company codes	
+tt_company_code_key = SELECT DISTINCT COMPANY_CODE_ID FROM :ot_costing_sheet_overhead_row;
+call "sap.plc.db.administration.procedures::p_ref_company_code_read"(:iv_logon_language,:iv_master_data_timestamp,'',:tt_company_code_key,ot_company_code);	
+                     
+--select business areas	
+ tt_business_area_key = select distinct BUSINESS_AREA_ID from :ot_costing_sheet_overhead_row;
+ call "sap.plc.db.administration.procedures::p_ref_business_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_business_area_key,ot_business_area);
+
+--select profit centers	
+ tt_profit_center_key = select distinct PROFIT_CENTER_ID, CONTROLLING_AREA_ID from :ot_costing_sheet_overhead_row;
+ call "sap.plc.db.administration.procedures::p_ref_profit_center_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_profit_center_key,ot_profit_center);
+
+--select plants  	
+ tt_plant_key = select distinct PLANT_ID from :ot_costing_sheet_overhead_row;
+ call "sap.plc.db.administration.procedures::p_ref_plant_read"(:iv_logon_language,:iv_master_data_timestamp,'','',:tt_plant_key,ot_plant);
+
+--select overhead group
+ tt_overhead_group_key = select distinct OVERHEAD_GROUP_ID, PLANT_ID from :ot_costing_sheet_overhead_row;      
+ call "sap.plc.db.administration.procedures::p_ref_overhead_group_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_overhead_group_key,:ot_overhead_group); 
+ 
+--select activity type
+ tt_activity_type_key = select distinct ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID from :ot_costing_sheet_overhead_row;      
+ call "sap.plc.db.administration.procedures::p_ref_activity_type_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_activity_type_key,:ot_activity_type); 
+ 
+--select cost center
+ tt_cost_center_key = select distinct COST_CENTER_ID, CONTROLLING_AREA_ID from :ot_costing_sheet_overhead_row;      
+ call "sap.plc.db.administration.procedures::p_ref_cost_center_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_cost_center_key,:ot_cost_center); 
+ 
+--select work center
+ tt_work_center_key = select distinct WORK_CENTER_ID, PLANT_ID from :ot_costing_sheet_overhead_row;      
+ call "sap.plc.db.administration.procedures::p_ref_work_center_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_work_center_key,:ot_work_center); 
+ 
+--select controlling area	
+ tt_controlling_area_key = select distinct CONTROLLING_AREA_ID from :tt_accounts_key;
+ call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_key,ot_controlling_area);	
+                     
+END;
+
+

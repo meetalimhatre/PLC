@@ -1,0 +1,126 @@
+PROCEDURE  "sap.plc.db.administration.procedures::p_account_group_read" ( 
+              IN iv_logon_language        NVARCHAR(11),
+              IN iv_master_data_timestamp TIMESTAMP,
+		      IN iv_text_from_autocomplete	NVARCHAR(250),
+              IN iv_filter_string         NVARCHAR(5000),
+              IN iv_no_max_records        INTEGER,
+              IN iv_no_skip_records       INTEGER,
+              OUT ot_account_groups        "sap.plc.db.administration::masterdata.tt_account_groups" default empty,
+	          OUT ot_account_groups_text   "sap.plc.db::basis.t_account_group__text" default empty,
+	          OUT ot_account_range         "sap.plc.db.administration::masterdata.tt_account_range" default empty,
+	          OUT ot_accounts              "sap.plc.db.administration::masterdata.tt_accounts" default empty,
+	          OUT ot_controlling_area      "sap.plc.db.administration::masterdata.tt_controlling_area" default empty
+       ) 
+       LANGUAGE SQLSCRIPT
+       SQL SECURITY INVOKER
+       READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+       Select all acount groups and all acount ranges 
+ ***************************************************/
+
+ --select all account groups
+ot_account_groups_all = 
+                           select
+                                 plcTable.ACCOUNT_GROUP_ID,
+                                 plcTable.CONTROLLING_AREA_ID,
+                                 plcTable.COST_PORTION,
+                                  plcTable._VALID_FROM,
+                                  plcTable._VALID_TO,
+                                  plcTable._SOURCE,
+                                  plcTable._CREATED_BY,
+                                  minValues._VALID_FROM as _VALID_FROM_FIRST_VERSION,
+                                  minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+                                  plcTextTable.ACCOUNT_GROUP_DESCRIPTION
+                           from  "sap.plc.db::basis.t_account_group" as plcTable
+                           inner join 
+                           (      select A._VALID_FROM, A.ACCOUNT_GROUP_ID, A._CREATED_BY
+                                  from "sap.plc.db::basis.t_account_group" as A
+                                  inner join 
+                                  (      select MIN(_VALID_FROM) as _VALID_FROM, ACCOUNT_GROUP_ID
+                                         from  "sap.plc.db::basis.t_account_group"
+                                                group by ACCOUNT_GROUP_ID
+                                  ) as B
+                                         on A._VALID_FROM = B._VALID_FROM and A.ACCOUNT_GROUP_ID = B.ACCOUNT_GROUP_ID
+                           ) as minValues
+                                  on plcTable.ACCOUNT_GROUP_ID = minValues.ACCOUNT_GROUP_ID
+                           left outer join  "sap.plc.db::basis.t_account_group__text" as plcTextTable
+                                  on plcTable.ACCOUNT_GROUP_ID = plcTextTable.ACCOUNT_GROUP_ID
+                                  and plcTextTable.LANGUAGE = :iv_logon_language
+                                  and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                       and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null) 
+                           where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                               and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+                               and ( LOWER(plcTable.ACCOUNT_GROUP_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+			    			   or LOWER(plcTextTable.ACCOUNT_GROUP_DESCRIPTION) LIKE LOWER(:iv_text_from_autocomplete||'%') )
+                               order by plcTable.ACCOUNT_GROUP_ID;
+                               
+ot_account_groups_filter = APPLY_FILTER(:ot_account_groups_all, :iv_filter_string ) ; 
+
+ot_account_groups = select ACCOUNT_GROUP_ID, CONTROLLING_AREA_ID, COST_PORTION, _VALID_FROM, _VALID_TO, _SOURCE, 
+                                   _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, ACCOUNT_GROUP_DESCRIPTION 
+                                   from :ot_account_groups_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+ 
+ot_account_groups_text =
+                           select  
+                                  plcTextTable.ACCOUNT_GROUP_ID, 
+                                  plcTextTable.LANGUAGE, 
+                                  plcTextTable.ACCOUNT_GROUP_DESCRIPTION, 
+                                  plcTextTable._VALID_FROM, 
+                                  plcTextTable._VALID_TO,
+                                  plcTextTable._SOURCE,
+                                  plcTextTable._CREATED_BY
+                           from  "sap.plc.db::basis.t_account_group__text" as plcTextTable 
+                           where ( plcTextTable.ACCOUNT_GROUP_ID ) in ( select ACCOUNT_GROUP_ID from :ot_account_groups ) 
+                                  and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                                  and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null );
+                                         
+--select all acount ranges
+ot_account_range = 
+                           select
+                                  plcTable.FROM_ACCOUNT_ID,
+                                  plcTable.TO_ACCOUNT_ID,
+                                  plcTable.ACCOUNT_GROUP_ID,
+                                  plcTable._VALID_FROM,
+                                  plcTable._VALID_TO,
+                                  plcTable._SOURCE,
+                                  plcTable._CREATED_BY,
+                                  minValues._VALID_FROM as _VALID_FROM_FIRST_VERSION,
+                                  minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION
+                           from  "sap.plc.db::basis.t_account_account_group" as plcTable
+                           inner join 
+                           (      select A.FROM_ACCOUNT_ID, A._VALID_FROM, A.ACCOUNT_GROUP_ID, A._CREATED_BY
+                                  from  "sap.plc.db::basis.t_account_account_group" as A
+                                  inner join 
+                                  (      select MIN(_VALID_FROM) as _VALID_FROM, ACCOUNT_GROUP_ID, FROM_ACCOUNT_ID
+                                         from  "sap.plc.db::basis.t_account_account_group"
+                                                group by ACCOUNT_GROUP_ID, FROM_ACCOUNT_ID
+                                  ) as B
+                                         on A._VALID_FROM = B._VALID_FROM and A.ACCOUNT_GROUP_ID = B.ACCOUNT_GROUP_ID and A.FROM_ACCOUNT_ID = B.FROM_ACCOUNT_ID
+                           ) as minValues
+                                  on plcTable.ACCOUNT_GROUP_ID = minValues.ACCOUNT_GROUP_ID and plcTable.FROM_ACCOUNT_ID = minValues.FROM_ACCOUNT_ID
+                           where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                               and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null ) 
+                               and ( plcTable.ACCOUNT_GROUP_ID ) in ( select ACCOUNT_GROUP_ID from :ot_account_groups )
+                               order by plcTable.FROM_ACCOUNT_ID, plcTable.ACCOUNT_GROUP_ID;
+
+--select accounts (used in ranges)
+ot_accounts_key =    select a.FROM_ACCOUNT_ID as ACCOUNT_ID, b.CONTROLLING_AREA_ID as CONTROLLING_AREA_ID 
+                                  from :ot_account_range as a
+                     inner join :ot_account_groups as b
+                     on a.ACCOUNT_GROUP_ID = b.ACCOUNT_GROUP_ID
+                  
+                     UNION ALL
+
+                                  select c.TO_ACCOUNT_ID as ACCOUNT_ID, d.CONTROLLING_AREA_ID as CONTROLLING_AREA_ID from :ot_account_range as c
+                     inner join :ot_account_groups as d
+                     on c.ACCOUNT_GROUP_ID = d.ACCOUNT_GROUP_ID;
+
+call "sap.plc.db.administration.procedures::p_ref_accounts_read"(:iv_logon_language,:iv_master_data_timestamp,:ot_accounts_key,ot_accounts);
+                    
+--select controlling area  
+ot_controlling_area_key = select distinct CONTROLLING_AREA_ID from :ot_accounts;
+call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:ot_controlling_area_key,ot_controlling_area);       
+
+END;

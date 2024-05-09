@@ -1,0 +1,41 @@
+update temp_table
+				set	temp_table.ERROR_CODE = CASE 
+				            WHEN result._VALID_FROM is null and temp_table.operation = 'Update' THEN 'GENERAL_ENTITY_NOT_CURRENT_ERROR'
+				            WHEN result._VALID_FROM is not null THEN 'GENERAL_ENTITY_NOT_CURRENT_ERROR'
+				            ELSE ''
+				         END, 
+                    temp_table.ERROR_DETAILS = CASE 
+								 WHEN result._VALID_FROM is null and temp_table.operation = 'Update' THEN 
+								      '{"administrationConflictDetailsObj" : {"newValidFromDate": null ,"userId":"'||result._CREATED_BY||'", 
+								      	"operationUserId":"Delete", "objType": "TextObj"}}'
+								 WHEN result._VALID_FROM is not null THEN '{"administrationConflictDetailsObj" : {"newValidFromDate": "' 
+					                ||(TO_NVARCHAR(result._VALID_FROM, 'YYYY-MM-DD')||'T'||TO_NVARCHAR(result._VALID_FROM, 'HH24:MI:SS.FF3')||'Z')  
+					                ||'","userId":"'||result._CREATED_BY||'", "operationUserId":"Update", "objType": "TextObj"}}'
+						         ELSE ''
+							    END
+					from {{temporaryTextTable MasterdataBusinessObject}} as temp_table, 
+				    ( select {{keyFieldsWithPrefix MasterdataBusinessObject 'conflicting_entry'}}, 
+				         conflicting_entry.LANGUAGE,
+				         updated_entry._VALID_FROM, 
+				         ifnull(updated_entry._CREATED_BY, conflicting_entry._CREATED_BY) as _CREATED_BY,
+						 conflicting_entry._VALID_FROM as _OLD_VALID_FROM
+						 from
+						 (select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table._VALID_FROM, temp_table.LANGUAGE, main_table._CREATED_BY 
+						                from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+										inner join {{textTable MasterdataBusinessObject}} as main_table
+										on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+										and temp_table._VALID_FROM = main_table._VALID_FROM
+										and temp_table.LANGUAGE = main_table.LANGUAGE
+										and temp_table.operation in ('Update','Delete')
+										and (temp_table.error_code = '' or  temp_table.error_code is null)
+										where main_table._VALID_TO is not null) as conflicting_entry
+						 left outer join {{textTable MasterdataBusinessObject}} as updated_entry
+						 on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'conflicting_entry' 'updated_entry'}}	
+						 and conflicting_entry.LANGUAGE = updated_entry.LANGUAGE 	 
+						 and updated_entry._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and updated_entry._VALID_TO is null
+					) as result 
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+					and temp_table._VALID_FROM = result._OLD_VALID_FROM
+					and temp_table.LANGUAGE = result.LANGUAGE
+					and temp_table.operation in ('Update','Delete')
+					and (temp_table.error_code = '' or  temp_table.error_code is null)

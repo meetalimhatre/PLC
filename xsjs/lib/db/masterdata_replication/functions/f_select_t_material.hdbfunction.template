@@ -1,0 +1,35 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_material" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"MATERIAL_ID"	NVARCHAR(40),
+	"BASE_UOM_ID"	NVARCHAR(3),
+	"MATERIAL_GROUP_ID"	NVARCHAR(9),
+	"MATERIAL_TYPE_ID"	NVARCHAR(4),
+	"IS_CREATED_VIA_CAD_INTEGRATION"	TINYINT,
+	"IS_PHANTOM_MATERIAL"	TINYINT,
+	"IS_CONFIGURABLE_MATERIAL"	TINYINT,
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	{{#if Material.customFields}}
+        {{ddl_masterdataCustomFieldsWithoutUnit Material}}
+    {{/if}}
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"MATERIAL_ID"	NVARCHAR(40),
+		"BASE_UOM_ID"	NVARCHAR(3),
+		"MATERIAL_GROUP_ID"	NVARCHAR(9),
+		"MATERIAL_TYPE_ID"	NVARCHAR(4),
+		"IS_CREATED_VIA_CAD_INTEGRATION"	TINYINT,
+		"IS_PHANTOM_MATERIAL"	TINYINT,
+		"IS_CONFIGURABLE_MATERIAL"	TINYINT,
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+		{{#if Material.customFields}}
+            {{ddl_masterdataCustomFieldsWithoutUnit Material}}
+        {{/if}}
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_material', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

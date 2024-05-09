@@ -1,0 +1,1786 @@
+view "sap.plc.db.views::V_DATA_PROTECTION_DISPLAY_INFO"
+	AS  SELECT		
+		 't_calculation_version' as table_name,
+		 'CUSTOMER_ID' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (CUSTOMER_ID) as entity_id,
+		 count(CUSTOMER_ID) as counter
+FROM "sap.plc.db::basis.t_calculation_version" as t
+		WHERE t.CUSTOMER_ID is not null 
+		OR t.CUSTOMER_ID <> 'DELETED'
+		GROUP BY UPPER (t.CUSTOMER_ID)
+--##############################################
+		UNION ALL
+		SELECT
+		't_project' as table_name,
+		 'CUSTOMER_ID' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (CUSTOMER_ID) as entity_id,
+		 count(CUSTOMER_ID) as counter
+FROM "sap.plc.db::basis.t_project" as t
+		WHERE t.CUSTOMER_ID is not null 
+		OR t.CUSTOMER_ID <> 'DELETED'
+		GROUP BY UPPER (t.CUSTOMER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_customer' as table_name,
+		 'CUSTOMER_ID' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (CUSTOMER_ID) as entity_id,
+		 count(CUSTOMER_ID) as counter
+FROM "sap.plc.db::basis.t_customer" as t
+		WHERE t.CUSTOMER_ID is not null 
+		OR t.CUSTOMER_ID <> 'DELETED'
+		GROUP BY UPPER (t.CUSTOMER_ID)   
+--##############################################
+		UNION ALL
+		SELECT 
+		't_activity_price' as table_name,
+		'CUSTOMER_ID' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (CUSTOMER_ID) as entity_id,
+		 count(CUSTOMER_ID) as counter
+FROM "sap.plc.db::basis.t_activity_price" as t
+		WHERE t.CUSTOMER_ID <> '*'
+		GROUP BY UPPER (t.CUSTOMER_ID)   
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_price' as table_name,
+		'CUSTOMER_ID' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (CUSTOMER_ID) as entity_id,
+		 count(CUSTOMER_ID) as counter
+FROM "sap.plc.db::basis.t_material_price" as t
+		WHERE t.CUSTOMER_ID <> '*'
+		GROUP BY UPPER (t.CUSTOMER_ID)   
+--##############################################
+		UNION ALL
+		SELECT
+		't_item' as table_name,
+		 'VENDOR_ID' as column_name,
+ 		 'VENDOR' as entity_type,
+		 UPPER (VENDOR_ID) as entity_id,
+		 count(VENDOR_ID) as counter
+FROM "sap.plc.db::basis.t_item" as t
+		WHERE t.VENDOR_ID is not null 
+		OR t.VENDOR_ID <> 'DELETED'
+		GROUP BY UPPER (t.VENDOR_ID)
+--##############################################
+		UNION ALL
+		SELECT
+		't_item_category' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_item_category" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT
+		't_item_category' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_item_category" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_price' as table_name,
+		 'VENDOR_ID' as column_name,
+ 		 'VENDOR' as entity_type,
+		 UPPER (VENDOR_ID) as entity_id,
+		 count(VENDOR_ID) as counter
+FROM "sap.plc.db::basis.t_material_price" as t
+		WHERE t.VENDOR_ID <> '*'
+		GROUP BY UPPER (t.VENDOR_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_price__first_version' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_price__first_version" as t
+		WHERE t._CREATED_BY <> '*'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_activity_price__first_version' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_activity_price__first_version" as t
+		WHERE t._CREATED_BY <> '*'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_account' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_account" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_vendor' as table_name,
+		 'VENDOR_ID' as column_name,
+ 		 'VENDOR' as entity_type,
+		 UPPER (VENDOR_ID) as entity_id,
+		 count(VENDOR_ID) as counter
+FROM "sap.plc.db::basis.t_vendor" as t
+		WHERE t.VENDOR_ID is not null 
+		OR t.VENDOR_ID <> 'DELETED'
+		GROUP BY UPPER (t.VENDOR_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_account_account_group' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_account_account_group" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_account_group' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_account_group" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_component_split_account_group' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_component_split_account_group" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_account_group__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_account_group__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_account__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_account__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_activity_price' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_activity_price" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_activity_price' as table_name,
+		 '_CREATED_BY_FIRST_VERSION' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY_FIRST_VERSION) as entity_id,
+		 count(_CREATED_BY_FIRST_VERSION) as counter
+FROM "sap.plc.db::basis.t_activity_price" as t
+		WHERE t._CREATED_BY_FIRST_VERSION is not null 
+		OR t._CREATED_BY_FIRST_VERSION <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY_FIRST_VERSION)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_activity_type' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_activity_type" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT
+		't_activity_type__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_activity_type__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_addin_configuration_header' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_addin_configuration_header" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_addin_configuration_header' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_addin_configuration_header" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_addin_version' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_addin_version" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_addin_version' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_addin_version" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_business_area' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_business_area" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_business_area__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_business_area__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_process' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_process" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_process__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_process__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_calculation' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_calculation" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_calculation' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_calculation" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_calculation_version' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_calculation_version" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		
+		SELECT 
+		't_calculation_version_temporary' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_calculation_version_temporary" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_company_code' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_company_code" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_company_code__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_company_code__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_component_split' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_component_split" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_component_split__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_component_split__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_controlling_area' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_controlling_area" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_controlling_area__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_controlling_area__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet_base' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_base" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet_base_row' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_base_row" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_costing_sheet_overhead' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_overhead" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_costing_sheet_overhead_row' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_overhead_row" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet_row' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_row" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+				 't_costing_sheet_row_dependencies' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_row_dependencies" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet_row__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet_row__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_costing_sheet__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_costing_sheet__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_cost_center' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_cost_center" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_cost_center__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_cost_center__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_currency' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_currency" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_currency_conversion' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_currency_conversion" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_currency__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_currency__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_customer' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_customer" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_dimension' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_dimension" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_dimension__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_dimension__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document_material' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document_material" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document_status' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document_status" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document_status__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document_status__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document_type' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document_type" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_document_type__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document_type__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_document__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_document__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_item' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_item" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_item' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_item" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_item_temporary' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_item_temporary" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_item_temporary' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_item_temporary" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_design_office' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_design_office" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_design_office__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_design_office__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_language' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_language" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_material' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT
+		 't_material_account_determination' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_account_determination" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_group' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_group" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_material_group__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_group__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_plant' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_plant" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_type' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_type" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_type__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_type__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+				 't_metadata_item_attributes' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata_item_attributes" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata_item_attributes' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata_item_attributes" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata__text' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata__text" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_metadata__text' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata__text" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata_staging' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata_staging" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata_staging' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata_staging" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+		UNION ALL
+		SELECT 
+		't_metadata__text_staging' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata__text_staging" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_metadata__text_staging' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_metadata__text_staging" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_task' as table_name,
+		 'SESSION_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (SESSION_ID) as entity_id,
+		 count(SESSION_ID) as counter
+FROM "sap.plc.db::basis.t_task" as t
+		WHERE t.SESSION_ID is not null 
+		OR t.SESSION_ID <> 'DELETED'
+		GROUP BY UPPER (t.SESSION_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_overhead_group' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_overhead_group" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_overhead_group__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_overhead_group__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_plant' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_plant" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_plant__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_plant__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_price' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_material_price" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_material_price' as table_name,
+		 '_CREATED_BY_FIRST_VERSION' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY_FIRST_VERSION) as entity_id,
+		 count(_CREATED_BY_FIRST_VERSION) as counter
+FROM "sap.plc.db::basis.t_material_price" as t
+		WHERE t._CREATED_BY_FIRST_VERSION is not null 
+		OR t._CREATED_BY_FIRST_VERSION <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY_FIRST_VERSION)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_price_source' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_price_source" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_price_source' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_price_source" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT
+		't_price_determination_strategy' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_price_determination_strategy" as t
+		WHERE t.CREATED_BY is not null
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT
+		 't_price_determination_strategy' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_price_determination_strategy" as t
+		WHERE t.LAST_MODIFIED_BY is not null
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_profit_center' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_profit_center" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_exchange_rate_type' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_exchange_rate_type" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_exchange_rate_type' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_exchange_rate_type" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_exchange_rate_type__text' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_exchange_rate_type__text" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_exchange_rate_type__text' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_exchange_rate_type__text" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		 't_profit_center__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_profit_center__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_project" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project' as table_name,
+		 'PROJECT_RESPONSIBLE' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (PROJECT_RESPONSIBLE) as entity_id,
+		 count(PROJECT_RESPONSIBLE) as counter
+FROM "sap.plc.db::basis.t_project" as t
+		WHERE t.PROJECT_RESPONSIBLE is not null 
+		OR t.PROJECT_RESPONSIBLE <> 'DELETED'
+		GROUP BY UPPER (t.PROJECT_RESPONSIBLE)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_lifecycle_configuration' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_lifecycle_configuration" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_one_time_project_cost' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_one_time_project_cost" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_one_time_product_cost' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_one_time_product_cost" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_total_quantities' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_total_quantities" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_lifecycle_configuration' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_lifecycle_configuration" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_lifecycle_period_type' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_lifecycle_period_type" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_monthly_lifecycle_period' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_monthly_lifecycle_period" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_project_lifecycle_period_quantity_value' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_recent_calculation_versions' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::basis.t_recent_calculation_versions" as t
+		WHERE t.USER_ID is not null 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_uom' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_uom" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_uom__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_uom__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_valuation_class' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_valuation_class" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_valuation_class__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_valuation_class__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_variant' as table_name,
+		 'LAST_CALCULATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_CALCULATED_BY) as entity_id,
+		 count(LAST_CALCULATED_BY) as counter
+FROM "sap.plc.db::basis.t_variant" as t
+		WHERE t.LAST_CALCULATED_BY is not null 
+		OR t.LAST_CALCULATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_CALCULATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_variant' as table_name,
+		 'LAST_MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_MODIFIED_BY) as entity_id,
+		 count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_variant" as t
+		WHERE t.LAST_MODIFIED_BY is not null 
+		OR t.LAST_MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_variant' as table_name,
+		 'LAST_REMOVED_MARKINGS_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (LAST_REMOVED_MARKINGS_BY) as entity_id,
+		 count(LAST_REMOVED_MARKINGS_BY) as counter
+FROM "sap.plc.db::basis.t_variant" as t
+		WHERE t.LAST_REMOVED_MARKINGS_BY is not null 
+		OR t.LAST_REMOVED_MARKINGS_BY <> 'DELETED'
+		GROUP BY UPPER (t.LAST_REMOVED_MARKINGS_BY)
+--##############################################
+		UNION ALL
+        SELECT
+        't_variant_temporary' as table_name,
+        'LAST_CALCULATED_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (LAST_CALCULATED_BY) as entity_id,
+        count(LAST_CALCULATED_BY) as counter
+FROM "sap.plc.db::basis.t_variant_temporary" as t
+        WHERE t.LAST_CALCULATED_BY is not null
+        OR t.LAST_CALCULATED_BY <> 'DELETED'
+        GROUP BY UPPER (t.LAST_CALCULATED_BY)
+--##############################################
+        UNION ALL
+        SELECT
+        't_variant_temporary' as table_name,
+        'LAST_MODIFIED_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (LAST_MODIFIED_BY) as entity_id,
+        count(LAST_MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_variant_temporary" as t
+    	WHERE t.LAST_MODIFIED_BY is not null
+        OR t.LAST_MODIFIED_BY <> 'DELETED'
+        GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+        UNION ALL
+        SELECT
+        't_variant_temporary' as table_name,
+        'LAST_REMOVED_MARKINGS_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (LAST_REMOVED_MARKINGS_BY) as entity_id,
+        count(LAST_REMOVED_MARKINGS_BY) as counter
+FROM "sap.plc.db::basis.t_variant_temporary" as t
+     	WHERE t.LAST_REMOVED_MARKINGS_BY is not null
+        OR t.LAST_REMOVED_MARKINGS_BY <> 'DELETED'
+        GROUP BY UPPER (t.LAST_REMOVED_MARKINGS_BY)
+--##############################################
+        UNION ALL
+        SELECT
+        't_tag' as table_name,
+        'CREATED_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (CREATED_BY) as entity_id,
+        count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_tag" as t
+   		WHERE t.CREATED_BY is not null
+   		 OR t.CREATED_BY <> 'DELETED'
+         GROUP BY UPPER (t.CREATED_BY)
+--##############################################		
+        UNION ALL
+        SELECT
+        't_entity_tags' as table_name,
+        'CREATED_BY' as column_name,
+        'USER' as entity_type,
+         UPPER (CREATED_BY) as entity_id,
+         count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_entity_tags" as t
+   		WHERE t.CREATED_BY is not null
+   		OR t.CREATED_BY <> 'DELETED'
+   		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+        UNION ALL
+        SELECT
+        't_status' as table_name,
+        'CREATED_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (CREATED_BY) as entity_id,
+        count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_status" as t
+        WHERE t.CREATED_BY is not null
+        OR t.CREATED_BY <> 'DELETED'
+        GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+        UNION ALL
+        SELECT
+        't_status' as table_name,
+        'LAST_MODIFIED_BY' as column_name,
+        'USER' as entity_type,
+        UPPER (LAST_MODIFIED_BY) as entity_id,
+        count(LAST_MODIFIED_BY) as counter
+        FROM "sap.plc.db::basis.t_status" as t
+        WHERE t.LAST_MODIFIED_BY is not null
+        OR t.LAST_MODIFIED_BY <> 'DELETED'
+        GROUP BY UPPER (t.LAST_MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_vendor' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_vendor" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_work_center' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_work_center" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_work_center_activity_type' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_work_center_activity_type" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_work_center_process' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_work_center_process" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_work_center__text' as table_name,
+		 '_CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (_CREATED_BY) as entity_id,
+		 count(_CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_work_center__text" as t
+		WHERE t._CREATED_BY is not null 
+		OR t._CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t._CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_auth_project' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::auth.t_auth_project" as t
+		WHERE t.USER_ID is not null 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_auth_user' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::auth.t_auth_user" as t
+		WHERE t.USER_ID is not null 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_usergroup_user' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::auth.t_usergroup_user" as t
+		WHERE t.USER_ID is not null 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_default_settings' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::basis.t_default_settings" as t
+		WHERE t.USER_ID <> '' 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_frontend_settings' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::basis.t_frontend_settings" as t
+		WHERE t.USER_ID <> '' 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_layout_personal' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::basis.t_layout_personal" as t
+		WHERE t.USER_ID is not null 
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_installation_log' as table_name,
+		 'EXECUTED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (EXECUTED_BY) as entity_id,
+		 count(EXECUTED_BY) as counter
+FROM "sap.plc.db::basis.t_installation_log" as t
+		WHERE t.EXECUTED_BY is not null 
+		OR t.EXECUTED_BY <> 'DELETED'
+		GROUP BY UPPER (t.EXECUTED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_folder' as table_name,
+		 'CREATED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (CREATED_BY) as entity_id,
+		 count(CREATED_BY) as counter
+FROM "sap.plc.db::basis.t_folder" as t
+		WHERE t.CREATED_BY is not null 
+		OR t.CREATED_BY <> 'DELETED'
+		GROUP BY UPPER (t.CREATED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_folder' as table_name,
+		 'MODIFIED_BY' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (MODIFIED_BY) as entity_id,
+		 count(MODIFIED_BY) as counter
+FROM "sap.plc.db::basis.t_folder" as t
+		WHERE t.MODIFIED_BY is not null
+		OR t.MODIFIED_BY <> 'DELETED'
+		GROUP BY UPPER (t.MODIFIED_BY)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_replication_run' as table_name,
+		 'USER_ID' as column_name,
+ 		 'USER' as entity_type,
+		 UPPER (USER_ID) as entity_id,
+		 count(USER_ID) as counter
+FROM "sap.plc.db::map.t_replication_run" as t
+		WHERE t.USER_ID is not null
+		OR t.USER_ID <> 'DELETED'
+		GROUP BY UPPER (t.USER_ID)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_kna1' as table_name,
+		 'KUNNR' as column_name,
+ 		 'CUSTOMER' as entity_type,
+		 UPPER (KUNNR) as entity_id,
+		 count(KUNNR) as counter
+FROM "sap.plc.db::repl_st.t_kna1" as t
+		WHERE t.KUNNR is not null
+		OR t.KUNNR <> 'DELETED'
+		GROUP BY UPPER (t.KUNNR)
+--##############################################
+		UNION ALL
+		SELECT 
+		't_lfa1' as table_name,
+		 'LIFNR' as column_name,
+ 		 'VENDOR' as entity_type,
+		 UPPER (LIFNR) as entity_id,
+		 count(LIFNR) as counter
+FROM "sap.plc.db::repl_st.t_lfa1" as t
+		WHERE t.LIFNR is not null
+		OR t.LIFNR <> 'DELETED'
+		GROUP BY UPPER (t.LIFNR)
+
+
+
+

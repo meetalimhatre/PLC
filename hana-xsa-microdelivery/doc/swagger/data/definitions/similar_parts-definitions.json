@@ -1,0 +1,368 @@
+{
+    "definitions": {
+        "SimilarPartsRequestBody": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "CALCULATION_VERSION_ID",
+                    "Attributes",
+                    "Source"
+                ],
+                "properties": {
+                    "CALCULATION_VERSION_ID": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "CALCULATION_VERSION_ID of the selected item. ex:10001. This field is reserved for batch search for a list of items. It's used to uniquely determine the correspondence between query items and returned objects array. In case of batch search, it is required and in case of non-batch search it can be omitted. The field is also required when OnlyCurrent =1 because search will be done only on the calculation version set as Current"
+                    },
+                    "ITEM_ID": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "ITEM_ID of the selected item. This field is reserved for batch search for a list of items. It's used to uniquely determine the correspondence between query items and returned objects array. In case of batch search, it is required and in case of non-batch search it can be omitted."
+                    },
+                    "Attributes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "description": "The search attributes with values and search weights will decide the overall similarity of the search matches.",
+                            "required": [
+                                "Name",
+                                "Value",
+                                "Weight",
+                                "IsFuzzySearch"
+                            ],
+                            "properties": {
+                                "Name": {
+                                    "type": "string",
+                                    "description": "column name, standard or custom fields, ex: MATERIAL_ID,FUNCTION_GROUP,MODULE,CONSTRUCTION_VARIANT"
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "A value of attribute which is searched. ex: A 205 682 02 71"
+                                },
+                                "Weight": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "description": "ex: 0.5"
+                                },
+                                "IsFuzzySearch": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "enum": [
+                                        0,
+                                        1
+                                    ],
+                                    "description": "enum[0,1]. IsFuzzySearch = 0 means using exact string comparison to get similarity. If the compared value is same as searched one, it will return 1, else return 0 as similarity score. ex: if searched value is 'A 205 682 02 71', compared is 'A 205 626 02 12', similarity score is 0. IsFuzzySearch = 1 is fuzzy search, which means the SCORE() function is called to compare similarities for this attribute value, ex: if searched value is 'A 205 682 02 71', compared is 'A 205 626 02 12', similarity score is 0.8."
+                                },
+                                "Option": {
+                                    "type": "object",
+                                    "description": "Option is optional for fuzzy search (IsFuzzySearch = 1) on numeric columns.",
+                                    "properties": {
+                                        "scoreFunction": {
+                                            "type": "string",
+                                            "description": "Score function in fuzzy search on numeric columns. Its value must be one of linear, gaussian and logarithmic. Default score function is gaussian."
+                                        },
+                                        "scoreFunctionScale": {
+                                            "type": "number",
+                                            "description": "Value of the score function parameter scale. Its value must be > 0. It's not available for logarithmic score function."
+                                        },
+                                        "scoreFunctionDecay": {
+                                            "type": "number",
+                                            "description": "Value of the score function parameter decay. Possible values are 0 <= scoreFunctionDecay < 1 for linear, and 0 < scoreFunctionDecay < 1 for gaussian, and not avaiable for logarithmic score function. Default value is 0.5."
+                                        },
+                                        "scoreFunctionBase": {
+                                            "type": "number",
+                                            "description": "Value of the score function parameter base. Its value must be > 1. Only available for logarithmic score function. Its default value is 1 + (searchterm - scoreFunctionOffset), where searchterm is the value of current attribute."
+                                        },
+                                        "scoreFunctionOffset": {
+                                            "type": "number",
+                                            "description": "Value of the score function parameter offset. Its value must be >= 0, and default value is 0."
+                                        }
+                                    }
+                                },
+                                "Pattern": {
+                                    "type": "object",
+                                    "required": [
+                                        "Value",
+                                        "Groups"
+                                    ],
+                                    "description": "Pattern is required when IsFuzzySearch = 0, and not needed when IsFuzzzySearch=1. Use substrings of a column name as attributes,{} as whole string. For example, 'C 205.342-1' can be splitted into 'C' - model, '205' - model series, '3' - variant, '42' - engine type, '1' - left/right hand",
+                                    "properties": {
+                                        "Value": {
+                                            "type": "string",
+                                            "description": "regular expression of mapping substrings; for the example above, '([A-Z]{1}) ([[:digit:]]{3}).([[:digit:]]{1})([[:digit:]]{2})-([[:digit:]]{1})'"
+                                        },
+                                        "Groups": {
+                                            "description": "Groups defines a set of sub-string attributes for search.For the example above, Groups has 5 sub-string attribute group, MODEL, MODEL_SERIES, CONSTRUCTION_VARIANT, MOTOR, HAND",
+                                            "type": "array",
+                                            "items": {
+                                                "description": "substring groups.",
+                                                "type": "object",
+                                                "required": [
+                                                    "Index",
+                                                    "Name",
+                                                    "Weight",
+                                                    "Dict"
+                                                ],
+                                                "properties": {
+                                                    "Index": {
+                                                        "type": "integer",
+                                                        "format": "int32",
+                                                        "description": "Index of the attribute, ex: for engine, group index is 4"
+                                                    },
+                                                    "Name": {
+                                                        "type": "string",
+                                                        "description": "Name of the attribute, ex: Engine"
+                                                    },
+                                                    "Weight": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "description": "ex: 0.5"
+                                                    },
+                                                    "Dict": {
+                                                        "type": "array",
+                                                        "description": "Dict defines a look up table (key-value mapping) to retrieve descriptions for the substring group of the given attribute",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "required": [
+                                                                "Key",
+                                                                "Value"
+                                                            ],
+                                                            "properties": {
+                                                                "Key": {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "Value": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Source": {
+                        "type": "object",
+                        "properties": {
+                            "MasterData": {
+                                "description": "The search is done in master data for materials.",
+                                "type": "object",
+                                "properties": {
+                                    "MaterialTypes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "description": "MATERIAL_TYPE_ID"
+                                        }
+                                    },
+                                    "MaterialGroups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "description": "MATERIAL_GROUP_ID"
+                                        }
+                                    }
+                                }
+                            },
+                            "TimeRange": {
+                                "description": "The search is done in the versions within this time range.",
+                                "type": "object",
+                                "properties": {
+                                    "FromTime": {
+                                        "type": "string",
+                                        "description": "ex:2017-04-16T00:00:00.000Z"
+                                    },
+                                    "ToTime": {
+                                        "type": "string",
+                                        "description": "ex:2017-05-16T00:00:00.000Z"
+                                    }
+                                }
+                            },
+                            "CalculationVersions": {
+                                "description": "The search is done in historical calculation versions for materials.",
+                                "type": "object",
+                                "properties": {
+                                    "ProjectIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "format": "int32",
+                                            "description": "<PROJECT_ID>; Ids of projects in which the search will be done. ex: [11,21]; '' or [] or null or property missing means all projects."
+                                        }
+                                    },
+                                    "CalculationIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "format": "int32"
+                                        },
+                                        "description": "<CALCULATION_ID>; Ids of calculations in which the search will be done. ex: [101,201];'' or [] or null or property missing means all."
+                                    },
+                                    "CalculationVersionIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "format": "int32"
+                                        },
+                                        "description": "<CALCULATION_VERSION_ID>; Ids of calculation versions in which the search will be done. ex: [10001,10006]; '' or [] or null or property missing means all."
+                                    },
+                                    "ExcludeCalculationVersionIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "format": "int32"
+                                        },
+                                        "description": "<CALCULATION_VERSION_ID>; Search will not be done in these calculation versions, override CALCULATION_VERSION_Ids if conflicts. ex: [10001,10007]."
+                                    },
+                                    "OnlyCurrent": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "description": "ex: 1; When OnlyCurrent =1, it means search will be done on the current calculation version, that's the version set as Current. Override all other configurations for calculation(ProjectIds, CalculationIds, CalculationVersionIds, ExcludeCalculationVersionIds)."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "SimilarPartsResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "description": "ex: {}"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "ITEM_ID": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "ITEM_ID of the matched item, ex: 15"
+                                    },
+                                    "CALCULATION_VERSION_ID": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "CALCULATION_VERSION_ID of the matched item, ex: 10006"
+                                    },
+                                    "SimilarParts": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/OneSearchMatch"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "OneSearchMatch": {
+            "type": "object",
+            "properties": {
+                "Source": {
+                    "type": "string",
+                    "enum": [
+                        "MasterData",
+                        "CalculationVersions"
+                    ],
+                    "description": "ex: MasterData"
+                },
+                "MATERIAL_ID": {
+                    "type": "string",
+                    "description": "ex: A 205 682 02 71 (74)"
+                },
+                "MATERIAL_DESCRIPTION": {
+                    "type": "string",
+                    "description": "ex: A 205 682 02 71 (74)"
+                },
+                "ITEM_DESCRIPTION": {
+                    "type": "string",
+                    "description": "ex: ADHESIVE / EFBOND RA 820 (1)/ Others (73)"
+                },
+                "FREQUENCY": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "'Frequency' means how many calculation versions the matched item shows in. An item may appear in different models, model series or calculation versions. ex: searched 5 items in 3 other calculation versions, FREQUENCY will be 3"
+                },
+                "SCORE": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Similarity score of the match in range [0, 1], where 0 means no similarity, 1 means identical. ex: 0.8"
+                },
+                "PRICE_UNIT": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "ex: 1000"
+                },
+                "PRICE_FIXED_PORTION": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "ex: 56.2"
+                },
+                "PRICE_VARIABLE_PORTION": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "ex: 56.2"
+                },
+                "PRICE_UNIT_UOM_ID": {
+                    "type": "string",
+                    "description": "ex: PC"
+                },
+                "TRANSACTION_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "VENDOR_ID": {
+                    "type": "string",
+                    "description": "ex: #VD1"
+                },
+                "VENDOR_NAME": {
+                    "type": "string",
+                    "description": "ex: Lieferant 1"
+                },
+                "Attributes": {
+                    "type": "array",
+                    "description": "A set of attributes containing Name, value, and similarity score to the requested attribute value.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Name": {
+                                "type": "string",
+                                "description": "Attribute Name, ex: MODEL_SERIES"
+                            },
+                            "Value": {
+                                "type": "string",
+                                "description": "Attribute value (Frequency). One attribute of a given item may have different values across historical calculation versions."
+                            },
+                            "Score": {
+                                "type": "number",
+                                "format": "float",
+                                "description": "Score of attribute, ex: 0.6"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

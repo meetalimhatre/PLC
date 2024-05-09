@@ -1,0 +1,92 @@
+{
+    "_version": "1.0.0",
+
+    "sap.app": {
+        "id": "plc",
+        "type": "application",
+        "title": "Calculation Compare Tool",
+		"description": "Calculation Compare Tool",
+        "applicationVersion": {
+            "version": "1.0.0"
+        },
+        "dataSources": {
+			"CalculationsOdata": {
+				"uri": "/analytics/services.xsodata",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			}
+		}
+    },
+
+    "sap.ui": {
+        "technology": "UI5"
+    },
+
+    "sap.ui5": {
+        "rootView": {
+            "type": "XML",
+            "viewName": "ui.view.App"
+        },
+        "models": {
+            "CalculationsOdataModel": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"preload": true,
+				"dataSource": "CalculationsOdata",
+				"settings": {
+					"useBatch": false,
+					"json": true
+				}
+			}
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "css/style.css"
+                }
+            ]
+        },
+        "dependencies": {
+            "minUI5Version": "1.82.4",
+			"libs": {
+                "sap.m": {},
+                "sap.f": {},
+                "sap.ui.export": {}
+			}
+		},
+        "routing": {
+            "config": {
+               "routerClass": "sap.m.routing.Router",
+               "viewType": "XML",
+               "viewPath": "ui.view",
+               "controlId": "rootControl",
+               "controlAggregation":"pages",
+               "transition": "slide",
+               "clearTarget": true,
+               "async": true
+            },
+            "routes": [{
+                "pattern": "",
+                "name": "Home",
+                "target": "Home" 
+            },
+            {
+                "pattern": "{id1}/{id2}",
+                "name": "HomeWith2Ids",
+                "target": "Home" 
+            },
+            {
+                "pattern": "{id1}",
+                "name": "HomeWith1Id",
+                "target": "Home" 
+            }],
+            "targets": {
+                "Home":{
+                    "viewId": "Home",
+                    "viewName": "Home"
+                }
+            }
+        }
+    }
+}

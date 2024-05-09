@@ -1,0 +1,388 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_material_price" (
+    IN INPUT_TABLE TABLE (
+    	"PRICE_SOURCE_ID"                 NVARCHAR(20),
+    	"MATERIAL_ID"                     NVARCHAR(40),
+    	"PLANT_ID"                        NVARCHAR(8),
+    	"VENDOR_ID"                       NVARCHAR(10),
+    	"PURCHASING_GROUP"                NVARCHAR(20),
+    	"PURCHASING_DOCUMENT"             NVARCHAR(10),
+    	"LOCAL_CONTENT"                   DECIMAL(28, 7),
+    	"PROJECT_ID"                      NVARCHAR(35),
+    	"CUSTOMER_ID"                     NVARCHAR(10),
+    	"VALID_FROM"                      DATE,
+    	"VALID_TO"                        DATE,
+    	"VALID_FROM_QUANTITY"             DECIMAL(28, 7),
+    	"VALID_TO_QUANTITY"               DECIMAL(28, 7),
+    	"PRICE_FIXED_PORTION"             DECIMAL(28, 7),
+    	"PRICE_VARIABLE_PORTION"          DECIMAL(28, 7),
+    	"TRANSACTION_CURRENCY_ID"         NVARCHAR(3),
+    	"PRICE_UNIT"                      DECIMAL(28, 7),
+    	"PRICE_UNIT_UOM_ID"               NVARCHAR(3),
+    	"_SOURCE"                         TINYINT
+        {{#if Material_Price.customFields}}
+            {{ddl_masterdataCustomFieldsWithoutUnit Material_Price}}
+        {{/if}}
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";       
+        
+    -- Check existance of PRICE_SOURCE_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_SOURCE_ID'                                               as FIELD_NAME ,
+            it.PRICE_SOURCE_ID                                              as FIELD_VALUE,
+            'Unknown Price Source ID for Material ID ' || it.MATERIAL_ID    as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_material_price'                                              as TABLE_NAME   ,
+            'Replication_Update'                                            as OPERATION ,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+            where it.PRICE_SOURCE_ID not in (select PRICE_SOURCE_ID from "sap.plc.db::basis.t_price_source" where PRICE_SOURCE_TYPE_ID = 1);
+    
+    -- Check existance of MATERIAL_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'MATERIAL_ID'               as FIELD_NAME ,
+            it.MATERIAL_ID              as FIELD_VALUE,
+            'Unknown Material ID'       as MESSAGE_TEXT ,
+            lv_current_utctimestamp     as MESSAGE_TIME ,
+            'ERROR'                     as MESSAGE_TYPE ,
+            't_material_price'          as TABLE_NAME  ,
+            'Replication_Update'        as OPERATION ,
+            :lv_run_id                  as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select MATERIAL_ID from "sap.plc.db::basis.t_material" where _VALID_TO is null) as material 
+        on it.MATERIAL_ID = material.MATERIAL_ID
+        where material.MATERIAL_ID is null;
+        
+    -- Check existance of PLANT_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PLANT_ID'                                                      as FIELD_NAME ,
+            it.PLANT_ID                                                     as FIELD_VALUE,
+            'Unknown Plant ID for Material ID ' || it.MATERIAL_ID           as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_material_price'                                              as TABLE_NAME  ,
+            'Replication_Update'                                            as OPERATION ,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null) as plant 
+        on it.PLANT_ID = plant.PLANT_ID
+        where it.PLANT_ID <> '*'
+            and plant.PLANT_ID is null;
+        
+    -- Check existance of VENDOR_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'VENDOR_ID'                                                     as FIELD_NAME ,
+            it.VENDOR_ID                                                    as FIELD_VALUE,
+            'Unknown Vendor ID for Material ID ' || it.MATERIAL_ID          as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_material_price'                                              as TABLE_NAME  ,
+            'Replication_Update'                                            as OPERATION ,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select VENDOR_ID from "sap.plc.db::basis.t_vendor" where _VALID_TO is null) as vendor 
+        on it.VENDOR_ID = vendor.VENDOR_ID
+        where it.VENDOR_ID <> '*'
+            and vendor.VENDOR_ID is null;
+        
+    -- Check existance of PROJECT_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PROJECT_ID'                                                    as FIELD_NAME ,
+            it.PROJECT_ID                                                   as FIELD_VALUE,
+            'Unknown Project ID for Material ID ' || it.MATERIAL_ID         as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_material_price'                                              as TABLE_NAME  ,
+            'Replication_Update'                                            as OPERATION ,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        left join "sap.plc.db::basis.t_project" as project 
+        on it.PROJECT_ID = project.PROJECT_ID
+        where it.PROJECT_ID <> '*'
+            and project.PROJECT_ID is null;
+        
+    -- Check existance of CUSTOMER_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'CUSTOMER_ID'                                                       as FIELD_NAME ,
+            it.CUSTOMER_ID                                                      as FIELD_VALUE,
+            'Unknown Customer ID for Material ID ' || it.MATERIAL_ID            as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material_price'                                                  as TABLE_NAME  ,
+            'Replication_Update'                                                as OPERATION ,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select CUSTOMER_ID from "sap.plc.db::basis.t_customer" where _VALID_TO is null) as customer 
+        on it.CUSTOMER_ID = customer.CUSTOMER_ID
+        where it.CUSTOMER_ID <> '*'
+            and customer.CUSTOMER_ID is null;
+        
+    -- Check existance of TRANSACTION_CURRENCY_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'TRANSACTION_CURRENCY_ID'                                               as FIELD_NAME ,
+            it.TRANSACTION_CURRENCY_ID                                              as FIELD_VALUE,
+            'Unknown Currency ID for Material ID ' || it.MATERIAL_ID                as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                 as MESSAGE_TIME ,
+            'ERROR'                                                                 as MESSAGE_TYPE ,
+            't_material_price'                                                      as TABLE_NAME ,
+            'Replication_Update'                                                    as OPERATION ,
+            :lv_run_id                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null) as currency 
+        on it.TRANSACTION_CURRENCY_ID = currency.CURRENCY_ID
+        where currency.CURRENCY_ID is null;
+            
+    -- Check existance of PRICE_UNIT_UOM_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_UNIT_UOM_ID'                                                 as FIELD_NAME ,
+            it.PRICE_UNIT_UOM_ID                                                as FIELD_VALUE,
+            'Unknown Unit of Measure ID for Material ID ' || it.MATERIAL_ID     as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material_price'                                                  as TABLE_NAME ,
+            'Replication_Update'                                                as OPERATION ,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        left join (select UOM_ID from "sap.plc.db::basis.t_uom" where _VALID_TO is null) as uom 
+        on it.PRICE_UNIT_UOM_ID = uom.UOM_ID
+        where uom.UOM_ID is null;
+                
+    -- Check existance of VALID_FROM
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'VALID_FROM'                                                as FIELD_NAME ,
+            it.VALID_FROM                                               as FIELD_VALUE,
+            'Invalid Valid From for Material ID ' || it.MATERIAL_ID     as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                     as MESSAGE_TIME ,
+            'ERROR'                                                     as MESSAGE_TYPE ,
+            't_material_price'                                          as TABLE_NAME ,
+            'Replication_Update'                                        as OPERATION ,
+            :lv_run_id                                                  as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALID_FROM is null; -- must be Date format as defined on input
+        
+    -- Check existance of VALID_FROM_QUANTITY
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'VALID_FROM_QUANTITY'                                               as FIELD_NAME ,
+            it.VALID_FROM_QUANTITY                                              as FIELD_VALUE,
+            'Invalid Valid From Quantity for Material ID ' || it.MATERIAL_ID    as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material_price'                                                  as TABLE_NAME ,
+            'Replication_Update'                                                as OPERATION ,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALID_FROM_QUANTITY is null or it.VALID_FROM_QUANTITY = 0;
+    
+    -- Check existance of PRICE_FIXED_PORTION
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_FIXED_PORTION'                                               as FIELD_NAME ,
+            it.PRICE_FIXED_PORTION                                              as FIELD_VALUE,
+            'Invalid Price Fixed for Material ID ' || it.MATERIAL_ID            as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material_price'                                                  as TABLE_NAME ,
+            'Replication_Update'                                                as OPERATION ,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_FIXED_PORTION is null;
+
+    -- Check existance of PRICE_VARIABLE_PORTION
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_VARIABLE_PORTION'                                           as FIELD_NAME ,
+            it.PRICE_VARIABLE_PORTION                                          as FIELD_VALUE,
+            'Invalid Price Variable for Material ID ' || it.MATERIAL_ID        as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                            as MESSAGE_TIME ,
+            'ERROR'                                                            as MESSAGE_TYPE ,
+            't_material_price'                                                 as TABLE_NAME ,
+            'Replication_Update'                                               as OPERATION ,
+            :lv_run_id                                                         as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_VARIABLE_PORTION is null;
+    
+    -- get lines to actual upload
+    lt_update_records =
+        select
+            it.PRICE_SOURCE_ID, it.MATERIAL_ID, it.PLANT_ID, it.VENDOR_ID, it.PURCHASING_GROUP, it.PURCHASING_DOCUMENT, it.LOCAL_CONTENT, it.PROJECT_ID, it.CUSTOMER_ID, it.VALID_FROM, it.VALID_TO, it.VALID_FROM_QUANTITY, it.VALID_TO_QUANTITY, it.PRICE_FIXED_PORTION, it.PRICE_VARIABLE_PORTION, it.TRANSACTION_CURRENCY_ID, it.PRICE_UNIT, it.PRICE_UNIT_UOM_ID, it._SOURCE                     
+            {{masterdataCustomFieldsWithPrefixWithoutUnit Material_Price 'it'}} 
+        from (select *,
+                Count(*) OVER (PARTITION BY PRICE_SOURCE_ID,MATERIAL_ID,PLANT_ID,VENDOR_ID,PROJECT_ID,VALID_FROM,VALID_FROM_QUANTITY,CUSTOMER_ID) AS DUPLICATE_KEY_COUNT
+                from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1 -- ignore duplicate key rows AT ALL (not even one of them gets inserted)
+          and it.PRICE_SOURCE_ID in (select PRICE_SOURCE_ID from "sap.plc.db::basis.t_price_source" where PRICE_SOURCE_TYPE_ID = 1)
+          and it.MATERIAL_ID in (select MATERIAL_ID from "sap.plc.db::basis.t_material" where _VALID_TO is null)
+          and (it.PLANT_ID = '*' or it.PLANT_ID in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null))
+          and (it.VENDOR_ID = '*' or it.VENDOR_ID in (select VENDOR_ID from "sap.plc.db::basis.t_vendor" where _VALID_TO is null))
+          and (it.PROJECT_ID = '*' or it.PROJECT_ID in (select PROJECT_ID from "sap.plc.db::basis.t_project"))
+          and (it.CUSTOMER_ID = '*' or it.CUSTOMER_ID in (select CUSTOMER_ID from "sap.plc.db::basis.t_customer" where _VALID_TO is null))
+          and it.TRANSACTION_CURRENCY_ID in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null)
+          and it.PRICE_UNIT_UOM_ID in (select UOM_ID from "sap.plc.db::basis.t_uom" where _VALID_TO is null)
+          and it.VALID_FROM is not null
+          and it.VALID_FROM_QUANTITY is not null and it.VALID_FROM_QUANTITY <> 0
+          and it.PRICE_FIXED_PORTION is not null
+          and it.PRICE_VARIABLE_PORTION is not null
+          and it.PRICE_FIXED_PORTION + it.PRICE_VARIABLE_PORTION <> 0
+      except
+    	(select 
+           std.PRICE_SOURCE_ID, std.MATERIAL_ID, std.PLANT_ID, std.VENDOR_ID, std.PURCHASING_GROUP, std.PURCHASING_DOCUMENT, std.LOCAL_CONTENT, std.PROJECT_ID, std.CUSTOMER_ID, std.VALID_FROM, std.VALID_TO, std.VALID_FROM_QUANTITY, std.VALID_TO_QUANTITY,std.PRICE_FIXED_PORTION, std.PRICE_VARIABLE_PORTION, std.TRANSACTION_CURRENCY_ID, std.PRICE_UNIT, std.PRICE_UNIT_UOM_ID, std._SOURCE
+           {{masterdataCustomFieldsWithPrefixWithoutUnit Material_Price 'plcExtTable'}}
+                from "sap.plc.db::basis.t_material_price" as std
+                {{#if Material_Price.customFields}}
+                left outer join {{t_extensionTable Material_Price}} as plcExtTable
+                    on  std.PRICE_ID            = plcExtTable.PRICE_ID
+                    and std._VALID_FROM         = plcExtTable._VALID_FROM
+                {{/if}}
+                where _VALID_TO IS NULL
+                AND (std.PRICE_SOURCE_ID, std.MATERIAL_ID, std.PLANT_ID, std.VENDOR_ID, std.PROJECT_ID, std.CUSTOMER_ID, std.VALID_FROM) in
+                    (select PRICE_SOURCE_ID, MATERIAL_ID, PLANT_ID, VENDOR_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM from :INPUT_TABLE));
+
+    SELECT COUNT(*) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    IF lv_rows_count > 0 then
+
+        UPDATE "sap.plc.db::basis.t_material_price" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user  
+              where (tbl.PRICE_SOURCE_ID,tbl.MATERIAL_ID,tbl.PLANT_ID,tbl.VENDOR_ID,tbl.PROJECT_ID,tbl.VALID_FROM,tbl.VALID_FROM_QUANTITY,tbl.CUSTOMER_ID)
+                    in (select PRICE_SOURCE_ID,MATERIAL_ID,PLANT_ID,VENDOR_ID,PROJECT_ID,VALID_FROM,VALID_FROM_QUANTITY,CUSTOMER_ID from :lt_update_records as upd)
+                AND tbl._VALID_FROM < :lv_current_utctimestamp 
+                AND tbl._VALID_TO IS NULL;
+            		  
+        INSERT INTO  "sap.plc.db::basis.t_material_price"
+        (
+        	PRICE_ID,
+            PRICE_SOURCE_ID,              
+            MATERIAL_ID,                  
+            PLANT_ID,                     
+            VENDOR_ID,                    
+            PURCHASING_GROUP,                    
+            PURCHASING_DOCUMENT,                    
+            LOCAL_CONTENT,                    
+            PROJECT_ID,                   
+            CUSTOMER_ID,                  
+            VALID_FROM,                   
+            VALID_TO,                     
+            VALID_FROM_QUANTITY,          
+            VALID_TO_QUANTITY,            
+            PRICE_FIXED_PORTION,          
+            PRICE_VARIABLE_PORTION,       
+            TRANSACTION_CURRENCY_ID,
+            PRICE_UNIT,
+            PRICE_UNIT_UOM_ID,            
+            _SOURCE,                      
+            _VALID_FROM,       
+            _VALID_TO,                    
+            _CREATED_BY                                         
+        )
+    	select
+    		newuid(),
+            PRICE_SOURCE_ID,              
+            MATERIAL_ID,                  
+            PLANT_ID,                     
+            VENDOR_ID,                    
+            PURCHASING_GROUP,                    
+            PURCHASING_DOCUMENT,                    
+            LOCAL_CONTENT,                    
+            PROJECT_ID,                   
+            CUSTOMER_ID,                  
+            VALID_FROM,                   
+            VALID_TO,                     
+            VALID_FROM_QUANTITY,          
+            VALID_TO_QUANTITY,            
+            PRICE_FIXED_PORTION,          
+            PRICE_VARIABLE_PORTION,       
+            TRANSACTION_CURRENCY_ID,
+            PRICE_UNIT,
+            PRICE_UNIT_UOM_ID,            
+            _SOURCE,                      
+            :lv_current_utctimestamp as _VALID_FROM,
+            null as _VALID_TO, 
+            :lv_current_user as _CREATED_BY 
+    	from :lt_update_records;
+
+        {{#if Material_Price.customFields}}
+        -- also do Custom Fields
+        INSERT INTO {{t_extensionTable Material_Price}} 
+            (
+                PRICE_ID,
+                _VALID_FROM 
+                {{masterdataCustomFieldsWithoutUnit Material_Price}} 
+            )
+            select 
+                plcTable.PRICE_ID,     
+                :lv_current_utctimestamp as _VALID_FROM
+                {{masterdataCustomFieldsWithoutUnit Material_Price}}
+            from :lt_update_records as it
+            inner join "sap.plc.db::basis.t_material_price" as plcTable
+                on it.PRICE_SOURCE_ID = plcTable.PRICE_SOURCE_ID
+                and it.MATERIAL_ID = plcTable.MATERIAL_ID
+                and it.PLANT_ID = plcTable.PLANT_ID
+                and it.VENDOR_ID = plcTable.VENDOR_ID
+                and it.PROJECT_ID = plcTable.PROJECT_ID
+                and it.CUSTOMER_ID = plcTable.CUSTOMER_ID
+                and it.VALID_FROM = plcTable.VALID_FROM
+                and it.VALID_FROM_QUANTITY = plcTable.VALID_FROM_QUANTITY
+            where plcTable._VALID_FROM = lv_current_utctimestamp;
+        {{/if}}
+    	
+    END IF;
+END;

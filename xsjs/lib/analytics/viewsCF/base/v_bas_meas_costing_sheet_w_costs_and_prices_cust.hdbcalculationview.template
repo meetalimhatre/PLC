@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0" id="sap.plc.analytics.viewsCF.base::v_bas_meas_costing_sheet_w_costs_and_prices_cust" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DEFAULT" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore">
+  <descriptions />
+  <localVariables>
+    <variable id="projectId" parameter="true">
+      <descriptions defaultDescription="PROJECT" />
+      <variableProperties datatype="NVARCHAR" length="35" scale="null" mandatory="true">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue" />
+      </variableProperties>
+    </variable>
+    <variable id="versionId" parameter="true">
+      <descriptions defaultDescription="CALCULATION VERSION" />
+      <variableProperties datatype="INTEGER" length="10" scale="0" mandatory="false">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>calculation_version_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue" />
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust">
+      <targetVariable name="PROJECTID" resourceUri="sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" />
+      <localVariable>projectId</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust">
+      <targetVariable name="VERSIONID" resourceUri="sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" />
+      <localVariable>versionId</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="16" />
+  <dataSources>
+    <DataSource id="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews />
+  <logicalModel id="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust">
+    <descriptions />
+    <attributes>
+      <attribute id="PROJECT_ID" key="true" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PROJECT_ID" />
+      </attribute>
+      <attribute id="CALCULATION_VERSION_ID" key="true" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="CALCULATION_VERSION_ID" />
+      </attribute>
+      <attribute id="ITEM_ID" key="true" order="3" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="ITEM" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="ITEM_ID" />
+      </attribute>
+      <attribute id="ITEM_CATEGORY_ID" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="ITEM_CATEGORY_ID" />
+      </attribute>
+      <attribute id="IS_LEAF" order="5" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_LEAF" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="IS_LEAF" />
+      </attribute>
+      <attribute id="IS_ROLLED_UP_VALUE" order="6" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_ROLLED_UP_VALUE" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="IS_ROLLED_UP_VALUE" />
+      </attribute>
+      <attribute id="IS_OVERHEAD_ROLLED_UP" order="7" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_OVERHEAD_ROLLED_UP" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="IS_OVERHEAD_ROLLED_UP" />
+      </attribute>
+      <attribute id="COSTING_SHEET_ROW_ID" order="8" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_ROW_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COSTING_SHEET_ROW_ID" />
+      </attribute>
+      <attribute id="COSTING_SHEET_ROW_TYPE" order="9" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_ROW_TYPE" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COSTING_SHEET_ROW_TYPE" />
+      </attribute>
+      <attribute id="COSTING_SHEET_OVERHEAD_ROW_ID" order="10" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_OVERHEAD_ROW_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COSTING_SHEET_OVERHEAD_ROW_ID" />
+      </attribute>
+      <attribute id="ACCOUNT_ID" order="11" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="ACCOUNT" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="ACCOUNT_ID" />
+      </attribute>
+      <attribute id="TRANSACTION_CURRENCY_ID" order="21" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="TRANSACTION_CURRENCY_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TRANSACTION_CURRENCY_ID" />
+      </attribute>
+      <attribute id="PRICE_UNIT_UOM_ID" order="22" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PRICE_UNIT_UOM_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PRICE_UNIT_UOM_ID" />
+      </attribute>
+      <attribute id="BASE_QUANTITY_UOM_ID" order="29" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="BASE_QUANTITY_UOM_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="BASE_QUANTITY_UOM_ID" />
+      </attribute>
+      <attribute id="QUANTITY_PER_BASE_UNIT_UOM_ID" order="31" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+      </attribute>
+      <attribute id="REPORT_CURRENCY_ID" order="39" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="REPORT_CURRENCY_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="REPORT_CURRENCY_ID" />
+      </attribute>
+      <attribute id="TOTAL_QUANTITY_UOM_ID" order="40" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TOTAL_QUANTITY_UOM_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_QUANTITY_UOM_ID" />
+      </attribute>
+      <attribute id="TARGET_COST_CURRENCY_ID" order="41" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TARGET_COST_CURRENCY_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TARGET_COST_CURRENCY_ID" />
+      </attribute>
+      <attribute id="SALES_PRICE_CURRENCY_ID" order="42" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="SALES_PRICE_CURRENCY_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="SALES_PRICE_CURRENCY_ID" />
+      </attribute>
+      <attribute id="PROJECT_SALES_PRICE_CURRENCY_ID" order="43" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROJECT_SALES_PRICE_CURRENCY_ID" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PROJECT_SALES_PRICE_CURRENCY_ID" />
+      </attribute>
+      <attribute id="COST3" order="44" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COST3" />
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST3" />
+      </attribute>
+    {{#if Item.customFields}}
+	{{cv_customFieldsAttrXml Item}}
+{{/if}}
+</attributes>
+    <calculatedAttributes />
+    <privateDataFoundation>
+      <tableProxies />
+      <joins />
+      <layout>
+        <shapes />
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures>
+      <measure id="COST" order="12" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST" />
+      </measure>
+      <measure id="COST_FIXED_PORTION" order="13" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST_FIXED_PORTION" />
+      </measure>
+      <measure id="COST_VARIABLE_PORTION" order="14" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST_VARIABLE_PORTION" />
+      </measure>
+
+      <measure id="COST2" order="15" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST2" />
+      </measure>
+      <measure id="COST2_FIXED_PORTION" order="16" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST2_FIXED_PORTION" />
+      </measure>
+      <measure id="COST2_VARIABLE_PORTION" order="17" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST2_VARIABLE_PORTION" />
+      </measure>
+
+      <measure id="TOTAL_QUANTITY" order="18" semanticType="quantity" aggregationType="sum" measureType="quantity">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_QUANTITY" />
+      </measure>
+      <measure id="COST3_FIXED_PORTION" order="19" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST3_FIXED_PORTION" />
+      </measure>
+      <measure id="COST3_VARIABLE_PORTION" order="20" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="COST3_VARIABLE_PORTION" />
+      </measure>
+      <measure id="PRICE" order="23" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE" />
+        <unitCurrencyAttribute attributeName="TRANSACTION_CURRENCY_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PRICE" />
+      </measure>
+      <measure id="PRICE_FIXED_PORTION" order="24" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE_FIXED_PORTION" />
+        <unitCurrencyAttribute attributeName="TRANSACTION_CURRENCY_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PRICE_FIXED_PORTION" />
+      </measure>
+      <measure id="PRICE_VARIABLE_PORTION" order="25" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE_VARIABLE_PORTION" />
+        <unitCurrencyAttribute attributeName="TRANSACTION_CURRENCY_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PRICE_VARIABLE_PORTION" />
+      </measure>
+      <measure id="PRICE_UNIT" order="26" semanticType="quantity" aggregationType="sum" measureType="quantity">
+        <descriptions defaultDescription="PRICE_UNIT" />
+        <unitCurrencyAttribute attributeName="PRICE_UNIT_UOM_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PRICE_UNIT" />
+      </measure>
+      <measure id="SURCHARGE" order="27" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="SURCHARGE" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="SURCHARGE" />
+      </measure>
+      <measure id="TARGET_COST" order="28" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TARGET_COST" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TARGET_COST" />
+      </measure>
+      <measure id="SALES_PRICE" order="30" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="SALES_PRICE" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="SALES_PRICE" />
+      </measure>
+      <measure id="PROJECT_SALES_PRICE" order="32" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PROJECT_SALES_PRICE" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="PROJECT_SALES_PRICE" />
+      </measure>
+      <measure id="BASE_QUANTITY" order="33" semanticType="quantity" aggregationType="sum" measureType="quantity">
+        <descriptions defaultDescription="BASE_QUANTITY" />
+        <unitCurrencyAttribute attributeName="BASE_QUANTITY_UOM_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="BASE_QUANTITY" />
+      </measure>
+      <measure id="QUANTITY_PER_BASE_UNIT" order="34" semanticType="quantity" aggregationType="sum" measureType="quantity">
+        <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT" />
+        <unitCurrencyAttribute attributeName="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="QUANTITY_PER_BASE_UNIT" />
+      </measure>
+    
+      <measure id="TOTAL_COST_PER_UNIT" order="35" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST_PER_UNIT" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_COST_PER_UNIT" />
+      </measure>
+      <measure id="TOTAL_COST2_PER_UNIT" order="36" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST2_PER_UNIT" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_COST2_PER_UNIT" />
+      </measure>
+      <measure id="TOTAL_COST3_PER_UNIT" order="37" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST3_PER_UNIT" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_COST3_PER_UNIT" />
+      </measure>
+    
+      <measure id="TOTAL_QUANTITY_OF_VARIANTS" order="38" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_QUANTITY_OF_VARIANTS" />
+        <measureMapping columnObjectName="TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" columnName="TOTAL_QUANTITY_OF_VARIANTS" />
+      </measure>
+    {{#if Item.customFields}}
+	{{cv_customFieldsMeasureXml Item}}
+{{/if}}
+</baseMeasures>
+    <calculatedMeasures />
+    <restrictedMeasures />
+    <localDimensions />
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="40" y="85" />
+        <rectangleSize height="0" width="0" />
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

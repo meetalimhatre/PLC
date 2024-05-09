@@ -1,0 +1,33 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_T001W" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_t001w_t001k" 
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+SELECT COUNT(PLANT_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_plant"
+        WHERE "sap.plc.db::basis.t_plant"."PLANT_ID" = :NEWROW."WERKS"
+            AND "sap.plc.db::basis.t_plant"."COMPANY_CODE_ID" = :NEWROW."BUKRS"
+            AND "sap.plc.db::basis.t_plant"."COUNTRY" = :NEWROW."LAND1" 
+            AND "sap.plc.db::basis.t_plant"."POSTAL_CODE" = :NEWROW."PSTLZ" 
+            AND "sap.plc.db::basis.t_plant"."REGION" = :NEWROW."REGIO" 
+            AND "sap.plc.db::basis.t_plant"."CITY" = :NEWROW."ORT01" 
+            AND "sap.plc.db::basis.t_plant"."STREET_NUMBER_OR_PO_BOX" = :NEWROW."STRAS"
+            AND "sap.plc.db::basis.t_plant"."_SOURCE" = :lv_source
+            AND "sap.plc.db::basis.t_plant"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_plant"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0 THEN              
+    UPDATE "sap.plc.db::basis.t_plant" 
+                SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+                WHERE "sap.plc.db::basis.t_plant"."PLANT_ID" = :NEWROW."WERKS" 
+                AND "sap.plc.db::basis.t_plant"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_plant"."_VALID_TO" IS NULL;
+    INSERT INTO "sap.plc.db::basis.t_plant" 
+        (PLANT_ID,COMPANY_CODE_ID,COUNTRY,POSTAL_CODE,REGION,CITY,STREET_NUMBER_OR_PO_BOX,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+        VALUES (:NEWROW."WERKS", :NEWROW."BUKRS",:NEWROW."LAND1",:NEWROW."PSTLZ", :NEWROW."REGIO",:NEWROW."ORT01",:NEWROW."STRAS", current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

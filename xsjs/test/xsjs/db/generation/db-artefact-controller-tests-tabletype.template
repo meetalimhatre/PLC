@@ -1,0 +1,1 @@
+TYPE "sap.plc_test.xs.db.generation::tt_item" AS TABLE (id int)

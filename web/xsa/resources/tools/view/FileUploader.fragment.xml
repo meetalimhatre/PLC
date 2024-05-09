@@ -1,0 +1,16 @@
+<core:FragmentDefinition
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+    controllerName="ui.controller.App">
+    <HBox width="60%" alignContent="Stretch" alignItems="Center" class="file-uploader-wrapper" >
+        <items>
+            <Label text="Select File: "/>
+            <u:FileUploader width='140%' class="file-uploader"  id="file-uploader"
+                change="onFileChange"
+                fileType="csv"
+                placeholder="*Please select a .csv file for user mapping if custom IDP is used." />
+        </items>
+    </HBox>
+</core:FragmentDefinition>

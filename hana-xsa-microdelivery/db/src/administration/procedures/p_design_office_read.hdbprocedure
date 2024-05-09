@@ -1,0 +1,75 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_design_office_read" ( 
+	    IN iv_logon_language 					NVARCHAR(11),
+		IN iv_master_data_timestamp 			TIMESTAMP,
+		IN iv_filter_string 					NVARCHAR(5000),
+		IN iv_no_max_records 					INTEGER, 
+		IN iv_no_skip_records                   INTEGER,
+        OUT ot_design_office 					"sap.plc.db.administration::masterdata.tt_design_office" default empty,
+        OUT ot_design_office_text 				"sap.plc.db::basis.t_design_office__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*************************************************** 
+	Select document status
+ ***************************************************/
+ 
+ --select document status
+ 	tt_design_office_union =
+ 						select
+ 							plcTable.DESIGN_OFFICE_ID,
+ 							plcTable._VALID_FROM,
+ 							plcTable._VALID_TO,
+ 							plcTable._CREATED_BY,
+ 							plcTable._SOURCE,
+ 							minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+ 							minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+ 							plcTextTable.DESIGN_OFFICE_DESCRIPTION
+ 						from "sap.plc.db::basis.t_design_office" as plcTable
+ 						inner join
+							(   select A._VALID_FROM, A.DESIGN_OFFICE_ID, A._CREATED_BY 
+								from "sap.plc.db::basis.t_design_office" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM,DESIGN_OFFICE_ID
+										from "sap.plc.db::basis.t_design_office" 
+										group by DESIGN_OFFICE_ID
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.DESIGN_OFFICE_ID = B.DESIGN_OFFICE_ID
+							) AS minValues
+							on plcTable.DESIGN_OFFICE_ID = minValues.DESIGN_OFFICE_ID
+						left outer join "sap.plc.db::basis.t_design_office__text" as plcTextTable
+							on  plcTable.DESIGN_OFFICE_ID = plcTextTable.DESIGN_OFFICE_ID
+							and plcTextTable.LANGUAGE = :iv_logon_language
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+						where plcTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+						order by plcTable.DESIGN_OFFICE_ID;
+						 	
+tt_design_office_filter = APPLY_FILTER(:tt_design_office_union, :iv_filter_string) ;      
+	
+ot_design_office =  
+		select DESIGN_OFFICE_ID, _VALID_FROM, _VALID_TO,  _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, 
+               _CREATED_BY_FIRST_VERSION, DESIGN_OFFICE_DESCRIPTION 
+               from :tt_design_office_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+
+
+--select document status text
+ot_design_office_text =
+						select
+							plcTextTable.DESIGN_OFFICE_ID,
+							plcTextTable.LANGUAGE,
+							plcTextTable.DESIGN_OFFICE_DESCRIPTION,
+							plcTextTable._VALID_FROM,
+							plcTextTable._VALID_TO,
+							plcTextTable._SOURCE,
+							plcTextTable._CREATED_BY
+						from "sap.plc.db::basis.t_design_office__text" as plcTextTable
+						where ( plcTextTable.DESIGN_OFFICE_ID ) in ( select distinct DESIGN_OFFICE_ID from :ot_design_office )
+							and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+							and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);	
+							
+END;
+

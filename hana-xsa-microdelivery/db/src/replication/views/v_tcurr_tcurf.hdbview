@@ -1,0 +1,19 @@
+VIEW "sap.plc.db.replication.views::v_tcurr_tcurf" ( "FCURR", "TCURR", "FFACT", "TFACT", "UKURS", "ERP_DATE" ) AS select TCURF.FCURR , TCURF.TCURR , 
+	   TCURF.FFACT , TCURF.TFACT , 
+                TCURR.UKURS, CAST (TO_DATS(TCURR.gdatu_c) AS DATE) as ERP_DATE
+                from "sap.plc.db::repl.t_tcurf" AS TCURF
+                inner join "sap.plc.db::repl.t_tcurr" AS TCURR
+                on 	TCURF.FCURR = TCURR.FCURR and 
+                	TCURF.TCURR = TCURR.TCURR 
+                	
+                	WHERE 
+                	TCURR.GDATU_C = ( select MAX(GDATU_C) 
+                								from "sap.plc.db::repl.t_tcurr" AS TCURR1
+                								WHERE TCURR1.FCURR = TCURR.FCURR AND 
+                									  TCURR1.TCURR = TCURR.TCURR  )
+                	AND								  
+                	TCURF.GDATU_C = ( select MAX(GDATU_C) 
+                								from "sap.plc.db::repl.t_tcurf" AS TCURF1
+                								WHERE TCURF1.FCURR = TCURR.FCURR AND 
+                									  TCURF1.TCURR = TCURR.TCURR AND
+                									  TCURF1.GDATU_C <= TCURR.GDATU_C ) WITH READ ONLY

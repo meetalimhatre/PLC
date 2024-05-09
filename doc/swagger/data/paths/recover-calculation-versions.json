@@ -1,0 +1,54 @@
+{
+    "recover-calculation-versions": {
+        "get": {
+            "tags": [
+                "recover-calculation-versions"
+            ],
+            "summary": "Gets Recovered Calculation Versions",
+            "description": "it will return top n recovered calculations versions recently used, after a crash the application",
+            "operationId": "recover-calculation-versionsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "get top recovered calculation-versions (default: 100)",
+                    "required": false,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/recover_calculation_versions-definitions.json#/definitions/RecoverCalculationVersionsGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    }
+}

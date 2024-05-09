@@ -1,0 +1,68 @@
+{
+    "calculated-results": {
+        "get": {
+            "tags": [
+                "calculated-results"
+            ],
+            "summary": "Gets calculation version items calculated fields",
+            "description": "",
+            "operationId": "calculatedResults",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this calculation ",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "Parameter that specifies the id of calculation version. Calculation Version must be already opened.",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "compressedResult",
+                    "in": "query",
+                    "description": "Parameter that compresses the result. If the parameters is set to true, calculated data will be an object with arrays of values for each property.",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculatedResultsResponse"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    }
+}

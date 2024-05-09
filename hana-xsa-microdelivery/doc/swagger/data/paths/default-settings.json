@@ -1,0 +1,260 @@
+{
+    "default-settings": {
+        "get": {
+            "tags": [
+                "default-settings"
+            ],
+            "summary": "Get default settings",
+            "description": "Get default settings",
+            "operationId": "defaultSettingsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Indicates if settings are global ('global') or user specific ('user') ",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "global",
+                        "user"
+                    ]
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Sets the lock on default settings",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/DefaultSettingsGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "read:defaultSettings"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "default-settings"
+            ],
+            "summary": "Creates default settings",
+            "description": "Creates default settings",
+            "operationId": "defaultSettingsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Indicates if settings are global ('global') or user specific ('user')",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "global",
+                        "user"
+                    ]
+                },
+                {
+                    "name": "settings",
+                    "in": "body",
+                    "description": "DefaultSettings that will be created",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "201": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsPostResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.GLOBAL_DEFAULT_SETTINGS_EDIT": [
+                        "update:globalDefaultSettings"
+                    ]
+                },
+                {
+                    "Privileges.USER_DEFAULT_SETTINGS_EDIT": [
+                        "update:userDefaultSettings"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "default-settings"
+            ],
+            "summary": "Updates default settings",
+            "description": "Updates default settings",
+            "operationId": "defaultSettingsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Indicates if settings are global ('global') or user specific ('user')",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "global",
+                        "user"
+                    ]
+                },
+                {
+                    "name": "settings",
+                    "in": "body",
+                    "description": "DefaultSettings that will be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsPutResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.GLOBAL_DEFAULT_SETTINGS_EDIT": [
+                        "update:globalDefaultSettings"
+                    ]
+                },
+                {
+                    "Privileges.USER_DEFAULT_SETTINGS_EDIT": [
+                        "update:userDefaultSettings"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "default-settings"
+            ],
+            "summary": "Delete default settings",
+            "description": "Delete default settings",
+            "operationId": "defaultSettingsDel",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Can be global or user",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "global",
+                        "user"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsDeleteResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.GLOBAL_DEFAULT_SETTINGS_EDIT": [
+                        "update:globalDefaultSettings"
+                    ]
+                },
+                {
+                    "Privileges.USER_DEFAULT_SETTINGS_EDIT": [
+                        "update:userDefaultSettings"
+                    ]
+                }
+            ]
+        }
+    }
+}

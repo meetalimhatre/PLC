@@ -1,0 +1,124 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_material_type__text" (
+    IN INPUT_TABLE TABLE (
+    	"MATERIAL_TYPE_ID" NVARCHAR(4),
+    	"LANGUAGE" NVARCHAR(11),
+    	"MATERIAL_TYPE_DESCRIPTION" NVARCHAR(250),
+    	"_SOURCE" TINYINT
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER 
+  
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+	lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    SELECT current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+        
+	SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+		INTO lv_current_user 
+		FROM "sap.plc.db::DUMMY";
+
+     SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";   
+    
+        INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+        	FIELD_VALUE,
+        	MESSAGE_TEXT ,
+        	MESSAGE_TIME ,
+        	MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )-- check if the MAIN OBJECT is existing (no other checks needed, since done on the main object)
+            select 
+                'MATERIAL_TYPE_ID'                      as FIELD_NAME ,
+                it.MATERIAL_TYPE_ID                     as FIELD_VALUE,
+                'Unknown Material Type ID'              as MESSAGE_TEXT ,
+                :lv_current_utctimestamp                as MESSAGE_TIME ,
+                'ERROR'                                 as MESSAGE_TYPE ,
+                't_material_type__text'                 as TABLE_NAME ,
+                'Replication_Update'                    as OPERATION ,
+                :lv_run_id                              as RUN_ID
+            from :INPUT_TABLE as it
+            where it.MATERIAL_TYPE_ID not in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type" where _VALID_TO is null)
+        ;
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+        	FIELD_VALUE,
+        	MESSAGE_TEXT ,
+        	MESSAGE_TIME ,
+        	MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )
+            select 
+                'LANGUAGE'                                                                          as FIELD_NAME ,
+                it.LANGUAGE                                                                         as FIELD_VALUE ,
+                'Unknown Language for Material Type ID ' || it.MATERIAL_TYPE_ID                     as MESSAGE_TEXT ,
+                lv_current_utctimestamp                                                             as MESSAGE_TIME ,
+                'ERROR'                                                                             as MESSAGE_TYPE ,
+                't_material_type__text'                                                             as TABLE_NAME ,
+                'Replication_Update'                                                                as OPERATION ,
+                :lv_run_id                                                                          as RUN_ID
+            from :INPUT_TABLE as it
+            where it.LANGUAGE not in (select LANGUAGE from "sap.plc.db::basis.t_language")
+        ;
+    
+    lt_update_records =
+        select MATERIAL_TYPE_ID, LANGUAGE, MATERIAL_TYPE_DESCRIPTION, _SOURCE
+        from 
+        --:INPUT_TABLE as it
+        (select *, --ROW_NUMBER()
+            Count(*) OVER (PARTITION BY MATERIAL_TYPE_ID, LANGUAGE) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+          and it.MATERIAL_TYPE_ID in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type" where _VALID_TO is null) 
+          and it.LANGUAGE in (select LANGUAGE from "sap.plc.db::basis.t_language" where _VALID_TO is null) 
+            -- ignore unchanged records 
+          --and (it.MATERIAL_TYPE_ID, it.LANGUAGE, IFNULL(it.MATERIAL_TYPE_DESCRIPTION,''), it._SOURCE) 
+          --    not in 
+          except    
+              (select MATERIAL_TYPE_ID, LANGUAGE, MATERIAL_TYPE_DESCRIPTION, _SOURCE
+                    from "sap.plc.db::basis.t_material_type__text" as std
+                    where _VALID_TO IS NULL
+                    AND (std.MATERIAL_TYPE_ID, std.LANGUAGE) in (select MATERIAL_TYPE_ID, LANGUAGE from :INPUT_TABLE));
+    
+    SELECT COUNT(MATERIAL_TYPE_ID) into lv_rows_count from :lt_update_records;
+    
+    OV_PROCESSED_ROWS := :lv_rows_count;
+
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_material_type__text" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user
+    		WHERE 
+    		      (tbl.MATERIAL_TYPE_ID, tbl.LANGUAGE)
+    		      in (select MATERIAL_TYPE_ID, LANGUAGE
+    			      from :lt_update_records as upd 
+    			      where upd.MATERIAL_TYPE_ID = tbl.MATERIAL_TYPE_ID
+    			        and upd.LANGUAGE = tbl.LANGUAGE
+    		      )
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- inser the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_material_type__text" 
+    		(MATERIAL_TYPE_ID, LANGUAGE, MATERIAL_TYPE_DESCRIPTION, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select MATERIAL_TYPE_ID, LANGUAGE, MATERIAL_TYPE_DESCRIPTION, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+	
+END

@@ -1,0 +1,27 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_set_reporting_currency_item_custom_fields" ( 
+        IN  lv_session_id						NVARCHAR(50),
+		IN 	iv_cv_id 	  						INTEGER,
+        IN  lv_report_currency_id               NVARCHAR(3)
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+	
+BEGIN
+
+
+lt_assemblies = SELECT DISTINCT parent_item_id FROM "sap.plc.db::basis.t_item_temporary" where session_id = :lv_session_id AND calculation_version_id = :iv_cv_id AND parent_item_id is not null;
+
+-- Set reporting currency of the calculation versions to all assembly items
+UPDATE T   
+SET T.transaction_currency_id = :lv_report_currency_id, T.is_dirty = 1 
+FROM "sap.plc.db::basis.t_item_temporary" T INNER JOIN :lt_assemblies P on P.parent_item_id = T.item_id
+WHERE T.session_id =:lv_session_id AND T.calculation_version_id = :iv_cv_id AND T.is_deleted = 0;
+
+-- Set reporting currency of the calculation versions to all assembly items with currency CFF
+
+{{#if Item.customFields}}
+    {{updateCustomFieldsWithCurrency Item}}
+{{/if}}
+
+END

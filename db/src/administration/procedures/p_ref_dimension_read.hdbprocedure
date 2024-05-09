@@ -1,0 +1,33 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_dimension_read" (
+		IN iv_logon_language    		 NVARCHAR(11),
+		IN iv_master_data_timestamp      TIMESTAMP,
+        IN ot_dimension_key      		 "sap.plc.db.administration::masterdata.tt_dimension_key",
+        OUT ot_dimension		         "sap.plc.db.administration::masterdata.tt_dimension" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+-- select dimensions
+
+ot_dimension =
+            select  
+                plcTable.DIMENSION_ID, 
+                plcTable._VALID_FROM, 
+                plcTable._VALID_TO,
+                plcTable._SOURCE, 
+                plcTable._CREATED_BY,
+                null AS _VALID_FROM_FIRST_VERSION,
+                null AS _CREATED_BY_FIRST_VERSION,
+                plcTextTable.DIMENSION_DESCRIPTION 
+            from "sap.plc.db::basis.t_dimension" as plcTable 
+            left outer join "sap.plc.db::basis.t_dimension__text" as plcTextTable 
+            	on  plcTable.DIMENSION_ID = plcTextTable.DIMENSION_ID 
+            	and plcTextTable.LANGUAGE = :iv_logon_language 
+            	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+            	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+            where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+            	and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+            	and  ( plcTable.DIMENSION_ID) in ( select DIMENSION_ID from :ot_dimension_key );
+END;

@@ -1,0 +1,198 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_material_account_determination" (
+    IN INPUT_TABLE TABLE (
+    	"CONTROLLING_AREA_ID" NVARCHAR(4),
+    	"MATERIAL_TYPE_ID" NVARCHAR(4),
+    	"PLANT_ID" NVARCHAR(8),
+    	"VALUATION_CLASS_ID" NVARCHAR(4),
+    	"ACCOUNT_ID" NVARCHAR(10),
+    	"_SOURCE" TINYINT -- 1: PLC / 2: ERP
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+   LANGUAGE SQLSCRIPT
+   SQL SECURITY INVOKER
+
+   as
+   
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+	lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+	
+	SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+		INTO lv_current_user 
+		FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";
+
+        -- Check existance of Controlling Area ID together with Account ID
+        INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+        	FIELD_VALUE,
+        	MESSAGE_TEXT ,
+        	MESSAGE_TIME ,
+        	MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )-- check if the MAIN OBJECT is existing (no other checks needed, since done on the main object)
+            select 
+                'ACCOUNT_ID'                                                                        as FIELD_NAME ,
+                it.ACCOUNT_ID                                                                       as FIELD_VALUE ,
+                'Unknown Account ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID             as MESSAGE_TEXT ,
+                :lv_current_utctimestamp                                                            as MESSAGE_TIME ,
+                'ERROR'                                                                             as MESSAGE_TYPE ,
+                't_material_account_determination'                                                  as TABLE_NAME ,
+                'Replication_Update'                                                                as OPERATION ,
+                :lv_run_id                                                                          as RUN_ID
+            from :INPUT_TABLE as it
+            where (it.ACCOUNT_ID, it.CONTROLLING_AREA_ID) not in (select ACCOUNT_ID, CONTROLLING_AREA_ID from "sap.plc.db::basis.t_account" where _VALID_TO is null)
+        ;
+        
+        -- Check existance of MATERIAL_TYPE_ID
+        INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+            FIELD_VALUE ,
+            MESSAGE_TEXT ,
+            MESSAGE_TIME ,
+            MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )
+            select 
+                'MATERIAL_TYPE_ID'                                                                      as FIELD_NAME ,
+                it.MATERIAL_TYPE_ID                                                                     as FIELD_VALUE ,
+                'Unknown Material Type ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID           as MESSAGE_TEXT ,
+                lv_current_utctimestamp                                                                 as MESSAGE_TIME ,
+                'ERROR'                                                                                 as MESSAGE_TYPE ,
+                't_material_account_determination'                                                      as TABLE_NAME ,
+                'Replication_Update'                                                                    as OPERATION ,
+                :lv_run_id                                                                              as RUN_ID
+            from :INPUT_TABLE as it
+            where  it.MATERIAL_TYPE_ID <> '*'
+            and IFNULL(it.MATERIAL_TYPE_ID, '') <> '' AND it.MATERIAL_TYPE_ID not in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type" where _VALID_TO is null)
+            ;
+            
+        -- Check existance of PLANT_ID
+        INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+            FIELD_VALUE ,
+            MESSAGE_TEXT ,
+            MESSAGE_TIME ,
+            MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )
+            select 
+                'PLANT_ID'                                                                                  as FIELD_NAME ,
+                it.PLANT_ID                                                                                 as FIELD_VALUE ,
+                'Unknown Plant ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID                       as MESSAGE_TEXT ,
+                lv_current_utctimestamp                                                                     as MESSAGE_TIME ,
+                'ERROR'                                                                                     as MESSAGE_TYPE ,
+                't_material_account_determination'                                                          as TABLE_NAME ,
+                'Replication_Update'                                                                        as OPERATION ,
+                :lv_run_id                                                                                  as RUN_ID
+            from :INPUT_TABLE as it
+            where it.PLANT_ID <> '*'
+              and it.PLANT_ID not in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null)
+            ;
+            
+        -- Check existance of VALUATION_CLASS_ID
+        INSERT INTO "sap.plc.db::map.t_replication_log" (
+        	FIELD_NAME ,
+            FIELD_VALUE ,
+            MESSAGE_TEXT ,
+            MESSAGE_TIME ,
+            MESSAGE_TYPE ,
+            TABLE_NAME ,
+            OPERATION ,
+            RUN_ID
+        )
+            select 
+                'VALUATION_CLASS_ID'                                                                            as FIELD_NAME ,
+                it.VALUATION_CLASS_ID                                                                           as FIELD_VALUE,
+                'Unknown Valuation Class ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID                 as MESSAGE_TEXT ,
+                lv_current_utctimestamp                                                                         as MESSAGE_TIME ,
+                'ERROR'                                                                                         as MESSAGE_TYPE ,
+                't_material_account_determination'                                                              as TABLE_NAME ,
+                'Replication_Update'                                                                            as OPERATION ,
+                :lv_run_id                                                                                      as RUN_ID
+            from :INPUT_TABLE as it
+            where  it.VALUATION_CLASS_ID <> '*'
+            and IFNULL(it.VALUATION_CLASS_ID, '') <> '' AND it.VALUATION_CLASS_ID not in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class" where _VALID_TO is null)
+            ;
+    
+    -- get lines to actual upload
+    lt_update_records =
+        select
+            CONTROLLING_AREA_ID, MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID, ACCOUNT_ID, _SOURCE
+        from (select *, 
+            Count(*) OVER (PARTITION BY CONTROLLING_AREA_ID,MATERIAL_TYPE_ID,PLANT_ID,VALUATION_CLASS_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1 -- ignore duplicate key rows AT ALL (not even one of them gets inserted)
+            -- ignore identical rows
+          --and (it.CONTROLLING_AREA_ID, it.MATERIAL_TYPE_ID, it.PLANT_ID, it.VALUATION_CLASS_ID, it.ACCOUNT_ID, it._SOURCE
+          --    ) 
+          --    not in 
+			and (it.ACCOUNT_ID, it.CONTROLLING_AREA_ID) in (select ACCOUNT_ID, CONTROLLING_AREA_ID from "sap.plc.db::basis.t_account" where _VALID_TO is null)
+			and (it.MATERIAL_TYPE_ID = '*' or it.MATERIAL_TYPE_ID in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type" where _VALID_TO is null))
+			and (it.PLANT_ID = '*' or it.PLANT_ID in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null))
+			and (it.VALUATION_CLASS_ID = '*' or it.VALUATION_CLASS_ID in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class" where _VALID_TO is null))
+          except    
+              (
+                    select 
+                        CONTROLLING_AREA_ID, MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID, ACCOUNT_ID, _SOURCE
+                    from "sap.plc.db::basis.t_material_account_determination" as std
+                    where _VALID_TO IS NULL
+                    AND (std.CONTROLLING_AREA_ID, std.MATERIAL_TYPE_ID, std.PLANT_ID, std.VALUATION_CLASS_ID) in (select CONTROLLING_AREA_ID, MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID from :INPUT_TABLE));
+    
+    SELECT COUNT(CONTROLLING_AREA_ID) into lv_rows_count from :lt_update_records;
+    
+    OV_PROCESSED_ROWS := :lv_rows_count;
+
+    IF lv_rows_count > 0 then
+        UPDATE "sap.plc.db::basis.t_material_account_determination" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user  
+              where (tbl.CONTROLLING_AREA_ID, tbl.MATERIAL_TYPE_ID, tbl.PLANT_ID, tbl.VALUATION_CLASS_ID) 
+                    in (select CONTROLLING_AREA_ID, MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID from :lt_update_records as upd)
+                AND tbl._VALID_TO IS NULL;
+            		  
+    	
+        INSERT INTO  "sap.plc.db::basis.t_material_account_determination"
+        (
+            CONTROLLING_AREA_ID,              
+            MATERIAL_TYPE_ID,                  
+            PLANT_ID,                     
+            VALUATION_CLASS_ID,                    
+            ACCOUNT_ID,
+            _SOURCE,                      
+            _VALID_FROM,       
+            _VALID_TO,                    
+            _CREATED_BY                                         
+        )
+    	select
+            CONTROLLING_AREA_ID,              
+            MATERIAL_TYPE_ID,                  
+            PLANT_ID,                     
+            VALUATION_CLASS_ID,                    
+            ACCOUNT_ID,
+            _SOURCE,                      
+            :lv_current_utctimestamp as _VALID_FROM,
+            null as _VALID_TO, 
+            :lv_current_user as _CREATED_BY 
+    	from :lt_update_records;
+    	
+    END IF;
+    
+END

@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::personal_data_validity_read_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_personal_data_validity", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		]
+	}
+}

@@ -1,0 +1,21 @@
+PROCEDURE "sap.plc.db.management.procedures::p_unlock_calculation_version" ( 
+		IN userId NVARCHAR(256)
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+
+	DELETE FROM "sap.plc.db::basis.t_item_temporary" WHERE UCASE(session_id) = UCASE(:userId);
+		
+	DELETE FROM "sap.plc.db::basis.t_calculation_version_temporary" WHERE UCASE(session_id) = UCASE(:userId);
+		
+	DELETE FROM "sap.plc.db::basis.t_open_calculation_versions" WHERE UCASE(session_id) = UCASE(:userId);
+	
+{{#if Item.customFields}}
+	DELETE FROM {{t_temporaryExtensionTable Item}} WHERE UCASE(session_id) = UCASE(:userId);
+{{/if}}
+	
+END
+
+

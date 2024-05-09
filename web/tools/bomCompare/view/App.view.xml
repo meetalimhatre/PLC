@@ -1,0 +1,21 @@
+<mvc:View  
+    xmlns="sap.m" 
+    xmlns:tnt="sap.tnt" 
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    height="100%"
+    xmlns:ui="ui.view" 
+    controllerName='ui.controller.App' >
+    <tnt:ToolPage id="toolPage">
+        <tnt:header>
+            <tnt:ToolHeader>
+                <core:Fragment fragmentName="core.header.header" type="XML"/>
+            </tnt:ToolHeader>
+        </tnt:header>
+        <tnt:mainContents>
+            <App id="rootControl">
+            </App>
+        </tnt:mainContents>
+    </tnt:ToolPage>  
+</mvc:View>

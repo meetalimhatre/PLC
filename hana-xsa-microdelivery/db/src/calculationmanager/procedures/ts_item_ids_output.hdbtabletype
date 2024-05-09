@@ -1,0 +1,1 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_item_ids_output" AS TABLE  ( "ITEM_ID" INT CS_INT NOT NULL, PRIMARY KEY ( "ITEM_ID" ) ) 

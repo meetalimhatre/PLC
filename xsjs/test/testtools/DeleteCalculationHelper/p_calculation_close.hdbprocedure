@@ -1,0 +1,24 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.DeleteCalculationHelper::p_calculation_close" ( 
+	IN calcid INTEGER
+) 
+	LANGUAGE SQLSCRIPT 
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA "SAP_PLC"
+	AS
+
+BEGIN
+--closes a calculation and all its versions
+--NOT TESTED; DO NOT USE IN PRODUCTIVE CODE   
+
+	DELETE FROM "sap.plc.db::basis.t_open_calculation_versions"
+		WHERE calculation_version_id  IN (SELECT calculation_version_id FROM "sap.plc.db::basis.t_calculation_version" WHERE calculation_id= :calcid);
+
+	DELETE FROM "sap.plc.db::basis.t_item_temporary"
+		WHERE calculation_version_id  IN (SELECT calculation_version_id FROM "sap.plc.db::basis.t_calculation_version" WHERE calculation_id= :calcid);
+
+	DELETE FROM "sap.plc.db::basis.t_calculation_version_temporary"
+		WHERE calculation_version_id  IN (SELECT calculation_version_id FROM "sap.plc.db::basis.t_calculation_version" WHERE calculation_id= :calcid);
+
+
+
+END;

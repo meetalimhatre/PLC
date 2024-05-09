@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::lifecycle_period_value_delete_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_project_lifecycle_period_quantity_value", 
+			"type":"TABLE", 
+ 			"privileges":[ "DELETE" ] 
+		}
+		]
+	}
+}

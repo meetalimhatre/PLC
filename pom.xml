@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sap.plc.xsa</groupId>
+        <artifactId>node-npm-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>./node-parent-pom.xml</relativePath>
+    </parent>
+
+    <artifactId>xsac-plc-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <revision>4.4.16</revision>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.java.version>17</project.java.version>
+
+        <java.version>${project.java.version}</java.version>
+        <maven.compiler.source>${project.java.version}</maven.compiler.source>
+        <maven.compiler.target>${project.java.version}</maven.compiler.target>
+      
+        <java.tests.forked.jvm.args>-Xmx2g -XX:MetaspaceSize=32m -XX:MaxMetaspaceSize=512m -XX:MinHeapFreeRatio=30
+            -XX:MaxHeapFreeRatio=85 -XX:+UseParallelGC</java.tests.forked.jvm.args>
+        <maven.skip.tests>true</maven.skip.tests>
+    </properties>
+
+    <build>
+        <defaultGoal>clean install</defaultGoal>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>all</id>
+            <modules>
+                <module>java-plc-parent</module>
+            </modules>
+            <properties>
+                <maven.skip.tests>false</maven.skip.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>build/assembly-xsa</module>
+                <module>build/assembly-cf</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,9 @@
+service {
+    "sap.plc.db::map.t_scheduler_log" as "SchedulerOdata" with ("RUN_ID","SCHED_NAME", "STATE", "FIRED_TIME","FINISHED_TIME")
+        create forbidden
+        update forbidden
+        delete forbidden;
+}
+annotations {
+   enable OData4SAP;
+}

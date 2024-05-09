@@ -1,0 +1,30 @@
+{{#if MasterdataBusinessObject.usedInBusinessObjects}}
+					update temp_table
+						set	temp_table.ERROR_CODE = 'GENERAL_VALIDATION_ERROR',
+						temp_table.ERROR_DETAILS = '{"validationObj": { "dependencyObjects": [{"businessObj":"'|| result.business_objects ||'"}],
+							"validationInfoCode": "DEPENDENCY_ERROR"}}'
+						from {{temporaryTable MasterdataBusinessObject}} as temp_table,
+						(select STRING_AGG( business_object, '"},{"businessObj":"') as business_objects, {{keyFields MasterdataBusinessObject}}, _VALID_FROM
+						  from (
+						    {{#each MasterdataBusinessObject.usedInBusinessObjects as |bo index|}}
+						  	  select distinct {{anyStringWithQuotes bo.BusinessObjectName}} as business_object, {{keyFieldsWithPrefix ../MasterdataBusinessObject 'temp_table'}}, temp_table._VALID_FROM
+						        from {{temporaryTable ../MasterdataBusinessObject}} as temp_table
+								inner join {{tableNameWithQuotes bo.TableName}} as main_table
+								on ( {{fieldsConditionForDependendFieldsWithPrefixes ../MasterdataBusinessObject.keyFields bo.FieldsName 'temp_table' 'main_table'}} )
+								{{#if bo.IsVersioned}}
+								  and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp ../MasterdataBusinessObject}}) and main_table._VALID_TO is null
+								{{/if}}
+								and temp_table.operation in ('Delete')
+								and (temp_table.error_code = '' or  temp_table.error_code is null)
+								{{#if @last}}
+								{{else}}
+									union
+								{{/if}}
+							{{/each}}
+						   ) group by {{keyFields MasterdataBusinessObject}}, _VALID_FROM
+						) as result
+						where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+						and temp_table._VALID_FROM = result._VALID_FROM
+						and temp_table.operation in ('Delete')
+						and (temp_table.error_code = '' or  temp_table.error_code is null)
+					{{/if}}

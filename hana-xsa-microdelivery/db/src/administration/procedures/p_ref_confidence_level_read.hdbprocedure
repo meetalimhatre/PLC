@@ -1,0 +1,21 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_confidence_level_read" ( 
+		IN iv_logon_language           	NVARCHAR(11),
+        IN ot_confidence_level_key	 	"sap.plc.db::basis.t_confidence_level",
+        OUT ot_confidence_level     	"sap.plc.db.administration::masterdata.tt_confidence_level" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+--select confidence_level
+ot_confidence_level = select  
+			   				plcTable.CONFIDENCE_LEVEL_ID,
+			    			plcTextTable.CONFIDENCE_LEVEL_DESCRIPTION
+			           	from "sap.plc.db::basis.t_confidence_level" as plcTable 
+			            left outer join "sap.plc.db::basis.t_confidence_level__text" as plcTextTable 
+			                on  plcTable.CONFIDENCE_LEVEL_ID = plcTextTable.CONFIDENCE_LEVEL_ID 
+			                and plcTextTable.LANGUAGE = :iv_logon_language   
+			            where (  plcTable.CONFIDENCE_LEVEL_ID ) in ( select CONFIDENCE_LEVEL_ID from :ot_confidence_level_key );
+	
+END;

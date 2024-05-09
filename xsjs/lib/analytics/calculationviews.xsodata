@@ -1,0 +1,52 @@
+service  {
+	"sap.plc.analytics.viewsCF::V_EXT_ACTIVITIES_CUST" as "V_EXT_ACTIVITIES"
+	key ("CALCULATION_VERSION_ID", "ITEM_ID") 
+	parameters via entity "ACTIVITIES" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.viewsCF::V_EXT_COMPONENT_SPLIT_CUST" as "V_EXT_COMPONENT_SPLIT_CUST" 
+	key ("CALCULATION_VERSION_ID", "ITEM_ID") 
+	parameters via entity "COMPONENT_SPLIT" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.viewsCF::V_EXT_COSTING_SHEET_CUST" as "V_EXT_COSTING SHEET_CUST"
+	key ("CALCULATION_VERSION_ID", "ITEM_ID") 
+	parameters via entity "COSTING_SHEET" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.viewsCF::V_EXT_LINE_ITEMS_CUST" as "V_EXT_LINE_ITEMS_CUST" 
+	key ("CALCULATION_VERSION_ID", "ITEM_ID") 
+	parameters via entity "LINE_ITEMS" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.viewsCF::V_EXT_MATERIAL_LIST_CUST" as "V_EXT_MATERIAL_LIST_CUST" 
+	key ("CALCULATTON_VERSION_ID", "ITEM_ID")
+	parameters via entity "MATERIAL_LIST" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden ;
+	"sap.plc.analytics.viewsCF::V_EXT_PROJECT_COMPONENT_SPLIT_CUST" as "V_EXT_PROJECT_COMPONENT_SPLIT_CUST" 
+	key ("PROJECT_ID", "CALCULATION_VERSION_ID") 
+	parameters via entity "PRJECT_COMPONENT_SPLIT" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.viewsCF::V_EXT_PROJECT_COSTING_SHEET_CUST" as "V_EXT_PROJECT_COSTING_SHEET_CUST" 
+	key ("PROJECT_ID", "CALCULATION_VERSION_ID")
+	parameters via entity "PRJECT_COSTING_SHEET" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+}
+annotations {
+	enable OData4SAP;
+ }
+ settings {
+    support null;
+	content cache-control "no-store";
+  	metadata cache-control "max-age=3600,must-revalidate";
+ }

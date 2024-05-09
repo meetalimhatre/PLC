@@ -1,0 +1,14 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.DeleteCalculationHelper::p_change_calcversionid" ( 
+	in oldid integer,
+	in newid integer) 
+		LANGUAGE SQLSCRIPT
+		SQL SECURITY INVOKER 
+		DEFAULT SCHEMA "SAP_PLC"
+		 AS
+	BEGIN
+	update "sap.plc.db::basis.t_calculation_version_temporary" SET CALCULATION_VERSION_ID = :newid WHERE CALCULATION_VERSION_ID = :oldid;
+	update "sap.plc.db::basis.t_calculation_version" SET CALCULATION_VERSION_ID = :newid WHERE CALCULATION_VERSION_ID = :oldid;
+	update "sap.plc.db::basis.t_open_calculation_versions" SET CALCULATION_VERSION_ID = :newid WHERE CALCULATION_VERSION_ID = :oldid;
+	update "sap.plc.db::basis.t_item_temporary" SET CALCULATION_VERSION_ID = :newid WHERE CALCULATION_VERSION_ID = :oldid;
+	update "sap.plc.db::basis.t_item" SET CALCULATION_VERSION_ID = :newid WHERE CALCULATION_VERSION_ID = :oldid;
+	END;

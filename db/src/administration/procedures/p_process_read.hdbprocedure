@@ -1,0 +1,88 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_process_read" (  
+		IN iv_logon_language            NVARCHAR(11),
+		IN iv_master_data_timestamp     TIMESTAMP,
+		IN iv_filter_string	        	NVARCHAR(5000),
+		IN iv_no_max_records            INTEGER,
+		IN iv_no_skip_records           INTEGER,
+		OUT ot_process         "sap.plc.db.administration::masterdata.tt_process" default empty,
+		OUT ot_controlling_area			"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_accounts					"sap.plc.db.administration::masterdata.tt_accounts" default empty,
+		OUT ot_process_text    "sap.plc.db::basis.t_process__text" default empty
+ 	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+
+--select processes
+	tt_process_union =				
+					select
+						plcTable.PROCESS_ID,
+						plcTable.CONTROLLING_AREA_ID,
+						plcTable.ACCOUNT_ID,
+						plcTable.COMMENT,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+						minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.PROCESS_DESCRIPTION
+					from "sap.plc.db::basis.t_process" as plcTable 
+					inner join
+						(	select A._VALID_FROM, A.PROCESS_ID, A.CONTROLLING_AREA_ID, A._CREATED_BY
+							from "sap.plc.db::basis.t_process" AS A
+								inner join
+								( select MIN(_VALID_FROM) AS _VALID_FROM, PROCESS_ID, CONTROLLING_AREA_ID
+									from "sap.plc.db::basis.t_process"
+									group by PROCESS_ID, CONTROLLING_AREA_ID
+								) AS B
+								ON A._VALID_FROM = B._VALID_FROM AND A.PROCESS_ID = B.PROCESS_ID AND A.CONTROLLING_AREA_ID = B.CONTROLLING_AREA_ID
+						) AS minValues
+						on plcTable.PROCESS_ID = minValues.PROCESS_ID AND plcTable.CONTROLLING_AREA_ID = minValues.CONTROLLING_AREA_ID
+					left outer join "sap.plc.db::basis.t_process__text" as plcTextTable		
+						on 	plcTable.PROCESS_ID = plcTextTable.PROCESS_ID
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID
+						and plcTextTable.LANGUAGE = :iv_logon_language
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+						and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)
+					where plcTable._VALID_FROM <= :iv_master_data_timestamp
+						and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+					order by plcTable.PROCESS_ID, plcTable.CONTROLLING_AREA_ID;
+
+	tt_process_filter = APPLY_FILTER(:tt_process_union, :iv_filter_string) ;      
+	
+	ot_process =  
+			select  PROCESS_ID,CONTROLLING_AREA_ID,ACCOUNT_ID,COMMENT,_VALID_FROM, _VALID_TO, _SOURCE, 
+				    _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, PROCESS_DESCRIPTION 
+				    from :tt_process_filter limit :iv_no_max_records offset :iv_no_skip_records;   
+						
+-- process texts				
+	ot_process_text = 
+										
+						select				
+							plcTextTable.PROCESS_ID,
+							plcTextTable.CONTROLLING_AREA_ID,
+							plcTextTable.LANGUAGE,
+							plcTextTable.PROCESS_DESCRIPTION,
+							plcTextTable._VALID_FROM,
+							plcTextTable._VALID_TO,
+							plcTextTable._SOURCE,
+							plcTextTable._CREATED_BY
+							from "sap.plc.db::basis.t_process__text" as plcTextTable
+							where (plcTextTable.PROCESS_ID, plcTextTable.CONTROLLING_AREA_ID) in (select PROCESS_ID, CONTROLLING_AREA_ID from :ot_process)
+								and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+								and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+								
+
+ 
+ --select controlling area	
+ tt_controlling_area_key = select distinct CONTROLLING_AREA_ID from :ot_process;
+ call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_key,ot_controlling_area);	
+ 
+ --select accounts
+ tt_accounts_key = select distinct ACCOUNT_ID, CONTROLLING_AREA_ID from :ot_process;
+ call "sap.plc.db.administration.procedures::p_ref_accounts_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_accounts_key,ot_accounts);  
+									
+END;

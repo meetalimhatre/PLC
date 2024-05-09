@@ -1,0 +1,290 @@
+{
+  "welcomeFile": "index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/index.html",
+      "localDir": "resources",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/home/(.*)$",
+      "localDir": "resources",
+      "cacheControl": "public, max-age=604800",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/sap/plc/xs/rest/(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "target": "/xs/rest/$1",
+      "csrfProtection": true,
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base"
+    },
+    {
+       "source": "^/sap/plc/updates/(.*)$",
+       "localDir": "resources",
+       "csrfProtection": true,
+       "authenticationType": "xsuaa",
+       "scope": "$XSAPPNAME.Base"
+    },
+    {
+      "source": "^/sap/plc/xs/ops/(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "target": "/xs/ops/$1",
+      "csrfProtection": true,
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/auth/login.html",
+      "localDir": "resources",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base",
+      "csrfProtection": true
+    },
+    {
+      "source": "^/openVersion.*$",
+      "localDir": "resources",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/auth/logout.html$",
+      "localDir": "resources",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/admin/repl/index.html",
+      "localDir": "resources",
+      "target": "/repl/index.html",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base",
+      "csrfProtection": true,
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/admin/repl/(.+)$",
+      "localDir": "resources",
+      "target": "/repl/$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base",
+      "csrfProtection": true
+    },
+    {
+      "source": "^/admin/repl/",
+      "localDir": "resources",
+      "target": "/repl/",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base",
+      "csrfProtection": true,
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/sap/plc_test/(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "target": "/$1",
+      "csrfProtection": true,
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base"
+    },
+    {
+      "source": "^/sap/plc/mt/(.*)$",
+      "destination": "xsac-plc-mt-destination",
+      "target": "/$1",
+      "authenticationType": "none",
+      "csrfProtection": true
+    },
+    {
+      "source": "^/sap/plc/xsjs/doc/(.*)$",
+      "localDir": "resources",
+      "target": "/doc/xsjs/$1",
+      "scope": "$XSAPPNAME.ApiDocR"
+    },
+    {
+      "source": "^/sap/plc/api/doc/(.*)$",
+      "localDir": "resources",
+      "target": "/doc/publicapi/$1",
+      "scope": "$XSAPPNAME.ApiDocR"
+    },
+    {
+      "source": "^/sap/bc/ina/(.*)$",
+      "destination": "xsac-plc-xsahaa-destination",
+      "httpMethods": [
+        "POST",
+        "GET"
+      ],
+      "authenticationType": "xsuaa",
+      "csrfProtection": true,
+      "scope": "$XSAPPNAME.AnalyticsViewer"
+    },
+    {
+      "source": "^/sap/plc/api/v1/(.*)$",
+      "destination": "xsac-plc-api-destination",
+      "httpMethods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "target": "/api/v1/$1",
+      "authenticationType": "xsuaa",
+      "csrfProtection": true
+    },
+    {
+      "source":"^/sap/plc/map/(.*)$",
+      "destination": "xsac-plc-map-destination",
+      "httpMethods":[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "target":"/$1",
+      "authenticationType":"xsuaa",
+      "csrfProtection":true
+    },
+    {
+      "source":"^/sap/plc/scheduler/(.*)$",
+      "destination": "xsac-plc-scheduler-destination",
+      "httpMethods":[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "target":"$1",
+      "authenticationType":"xsuaa",
+      "csrfProtection":true
+    },
+    {
+      "source": "^/sap/plc/xs/oData/schedulerService.xsodata/SchedulerOdata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/schedulerService.xsodata/SchedulerOdata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Sched" 
+    },
+    {
+      "source": "^/sap/plc/xs/oData/schedulerService.xsodata/\\$metadata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/schedulerService.xsodata/$metadata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Sched"
+    },
+    {
+      "source": "^/sap/plc/xs/oData/logsService.xsodata/LogsOdata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/logsService.xsodata/LogsOdata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.MdrLogs"
+    },
+    {
+      "source": "^/sap/plc/xs/oData/logsService.xsodata/\\$metadata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/logsService.xsodata/$metadata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.MdrLogs"
+    },
+    {
+      "source": "^/sap/plc/xs/oData/statisticsService.xsodata/StatisticsOdata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/statisticsService.xsodata/StatisticsOdata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.MdrStatistics"
+    },
+    {
+      "source": "^/sap/plc/xs/oData/statisticsService.xsodata/\\$metadata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+        "GET"
+      ],
+      "target": "/xs/oData/statisticsService.xsodata/$metadata$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.MdrStatistics"
+    },
+    {
+      "source": "^/analytics/services.xsodata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+      "GET"
+      ],
+      "authenticationType": "xsuaa",
+      "csrfProtection": true,
+      "scope": "$XSAPPNAME.CalcVerOpen" 
+    },
+    {
+      "source": "^/analytics/calculationviews.xsodata(.*)$",
+      "destination": "xsac-plc-xs-destination",
+      "httpMethods": [
+      "GET"
+      ],
+      "authenticationType": "xsuaa",
+      "csrfProtection": true,
+      "scope": "$XSAPPNAME.AnalyticsViewer" 
+    },
+    {
+      "source": "^/calculation/compare/(.*)$",
+      "localDir": "resources",
+      "target": "/bomCompare/$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.CalcVerOpen",
+      "csrfProtection": true,
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+        "source": "^/admin/dpp/index.html",
+        "localDir": "resources",
+        "target": "/retentionPeriods/index.html",
+        "authenticationType": "xsuaa",
+        "scope": "$XSAPPNAME.RetPeriodsR",
+        "csrfProtection": true,
+        "cacheControl": "no-cache, no-store, must-revalidate"
+      },
+      {
+        "source": "^/admin/dpp/(.+)$",
+        "localDir": "resources",
+        "target": "/retentionPeriods/$1",
+        "authenticationType": "xsuaa",
+        "scope": "$XSAPPNAME.RetPeriodsR",
+        "csrfProtection": true
+      },
+      {
+        "source": "^/admin/dpp/",
+        "localDir": "resources",
+        "target": "/retentionPeriods/",
+        "authenticationType": "xsuaa",
+        "scope": "$XSAPPNAME.RetPeriodsR",
+        "csrfProtection": true,
+        "cacheControl": "no-cache, no-store, must-revalidate"
+      },
+    {
+      "source": "^/ui5/common/(.*)$",
+      "localDir": "resources",
+      "target": "/commonUi5/$1",
+      "authenticationType": "xsuaa",
+      "scope": "$XSAPPNAME.Base",
+      "csrfProtection": true
+    }
+  ],
+  "logout": {
+    "logoutEndpoint": "/logout",
+    "logoutPage": "/auth/logout.html"
+  }
+}

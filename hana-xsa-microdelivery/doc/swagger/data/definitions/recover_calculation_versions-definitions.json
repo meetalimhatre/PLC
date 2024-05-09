@@ -1,0 +1,43 @@
+{
+	"definitions": {
+		"RecoverCalculationVersionsGetResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"CALCULATION_VERSIONS": {
+										"type": "array",
+										"items": {
+											 "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsGetCalculationVersionsModel"
+										}
+									},
+									"CALCULATIONS": {
+										"type": "array",
+										"items": {
+											"$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsGetCalculationModel"
+										}
+									},
+									"PROJECTS": {
+										"type": "array",
+										"items": {
+											 "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsGetProjectsModel"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

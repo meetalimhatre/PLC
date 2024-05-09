@@ -1,0 +1,181 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_meas_component_split" (
+projectId NVARCHAR(5000) default '',
+versionIds NVARCHAR(5000)
+)
+RETURNS TABLE (
+	"PROJECT_ID" NVARCHAR (35), 
+	"CALCULATION_VERSION_ID" INTEGER, 
+	"ITEM_ID"  NVARCHAR (22), 
+	"ACCOUNT_ID" NVARCHAR (10), 
+	"COST_COMPONENT_ID" INTEGER,
+	"COST" DECIMAL (28, 7), 
+	"COST_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST2" DECIMAL (28, 7), 
+	"COST2_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST2_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST3" DECIMAL (28, 7), 
+	"COST3_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST3_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"REPORT_CURRENCY_ID" NVARCHAR (3),
+	"TOTAL_QUANTITY" DECIMAL (28, 7), 
+	"TOTAL_QUANTITY_UOM_ID" NVARCHAR (3),
+	"BASE_QUANTITY" DECIMAL (28, 7), 
+	"BASE_QUANTITY_UOM_ID" NVARCHAR (3), 
+	"QUANTITY_PER_BASE_UNIT" DECIMAL (28, 7), 
+	"QUANTITY_PER_BASE_UNIT_UOM_ID" NVARCHAR (3),
+	"TARGET_COST" DECIMAL (28, 7), 
+	"TARGET_COST_CURRENCY_ID" NVARCHAR (3), 
+	"TOTAL_COST_PER_UNIT" DECIMAL (28, 7), 
+	"TOTAL_COST2_PER_UNIT" DECIMAL (28, 7), 
+	"TOTAL_COST3_PER_UNIT" DECIMAL (28, 7), 
+	"PRICE" DECIMAL (28, 7), 
+	"PRICE_FIXED_PORTION" DECIMAL (28, 7), 
+	"PRICE_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"TRANSACTION_CURRENCY_ID" NVARCHAR (3), 
+	"PRICE_UNIT" DECIMAL (28, 7), 
+	"PRICE_UNIT_UOM_ID" NVARCHAR (3), 
+	"SALES_PRICE"  DECIMAL (28, 7), 
+	"SALES_PRICE_CURRENCY_ID" NVARCHAR (3), 
+	"PROJECT_SALES_PRICE" DECIMAL (28, 7), 
+	"PROJECT_SALES_PRICE_CURRENCY_ID" NVARCHAR (3),
+	"PARENT_ITEM_ID" Integer
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS
+
+BEGIN
+
+var_out = SELECT
+	itemcosts.project_id,
+	itemcosts.calculation_version_id,
+	concat(itemcosts.calculation_version_id, concat('-', itemcosts.item_id)) as item_id,
+	compSplitValues.account_id,
+	compSplitRows.cost_component_id,
+	-- in case no component split is assigned to the calculation version, the row
+	-- "Unassigned Cost" has to show total cost values for the respective item
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost
+		ELSE compSplitValues.cost
+	END AS cost,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost_fixed_portion
+		ELSE compSplitValues.cost_fixed_portion
+	END AS cost_fixed_portion,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost_variable_portion
+		ELSE compSplitValues.cost_variable_portion
+	END AS cost_variable_portion,
+	-- 2
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost2
+		ELSE compSplitValues.cost2
+	END AS cost2,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost2_fixed_portion
+		ELSE compSplitValues.cost2_fixed_portion
+	END AS cost2_fixed_portion,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost2_variable_portion
+		ELSE compSplitValues.cost2_variable_portion
+	END AS cost2_variable_portion,
+	-- 3
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost3
+		ELSE compSplitValues.cost3
+	END AS cost3,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost3_fixed_portion
+		ELSE compSplitValues.cost3_fixed_portion
+	END AS cost3_fixed_portion,
+	CASE
+		WHEN compSplitRows.component_split_id is null THEN itemcosts.total_cost3_variable_portion
+		ELSE compSplitValues.cost3_variable_portion
+	END AS cost3_variable_portion,
+
+	itemcosts.report_currency_id,
+	itemcosts.total_quantity,
+	itemcosts.total_quantity_uom_id,
+	itemcosts.base_quantity,
+	itemcosts.base_quantity_uom_id,
+	itemcosts.quantity_per_base_unit,
+	itemcosts.quantity_per_base_unit_uom_id,
+	itemcosts.target_cost as target_cost,
+	itemcosts.target_cost_currency_id,
+	itemcosts.total_cost_per_unit,
+	itemcosts.total_cost2_per_unit,
+	itemcosts.total_cost3_per_unit,
+	itemcosts.price,
+	itemcosts.price_fixed_portion,
+	itemcosts.price_variable_portion,
+	itemcosts.transaction_currency_id,
+	itemcosts.price_unit,
+	itemcosts.price_unit_uom_id,
+	itemcosts.sales_price,
+	itemcosts.sales_price_currency_id,
+	itemcosts.project_sales_price as project_sales_price,
+	itemcosts.project_sales_price_currency_id as project_sales_price_currency_id,
+	itemcosts.PARENT_ITEM_ID
+FROM "sap.plc.analytics.views.base::f_sql_meas_item_costs_view"(:projectId, :versionIds) itemcosts		
+	INNER JOIN (
+			-- create a unioned result set including all cost components for each component split enriched by the default row "Unassigned Costs"
+			-- In addition, add default row to result set without linkage to a component split to enrich calculation versions
+			-- without having any component split assigned
+			(
+				SELECT 
+						compSplit.component_split_id,
+						compSplit._valid_from,
+						compSplit._valid_to,
+						accountGroups.account_group_id as cost_component_id,
+						accountGroups._valid_from as cost_component_valid_from,
+						accountGroups._valid_to as cost_component_valid_to
+					FROM "sap.plc.db::basis.t_component_split" compSplit	
+						LEFT JOIN "sap.plc.db::basis.t_component_split_account_group" accountGroups
+							ON compSplit.component_split_id = accountGroups.component_split_id
+				UNION ALL
+				-- Union an additional row which represents "Unassigned Costs":
+				-- per definition, cost_component_id = -1 collects all unassigned cost component costs
+				SELECT
+						compSplit.component_split_id,
+						compSplit._valid_from,
+						compSplit._valid_to,
+						'-1',
+						null,
+						null
+					FROM "sap.plc.db::basis.t_component_split" compSplit
+			)
+			-- Add default row to result set without link to a component split to enrich calculation versions
+			-- without having any component split assigned
+			UNION ALL
+			(
+				SELECT 
+						null, -- as component_split_id, no reference to a component split
+						null,
+						null,
+						'-1', -- as cost_component_id (Unassigned Costs are stored with ID = -1)
+						null,
+						null
+					FROM "sap.plc.db::DUMMY"
+			)
+		) compSplitRows
+			-- regular join condition (e.g. calcVersion.component_split_id = compSplitRows.component_split_id) would not work here as standalone condition
+			-- since component_split_id can be NULL (in case no component split is assigned to the calculation). NULL is not value and
+			-- therefore, cannot be used as a join condition without considering NULL or standard rows as special case
+			ON (itemcosts.component_split_id = compSplitRows.component_split_id OR (itemcosts.component_split_id IS NULL AND compSplitRows.component_split_id IS NULL))
+			AND (
+					-- check validity for each component split and the linked account groups based on date ranges - except for
+					-- 'Unassigned Costs' (ID = -1) since they are defined as default rows for every item
+					(
+						itemcosts.master_data_timestamp >= compSplitRows._valid_from AND (compSplitRows._valid_to IS NULL OR itemcosts.master_data_timestamp < compSplitRows._valid_to)
+						AND itemcosts.master_data_timestamp >= compSplitRows.cost_component_valid_from AND (compSplitRows.cost_component_valid_to IS NULL OR itemcosts.master_data_timestamp < compSplitRows.cost_component_valid_to)
+					)
+					OR (compSplitRows.cost_component_id = '-1' AND 	(itemcosts.master_data_timestamp >= compSplitRows._valid_from AND (compSplitRows._valid_to IS NULL OR itemcosts.master_data_timestamp < compSplitRows._valid_to)))
+				)
+	LEFT OUTER JOIN "sap.plc.db::basis.t_item_calculated_values_component_split" compSplitValues
+		ON compSplitValues.calculation_version_id = itemcosts.calculation_version_id
+		AND compSplitValues.item_id = itemcosts.item_id
+		AND compSplitValues.cost_component_id = compSplitRows.cost_component_id
+	where (compSplitValues.item_id is not null or ( itemcosts.component_split_id IS NULL AND compSplitRows.component_split_id IS NULL));
+
+return :var_out;
+END;

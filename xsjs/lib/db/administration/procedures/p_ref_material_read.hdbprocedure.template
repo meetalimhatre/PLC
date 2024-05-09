@@ -1,0 +1,56 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_material_read" ( 
+		IN iv_logon_language        NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,	
+        IN ot_material_key  		"sap.plc.db.administration::masterdata.tt_material_key",
+        OUT ot_material   			"sap.plc.db.administration::masterdata.tt_material" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+--select materials
+ot_material = 
+            select  
+   				plcTable.MATERIAL_ID,
+				plcTable.BASE_UOM_ID,
+				plcTable.MATERIAL_GROUP_ID,
+				plcTable.MATERIAL_TYPE_ID,
+				plcTable.IS_CREATED_VIA_CAD_INTEGRATION,
+				plcTable.IS_PHANTOM_MATERIAL,
+				plcTable.IS_CONFIGURABLE_MATERIAL,
+				plcTable._VALID_FROM,
+				plcTable._VALID_TO,
+				plcTable._SOURCE,
+				plcTable._CREATED_BY,
+                minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+                minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+    			plcTextTable.MATERIAL_DESCRIPTION
+    			{{customFieldsWithTablePrefix Material}}
+            	 from "sap.plc.db::basis.t_material" as plcTable 
+            inner join 
+				(   select A._VALID_FROM, A.MATERIAL_ID, A._CREATED_BY 
+					from "sap.plc.db::basis.t_material" AS A 
+						inner join 
+						( select MIN(_VALID_FROM) AS _VALID_FROM, MATERIAL_ID
+							from "sap.plc.db::basis.t_material" 
+							group by MATERIAL_ID
+						) AS B
+						ON A._VALID_FROM = B._VALID_FROM AND A.MATERIAL_ID = B.MATERIAL_ID
+				) AS minValues
+			 	on  plcTable.MATERIAL_ID = minValues.MATERIAL_ID
+            left outer join "sap.plc.db::basis.t_material__text" as plcTextTable 
+                on  plcTable.MATERIAL_ID = plcTextTable.MATERIAL_ID 
+                and plcTextTable.LANGUAGE = :iv_logon_language 
+                and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+            LEFT OUTER JOIN {{t_extensionTable Material}} as plcExtTable ON
+				plcTable.MATERIAL_ID = plcExtTable.MATERIAL_ID 
+                and plcTable._VALID_FROM = plcExtTable._VALID_FROM 
+            where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+                and (  plcTable.MATERIAL_ID ) in ( select MATERIAL_ID from :ot_material_key );
+
+END;
+
+

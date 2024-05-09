@@ -1,0 +1,83 @@
+PROCEDURE "sap.plc_test.db.calculationmanager.procedures::p_item_price_determination_all_fake" (
+          IN iv_cv_id 					INTEGER,
+     	IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN it_calculation_version          "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",
+		OUT ot_determined_prices 	     "sap.plc.db.calculationmanager.procedures::ts_item_price_determination_output" default empty,
+		OUT ot_messages                    "sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+	
+        
+BEGIN
+
+    declare lt_item_id_array integer array                           = array (                                    11);
+    declare lt_vendor_id_array nvarchar(20) array                    = array (                               'VEN_1');
+    declare lt_price_fixed_portion_array decimal(28,7) array         = array (                                   100);
+    declare lt_price_variable_portion_array decimal(28,7) array      = array (                                   200);
+    declare lt_transaction_currency_id_array nvarchar(3) array       = array (                                 'USD');
+    declare lt_price_unit_array decimal(28,7) array                  = array (                                     1);
+    declare lt_price_unit_uom_id_array nvarchar(3) array             = array (                                  'PC');
+    declare lt_is_price_split_active_array integer array             = array (                                     0);
+    declare lt_price_id_array nvarchar(32) array                     = array (                         '683444444444');
+    declare lt_confidence_level_id_array integer array               = array (                                     2);
+    declare lt_price_source_id_array nvarchar(20) array              = array (                            'SOURCE_1');
+    declare lt_price_source_type_array integer array                 = array (                                     3);
+    declare lt_purchasing_group_array nvarchar(20) array             = array (                             'GROUP_1');
+    declare lt_purchasing_document_array nvarchar(10) array          = array (                               'DOC_1');
+    declare lt_local_content_array decimal(28,7) array               = array (                                     4);
+    
+    
+    lt_determined_prices = unnest(
+                                    :lt_item_id_array, 
+                                    :lt_vendor_id_array,
+                                    :lt_price_fixed_portion_array,
+                                    :lt_price_variable_portion_array,
+                                    :lt_transaction_currency_id_array,
+                                    :lt_price_unit_array,
+                                    :lt_price_unit_uom_id_array,
+                                    :lt_is_price_split_active_array,
+                                    :lt_price_id_array,
+                                    :lt_confidence_level_id_array,
+                                    :lt_price_source_id_array,
+                                    :lt_price_source_type_array,
+                                    :lt_purchasing_group_array,
+                                    :lt_purchasing_document_array,
+                                    :lt_local_content_array
+                                ) with ordinality as ("ITEM_ID", "VENDOR_ID", "PRICE_FIXED_PORTION","PRICE_VARIABLE_PORTION", "TRANSACTION_CURRENCY_ID",
+                                                     "PRICE_UNIT", "PRICE_UNIT_UOM_ID", "IS_PRICE_SPLIT_ACTIVE", "PRICE_ID", "CONFIDENCE_LEVEL_ID", "PRICE_SOURCE_ID", "PRICE_SOURCE_TYPE_ID", 
+                                                     "PURCHASING_GROUP", "PURCHASING_DOCUMENT", "LOCAL_CONTENT","SEQ");
+    ot_determined_prices = select "ITEM_ID", 
+                                  "VENDOR_ID", 
+                                  "PRICE_FIXED_PORTION",
+                                  "PRICE_VARIABLE_PORTION", 
+                                  "TRANSACTION_CURRENCY_ID",
+                                  "PRICE_UNIT", 
+                                  "PRICE_UNIT_UOM_ID", 
+                                  "IS_PRICE_SPLIT_ACTIVE",
+                                  "PRICE_ID",
+                                  "CONFIDENCE_LEVEL_ID", 
+                                  "PRICE_SOURCE_ID", 
+                                  "PRICE_SOURCE_TYPE_ID", 
+                                  "PURCHASING_GROUP", 
+                                  "PURCHASING_DOCUMENT", 
+                                  "LOCAL_CONTENT"
+                             {{#if Material_Price.customFields}}
+                                  ,1   as CMPR_BOOLEAN_INT_MANUAL,
+                                  'A'  as CMPR_BOOLEAN_INT_UNIT,
+                                  2.1  as CMPR_DECIMAL_MANUAL,
+                                  'B'  as CMPR_DECIMAL_UNIT,
+                                  3.1  as CMPR_DECIMAL_WITH_CURRENCY_MANUAL, 
+                                  'C'  as CMPR_DECIMAL_WITH_CURRENCY_UNIT,
+                                  4.1  as CMPR_DECIMAL_WITH_UOM_MANUAL,
+                                  'D'  as CMPR_DECIMAL_WITH_UOM_UNIT
+                             {{/if}}
+                             {{#if Activity_Price.customFields}}
+                                  ,1   as CAPR_DECIMAL_MANUAL,
+                                  'A'  as CAPR_DECIMAL_UNIT
+                             {{/if}}
+                          from :lt_determined_prices
+                          where item_id in (select item_id from :it_items);     -- where condition only to produce fake determined prices for the items in the input; otherwise also empty input 
+                                                                                -- would lead to determined prices, which interferes with the procedure unter test
+END;

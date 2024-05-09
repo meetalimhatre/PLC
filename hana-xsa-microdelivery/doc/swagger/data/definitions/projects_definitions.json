@@ -1,0 +1,599 @@
+{
+    "definitions": {
+        "ProjectModel": {
+            "type": "object",
+            "properties": {
+                "PROJECT_ID": {
+                    "type": "string",
+                    "description": "ex: #P1"
+                },
+                "ENTITY_ID": {
+                    "type": "integer",
+                    "description": "ex: 4"
+                },
+                "PATH": {
+                    "type": "string",
+                    "description": "ex: 4/25/35"
+                },
+                "REFERENCE_PROJECT_ID": {
+                    "type": "string",
+                    "description": "ex: P-9990"
+                },
+                "PROJECT_NAME": {
+                    "type": "string",
+                    "description": "Ex: #SAP Example: Pumps Project"
+                },
+                "PROJECT_RESPONSIBLE": {
+                    "type": "string",
+                    "description": "Ex: #CONTROLLER"
+                },
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "Ex: #CA1"
+                },
+                "CUSTOMER_ID": {
+                    "type": "string",
+                    "description": "Ex: #CU1"
+                },
+                "SALES_DOCUMENT": {
+                    "type": "string",
+                    "description": "Ex: #10000022"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Ex: 100000"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "Ex: USD"
+                },
+                "COMMENT": {
+                    "type": "string",
+                    "description": "Ex: linked to a PS project and to an SD inquiry"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "Ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "Ex: #PT1"
+                },
+                "BUSINESS_AREA_ID": {
+                    "type": "string",
+                    "description": "Ex: #BA1"
+                },
+                "PROFIT_CENTER_ID": {
+                    "type": "string",
+                    "description": "Ex: #PC1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "Ex: USD"
+                },
+                "COSTING_SHEET_ID": {
+                    "type": "string",
+                    "description": "Ex: #COGSL"
+                },
+                "COMPONENT_SPLIT_ID": {
+                    "type": "string",
+                    "description": "Ex: #SPLIT_DETAILED"
+                },
+                "START_OF_PROJECT": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "END_OF_PROJECT": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "START_OF_PRODUCTION": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "END_OF_PRODUCTION": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "VALUATION_DATE": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "LIFECYCLE_VALUATION_DATE": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "LIFECYCLE_PERIOD_INTERVAL": {
+                    "type": "number",
+                    "format": "int32",
+                    "description": "Ex: 100000"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "Ex: #CONTROLLER"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2015-01-01T00:00:00.000Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "Ex: #CONTROLLER"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "Ex: STANDARD"
+                },
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				}
+            }
+        },
+        "ProjectsResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "masterdata": {
+                            "type": "object",
+                            "properties": {
+                                "BUSINESS_AREA_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/BusinessAreaModel"
+                                    }
+                                },
+                                "COMPANY_CODE_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+                                    }
+                                },
+                                "COMPONENT_SPLIT_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/ComponentSplitModel"
+                                    }
+                                },
+                                "CONTROLLING_AREA_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+                                    }
+                                },
+                                "COSTING_SHEET_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetModel"
+                                    }
+                                },
+                                "CUSTOMER_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+                                    }
+                                },
+                                "EXCHANGE_RATE_TYPE_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetModel"
+                                    }
+                                },
+                                "PLANT_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+                                    }
+                                },
+                                "PROFIT_CENTER_ENTITIES": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterModel"
+                                    }
+                                }
+                            }
+                        },
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ProjectsOpenCloseDeleteBody": {
+            "type": "object",
+            "properties": {
+                "PROJECT_ID": {
+                    "type": "string",
+                    "description": "ex: TEST"
+                }
+            }
+        },
+        "ProjectsPostPutBody": {
+            "type": "object",
+            "properties": {
+                "PROJECT_ID": {
+                    "type": "string",
+                    "description": "ex: TEST"
+                },
+                "PROJECT_NAME": {
+                    "type": "string",
+                    "description": "Test"
+                },
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "ex: #CA1"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "ex: #PT1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "ex: STANDARD"
+                },
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+                "PATH": {
+                    "type": "string",
+                    "description": "ex: 11/22/33/42"
+                }
+            },
+            "xml": {
+                "name": "ProjectsPostPutBody"
+            }
+        },
+        "ProjectsPutBody": {
+            "type": "object",
+            "properties": {
+                "PROJECT_ID": {
+                    "type": "string",
+                    "description": "ex: TEST"
+                },
+                "PROJECT_NAME": {
+                    "type": "string",
+                    "description": "Test"
+                },
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "ex: #CA1"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "ex: #PT1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "ex: STANDARD"
+                },
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+                "TARGET_PATH": {
+                    "type": "string",
+                    "description": "ex: 11/22/33/42"
+                },
+                "SOURCE_PATH": {
+                    "type": "string",
+                    "description": "ex: 11/22"
+                }
+            },
+            "xml": {
+                "name": "ProjectsPutBody"
+            }
+        },
+        "LifecyclePeriodModel": {
+            "type": "object",
+            "required": [
+                "LIFECYCLE_PERIOD_FROM",
+                "VALUE"
+            ],
+            "properties": {
+                "LIFECYCLE_PERIOD_FROM": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Number of months from 1900-01-01 when the lifecycle period starts"
+                },
+                "LIFECYCLE_PERIOD_FROM_DATE": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Representation of the lifecycle period start as date"
+                },
+                "VALUE": {
+                    "type": "string",
+                    "description": "decimal number escaped as string; can only be != 0; if objects send with VALUE == 0 this leads to validation errors"
+                }
+            }
+        },
+        "ProjectMaterialPriceSurchargesGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectMaterialPriceSurchargesModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ProjectMaterialPriceSurchargesPutResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectSurchargesAccountGroupsOverlappingMessageModel"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectMaterialPriceSurchargesModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ProjectCalculateLifecycleVersions": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ProjectCalculateLifecycleVersionModel"
+            }    
+        },
+        "ProjectCalculateLifecycleVersionModel": {
+            "type": "object",
+            "properties": {
+                "oneTimeCostItemDescription": {
+                    "type": "string"
+                    }
+            }
+        },
+        "ProjectMaterialPriceSurchargesPutRequest": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ProjectMaterialPriceSurchargesModel"
+            }
+        },
+        "ProjectMaterialPriceSurchargesModel": {
+            "type": "object",
+            "properties": {
+                "PLANT_ID": {
+                    "type": "string"
+                },
+                "PLANT_DESCRIPTION": {
+                    "type": "string"
+                },
+                "ACCOUNT_GROUP_ID": {
+                    "type": "integer"
+                },
+                "ACCOUNT_GROUP_DESCRIPTION": {
+                    "type": "string"
+                },
+                "MATERIAL_GROUP_ID": {
+                    "type": "string"
+                },
+                "MATERIAL_GROUP_DESCRIPTION": {
+                    "type": "string"
+                },
+                "MATERIAL_TYPE_ID": {
+                    "type": "string"
+                },
+                "MATERIAL_TYPE_DESCRIPTION": {
+                    "type": "string"
+                },
+                "MATERIAL_ID": {
+                    "type": "string"
+                },
+                "MATERIAL_DESCRIPTION": { 
+                    "type": "string"                
+                },
+                "PERIOD_VALUES": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LifecyclePeriodModel"
+                    },
+                    "description": "Surcharges defined for the different lifecycle periods. If no surcharges are defined yet, an empty array is delivered."
+                }
+            }
+        },
+        "ProjectActivityPriceSurchargesGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectSurchargesAccountGroupsOverlappingMessageModel"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectActivityPriceSurchargesModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ProjectActivityPriceSurchargesPutRequest": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ProjectActivityPriceSurchargesModel"
+            }
+        },
+        "ProjectActivityPriceSurchargesPutResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectActivityPriceSurchargesModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ProjectActivityPriceSurchargesModel": {
+            "type": "object",
+            "required": [
+                "PLANT_ID",
+                "ACCOUNT_GROUP_ID",
+                "COST_CENTER_ID",
+                "ACTIVITY_TYPE_ID",
+                "PERIOD_VALUES"
+            ],
+            "properties": {
+                "PLANT_ID": {
+                    "type": "string"
+                },
+                "PLANT_DESCRIPTION": {
+                    "type": "string"
+                },
+                "ACCOUNT_GROUP_ID": {
+                    "type": "integer"
+                },
+                "ACCOUNT_GROUP_DESCRIPTION": {
+                    "type": "string"
+                },
+                "COST_CENTER": {
+                    "type": "string"
+                },
+                "COST_CENTER_DESCRIPTION": {
+                    "type": "string"
+                },
+                "ACTIVITY_TYPE_ID": {
+                    "type": "string"
+                },
+                "ACTIVITY_TYPE_DESCRIPTION": {
+                    "type": "string"
+                },
+                "PERIOD_VALUES": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LifecyclePeriodModel"
+                    },
+                    "description": "Surcharges defined for the different lifecycle periods. If no surcharges are defined yet, an empty array is delivered."
+                }
+            }
+        },
+        "ProjectSurchargesAccountGroupsOverlappingMessageModel": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "PROJECT_SURCHARGES_ACCOUNT_GROUPS_OVERLAPPING_WARNING"
+                    ],
+                    "default": "PROJECT_SURCHARGES_ACCOUNT_GROUPS_OVERLAPPING_WARNING",
+                    "description": "If surcharges are defined for different account groups which contain the same account more than once"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "ACCOUNT_GROUPS_WITH_OVERLAPS": {
+                                "type": "array",
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "description": "Set of account group ids that sharing at least one account. Example [100, 200] => groups with id 100 and 200 have overlaps; [100, 200, 300] => groups with id 100, 200 and 300 have overlaps"
+                            }
+                        }
+                    }
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "Warning"
+                    ],
+                    "default": "Warning"
+                }
+            }
+        }
+    }
+}

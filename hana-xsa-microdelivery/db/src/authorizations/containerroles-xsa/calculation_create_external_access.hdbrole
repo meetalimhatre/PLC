@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::calculation_create_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_calculation", 
+			"type":"TABLE", 
+ 			"privileges":[ "INSERT" ] 
+		}
+		]
+	}
+}

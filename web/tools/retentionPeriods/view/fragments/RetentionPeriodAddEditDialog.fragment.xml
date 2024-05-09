@@ -1,0 +1,66 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout"
+xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+    <Dialog  id="AddEditRetentionPeriod" title="{view>/AddEditRetentionsPeriodDialogHeader}" busy="{view>/addEditDialogBusy}" contentWidth="500px">
+        <content > 
+            <f:SimpleForm id="SimpleFormChange354"
+			editable="true"
+			layout="ResponsiveGridLayout"
+            labelSpanXL="4"
+            labelSpanL="4"
+            labelSpanM="4"
+            labelSpanS="4"
+            adjustLabelSpan="false"
+            emptySpanXL="1"
+            emptySpanL="1"
+            emptySpanM="1"
+            emptySpanS="0"
+            columnsXL="1"
+            columnsL="1"
+            columnsM="1"
+			singleContainerFullSize="true" >
+			<f:content>
+				<Label id="AddEditDialogEntity" text="{i18n>XFLD_ENTITY}" tooltip="{i18n>XTOL_ENTITY_Tooltip}" />
+                <Select id="EntityTypes" enabled="{view>/EntityEnabled}"  selectedKey="{view>/addEditRetentionPeriodDialogItem/ENTITY}" change=".onEntityTypeChanged" items="{path: 'view>/EntityTypes' }">
+                    <items >
+                        <core:Item text="{path: 'view>text', formatter: '.formatEntityText'}" key="{view>key}" tooltip="{view>text}" />
+                    </items>
+                </Select>
+                <Label id="AddEditDialogEntityId" text="{i18n>XFLD_ENTITY_ID}" tooltip="{i18n>XTOL_ENTITY_ID_Tooltip}"/>
+                <Input id="AddEditDialogEntityIdInput" value="{view>/addEditRetentionPeriodDialogItem/SUBJECT}" 
+                    valueState="{view>/valueStateSUBJECT}"
+                    valueStateText="{view>/valueTextSUBJECT}" 
+                    change=".SubjectChanged" enabled="{view>/SubjectEnabled}" />
+                <Label id="AddEditDialogValidTo" text="{i18n>XFLD_VALID_TO}" tooltip="{i18n>XTOL_VALID_TO_Tooltip}"/>
+                <DatePicker
+                    id="AddEditDialogValidToDatePickers"
+                    placeholder="{i18n>XFLD_EnterDateTo}"
+                    value="{view>/addEditRetentionPeriodDialogItem/VALID_TO}"
+                    valueFormat="yyyy-MM-dd"
+                    displayFormat="long"
+                    change=".onChangeValidForOrValidTo('VALID_FOR')"
+                    valueState="{view>/valueStateVALID_TO}"
+					valueStateText="{view>/valueTextVALID_TO}"
+                    enabled="{view>/ValidToEnabled}"/>
+                <Label id="AddEditDialogValidFor" text="{i18n>XFLD_VALID_FOR}" tooltip="{i18n>XTOL_VALID_FOR_Tooltip}"/>
+                <StepInput
+                    id="AddEditDialogValidForStepInput"
+                    value="{view>/addEditRetentionPeriodDialogItem/VALID_FOR}"
+                    description="{i18n>XFLD_VALID_FOR_Description}"
+                    min="0"
+                    max="600"
+                    enabled="{view>/ValidForEnabled}"
+                    valueState="{view>/valueStateVALID_FOR}"
+					valueStateText="{view>/valueTextVALID_FOR}"
+                    change=".onChangeValidForOrValidTo('VALID_TO')"/>
+                    
+			</f:content>
+		</f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button id="addSaveButton" text="{i18n>XBUT_btnSave}" tooltip="{i18n>XTOL_Save_Tooltip}" press=".saveRetentionPeriod" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>XBUT_cancel}" tooltip="{i18n>XTOL_cancel}"  press=".onClose('AddEditRetentionPeriod')"/>
+        </endButton>
+      </Dialog>  
+</core:FragmentDefinition>

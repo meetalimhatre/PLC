@@ -1,0 +1,51 @@
+{{#if MasterdataBusinessObject.referencedObjects}}
+					update temp_table
+						set	temp_table.ERROR_CODE = 'GENERAL_ENTITY_NOT_FOUND_ERROR',
+						temp_table.ERROR_DETAILS = '{"businessObj":"'|| result.business_objects ||'","administrationObjType": "MainObj"}'
+						from {{temporaryTable MasterdataBusinessObject}} as temp_table,
+						(select STRING_AGG( business_object, ',') as business_objects, {{keyFields MasterdataBusinessObject}}, _VALID_FROM
+						  from (
+						    {{#each MasterdataBusinessObject.referencedObjects as |bo index|}}
+						    
+						    	{{#each bo.FieldsNameForMainObj as |fieldGroup index|}}
+						    	
+								     ( select {{anyStringWithQuotes bo.RefBusinessObjectName}} as business_object, {{keyFieldsWithPrefix ../../MasterdataBusinessObject 'temp_table'}}, temp_table._VALID_FROM
+								        from {{temporaryTable ../../MasterdataBusinessObject}} as temp_table
+								        where ( {{referencedFieldsValueConditions fieldGroup 'temp_table'}} )
+								        and temp_table.operation in ('Create', 'Update', 'Upsert')
+								        and (temp_table.error_code = '' or  temp_table.error_code is null)
+								        
+								        minus
+								       
+								       (select {{anyStringWithQuotes bo.RefBusinessObjectName}} as business_object, {{keyFieldsWithPrefix ../../MasterdataBusinessObject 'temp_table'}}, temp_table._VALID_FROM
+									        from {{temporaryTable ../../MasterdataBusinessObject}} as temp_table
+									        inner join {{tableNameWithQuotes bo.TableName}} as main_table
+									        on ( {{fieldsConditionForReferencedFieldsWithPrefixes bo.FieldsNameForRefObj fieldGroup 'main_table' 'temp_table'}} )
+									        {{#if bo.IsVersioned}}
+											  and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp ../../MasterdataBusinessObject}}) and main_table._VALID_TO is null
+											{{/if}}
+									        where ( {{referencedFieldsValueConditions fieldGroup 'temp_table'}} )
+									        and temp_table.operation in ('Create', 'Update', 'Upsert')
+									        and (temp_table.error_code = '' or  temp_table.error_code is null)
+									     )
+								      )
+								      
+								      {{#if @last}}
+									  {{else}}
+										  union
+									  {{/if}}
+								   
+								  {{/each}}
+								   
+								  {{#if @last}}
+								  {{else}}
+									  union
+								  {{/if}}
+							{{/each}}
+						   ) group by {{keyFields MasterdataBusinessObject}}, _VALID_FROM
+						) as result
+						where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+						and ( ( temp_table._VALID_FROM = result._VALID_FROM) or ( temp_table._VALID_FROM is null and result._VALID_FROM is null))
+						and temp_table.operation in ('Create', 'Update', 'Upsert')
+						and (temp_table.error_code = '' or  temp_table.error_code is null)
+					{{/if}}

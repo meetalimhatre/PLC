@@ -1,0 +1,55 @@
+PROCEDURE "sap.plc_test.testtools.calculation::p_recalculate_calculation_versions_sequentially" (
+	it_calculation_versions TABLE (calculation_version_id integer)	
+ ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+-- This is a helper script to recalculate a given set of calculation versions.
+-- The versions must be calculated in certain order: first all version without references and then, iteratively, all versions
+-- that only have references to already calculated versions (topological sorting of the dependency graph).
+
+-- determine all versions without references
+lt_calculatable_versions = select calculation_version_id from :it_calculation_versions
+	where calculation_version_id not in 
+		(select distinct calculation_version_id from "sap.plc.db::basis.t_item" 
+			where calculation_version_id in (select calculation_version_id from :it_calculation_versions) and referenced_calculation_version_id is not null);
+		
+-- initialize empty set of already calculated versions
+lt_calculated_versions = select calculation_version_id from "sap.plc.db::basis.t_calculation_version" where 1=2;
+
+-- We need to topologically sort the calculation versions: First calculation versions without references must be calculated.
+-- Later only calculation versions that have references to already calculated versions can be calculated, iteratively.
+WHILE NOT IS_EMPTY(:it_calculation_versions) DO
+
+	-- calculate all versions with no references or with only references to already calculated versions
+	declare cursor c for select calculation_version_id from :lt_calculatable_versions;
+
+	-- sequentially calculate calculation versions and save results  
+	for version as c do
+		call "sap.plc.db.calcengine.procedures::p_calculate_saved_calculation_version"(version.calculation_version_id);
+	end for;
+	
+	-- add just calculated versions to the list of already calculated versions
+	lt_calculated_versions = select calculation_version_id from :lt_calculated_versions UNION ALL select calculation_version_id from :lt_calculatable_versions;
+
+	-- exclude already calculated versions from overall list
+	it_calculation_versions = select calculation_version_id from :it_calculation_versions MINUS select calculation_version_id from :lt_calculatable_versions;
+
+	-- determine all versions that only have references to already calculated versions
+	lt_calculatable_versions = select distinct calculation_version_id from :it_calculation_versions
+		where calculation_version_id not in
+			-- not version that have references to not already calculated versions (:lt_calculated_versions)
+			(select calculation_version_id from "sap.plc.db::basis.t_item" 
+				where calculation_version_id in (select calculation_version_id from :it_calculation_versions) AND 
+					referenced_calculation_version_id not in (select calculation_version_id from :lt_calculated_versions) AND
+					referenced_calculation_version_id is not null)
+		and calculation_version_id in 
+			-- versions that only have references to already calculated versions (:lt_calculated_versions) 
+			(select calculation_version_id from "sap.plc.db::basis.t_item" 
+				where calculation_version_id in (select calculation_version_id from :it_calculation_versions) AND 
+					(referenced_calculation_version_id in (select calculation_version_id from :lt_calculated_versions) OR referenced_calculation_version_id is null));
+
+END WHILE;
+
+END

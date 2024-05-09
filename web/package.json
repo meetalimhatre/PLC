@@ -1,0 +1,80 @@
+{
+    "name": "xsac-plc-web",
+    "version": "4.4.16",
+    "description": "web",
+    "contributors": [{
+        "name": "SAP SE",
+        "email": "SAPProductLifecycleCosting@sap.com",
+        "url": "https://www.sap.com/products/product-lifecycle-costing.html"
+    }],
+    "license": "UNLICENSED",
+    "repository": {
+      "type": "git"
+    },
+    "dependencies": {
+      "@sap/approuter": "14.3.0",
+      "@sap/xsenv": "3.4.0",
+      "client-oauth2": "^4.3.3",
+      "winston": "3.6.0",
+      "tough-cookie": "^4.1.3" ,
+      "semver": "^7.5.2"
+    },
+    "resolutions": {
+        "tough-cookie": "^4.1.3" ,
+        "semver": "^7.5.2"
+    } ,
+    "devDependencies": {
+      "jsonfile": "5.0.0",
+      "custdev-sapui5-infra-util": "3.3.0",
+      "grunt": "1.0.3",
+      "grunt-cli": "1.3.2"
+    },
+    "engines": {
+      "node": "^14.x"
+    },
+    "sapui5": {
+        "version": "1.108.23",
+        "resources": "sdk/sapui5-sdk-dist-<%=sapui5.version%>-static/resources",
+        "testResources": "sdk/sapui5-sdk-dist-<%=sapui5.version%>-static/test-resources",
+        "apps": {
+            "web": {
+                "namespace": "",
+                "resources": "tools",
+                "testResources": "testing",
+                "testrunnerSchema": {
+                    "RetentionPeriods_unit": [
+                        "Unit/retentionPeriods/allTests.js"
+                    ],
+                    "RetentionPeriods_integration": [
+                        "Integration/retentionPeriods/AllJourneys.js"
+                    ],
+                    "Repl_unit": [
+                        "Unit/repl/allTests.js"
+                    ],
+                    "Repl_integration": [
+                        "Integration/repl/AllJourneys.js"
+                    ],
+                    "BomCompare_unit": [
+                        "Unit/bomCompare/allTests.js"
+                    ],
+                    "BomCompare_integration": [
+                        "Integration/bomCompare/AllJourneys.js"
+                    ],
+                    "CommonUI5_Unit": [
+                        "Unit/CommonUI5/allTests.js"
+                    ]
+                }
+            }
+        },
+        "browsers": [
+            "Chrome"
+        ]
+    },
+    "scripts": {
+        "preinstall": "npm install --package-lock-only --ignore-scripts && npm i npm-force-resolutions && ./node_modules/.bin/npm-force-resolutions",
+        "start": "node --max-http-header-size=16384 xsa/index.js",
+        "start:cf": "node --max-http-header-size=16384 node_modules/@sap/approuter/approuter.js -w cf",
+        "start:xsa": "node --max-http-header-size=16384 xsa/index.js",
+        "test-initialize-local": "node test-initialize-local.js"
+    }
+}

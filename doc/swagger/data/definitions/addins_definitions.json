@@ -1,0 +1,212 @@
+{
+    "definitions": {
+        "AddinModel": {
+            "type": "object",
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Addin GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Addin Version, ex: 1.0.0.0"
+                },
+                "NAME": {
+                    "type": "string",
+                    "description": "Addin name, ex: Assembly Image Add-In"
+                },
+                "FULL_QUALIFIED_NAME": {
+                    "type": "string",
+                    "description": "Addin name, ex: Sap.Plc.ExampleAddIns.AssemblyImageExampleAddIn.AddInMainController"
+                },
+                "DESCRIPTION": {
+                    "type": "string",
+                    "description": "Addin description, ex: Demo Add-In to show image of an selected assembly out of a SAP ERP System"
+                },
+                "PUBLISHER": {
+                    "type": "string",
+                    "description": "Addin publisher, ex: SAP SE"
+                },
+                "STATUS": {
+                    "type": "string",
+                    "description": "Addin status, ex: registered"
+                },
+                "CERTIFICATE_ISSUER": {
+                    "type": "string",
+                    "description": "Addin certificate issuer, ex: Demo CN = mySAP.com Software CA, O = mySAP.com Software,C = DE"
+                },
+                "CERTIFICATE_SUBJECT": {
+                    "type": "string",
+                    "description": "Addin certificate subject, ex: PLC Testing Team"
+                },
+                "CERTIFICATE_VALID_FROM": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Addin certificate valid from date, ex: 0001-01-01T00:00:00.000Z"
+                },
+                "CERTIFICATE_VALID_TO": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Addin certificate valid from date, ex: 0001-01-01T00:00:00.000Z"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Addin certificate created at date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "Addin created by user, ex: I055799"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Addin certificate last modified by date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "Addin last modified by user, ex: I055799"
+                },
+                "CONFIGURATION": {
+                    "type": "object",
+                    "properties": {
+                        "CREATED_ON": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Configuration created at date, ex: 2016-03-31T15:13:57.385Z"
+                        },
+                        "CREATED_BY": {
+                            "type": "string",
+                            "description": "Configuration created by user, ex: I055799"
+                        },
+                        "LAST_MODIFIED_ON": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Configuration last modified by date, ex: 2016-03-31T15:13:57.385Z"
+                        },
+                        "LAST_MODIFIED_BY": {
+                            "type": "string",
+                            "description": "Configuration last modified by user, ex: I055799"
+                        }
+                    }
+                }
+            }
+        },
+        "AddinResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "body": {
+                    "$ref": "#/definitions/AddinModel"
+                }
+            }
+        },
+        "AddinToBeRegistered": {
+            "type": "object",
+            "required": [
+                "ADDIN_GUID",
+                "ADDIN_VERSION",
+                "FULL_QUALIFIED_NAME",
+                "NAME",
+                "CERTIFICATE_ISSUER",
+                "CERTIFICATE_SUBJECT",
+                "CERTIFICATE_VALID_FROM",
+                "CERTIFICATE_VALID_TO"
+            ],
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                },
+                "FULL_QUALIFIED_NAME": {
+                    "type": "string",
+                    "description": "Add-In Full Qualified Name, ex: com.sap.plc.extensibility.testAddIn"
+                },
+                "NAME": {
+                    "type": "string",
+                    "description": "Add-In Name, ex: Test Add-In"
+                },
+                "DESCRIPTION": {
+                    "type": "string",
+                    "description": "Add-In Description, ex: Add-In for testing the installation process"
+                },
+                "PUBLISHER": {
+                    "type": "string",
+                    "description": "Add-In Publisher, ex: SAP SE"
+                },
+                "CERTIFICATE_ISSUER": {
+                    "type": "string",
+                    "description": "Add-In Certificate Issuer, ex: CN=VeriSign Class 3 Code Signing 2010 CA"
+                },
+                "CERTIFICATE_SUBJECT": {
+                    "type": "string",
+                    "description": "Add-In Certificate Subject, ex: CN = TFS Development, O = mySAP.com Software, C = DE"
+                },
+                "CERTIFICATE_VALID_FROM": {
+                    "type": "string",
+                    "description": "Add-In Certificate Valid From Date, ex: 2015-01-01T01:00Z"
+                },
+                "CERTIFICATE_VALID_TO": {
+                    "type": "string",
+                    "description": "Add-In Certificate Valid To Date, ex: 2019-01-01T01:00Z"
+                }
+            }
+        },
+        "AddinToBeUnregistered": {
+            "type": "object",
+            "required": [
+                "ADDIN_GUID",
+                "ADDIN_VERSION"
+            ],
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                }
+            }
+        },
+        "AddinToBeActivated": {
+            "type": "object",
+            "required": [
+                "ADDIN_GUID",
+                "ADDIN_VERSION",
+                "LAST_MODIFIED_ON",
+                "STATUS"
+            ],
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Add-In last modified date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "STATUS": {
+                    "type": "string",
+                    "description": "Add-In Status, ex: activated",
+                    "enum": [
+                        "activated",
+                        "registered"
+                    ]
+                }
+            }
+        }
+    }
+}

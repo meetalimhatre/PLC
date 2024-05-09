@@ -1,0 +1,74 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_component_split_read" (
+		IN iv_logon_language        			NVARCHAR(11),
+		IN iv_master_data_timestamp 			TIMESTAMP,
+		IN iv_text_from_autocomplete			NVARCHAR(250),
+		IN iv_filter_string	        			NVARCHAR(5000),
+		IN iv_no_max_records            		INTEGER,
+		IN iv_no_skip_records           		INTEGER,
+        OUT ot_component_split 					"sap.plc.db.administration::masterdata.tt_component_split" default empty,
+        OUT ot_component_split_text 			"sap.plc.db::basis.t_component_split__text" default empty,
+        OUT ot_component_split_account_group 	"sap.plc.db::basis.t_component_split_account_group" default empty,
+        OUT ot_accout_groups 					"sap.plc.db.administration::masterdata.tt_account_groups" default empty,
+        OUT ot_controlling_area 				"sap.plc.db.administration::masterdata.tt_controlling_area" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+tt_component_split_all = select
+							  plcTable.COMPONENT_SPLIT_ID, 
+							  plcTable.CONTROLLING_AREA_ID,
+							  plcTable._VALID_FROM, 
+							  plcTable._VALID_TO,
+							  plcTable._SOURCE,
+							  plcTable._CREATED_BY,
+							  minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+							  minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+							  plcTextTable.COMPONENT_SPLIT_DESCRIPTION as COMPONENT_SPLIT_DESCRIPTION
+						   from "sap.plc.db::basis.t_component_split" as plcTable
+						   inner join 
+						   (
+							   select A._VALID_FROM, A.COMPONENT_SPLIT_ID, A._CREATED_BY 
+							   from
+							   "sap.plc.db::basis.t_component_split" as A inner join
+						   		(select MIN(B._VALID_FROM) as _VALID_FROM, B.COMPONENT_SPLIT_ID
+						   		from "sap.plc.db::basis.t_component_split" B group by B.COMPONENT_SPLIT_ID
+						   		
+						   		) as B
+							   	on A._VALID_FROM = b._VALID_FROM and A.COMPONENT_SPLIT_ID = B.COMPONENT_SPLIT_ID
+						   	) as minValues
+						   		on  plcTable.COMPONENT_SPLIT_ID = minValues.COMPONENT_SPLIT_ID						   	
+						    left outer join "sap.plc.db::basis.t_component_split__text" as plcTextTable 
+	                        	on  plcTable.COMPONENT_SPLIT_ID = plcTextTable.COMPONENT_SPLIT_ID 
+	                       		and plcTextTable.LANGUAGE = :iv_logon_language 
+	                        	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+						   where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        	and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+	                        	and ( LOWER(plcTable.COMPONENT_SPLIT_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+			    			    or LOWER(plcTextTable.COMPONENT_SPLIT_DESCRIPTION) LIKE LOWER(:iv_text_from_autocomplete||'%') )	
+	                        	order by plcTable.COMPONENT_SPLIT_ID;
+	                        	
+tt_component_split_filter = APPLY_FILTER(:tt_component_split_all, :iv_filter_string) ; 
+
+ot_component_split = select COMPONENT_SPLIT_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO, _SOURCE, 
+		  	   		_CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, COMPONENT_SPLIT_DESCRIPTION 
+		  	   		from :tt_component_split_filter limit :iv_no_max_records offset :iv_no_skip_records;  	                        	
+						   
+ot_component_split_text  = select * 		
+							from "sap.plc.db::basis.t_component_split__text" 
+							where COMPONENT_SPLIT_ID IN (select COMPONENT_SPLIT_ID from :ot_component_split)
+							and _VALID_FROM <= :iv_master_data_timestamp and (_VALID_TO > :iv_master_data_timestamp or _VALID_TO is null); 
+                    	    
+ot_component_split_account_group = select * from "sap.plc.db::basis.t_component_split_account_group"
+							where COMPONENT_SPLIT_ID IN (select COMPONENT_SPLIT_ID from :ot_component_split)
+							and _VALID_FROM <= :iv_master_data_timestamp and (_VALID_TO > :iv_master_data_timestamp or _VALID_TO is null);
+                    	    
+tt_acount_groups_id = select distinct ACCOUNT_GROUP_ID from :ot_component_split_account_group;
+call "sap.plc.db.administration.procedures::p_ref_account_groups_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_acount_groups_id,ot_accout_groups);
+
+tt_controlling_area_id = select distinct CONTROLLING_AREA_ID from :ot_component_split;
+call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_id,:ot_controlling_area); 
+
+END;

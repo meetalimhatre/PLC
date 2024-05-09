@@ -1,0 +1,83 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_T030" 
+AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t030"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN
+ declare lv_current_utctimestamp    timestamp;
+ declare lv_identical_rows_count INT := 0;
+ declare lv_source INT := 2;
+ DECLARE v_KTOPL       VARCHAR(4) := '''';                                  
+ DECLARE v_BWMOD       VARCHAR(4) := '''';                                                      
+ DECLARE v_KOKRS       VARCHAR(4) := ''''; 
+ DECLARE v_WERKS       VARCHAR(4) := '''';
+
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+v_KTOPL = :NEWROW."KTOPL";
+v_BWMOD = :NEWROW."BWMOD";
+
+IF ( v_BWMOD <> '*' )  THEN
+
+    UPDATE "sap.plc.db::basis.t_material_account_determination"
+             SET _VALID_TO = :lv_current_utctimestamp  , _CREATED_BY = user()
+             WHERE 
+             "sap.plc.db::basis.t_material_account_determination"."MATERIAL_TYPE_ID" = :NEWROW."MTART"
+             AND  "sap.plc.db::basis.t_material_account_determination"."VALUATION_CLASS_ID" = :NEWROW."BKLAS"
+             AND ("sap.plc.db::basis.t_material_account_determination"."CONTROLLING_AREA_ID", "sap.plc.db::basis.t_material_account_determination"."PLANT_ID") 
+                      IN (SELECT    T001.KOKRS , 
+                                   T001W.WERKS
+                        FROM "sap.plc.db::repl.t_t001w_t001k" AS T001W
+                        INNER JOIN "sap.plc.db::repl.t_t001_tka02" AS T001
+                        ON   T001.BUKRS = T001W.BUKRS
+                        WHERE T001.KTOPL = v_KTOPL
+                        AND T001W.BWMOD = v_BWMOD)
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_TO" IS NULL;
+  
+      INSERT INTO "sap.plc.db::basis.t_material_account_determination"(
+       CONTROLLING_AREA_ID, MATERIAL_TYPE_ID , PLANT_ID , VALUATION_CLASS_ID , ACCOUNT_ID ,
+         _VALID_FROM , _VALID_TO , _SOURCE , _CREATED_BY )
+        SELECT T001.KOKRS , :NEWROW."MTART", T001W.WERKS, :NEWROW."BKLAS", :NEWROW."KONTS", :lv_current_utctimestamp, null, :lv_source, user()
+            FROM "sap.plc.db::repl.t_t001w_t001k" AS T001W
+                            INNER JOIN "sap.plc.db::repl.t_t001_tka02" AS T001
+                            ON   T001.BUKRS = T001W.BUKRS
+                            WHERE T001.KTOPL = v_KTOPL
+                            AND T001W.BWMOD = v_BWMOD;
+
+ELSE
+    v_WERKS = '*'; 
+    SELECT COUNT(MATERIAL_TYPE_ID) into lv_identical_rows_count
+        FROM "sap.plc.db::basis.t_material_account_determination"
+            WHERE "sap.plc.db::basis.t_material_account_determination"."MATERIAL_TYPE_ID" = :NEWROW."MTART"
+            AND "sap.plc.db::basis.t_material_account_determination"."VALUATION_CLASS_ID" = :NEWROW."BKLAS"
+            AND "sap.plc.db::basis.t_material_account_determination"."ACCOUNT_ID" = :v_WERKS
+            AND "sap.plc.db::basis.t_material_account_determination"."PLANT_ID" = :NEWROW."KONTS"
+            AND ("sap.plc.db::basis.t_material_account_determination"."CONTROLLING_AREA_ID") 
+                        IN (SELECT  T001.KOKRS
+                        FROM "sap.plc.db::repl.t_t001_tka02" AS T001
+                        WHERE T001.KTOPL = v_KTOPL)
+            AND "sap.plc.db::basis.t_material_account_determination"."_SOURCE" = :lv_source     
+            AND "sap.plc.db::basis.t_material_account_determination"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_material_account_determination"."_VALID_TO" IS NULL;
+
+    IF :lv_identical_rows_count = 0 THEN      
+        UPDATE "sap.plc.db::basis.t_material_account_determination"
+                SET _VALID_TO = :lv_current_utctimestamp  , _CREATED_BY = user()
+                WHERE "sap.plc.db::basis.t_material_account_determination"."MATERIAL_TYPE_ID" = :NEWROW."MTART"
+                AND "sap.plc.db::basis.t_material_account_determination"."VALUATION_CLASS_ID" = :NEWROW."BKLAS"
+                AND ("sap.plc.db::basis.t_material_account_determination"."CONTROLLING_AREA_ID") 
+                        IN (SELECT  distinct T001.KOKRS                                 
+                            FROM "sap.plc.db::repl.t_t001_tka02" AS T001
+                            WHERE  T001.KTOPL = v_KTOPL
+                                                    )
+                AND "sap.plc.db::basis.t_material_account_determination"."PLANT_ID" = v_BWMOD 
+                AND "sap.plc.db::basis.t_material_account_determination"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_material_account_determination"."_VALID_TO" IS NULL;
+                
+        INSERT INTO "sap.plc.db::basis.t_material_account_determination"  (
+        CONTROLLING_AREA_ID, MATERIAL_TYPE_ID , PLANT_ID , VALUATION_CLASS_ID , ACCOUNT_ID ,
+            _VALID_FROM , _VALID_TO , _SOURCE , _CREATED_BY )
+            SELECT distinct T001.KOKRS , :NEWROW."MTART", '*', :NEWROW."BKLAS", :NEWROW."KONTS", :lv_current_utctimestamp, null, :lv_source, user()
+            FROM "sap.plc.db::repl.t_t001_tka02" AS T001
+            WHERE T001.KTOPL = v_KTOPL;
+    END IF;                   
+END IF;
+end;

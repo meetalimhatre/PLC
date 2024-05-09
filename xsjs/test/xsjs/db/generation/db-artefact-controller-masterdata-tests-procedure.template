@@ -1,0 +1,4 @@
+PROCEDURE "sap.plc_test.xs.db.generation::p_masterdata" () LANGUAGE SQLSCRIPT AS BEGIN
+DELETE FROM {{t_extensionTable Material}};
+SELECT MATERIAL_ID, _VALID_FROM {{customFields Material}} FROM {{t_extensionTable Material}};
+END

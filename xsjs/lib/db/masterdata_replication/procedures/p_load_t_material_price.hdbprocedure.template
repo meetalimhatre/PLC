@@ -1,0 +1,92 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_load_t_material_price"
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+	lv_current_utctimestamp timestamp; 
+	lv_start_utctimestamp timestamp; 
+	lv_run_id nvarchar(50); 
+	lv_updated_rows integer; 
+	lv_deleted_rows integer; 
+	lv_count integer; 
+	lv_batch_size integer; 
+	lv_offset integer; 
+	lv_total_updated_rows integer; 
+	lv_current_user nvarchar(256);
+	lv_count_deleted_rows integer; 
+BEGIN 
+	select current_utctimestamp 
+		into lv_current_utctimestamp 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+		into lv_run_id 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('BATCH_SIZE') 
+		into lv_batch_size 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('APPLICATIONUSER') 
+		into lv_current_user 
+		from "sap.plc.db::DUMMY";   	   
+
+	if exists(select id from "sap.plc.db::map.t_destination_entity" where table_name = 't_material_price' and repl_status = 'ENABLED') 
+	then 
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+		lv_start_utctimestamp=:lv_current_utctimestamp; 
+		lv_offset = 0; 
+		lv_total_updated_rows = 0;
+
+		--we mark every material price coming from outside plc as 255
+		update "sap.plc.db::basis.t_material_price" 
+		set _source = 255
+		where _VALID_FROM < :lv_current_utctimestamp
+			AND _VALID_TO IS NULL
+			AND _SOURCE = 2; -- for the moment we keep only source 2
+
+		while (1=1) do 
+			ltMasterdataEntities=select * from "sap.plc.db.masterdata_replication.functions::f_select_t_material_price"(:lv_offset, :lv_batch_size); 
+			
+			update "sap.plc.db::basis.t_material_price" as tbl
+			set tbl._source = 2
+			where ( tbl.PRICE_SOURCE_ID,tbl.MATERIAL_ID,tbl.PLANT_ID,tbl.VENDOR_ID,tbl.PROJECT_ID,tbl.VALID_FROM,tbl.VALID_FROM_QUANTITY,tbl.CUSTOMER_ID) in (select PRICE_SOURCE_ID,MATERIAL_ID,PLANT_ID,VENDOR_ID,PROJECT_ID,VALID_FROM,VALID_FROM_QUANTITY,CUSTOMER_ID  from :ltMasterdataEntities where _source = 2)
+			and tbl._source = 255;
+
+			call "sap.plc.db.masterdata_replication.procedures::p_update_t_material_price"(:ltMasterdataEntities,lv_updated_rows); 
+			lv_total_updated_rows = :lv_total_updated_rows + :lv_updated_rows;
+			select count(*) into lv_count from :ltMasterdataEntities;
+			if (:lv_count < :lv_batch_size) or (:lv_batch_size is null) THEN  
+				lv_count = :lv_count + lv_offset;
+				break; 
+			else  
+				lv_offset = :lv_offset + :lv_batch_size; 
+			end if; 
+		end while;  
+
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+		--we remove those values that remained with source 255
+		update "sap.plc.db::basis.t_material_price" 
+		set _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user, _SOURCE = 2
+        where _SOURCE = 255;
+
+		lv_deleted_rows = ::ROWCOUNT;
+		
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+
+		insert into "sap.plc.db::map.t_statistics"(table_name,full_count,updated_count,deleted_count,start_time,end_time,run_time_seconds,run_id) 
+			values('t_material_price',:lv_count,:lv_total_updated_rows,:lv_deleted_rows,:lv_start_utctimestamp,:lv_current_utctimestamp,SECONDS_BETWEEN(:lv_start_utctimestamp,:lv_current_utctimestamp),:lv_run_id);  
+
+		update "sap.plc.db::map.t_replication_run" 
+			set last_update_time = :lv_current_utctimestamp 
+			where run_id=:lv_run_id; 
+
+	end if; 
+END

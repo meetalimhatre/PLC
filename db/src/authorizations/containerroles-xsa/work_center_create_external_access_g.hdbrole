@@ -1,0 +1,30 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::work_center_create_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_work_center", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_work_center__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_work_center_activity_type", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_work_center_process", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		]
+	}
+}

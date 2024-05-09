@@ -1,0 +1,459 @@
+{
+	"definitions": {
+		"CalculatedResultsResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"calculated": {
+							"type": "object",
+							"properties": {
+								"ITEM_CALCULATED_FIELDS": {
+									"type": "array",
+									"items": {
+										"$ref": "#/definitions/CalculationVersionsItemCalculatedFieldsModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET": {
+									"type": "array",
+									"items": {
+										"$ref": "#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT": {
+									"type": "array",
+									"items": {
+										"$ref": "#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitModel"
+									}
+								},
+								"ITEM_CALCULATED_FIELDS_COMPRESSED": {
+									"$ref": "#/definitions/CalculationVersionsItemCalculatedFieldsCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET_COMPRESSED": {
+									"$ref": "#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT_COMPRESSED": {
+								    "$ref": "#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitCompressedModel"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"CalculationVersionsItemCalculatedFieldsModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 3952"
+				},
+				"QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"QUANTITY_PER_BASE_UNIT_UOM_ID": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"QUANTITY_PER_BASE_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TOTAL_QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"BASE_QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TARGET_COST": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 120"
+				},
+				"TOTAL_QUANTITY_UOM_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"PRICE_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"LOT_SIZE": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 7377.288"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 7377.288"
+				},
+				"OTHER_COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 0"
+				},
+				"OTHER_COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 0"
+				},
+				"TOTAL_COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 2998.6704"
+				},
+				"TOTAL_COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				}
+			}
+		},
+		"CalculationVersionsItemCalculatedFieldsCompressedModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"QUANTITY_PER_BASE_UNIT_UOM_ID": {
+			    	"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"QUANTITY_PER_BASE_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"TOTAL_QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"BASE_QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"TARGET_COST": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"TOTAL_QUANTITY_UOM_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Ex:[PC, PC]"
+				},
+				"PRICE_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"LOT_SIZE": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"PRICE_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"PRICE_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"OTHER_COST_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[0, 0]"
+				},
+				"OTHER_COST_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[0, 0]"
+				},
+				"TOTAL_COST_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"TOTAL_COST_VARIABLE_PORTION": {
+				    "type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+				    "type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+				    "type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[7377.288, 5367.698]"
+				}
+			}
+		},
+		"CalculationVersionsPutItemCalculatedValuesCostingSheetModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 3952"
+				},
+				"COSTING_SHEET_ROW_ID": {
+					"type": "string",
+					"description": "Ex: Test"
+				},
+				"IS_ROLLED_UP": {
+					"type": "boolean",
+					"description": "Ex: 1/0"
+				},
+				"HAS_SUBITEMS": {
+					"type": "boolean",
+					"description": "Ex: 1"
+				},
+				"COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 9112.32"
+				},
+				"COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 15780.24"
+				}
+			}
+		},
+		"CalculationVersionsPutItemCalculatedValuesCostingSheetCompressedModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer"
+					},
+					"description": "Ex:[1, 2]"
+				},
+				"COSTING_SHEET_ROW_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Ex:[Test, Test1]"
+				},
+				"IS_ROLLED_UP": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					},
+					"description": "Ex:[1, 0]"
+				},
+				"HAS_SUBITEMS": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+						
+					},
+					"description": "Ex:[1, 0]"
+				},
+				"COST_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[9112.32, 15780.24]"
+				},
+				"COST_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "double"
+					},
+					"description": "Ex:[9112.32, 15780.24]"
+				}
+			}
+		},
+		"CalculationVersionsPutItemCalculatedValuesComponentSplitModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 3952"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "Ex: #SPLIT_ACTIVITIES"
+				},
+				"COST_COMPONENT_ID": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 130"
+				},
+				"COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 15780.24"
+				},
+				"COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 15780.24"
+				}
+			}
+		},
+		"CalculationVersionsPutItemCalculatedValuesComponentSplitCompressedModel": {
+				"type": "object",
+				"properties": {
+					"ITEM_ID": {
+    					"type": "array",
+    					"items": {
+        					"type": "integer"
+    					},
+    					"description": "Ex:[1, 2]"
+   				},
+    				"COMPONENT_SPLIT_ID": {
+    					"type": "array",
+   					    "items": {
+   						    "type": "string"
+    					},
+    					"description": "Ex:[#SPLIT_ACTIVITIES, #SPLIT_CONDENSED]"
+   				},
+     				"COST_COMPONENT_ID": {
+    					"type": "array",
+    					"items": {
+      						"type": "double"
+   					    },
+  						"description": "Ex:[130, 150]"
+  				},
+  				"COST_FIXED_PORTION": {
+  					"type": "array",
+  					"items": {
+ 						"type": "double"
+ 					},
+   					"description": "Ex:[9112.32, 15780.24]"
+  				},
+				"COST_VARIABLE_PORTION": {
+ 					"type": "array",
+  					"items": {
+  						"type": "double"
+  					},
+   					"description": "Ex:[9112.32, 15780.24]"
+  					}
+  				}
+		}
+	}
+}

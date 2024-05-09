@@ -1,0 +1,52 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_delete_items_marked_for_deletion" ( 
+        IN iv_session_id 				NVARCHAR(50),
+		IN iv_calculation_version_id 	INTEGER
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	--READS SQL DATA 
+	AS
+BEGIN
+
+--------------------------------------------------------------------------------------------
+--deletes items marked for deletion (they have flag is_deleted=1)
+--------------------------------------------------------------------------------------------
+
+--get the items that should be deleted
+lt_items_to_delete = select item_id from "sap.plc.db::basis.t_item_temporary" as item
+						inner join "sap.plc.db::basis.t_open_calculation_versions" as open_calculation_version
+						on item.session_id = open_calculation_version.session_id
+						and item.calculation_version_id = open_calculation_version.calculation_version_id
+						where item.is_deleted = 1
+						and item.calculation_version_id  = :iv_calculation_version_id
+						and item.session_id = :iv_session_id
+						and open_calculation_version.is_writeable = 1;
+
+--delete items
+delete from "sap.plc.db::basis.t_item_temporary"  
+	where item_id in (select item_id from :lt_items_to_delete)
+	and calculation_version_id  = :iv_calculation_version_id
+	and session_id = :iv_session_id;
+						
+{{#if Item.customFields}}
+--delete from temporary table extension
+delete from {{t_temporaryExtensionTable Item}}
+	where item_id in (select item_id from :lt_items_to_delete)
+	and calculation_version_id  = :iv_calculation_version_id
+	and session_id = :iv_session_id;
+{{/if}}
+
+delete from "sap.plc.db::basis.t_item"  
+	where item_id in (select item_id from :lt_items_to_delete)
+	and calculation_version_id  = :iv_calculation_version_id;
+
+{{#if Item.customFields}}
+--delete from extension
+delete from {{t_extensionTable Item}}  
+	where item_id in (select item_id from :lt_items_to_delete)
+	and calculation_version_id  = :iv_calculation_version_id;
+{{/if}}
+ 
+END;
+
+

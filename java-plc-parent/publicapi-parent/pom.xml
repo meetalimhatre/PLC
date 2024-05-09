@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>publicapi-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>publicapi-parent</name>
+
+    <parent>
+        <groupId>com.sap.plc.xsa</groupId>
+        <artifactId>java-plc-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <modules>
+        <module>modules/xsac-plc-publicapi-swaggergen</module>
+        <module>modules/xsac-plc-publicapi-swagger</module>
+        <module>modules/xsac-plc-publicapi</module>
+    </modules>
+
+</project>

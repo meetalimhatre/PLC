@@ -1,0 +1,202 @@
+{
+    "addin-configurations": {
+        "get": {
+            "tags": [
+                "addin-configurations"
+            ],
+            "summary": "Read Add-In Configuration",
+            "description": "",
+            "operationId": "addin-configurationsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "guid",
+                    "in": "query",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "version",
+                    "in": "query",
+                    "description": "Add-In Version, ex: 1.0.0.0",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "use_previous_version",
+                    "in": "query",
+                    "description": "If none Add-In Configuration is available for the current Add-In Version, system can select the most current Configuration from previously configured Versions of this Add-In",
+                    "type": "boolean",
+                    "default": false
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addin-configurations_definitions.json#/definitions/AddinConfigurationResponse"
+                    }
+                },
+                "404": {
+                    "description": "Add-In or Add-In Configuration cannot be found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_READ_ACTIVATED": [
+                        "read:addinActivated"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "addin-configurations"
+            ],
+            "summary": "Create Add-In Configuration",
+            "description": "",
+            "operationId": "addin-configurationsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addin",
+                    "in": "body",
+                    "description": "Add-In Configuration that will be created",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/addin-configurations_definitions.json#/definitions/AddinConfigurationToBeCreated"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addin-configurations_definitions.json#/definitions/AddinConfigurationResponse"
+                    }
+                },
+                "404": {
+                    "description": "Add-In cannot be found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "422": {
+                    "description": "Add-In Configuration already exists",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityAlreadyExistsError"
+                    }                    
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_EDIT": [
+                        "create:addin"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "addin-configurations"
+            ],
+            "summary": "Update Add-In Configuration",
+            "description": "",
+            "operationId": "addin-configurationsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addin",
+                    "in": "body",
+                    "description": "Add-In Configuration that will be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/addin-configurations_definitions.json#/definitions/AddinConfigurationToBeUpdated"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addin-configurations_definitions.json#/definitions/AddinConfigurationResponse"
+                    }
+                },
+                "400": {
+                    "description": "Add-In Configuration has been updated in the meantime",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotCurrentError"
+                    }   
+                },
+                "404": {
+                    "description": "Add-In or Add-In Configuration cannot be found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_EDIT": [
+                        "create:addin"
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Dimension="http://www.sap.com/ndb/BiModelDimension.ecore" schemaVersion="2.3" id="sap.plc_test.xs.db.generation::cv_item" applyPrivilegeType="NONE" checkAnalyticPrivileges="false" defaultClient="crossClient" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" translationRelevant="true" visibility="internal" calculationScenarioType="TREE_BASED" dataCategory="DEFAULT" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Aggregation">
+  <descriptions defaultDescription="sap.plc_test.xs.db.generation::cv_item"/>
+  <defaultSchema schemaName="SAP_PLC"/>
+  <localVariables/>
+  <variableMappings/>
+  <dataSources>
+    <DataSource id="sap.plc.db::basis.t_item" type="DATA_BASE_TABLE">
+      <viewAttributes allViewAttributes="true"/>
+      <resourceUri>sap.plc.db::basis.t_item</resourceUri>
+    </DataSource>
+  </dataSources>
+  <calculationViews>
+    <calculationView xsi:type="Calculation:ProjectionView" id="Projection_1">
+      <descriptions/>
+      <viewAttributes>
+        <viewAttribute id="ITEM_ID"/>
+        <viewAttribute id="CALCULATION_VERSION_ID"/>
+        <viewAttribute id="PARENT_ITEM_ID"/>
+      </viewAttributes>
+      <calculatedViewAttributes/>
+      <input node="#sap.plc.db::basis.t_item">
+        <mapping xsi:type="Calculation:AttributeMapping" target="ITEM_ID" source="ITEM_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="CALCULATION_VERSION_ID" source="CALCULATION_VERSION_ID"/>
+        <mapping xsi:type="Calculation:AttributeMapping" target="PARENT_ITEM_ID" source="PARENT_ITEM_ID"/>
+      </input>
+    </calculationView>
+  </calculationViews>
+  <inlineHierarchy xsi:type="Dimension:ParentChildHierarchy" id="items" aggregateAllNodes="true" rootNodeVisibility="ADD_ROOT_NODE_IF_DEFINED">
+    <descriptions defaultDescription="items"/>
+    <attributeParentPair attribute="#ITEM_ID" parentAttribute="#PARENT_ITEM_ID"/>
+  </inlineHierarchy>
+  <inlineHierarchy xsi:type="Dimension:ParentChildHierarchy" id="cvitems" aggregateAllNodes="true" rootNodeVisibility="ADD_ROOT_NODE_IF_DEFINED">
+    <descriptions defaultDescription="cvitems"/>
+    <attributeParentPair attribute="#calcversion_item" parentAttribute="#calcversion_parentitem"/>
+  </inlineHierarchy>
+  <logicalModel id="Projection_1">
+    <descriptions/>
+    <attributes>
+      <attribute id="ITEM_ID" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="ITEM_ID"/>
+        <keyMapping columnObjectName="Projection_1" columnName="ITEM_ID"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_ID" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_ID"/>
+        <keyMapping columnObjectName="Projection_1" columnName="CALCULATION_VERSION_ID"/>
+      </attribute>
+      <attribute id="PARENT_ITEM_ID" order="3" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PARENT_ITEM_ID"/>
+        <keyMapping columnObjectName="Projection_1" columnName="PARENT_ITEM_ID"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes>
+      <calculatedAttribute id="calcversion_item" hidden="false" order="4" semanticType="empty" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="calcversion_item"/>
+        <keyCalculation datatype="NVARCHAR" expressionLanguage="COLUMN_ENGINE" length="250" scale="0">
+          <formula>string(&quot;CALCULATION_VERSION_ID&quot;) + '_' + string(&quot;ITEM_ID&quot;)</formula>
+        </keyCalculation>
+      </calculatedAttribute>
+      <calculatedAttribute id="calcversion_parentitem" hidden="false" order="5" semanticType="empty" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="calcversion_parentitem"/>
+        <keyCalculation datatype="NVARCHAR" expressionLanguage="COLUMN_ENGINE" length="250" scale="0">
+          <formula>string(&quot;CALCULATION_VERSION_ID&quot;)+'_'+string(&quot;PARENT_ITEM_ID&quot;)</formula>
+        </keyCalculation>
+      </calculatedAttribute>
+    </calculatedAttributes>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+  <layout>
+    <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="40" y="85"/>
+        <rectangleSize height="0" width="0"/>
+      </shape>
+      <shape expanded="true" modelObjectName="Projection_1" modelObjectNameSpace="CalculationView">
+        <upperLeftCorner x="40" y="180"/>
+        <rectangleSize height="-1" width="-1"/>
+      </shape>
+    </shapes>
+  </layout>
+</Calculation:scenario>

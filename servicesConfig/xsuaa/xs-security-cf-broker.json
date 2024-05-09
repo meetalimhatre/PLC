@@ -1,0 +1,946 @@
+{
+  "xsappname": "xsac-plc-broker",
+  "tenant-mode": "shared",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.JOBSCHEDULER",
+      "description": "Scope for Job Scheduler",
+      "grant-as-authority-to-apps": [
+        "jobscheduler"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.Admin",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CFAdmR",
+      "description": "read multi-tenancy related records for cf admin",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AcctE",
+      "description": "create, update, delete all accounts",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AcctGrpE",
+      "description": "create, update, delete all account groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AcctGrpR",
+      "description": "read all account groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AcctR",
+      "description": "read all accounts",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ActPriceR",
+      "description": "read all activity prices",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ActPriceE",
+      "description": "create, update and delete activity prices",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ActTypeE",
+      "description": "create, update, delete all activity types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ActTypeR",
+      "description": "read all activity types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AddinE",
+      "description": "Edit addin status and configurations",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AddinRActiv",
+      "description": "Read activated addins and their configurations",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AddinRAll",
+      "description": "Read all addins and their configurations, independent of their status",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.AnalyticsViewer",
+      "description": "Read all calculation views",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.Base",
+      "description": "Basic access for init-session and ping",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.BizAreaE",
+      "description": "create, update, delete all business areas",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.BizAreaR",
+      "description": "read all business areas",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ProcE",
+      "description": "create, update, delete all processes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ProcR",
+      "description": "read all processes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcVerCU",
+      "description": "Create or update any calculation version",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcVerD",
+      "description": "Delete any calculation version (e.g. in cockpit)",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcVerFreeze",
+      "description": "Freeze any calculation version",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcVerOpen",
+      "description": "Read all calculation versions, i.e. open them",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcCU",
+      "description": "Create or update any calculations",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcD",
+      "description": "Delete any calculation",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CalcR",
+      "description": "Read all calculations (e.g. in cockpit)",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CompanyCodeE",
+      "description": "create, update, delete all company codes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CompanyCodeR",
+      "description": "read all company codes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CompoSplitE",
+      "description": "create, update, delete all component splits",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CompoSplitR",
+      "description": "read all component splits",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ConfLevelR",
+      "description": "read all confidence levels",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CAE",
+      "description": "create, update, delete all controlling areas",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CAR",
+      "description": "read all controlling areas",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CorpLayoutE",
+      "description": "edits corporate layouts",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CostCenterE",
+      "description": "create, update, delete all cost centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CostCenterR",
+      "description": "read all cost centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CostingSheetE",
+      "description": "create, update, delete all costing sheets",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CostingSheetR",
+      "description": "read all costing sheets",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CurrencyCnvE",
+      "description": "create, update, delete all currency conversions",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CurrencyCnvR",
+      "description": "read all currency conversions",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CurrencyE",
+      "description": "create, update, delete all currencys",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CFFCU",
+      "description": "Create or update any custom fields and formulas",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CustE",
+      "description": "create, update, delete all customers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.CustR",
+      "description": "read all customers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.DocE",
+      "description": "create, update, delete all documents",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.DocR",
+      "description": "read all documents",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.DocStatusR",
+      "description": "read all documents status",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.DocTypeE",
+      "description": "create, update, delete all document types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.DocTypeR",
+      "description": "read all document types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ExcgRateTypeE",
+      "description": "create, update, delete all exchange rate types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ExcgRateTypeR",
+      "description": "read all exchange rate types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.FrontendSetCorpE",
+      "description": "edit corporate frontend settings",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.GlobalDfltSetE",
+      "description": "Create and update all global default settings",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.GrpE",
+      "description": "edit user groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.GrpR",
+      "description": "read user groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.HdAdmV",
+      "description": "Hide admin view",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.LangE",
+      "description": "create, update, delete all languages",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatAcctDetE",
+      "description": "create, update, delete all material accounts determination",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatAcctDetR",
+      "description": "read all material accounts determination",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlE",
+      "description": "create, update, delete all materials",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlGrpE",
+      "description": "create, update, delete all material groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlGrpR",
+      "description": "read all material groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlPlantE",
+      "description": "create, update, delete all material plants",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlPlantR",
+      "description": "read all material plants",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlPriceE",
+      "description": "create, update and delete material prices",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlPriceR",
+      "description": "read all material prices",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlR",
+      "description": "read all materials",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlTypeE",
+      "description": "create, update, delete all material types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.MatlTypeR",
+      "description": "read all material types",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.OvhdGrpE",
+      "description": "create, update, delete all overhead groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.OvhdGrpR",
+      "description": "read all overhead groups",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PersonalDataR",
+      "description": "read user ids, customer ids, vendor ids",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PersonalDataD",
+      "description": "update and delete user ids, customer ids, vendor ids",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.RetPeriodsR",
+      "description": "read retention periods for user, customer, vendor",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.RetPeriodsE",
+      "description": "creates, updates and deletes retention periods for user, customer, vendor",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PlantE",
+      "description": "create, update, delete all plants",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PlantR",
+      "description": "read all plants",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceSrcR",
+      "description": "read all price sources",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceSrcE",
+      "description": "create and update price sources",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceSrcD",
+      "description": "delete price sources",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.StatusR",
+      "description": "read statuses",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.StatusE",
+      "description": "create, update, delete statuses",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TagR",
+      "description": "read all tags",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TagC",
+      "description": "create all tags",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TagD",
+      "description": "delete all tags",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceDetStratR",
+      "description": "read all price determination strategies",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceDetStratE",
+      "description": "create and update price determination strategies",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PriceDetStratD",
+      "description": "delete price determination strategies",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ProfitCenterE",
+      "description": "create, update, delete all profit centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ProfitCenterR",
+      "description": "read all profit centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PrjC",
+      "description": "Create any project",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PrjU",
+      "description": "Update any project",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PrjD",
+      "description": "Delete any project",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PrjOpen",
+      "description": "Open or close project for editing",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.PrjR",
+      "description": "Read all projects (e.g. in cockpit)",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.SalesOrgE",
+      "description": "create, update, delete all sales organizations",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.SalesOrgR",
+      "description": "read all sales organizations",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TasksR",
+      "description": "read tasks",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TransExp",
+      "description": "Exporting customization data to other systems",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TransImp",
+      "description": "Importing customization data from other systems",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.UOME",
+      "description": "create, update, delete all units of measure",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.UserDfltSetE",
+      "description": "Create and update all user default settings",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.UsersR",
+      "description": "read system users",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ValuationClsE",
+      "description": "create, update, delete all valuation classes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ValuationClsR",
+      "description": "read all valuation classes",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.VendorE",
+      "description": "create, update, delete all vendors",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.VendorR",
+      "description": "read all vendors",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.WorkCenterE",
+      "description": "create, update, delete all work centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.WorkCenterR",
+      "description": "read all work centers",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.Generators",
+      "description": "Allows usage of artifact generators.",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.FldR",
+      "description": "read folders",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.FldD",
+      "description": "delete folders",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.FldE",
+      "description": "create and update (move/rename) folders",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.Sched",
+      "description": "configure internal scheduling tool",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ActUsers",
+      "description": "read the number of active users per month",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ItemCatR",
+      "description": "read item categories",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ItemCatE",
+      "description": "edit item categories",
+      "granted-apps": [
+        "$XSAPPNAME(application,xsac-plc)"
+      ]
+    }
+  ],
+  "authorities": [
+    "$XSAPPNAME.AcctE",
+    "$XSAPPNAME.AcctGrpE",
+    "$XSAPPNAME.AcctGrpR",
+    "$XSAPPNAME.AcctR",
+    "$XSAPPNAME.ActPriceR",
+    "$XSAPPNAME.ActPriceE",
+    "$XSAPPNAME.ActTypeE",
+    "$XSAPPNAME.ActTypeR",
+    "$XSAPPNAME.Base",
+    "$XSAPPNAME.BizAreaE",
+    "$XSAPPNAME.BizAreaR",
+    "$XSAPPNAME.ProcE",
+    "$XSAPPNAME.ProcR",
+    "$XSAPPNAME.CalcVerCU",
+    "$XSAPPNAME.CalcVerD",
+    "$XSAPPNAME.CalcVerFreeze",
+    "$XSAPPNAME.CalcVerOpen",
+    "$XSAPPNAME.CalcCU",
+    "$XSAPPNAME.CalcD",
+    "$XSAPPNAME.CalcR",
+    "$XSAPPNAME.CompanyCodeE",
+    "$XSAPPNAME.CompanyCodeR",
+    "$XSAPPNAME.CompoSplitE",
+    "$XSAPPNAME.CompoSplitR",
+    "$XSAPPNAME.ConfLevelR",
+    "$XSAPPNAME.CAE",
+    "$XSAPPNAME.CAR",
+    "$XSAPPNAME.CorpLayoutE",
+    "$XSAPPNAME.CostCenterE",
+    "$XSAPPNAME.CostCenterR",
+    "$XSAPPNAME.CostingSheetE",
+    "$XSAPPNAME.CostingSheetR",
+    "$XSAPPNAME.CurrencyCnvE",
+    "$XSAPPNAME.CurrencyCnvR",
+    "$XSAPPNAME.CurrencyE",
+    "$XSAPPNAME.CustE",
+    "$XSAPPNAME.CustR",
+    "$XSAPPNAME.DocE",
+    "$XSAPPNAME.DocR",
+    "$XSAPPNAME.DocStatusR",
+    "$XSAPPNAME.DocTypeE",
+    "$XSAPPNAME.DocTypeR",
+    "$XSAPPNAME.ExcgRateTypeE",
+    "$XSAPPNAME.ExcgRateTypeR",
+    "$XSAPPNAME.FrontendSetCorpE",
+    "$XSAPPNAME.GlobalDfltSetE",
+    "$XSAPPNAME.GrpE",
+    "$XSAPPNAME.GrpR",
+    "$XSAPPNAME.ItemCatR",
+    "$XSAPPNAME.ItemCatE",
+    "$XSAPPNAME.LangE",
+    "$XSAPPNAME.MatAcctDetE",
+    "$XSAPPNAME.MatAcctDetR",
+    "$XSAPPNAME.MatlE",
+    "$XSAPPNAME.MatlGrpE",
+    "$XSAPPNAME.MatlGrpR",
+    "$XSAPPNAME.MatlPlantE",
+    "$XSAPPNAME.MatlPlantR",
+    "$XSAPPNAME.MatlPriceE",
+    "$XSAPPNAME.MatlPriceR",
+    "$XSAPPNAME.MatlR",
+    "$XSAPPNAME.MatlTypeE",
+    "$XSAPPNAME.MatlTypeR",
+    "$XSAPPNAME.OvhdGrpE",
+    "$XSAPPNAME.OvhdGrpR",
+    "$XSAPPNAME.PlantE",
+    "$XSAPPNAME.PlantR",
+    "$XSAPPNAME.PriceSrcR",
+    "$XSAPPNAME.PriceSrcE",
+    "$XSAPPNAME.PriceSrcD",
+    "$XSAPPNAME.StatusR",
+    "$XSAPPNAME.StatusE",
+    "$XSAPPNAME.TagR",
+    "$XSAPPNAME.TagC",
+    "$XSAPPNAME.TagD",
+    "$XSAPPNAME.PriceDetStratR",
+    "$XSAPPNAME.PriceDetStratE",
+    "$XSAPPNAME.PriceDetStratD",
+    "$XSAPPNAME.ProfitCenterE",
+    "$XSAPPNAME.ProfitCenterR",
+    "$XSAPPNAME.PrjC",
+    "$XSAPPNAME.PrjU",
+    "$XSAPPNAME.PrjD",
+    "$XSAPPNAME.PrjOpen",
+    "$XSAPPNAME.PrjR",
+    "$XSAPPNAME.SalesOrgR",
+    "$XSAPPNAME.TasksR",
+    "$XSAPPNAME.UOME",
+    "$XSAPPNAME.UserDfltSetE",
+    "$XSAPPNAME.ValuationClsE",
+    "$XSAPPNAME.ValuationClsR",
+    "$XSAPPNAME.VendorE",
+    "$XSAPPNAME.VendorR",
+    "$XSAPPNAME.WorkCenterE",
+    "$XSAPPNAME.WorkCenterR",
+    "$XSAPPNAME.FldR",
+    "$XSAPPNAME.FldD",
+    "$XSAPPNAME.FldE",
+    "$XSAPPNAME.ActUsers"
+  ],
+  "oauth2-configuration": {
+    "token-validity": 43200,
+    "refresh-token-validity": 3600,
+    "grant-types": [
+      "authorization_code",
+      "client_credentials",
+      "refresh_token",
+      "urn:ietf:params:oauth:grant-type:saml2-bearer",
+      "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      "client_x509",
+      "user_token"
+    ]
+  },
+  "xsenableasyncservice":"true"
+}

@@ -1,0 +1,16 @@
+CREATE PROCEDURE "SAP_PLC"."sap.plc_test.testtools::p_substitute_procedure" (
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA SAP_PLC
+    READS SQL DATA AS
+    lc_material_type1  INTEGER DEFAULT 1;
+    lc_material_type2  INTEGER DEFAULT 2;
+    lc_material_type3  INTEGER DEFAULT 6;
+    lc_material_type4  INTEGER DEFAULT 4;
+    lc_activity        INTEGER DEFAULT 3;
+    lc_use_multiple_plants  NVARCHAR(1) DEFAULT 'X';
+    lc_wildcard 	  NVARCHAR(1) DEFAULT '*';
+BEGIN
+
+END;

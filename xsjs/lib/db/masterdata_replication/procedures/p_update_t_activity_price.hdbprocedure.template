@@ -1,0 +1,367 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_activity_price" (
+    IN INPUT_TABLE TABLE (
+    	PRICE_SOURCE_ID                 NVARCHAR(20),
+    	CONTROLLING_AREA_ID             NVARCHAR(4),
+    	COST_CENTER_ID                  NVARCHAR(10),
+    	ACTIVITY_TYPE_ID                NVARCHAR(12),
+    	PROJECT_ID                      NVARCHAR(35),
+    	CUSTOMER_ID                     NVARCHAR(10),
+    	VALID_FROM                      DATE,
+    	VALID_TO                        DATE,
+    	VALID_FROM_QUANTITY             DECIMAL(28, 7),
+    	VALID_TO_QUANTITY               DECIMAL(28, 7),
+    	PRICE_FIXED_PORTION             DECIMAL(28, 7),
+    	PRICE_VARIABLE_PORTION          DECIMAL(28, 7),
+    	TRANSACTION_CURRENCY_ID         NVARCHAR(3),
+    	PRICE_UNIT                      DECIMAL(28, 7),
+    	PRICE_UNIT_UOM_ID               NVARCHAR(3),
+    	_SOURCE                         TINYINT
+        {{#if Activity_Price.customFields}}
+            {{ddl_masterdataCustomFieldsWithoutUnit Activity_Price}}
+        {{/if}}
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";     
+        
+    -- Check existance of PRICE_SOURCE_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_SOURCE_ID'           as FIELD_NAME ,
+            it.PRICE_SOURCE_ID          as FIELD_VALUE,
+            'Unknown Price Source ID'   as MESSAGE_TEXT ,
+            lv_current_utctimestamp     as MESSAGE_TIME ,
+            'ERROR'                     as MESSAGE_TYPE ,
+            't_activity_price'          as TABLE_NAME,
+            'Replication_Update'        as OPERATION ,
+            :lv_run_id                  as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_SOURCE_ID not in (select PRICE_SOURCE_ID from "sap.plc.db::basis.t_price_source" where PRICE_SOURCE_TYPE_ID = 2);
+    
+    -- Check existance of CONTROLLING_AREA_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'CONTROLLING_AREA_ID'           as FIELD_NAME ,
+            it.CONTROLLING_AREA_ID          as FIELD_VALUE,
+            'Unknown Controlling Area ID'   as MESSAGE_TEXT ,
+            lv_current_utctimestamp         as MESSAGE_TIME ,
+            'ERROR'                         as MESSAGE_TYPE ,
+            't_activity_price'              as TABLE_NAME ,
+            'Replication_Update'            as OPERATION ,
+            :lv_run_id                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.CONTROLLING_AREA_ID <> '*'
+            and it.CONTROLLING_AREA_ID not in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area" where _VALID_TO is null);
+        
+    -- Check existance of COST_CENTER_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'COST_CENTER_ID'           as FIELD_NAME ,
+            it.COST_CENTER_ID          as FIELD_VALUE,
+            'Unknown Cost Center ID'   as MESSAGE_TEXT ,
+            lv_current_utctimestamp    as MESSAGE_TIME ,
+            'ERROR'                    as MESSAGE_TYPE ,
+            't_activity_price'         as TABLE_NAME ,
+            'Replication_Update'       as OPERATION ,
+            :lv_run_id                 as RUN_ID
+        from :INPUT_TABLE as it
+        where it.COST_CENTER_ID <> '*'
+            and it.COST_CENTER_ID not in (select COST_CENTER_ID from "sap.plc.db::basis.t_cost_center" where _VALID_TO is null);
+        
+    -- Check existance of ACTIVITY_TYPE_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'ACTIVITY_TYPE_ID'           as FIELD_NAME ,
+            it.ACTIVITY_TYPE_ID          as FIELD_VALUE,
+            'Unknown Activity Type ID'   as MESSAGE_TEXT ,
+            lv_current_utctimestamp      as MESSAGE_TIME ,
+            'ERROR'                      as MESSAGE_TYPE ,
+            't_activity_price'           as TABLE_NAME ,
+            'Replication_Update'         as OPERATION ,
+            :lv_run_id                   as RUN_ID
+        from :INPUT_TABLE as it
+        where it.ACTIVITY_TYPE_ID <> '*'
+            and it.ACTIVITY_TYPE_ID not in (select ACTIVITY_TYPE_ID from "sap.plc.db::basis.t_activity_type" where _VALID_TO is null);
+        
+    -- Check existance of PROJECT_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PROJECT_ID'                 as FIELD_NAME ,
+            it.PROJECT_ID                as FIELD_VALUE,
+            'Unknown Project ID'         as MESSAGE_TEXT ,
+            lv_current_utctimestamp      as MESSAGE_TIME ,
+            'ERROR'                      as MESSAGE_TYPE ,
+            't_activity_price'           as TABLE_NAME ,
+            'Replication_Update'         as OPERATION ,
+            :lv_run_id                   as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PROJECT_ID <> '*'
+            and it.PROJECT_ID not in (select PROJECT_ID from "sap.plc.db::basis.t_project");
+        
+    -- Check existance of CUSTOMER_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'CUSTOMER_ID'                    as FIELD_NAME ,
+            it.CUSTOMER_ID                   as FIELD_VALUE,
+            'Unknown Customer ID'            as MESSAGE_TEXT ,
+            lv_current_utctimestamp          as MESSAGE_TIME ,
+            'ERROR'                          as MESSAGE_TYPE ,
+            't_activity_price'               as TABLE_NAME ,
+            'Replication_Update'             as OPERATION  ,
+            :lv_run_id                       as RUN_ID
+        from :INPUT_TABLE as it
+        where it.CUSTOMER_ID <> '*'
+            and it.CUSTOMER_ID not in (select CUSTOMER_ID from "sap.plc.db::basis.t_customer" where _VALID_TO is null);
+        
+    -- Check existance of TRANSACTION_CURRENCY_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'TRANSACTION_CURRENCY_ID'                 as FIELD_NAME ,
+            it.TRANSACTION_CURRENCY_ID                as FIELD_VALUE,
+            'Unknown Currency ID'                     as MESSAGE_TEXT ,
+            lv_current_utctimestamp                   as MESSAGE_TIME ,
+            'ERROR'                                   as MESSAGE_TYPE ,
+            't_activity_price'                        as TABLE_NAME ,
+            'Replication_Update'                      as OPERATION ,
+            :lv_run_id                                as RUN_ID
+        from :INPUT_TABLE as it
+        where it.TRANSACTION_CURRENCY_ID not in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null);
+            
+    -- Check existance of PRICE_UNIT_UOM_ID
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_UNIT_UOM_ID'           as FIELD_NAME ,
+            it.PRICE_UNIT_UOM_ID          as FIELD_VALUE,
+            'Unknown Unit of Measure ID'  as MESSAGE_TEXT ,
+            lv_current_utctimestamp       as MESSAGE_TIME ,
+            'ERROR'                       as MESSAGE_TYPE ,
+            't_activity_price'            as TABLE_NAME ,
+            'Replication_Update'          as OPERATION ,
+            :lv_run_id                    as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_UNIT_UOM_ID not in (select UOM_ID from "sap.plc.db::basis.t_uom" where _VALID_TO is null);
+                
+    -- Check existance of VALID_FROM
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'VALID_FROM'                        as FIELD_NAME ,
+            it.VALID_FROM                       as FIELD_VALUE,
+            'Invalid Valid From'                as MESSAGE_TEXT ,
+            lv_current_utctimestamp             as MESSAGE_TIME ,
+            'ERROR'                             as MESSAGE_TYPE ,
+            't_activity_price'                  as TABLE_NAME ,
+            'Replication_Update'                as OPERATION ,
+            :lv_run_id                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALID_FROM is null; -- must be Date format as defined on input
+        
+    -- Check existance of VALID_FROM_QUANTITY
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'VALID_FROM_QUANTITY'           as FIELD_NAME ,
+            it.VALID_FROM_QUANTITY          as FIELD_VALUE,
+            'Invalid Valid From Quantity'   as MESSAGE_TEXT ,
+            lv_current_utctimestamp         as MESSAGE_TIME ,
+            'ERROR'                         as MESSAGE_TYPE ,
+            't_activity_price'              as TABLE_NAME ,
+            'Replication_Update'            as OPERATION ,
+            :lv_run_id                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALID_FROM_QUANTITY is null or it.VALID_FROM_QUANTITY = 0;
+    
+    -- Check existance of PRICE_FIXED_PORTION
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_FIXED_PORTION'           as FIELD_NAME ,
+            it.PRICE_FIXED_PORTION          as FIELD_VALUE,
+            'Invalid Price Fixed'           as MESSAGE_TEXT ,
+            lv_current_utctimestamp         as MESSAGE_TIME ,
+            'ERROR'                         as MESSAGE_TYPE ,
+            't_activity_price'              as TABLE_NAME ,
+            'Replication_Update'            as OPERATION ,
+            :lv_run_id                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_FIXED_PORTION is null;
+
+    -- Check existance of PRICE_VARIABLE_PORTION
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME,FIELD_VALUE,MESSAGE_TEXT,MESSAGE_TIME,MESSAGE_TYPE,TABLE_NAME,OPERATION,RUN_ID
+    )
+        select 
+            'PRICE_VARIABLE_PORTION'        as FIELD_NAME ,
+            it.PRICE_VARIABLE_PORTION       as FIELD_VALUE,
+            'Invalid Price Variable'        as MESSAGE_TEXT ,
+            lv_current_utctimestamp         as MESSAGE_TIME ,
+            'ERROR'                         as MESSAGE_TYPE ,
+            't_activity_price'              as TABLE_NAME ,
+            'Replication_Update'            as OPERATION ,
+            :lv_run_id                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PRICE_VARIABLE_PORTION is null;
+           
+    -- get lines to acctual upload
+    lt_update_records =
+        select 
+            it.PRICE_SOURCE_ID, it.CONTROLLING_AREA_ID, it.COST_CENTER_ID, it.ACTIVITY_TYPE_ID, it.PROJECT_ID, it.CUSTOMER_ID, it.VALID_FROM, it.VALID_TO, it.VALID_FROM_QUANTITY, it.VALID_TO_QUANTITY, it.PRICE_FIXED_PORTION, it.PRICE_VARIABLE_PORTION, it.TRANSACTION_CURRENCY_ID, it.PRICE_UNIT, it.PRICE_UNIT_UOM_ID, it._SOURCE
+            {{masterdataCustomFieldsWithPrefixWithoutUnit Activity_Price 'it'}} 
+        from 
+        (select *,
+            Count(*) OVER (PARTITION BY PRICE_SOURCE_ID, CONTROLLING_AREA_ID, COST_CENTER_ID, ACTIVITY_TYPE_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM, VALID_FROM_QUANTITY) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1 -- ignore identical rows
+          and it.PRICE_SOURCE_ID in (select PRICE_SOURCE_ID from "sap.plc.db::basis.t_price_source" where PRICE_SOURCE_TYPE_ID = 2)
+          and (it.CONTROLLING_AREA_ID in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area" where _VALID_TO is null))
+          and (it.COST_CENTER_ID = '*' or it.COST_CENTER_ID in (select COST_CENTER_ID from "sap.plc.db::basis.t_cost_center" where _VALID_TO is null))
+          and (it.ACTIVITY_TYPE_ID = '*' or it.ACTIVITY_TYPE_ID in (select ACTIVITY_TYPE_ID from "sap.plc.db::basis.t_activity_type" where _VALID_TO is null))
+          and (it.PROJECT_ID = '*' or it.PROJECT_ID in (select PROJECT_ID from "sap.plc.db::basis.t_project"))
+          and (it.CUSTOMER_ID = '*' or it.CUSTOMER_ID in (select CUSTOMER_ID from "sap.plc.db::basis.t_customer" where _VALID_TO is null))
+          and it.TRANSACTION_CURRENCY_ID in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null)
+          and it.PRICE_UNIT_UOM_ID in (select UOM_ID from "sap.plc.db::basis.t_uom" where _VALID_TO is null)
+          and it.VALID_FROM is not null
+          and it.VALID_FROM_QUANTITY is not null and it.VALID_FROM_QUANTITY <> 0
+          and it.PRICE_FIXED_PORTION is not null
+          and it.PRICE_VARIABLE_PORTION is not null
+          and it.PRICE_FIXED_PORTION + it.PRICE_VARIABLE_PORTION <> 0
+		except
+			(select 
+                std.PRICE_SOURCE_ID, std.CONTROLLING_AREA_ID, std.COST_CENTER_ID, std.ACTIVITY_TYPE_ID, std.PROJECT_ID, std.CUSTOMER_ID, std.VALID_FROM, std.VALID_TO, std.VALID_FROM_QUANTITY, std.VALID_TO_QUANTITY, std.PRICE_FIXED_PORTION, std.PRICE_VARIABLE_PORTION, std.TRANSACTION_CURRENCY_ID, std.PRICE_UNIT, std.PRICE_UNIT_UOM_ID, std._SOURCE
+            	{{masterdataCustomFieldsWithPrefixWithoutUnit Activity_Price 'plcExtTable'}}
+                from "sap.plc.db::basis.t_activity_price" as std
+                {{#if Activity_Price.customFields}}
+                left outer join {{t_extensionTable Activity_Price}} as plcExtTable
+                    on  std.PRICE_ID            = plcExtTable.PRICE_ID
+                    and std._VALID_FROM         = plcExtTable._VALID_FROM
+                {{/if}}
+                where _VALID_TO IS NULL
+                AND (std.PRICE_SOURCE_ID, std.CONTROLLING_AREA_ID, std.COST_CENTER_ID, std.ACTIVITY_TYPE_ID, std.PROJECT_ID, std.CUSTOMER_ID, std.VALID_FROM) in (select PRICE_SOURCE_ID, CONTROLLING_AREA_ID, COST_CENTER_ID, ACTIVITY_TYPE_ID, PROJECT_ID,  CUSTOMER_ID, VALID_FROM from :INPUT_TABLE));
+    
+    SELECT COUNT(*) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    IF lv_rows_count > 0 then
+
+        UPDATE "sap.plc.db::basis.t_activity_price" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user  
+              where (tbl.PRICE_SOURCE_ID, tbl.CONTROLLING_AREA_ID, tbl.COST_CENTER_ID, tbl.ACTIVITY_TYPE_ID, tbl.PROJECT_ID, tbl.CUSTOMER_ID, tbl.VALID_FROM, tbl.VALID_FROM_QUANTITY) 
+                    in (select PRICE_SOURCE_ID, CONTROLLING_AREA_ID, COST_CENTER_ID, ACTIVITY_TYPE_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM, VALID_FROM_QUANTITY from :lt_update_records as upd)
+                AND tbl._VALID_FROM < :lv_current_utctimestamp 
+                AND tbl._VALID_TO IS NULL;
+            		  
+    	
+        INSERT INTO  "sap.plc.db::basis.t_activity_price"
+        (
+        	PRICE_ID,
+            PRICE_SOURCE_ID,
+            CONTROLLING_AREA_ID,
+            COST_CENTER_ID,
+            ACTIVITY_TYPE_ID,
+            PROJECT_ID,
+            CUSTOMER_ID,
+            VALID_FROM,
+            VALID_TO,
+            VALID_FROM_QUANTITY,
+            VALID_TO_QUANTITY,
+            PRICE_FIXED_PORTION,
+            PRICE_VARIABLE_PORTION,
+            TRANSACTION_CURRENCY_ID,
+            PRICE_UNIT,
+            PRICE_UNIT_UOM_ID,
+            _SOURCE,                      
+            _VALID_FROM,       
+            _VALID_TO,                    
+            _CREATED_BY                                         
+        )
+    	select
+    		newuid(),
+            PRICE_SOURCE_ID,
+            CONTROLLING_AREA_ID,
+            COST_CENTER_ID,
+            ACTIVITY_TYPE_ID,
+            PROJECT_ID,
+            CUSTOMER_ID,
+            VALID_FROM,
+            VALID_TO,
+            VALID_FROM_QUANTITY,
+            VALID_TO_QUANTITY,
+            PRICE_FIXED_PORTION,
+            PRICE_VARIABLE_PORTION,
+            TRANSACTION_CURRENCY_ID,
+            PRICE_UNIT,
+            PRICE_UNIT_UOM_ID,
+            _SOURCE,                      
+            :lv_current_utctimestamp as _VALID_FROM,
+            null as _VALID_TO,
+            :lv_current_user as _CREATED_BY
+    	from :lt_update_records;
+
+        {{#if Activity_Price.customFields}}
+        -- also do Custom Fields
+        INSERT INTO {{t_extensionTable Activity_Price}} 
+            (
+                PRICE_ID,
+                _VALID_FROM 
+                {{masterdataCustomFieldsWithoutUnit Activity_Price}} 
+            )
+            select 
+                plcTable.PRICE_ID,     
+                :lv_current_utctimestamp as _VALID_FROM
+                {{masterdataCustomFieldsWithoutUnit Activity_Price}}
+            from :lt_update_records as it
+            inner join "sap.plc.db::basis.t_activity_price" as plcTable
+                on it.PRICE_SOURCE_ID = plcTable.PRICE_SOURCE_ID
+                and it.CONTROLLING_AREA_ID = plcTable.CONTROLLING_AREA_ID
+                and it.COST_CENTER_ID = plcTable.COST_CENTER_ID
+                and it.ACTIVITY_TYPE_ID = plcTable.ACTIVITY_TYPE_ID
+                and it.PROJECT_ID = plcTable.PROJECT_ID
+                and it.CUSTOMER_ID = plcTable.CUSTOMER_ID
+                and it.VALID_FROM = plcTable.VALID_FROM
+                and it.VALID_FROM_QUANTITY = plcTable.VALID_FROM_QUANTITY
+            where plcTable._VALID_FROM = lv_current_utctimestamp;
+        {{/if}}
+    	  
+    END IF;
+END;

@@ -1,0 +1,271 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_get_prices" (
+		IN iv_session 					NVARCHAR(50),
+		IN iv_calculation_version_id 	INTEGER,
+		IN iv_id 						INTEGER,
+		IN iv_session_language 			NVARCHAR(11),
+		OUT ot_all_prices_activity 		"sap.plc.db.administration::masterdata.tt_activity_price" default empty,
+		OUT ot_all_prices_material 		"sap.plc.db.administration::masterdata.tt_material_price" default empty,
+		OUT ot_material 				"sap.plc.db.administration::masterdata.tt_material" default empty,
+		OUT ot_material_group 			"sap.plc.db.administration::masterdata.tt_material_group" default empty,
+		OUT ot_material_type 			"sap.plc.db.administration::masterdata.tt_material_type" default empty,
+		OUT ot_activity_type 			"sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+		OUT ot_cost_center 				"sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_plant 					"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_company_code 			"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_controlling_area 		"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_vendor 					"sap.plc.db.administration::masterdata.tt_vendor" default empty,
+		OUT ot_project					"sap.plc.db::basis.t_project" default empty,           
+		OUT ot_customer					"sap.plc.db.administration::masterdata.tt_customer" default empty,
+		OUT ot_price_components			"sap.plc.db.administration::masterdata.tt_price_component" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+    READS SQL DATA AS
+    lc_material_type1  INTEGER DEFAULT 1;
+    lc_material_type2  INTEGER DEFAULT 2;
+    lc_material_type3  INTEGER DEFAULT 6;
+    lc_material_type4  INTEGER DEFAULT 4;
+    lc_activity        INTEGER DEFAULT 3;
+	lc_ignore_filters  SMALLINT DEFAULT 0;
+    lc_use_multiple_plants  NVARCHAR(1) DEFAULT 'X';
+    lc_wildcard 	  NVARCHAR(1) DEFAULT '*';
+BEGIN
+/****************************************************************** 
+	Price Determination 
+ ******************************************************************/
+-- Procedure used to determine/select prices for an item. 
+--
+-- Input:  
+-- 		- iv_session => the session id with which the item to update is associated
+--		- iv_calculation_version_id => the calculation version id
+--		- iv_id => the item id
+--		- iv_session_language => the session language
+--				 
+-- Output:
+--		- ot_all_prices_activity => contains all determined activity prices
+--		- ot_all_prices_material => contains all determined material prices
+--		- referenced masterdata objects
+--
+
+/***************************** 
+	Get material / activity prices for an item 
+ *****************************/
+
+DECLARE lv_master_data_timestamp 		TIMESTAMP;
+DECLARE	lv_valuation_date 				DATE;
+DECLARE	lv_controlling_area 			NVARCHAR(4);
+DECLARE	lv_project_id 					NVARCHAR(35);
+DECLARE	lv_report_currency_id 			NVARCHAR(3);
+DECLARE	lv_customer_id 					NVARCHAR(10);
+DECLARE lt_component_split              "sap.plc.db.administration::masterdata.tt_component_split_input";
+DECLARE lt_costing_sheet                "sap.plc.db.administration::masterdata.tt_costing_sheet_input";
+DECLARE lt_account_groups               "sap.plc.db.administration::masterdata.tt_account_groups_input";
+DECLARE lt_work_center                  "sap.plc.db.administration::masterdata.tt_work_center_input";
+DECLARE lt_process                      "sap.plc.db.administration::masterdata.tt_process_input";
+DECLARE lt_profit_center                "sap.plc.db.administration::masterdata.tt_profit_center_input";
+DECLARE lt_account                      "sap.plc.db.administration::masterdata.tt_accounts_input";
+DECLARE lt_material_plant               "sap.plc.db.administration::masterdata.tt_material_plant_input";
+DECLARE lt_overhead_group               "sap.plc.db.administration::masterdata.tt_overhead_group_input";
+DECLARE lt_company_code                 "sap.plc.db.administration::masterdata.tt_company_code_input";
+DECLARE lt_business_area                "sap.plc.db.administration::masterdata.tt_business_area_input";
+DECLARE lt_material_group               "sap.plc.db.administration::masterdata.tt_material_group_input";
+DECLARE lt_material_type                "sap.plc.db.administration::masterdata.tt_material_type_input";
+DECLARE lt_document                     "sap.plc.db.administration::masterdata.tt_document_input";
+DECLARE lt_document_type                "sap.plc.db.administration::masterdata.tt_document_type_input";
+DECLARE lt_document_status              "sap.plc.db.administration::masterdata.tt_document_status_input";
+DECLARE lt_design_office                "sap.plc.db.administration::masterdata.tt_design_office_input";
+DECLARE lt_valuation_class              "sap.plc.db.administration::masterdata.tt_valuation_class_input";
+DECLARE lt_uom                          "sap.plc.db.administration::masterdata.tt_uom_input";
+DECLARE lt_currency                     "sap.plc.db.administration::masterdata.tt_currency_input";
+DECLARE lt_exchange_rate_type           "sap.plc.db.administration::masterdata.tt_exchange_rate_type_key";											  
+
+-- Get data for master data timestamp, valuation date, project_id, controlling area, project id and report currency id, material and activity price strategy id
+lt_cv_temporary = select    version.master_data_timestamp, version.valuation_date, version.report_currency_id, project.controlling_area_id,
+							project.project_id, version.customer_id, version.material_price_strategy_id, version.activity_price_strategy_id
+						from    "sap.plc.db::basis.t_calculation_version_temporary" as version
+							inner join "sap.plc.db::basis.t_calculation" as calculation
+								on 	calculation.calculation_id = version.calculation_id
+								and	version.calculation_version_id = :iv_calculation_version_id
+								and	version.session_id = :iv_session 
+							inner join "sap.plc.db::basis.t_project" as project
+								on project.project_id = calculation.project_id;
+lv_master_data_timestamp = :lt_cv_temporary.master_data_timestamp[1];
+lv_controlling_area = :lt_cv_temporary.controlling_area_id[1];
+lv_valuation_date = :lt_cv_temporary.valuation_date[1];
+															   
+-- Get items with category material 
+lt_item_material = 	select	itemTemp.item_id, itemTemp.parent_item_id, itemTemp.item_category_id,itemTemp.child_item_category_id, itemTemp.material_id, itemTemp.plant_id, 
+							itemTemp.vendor_id, itemTemp.activity_type_id, itemTemp.cost_center_id,
+					        itemTemp.price_source_id, itemTemp.price_source_type_id, itemTemp.is_price_split_active, itemTemp.price_id, itemTemp.confidence_level_id, itemTemp.price_fixed_portion, 
+					        itemTemp.price_variable_portion, itemTemp.transaction_currency_id,
+					        itemTemp.price_unit, itemTemp.price_unit_uom_id, itemTemp.is_disabling_price_determination, 
+					        itemTemp.purchasing_group, itemTemp.purchasing_document, itemTemp.local_content
+					        {{masterdataCustomFieldsWithPrefix Material_Price 'plcExtTable'}}
+					        {{masterdataCustomFieldsWithPrefix Activity_Price 'plcExtTable'}}
+			        from "sap.plc.db::basis.t_item_temporary" as itemTemp
+			        LEFT OUTER JOIN {{t_temporaryExtensionTable Item}} as plcExtTable ON
+						itemTemp.item_id = plcExtTable.item_id AND 
+						itemTemp.calculation_version_id = plcExtTable.calculation_version_id AND 
+						itemTemp.session_id = plcExtTable.session_id
+			        where itemTemp.calculation_version_id = :iv_calculation_version_id
+			        and   itemTemp.item_id = :iv_id
+			        and   itemTemp.session_id = :iv_session
+			        and   itemTemp.item_category_id in (:lc_material_type1,:lc_material_type2,:lc_material_type3,:lc_material_type4);
+
+-- Get items with category activity			 
+lt_item_activity = 	select	itemTemp.item_id, itemTemp.parent_item_id, itemTemp.item_category_id,itemTemp.child_item_category_id, itemTemp.material_id, itemTemp.plant_id, 
+							itemTemp.vendor_id, itemTemp.activity_type_id, itemTemp.cost_center_id,
+					        itemTemp.price_source_id, itemTemp.price_source_type_id, itemTemp.is_price_split_active, itemTemp.price_id, itemTemp.confidence_level_id, itemTemp.price_fixed_portion, 
+					        itemTemp.price_variable_portion, itemTemp.transaction_currency_id,
+					        itemTemp.price_unit, itemTemp.price_unit_uom_id, itemTemp.is_disabling_price_determination, 
+					        itemTemp.purchasing_group, itemTemp.purchasing_document, itemTemp.local_content
+					        {{masterdataCustomFieldsWithPrefix Material_Price 'plcExtTable'}}
+					        {{masterdataCustomFieldsWithPrefix Activity_Price 'plcExtTable'}}
+			         from "sap.plc.db::basis.t_item_temporary" as itemTemp
+				     LEFT OUTER JOIN {{t_temporaryExtensionTable Item}} as plcExtTable ON
+							itemTemp.item_id = plcExtTable.item_id AND 
+							itemTemp.calculation_version_id = plcExtTable.calculation_version_id AND 
+							itemTemp.session_id = plcExtTable.session_id
+			         where itemTemp.calculation_version_id = :iv_calculation_version_id
+			         and   itemTemp.item_id = :iv_id
+			         and   itemTemp.session_id = :iv_session
+			         and   itemTemp.item_category_id = :lc_activity;			  			  
+
+call "sap.plc.db.calculationmanager.procedures::p_item_price_determination_activity"(
+      it_items => :lt_item_activity,
+      it_calculation_version => :lt_cv_temporary,									 
+      ot_all_prices => lt_all_prices_activity);
+
+call "sap.plc.db.calculationmanager.procedures::p_item_price_determination_material"(
+      it_items => :lt_item_material,
+      it_calculation_version => :lt_cv_temporary,						  
+	  iv_use_multiple_plants => :lc_use_multiple_plants,	
+	  lc_consider_vendor_filters => :lc_ignore_filters,							 
+      ot_all_prices => lt_all_prices_material
+	);
+      
+ot_all_prices_activity = select price_id, price_source_id, controlling_area_id, cost_center_id, activity_type_id, project_id,
+							    valid_from, customer_id, valid_to, valid_from_quantity, valid_to_quantity, price_fixed_portion, price_variable_portion,
+							    transaction_currency_id, price_unit, price_unit_uom_id, IS_PRICE_SPLIT_ACTIVE, _valid_from, _valid_to, _source,
+							    null as _created_by, _valid_from_first_version, _created_by_first_version
+							    {{customFields Activity_Price}}
+ 	                       from :lt_all_prices_activity;
+
+ot_all_prices_material = select price_id, price_source_id, material_id, null as material_description, plant_id, vendor_id, purchasing_group, purchasing_document, local_content,
+		                        project_id, valid_from, customer_id, valid_to, valid_from_quantity, valid_to_quantity, price_fixed_portion, price_variable_portion,
+		                        transaction_currency_id, price_unit, price_unit_uom_id, IS_PRICE_SPLIT_ACTIVE, IS_PREFERRED_VENDOR, _valid_from, _valid_to,_source,
+		                        null as _created_by, _valid_from_first_version, _created_by_first_version
+		                        {{customFields Material_Price}}
+						    from :lt_all_prices_material;               
+
+--Get all dependent master data entities    
+lt_controlling_area     = select controlling_area_id, :lv_master_data_timestamp as master_data_timestamp 
+			  	          from :ot_all_prices_activity
+			  	          where controlling_area_id <> lc_wildcard
+						  union
+						  select :lv_controlling_area as controlling_area_id, :lv_master_data_timestamp as master_data_timestamp
+						  from "sap.plc.db::DUMMY";
+lt_cost_center          = select cost_center_id, controlling_area_id, :lv_master_data_timestamp as master_data_timestamp
+                          from :ot_all_prices_activity
+			  	          where cost_center_id <> lc_wildcard
+			  	          and  controlling_area_id <> lc_wildcard;
+lt_activity_type        = select activity_type_id, controlling_area_id, :lv_master_data_timestamp as master_data_timestamp
+                          from :ot_all_prices_activity
+			  	          where activity_type_id <> lc_wildcard
+			  	          and  controlling_area_id <> lc_wildcard;			  	          
+lt_vendor               = select vendor_id, :lv_master_data_timestamp as master_data_timestamp
+                          from :ot_all_prices_material
+			  	          where vendor_id <> lc_wildcard;			  	   
+lt_plant                = select plant_id, :lv_master_data_timestamp as master_data_timestamp
+                          from :ot_all_prices_material
+			  	          where plant_id <> lc_wildcard;			  	  			  	          
+lt_material             = select material_id, :lv_master_data_timestamp as master_data_timestamp
+                          from :ot_all_prices_material;
+lt_price_components     = select price_id, 	:lv_master_data_timestamp as master_data_timestamp, :lv_valuation_date as valuation_date
+						  from :ot_all_prices_activity
+						  union
+						  select price_id, :lv_master_data_timestamp as master_data_timestamp, :lv_valuation_date as valuation_date
+						  from :ot_all_prices_material;
+lt_customer	= select customer_id, :lv_master_data_timestamp as master_data_timestamp 
+                   from :ot_all_prices_activity where customer_id <> lc_wildcard
+     			UNION
+               select customer_id, :lv_master_data_timestamp as master_data_timestamp 
+        			from :ot_all_prices_material where customer_id <> lc_wildcard;
+
+call "sap.plc.db.administration.procedures::p_masterdata_read"( 
+    :iv_session_language,
+    :lt_component_split,
+    :lt_costing_sheet,
+    :lt_account_groups,
+	:lt_price_components,
+    :lt_work_center,
+    :lt_process,
+    :lt_activity_type,
+    :lt_cost_center,
+    :lt_profit_center,
+    :lt_account,
+    :lt_material_plant,
+    :lt_overhead_group,
+	:lt_plant,
+	:lt_company_code,
+	:lt_controlling_area,
+	:lt_business_area,
+    :lt_material,
+    :lt_material_group,
+    :lt_material_type,
+    :lt_document,
+    :lt_document_type,
+    :lt_document_status,
+    :lt_design_office,
+    :lt_vendor,
+    :lt_customer,
+    :lt_valuation_class,
+    :lt_uom,
+    :lt_currency,
+    :lt_exchange_rate_type,
+    ot_component_split,
+    ot_selected_account_group,
+    ot_costing_sheet,
+    ot_costing_sheet_row,
+    ot_costing_sheet_base,
+    ot_costing_sheet_base_row,
+    ot_costing_sheet_overhead,
+    ot_costing_sheet_overhead_row,
+    ot_costing_sheet_row_dependencies,
+    ot_account_groups,
+	ot_price_components,
+    ot_work_center,
+    ot_process,
+    ot_activity_type,
+    ot_cost_center,
+	ot_profit_center,
+	ot_accounts,
+	ot_overhead_group,
+	ot_material_plant,
+	ot_plant,
+	ot_company_code,
+	ot_controlling_area,
+	ot_business_area,
+    ot_material,
+    ot_material_group,
+    ot_material_type,
+    ot_document,
+    ot_document_type,
+    ot_document_status,
+    ot_design_office,
+    ot_vendor,
+    ot_customer,
+    ot_valuation_class,
+    ot_uom,
+    ot_currency,
+    ot_exchange_rate_type);  
+    
+--select projects
+ot_project = select PROJECT_ID, REFERENCE_PROJECT_ID, PROJECT_NAME, PROJECT_RESPONSIBLE, CONTROLLING_AREA_ID, CUSTOMER_ID, SALES_DOCUMENT,
+				SALES_PRICE, SALES_PRICE_CURRENCY_ID, COMMENT, COMPANY_CODE_ID, PLANT_ID, BUSINESS_AREA_ID, PROFIT_CENTER_ID, REPORT_CURRENCY_ID,
+				COSTING_SHEET_ID, COMPONENT_SPLIT_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, END_OF_PRODUCTION, VALUATION_DATE,
+				LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, EXCHANGE_RATE_TYPE_ID, ENTITY_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID
+			from "sap.plc.db::basis.t_project" 
+			where PROJECT_ID in (select distinct PROJECT_ID from (select PROJECT_ID from :ot_all_prices_activity union all select PROJECT_ID from :ot_all_prices_material));
+			
+END;

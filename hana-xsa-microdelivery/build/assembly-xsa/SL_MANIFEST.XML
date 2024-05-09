@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<software-component-version formatVersion="1.0" schemaVersion="1.0">
+	<software-component-version-key>
+		<PPMS-ID>73554900100200008384</PPMS-ID>
+		<name>XSAC_PLC</name>
+		<version>4</version>
+		<vendor>sap.com</vendor>
+	</software-component-version-key>
+	<caption>PROD LIFECYCLE COST XSA V4</caption>
+	<sp>
+		<sp-key>
+			<PPMS-ID>73554900101100069453</PPMS-ID>
+			<name>SP004</name>
+			<sp-level>004</sp-level>
+			<vendor>sap.com</vendor>
+		</sp-key>
+		<patch-level>5</patch-level>
+		<sp-caption>PROD LIFECYCLE COST XSA V4 SP005</sp-caption>
+	</sp>
+	<runtime-type>XSART</runtime-type>
+	<ACH>PLM-PLC</ACH>
+	<!-- <rin>${sl.rin}</rin> -->
+</software-component-version>

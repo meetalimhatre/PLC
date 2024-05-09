@@ -1,0 +1,77 @@
+{
+    "masterdata": {
+        "get": {
+            "tags": [
+                "masterdata"
+            ],
+            "summary": "Gets masterdata for a given calculation version",
+            "description": "It will return all masterdata from a calculation version when parameter calculation_version_id is used",
+            "operationId": "masterdataGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "query",
+                    "description": "get masterdata for a specific calculation version id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/masterdata_definitions.json#/definitions/MasterdataGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+            		"Privileges.CALCULATION_VERSIONS_OPEN": ["read:projects"],
+            		"Privileges.MATERIAL_PRICE_READ": ["read:material_price"],
+            		"Privileges.ACTIVITY_PRICE_READ": ["read:activity_price"],
+            		"Privileges.ACCOUNT_READ": ["read:account"],
+            		"Privileges.ACCOUNT_GROUP_READ": ["read:account_group"],
+            		"Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": ["read:material_account"],
+            		"Privileges.VALUATION_CLASS_READ": ["read:valuation_class"],
+            		"Privileges.PROCESS_READ": ["read:process"],
+            		"Privileges.COSTING_SHEET_READ": ["read:costing_sheet"],
+            		"Privileges.COMPONENT_SPLIT_READ": ["read:component_split"],
+            		"Privileges.PLANT_READ": ["read:plant"],
+            		"Privileges.WORK_CENTER_READ": ["read:work_center"],
+            		"Privileges.MATERIAL_TYPE_READ": ["read:material_type"],
+            		"Privileges.MATERIAL_GROUP_READ": ["read:material_group"],
+            		"Privileges.MATERIAL_READ": ["read:material"],
+            		"Privileges.MATERIAL_PLANT_READ": ["read:material_plant"],
+            		"Privileges.DOCUMENT_READ": ["read:document"],
+            		"Privileges.DOCUMENT_TYPE_READ": ["read:document_type"],
+            		"Privileges.CUSTOMER_READ": ["read:customer"],
+            		"Privileges.VENDOR_READ": ["read:vendor"],
+            		"Privileges.COMPANY_CODE_READ": ["read:company_code"],
+            		"Privileges.PROFIT_CENTER_READ": ["read:profit_center"],
+            		"Privileges.BUSINESS_AREA_READ": ["read:business_area"],
+            		"Privileges.COST_CENTER_READ": ["read:cost_center"],
+            		"Privileges.ACTIVITY_TYPE_READ": ["read:activity_type"],
+            		"Privileges.SALES_ORGANIZATION_READ": ["read:sales_organization"],
+            		"Privileges.DOCUMENT_STATUS_READ": ["read:document_status"]
+            	}
+            ]
+        }
+    }
+}

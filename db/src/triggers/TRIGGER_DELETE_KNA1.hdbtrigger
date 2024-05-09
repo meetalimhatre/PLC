@@ -1,0 +1,33 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_KNA1" AFTER DELETE ON "sap.plc.db::repl.t_kna1"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+IF ( :OLDROW."STKZN" = 1 ) THEN
+    DELETE FROM "sap.plc.db::basis.t_customer" WHERE CUSTOMER_ID = :OLDROW."KUNNR";
+
+    DELETE FROM "sap.plc.db::basis.t_material_price" WHERE CUSTOMER_ID = :OLDROW."KUNNR";
+
+    DELETE FROM "sap.plc.db::basis.t_activity_price" WHERE CUSTOMER_ID = :OLDROW."KUNNR";
+
+    UPDATE "sap.plc.db::basis.t_calculation_version"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = user()
+    WHERE CUSTOMER_ID = :OLDROW."KUNNR";
+
+    UPDATE "sap.plc.db::basis.t_calculation_version_temporary"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = user() 
+    WHERE CUSTOMER_ID = :OLDROW."KUNNR";
+
+    UPDATE "sap.plc.db::basis.t_project"
+    SET CUSTOMER_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = user() 
+    WHERE CUSTOMER_ID = :OLDROW."KUNNR";	
+ELSE
+UPDATE "sap.plc.db::basis.t_customer"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE "sap.plc.db::basis.t_customer"."CUSTOMER_ID" = :OLDROW."KUNNR"
+                    AND "sap.plc.db::basis.t_customer"."_VALID_FROM" < :lv_current_utctimestamp
+                    AND "sap.plc.db::basis.t_customer"."_VALID_TO" IS NULL;
+END IF;
+end
+;

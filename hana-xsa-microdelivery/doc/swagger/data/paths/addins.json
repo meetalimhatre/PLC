@@ -1,0 +1,234 @@
+{
+    "addins": {
+        "get": {
+            "tags": [
+                "addins"
+            ],
+            "summary": "Read Add-Ins",
+            "description": "",
+            "operationId": "addinsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "status",
+                    "in": "query",
+                    "description": "Filter Add-Ins based on the status",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "all",
+                        "activated"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinResponse"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_READ_ALL": [
+                        "read:addinAll"
+                    ]
+                },
+                {
+                    "Privileges.ADDIN_READ_ACTIVATED": [
+                        "read:addinActivated"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "addins"
+            ],
+            "summary": "Register an Add-In",
+            "description": "",
+            "operationId": "addinsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addin",
+                    "in": "body",
+                    "description": "Add-In that will be registered",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinToBeRegistered"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinResponse"
+                    }
+                },
+                "400": {
+                    "description": "Add-In has been updated in the meantime"
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_EDIT": [
+                        "create:addin"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "addins"
+            ],
+            "summary": "(De)Activate Add-In",
+            "description": "",
+            "operationId": "addinsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addin",
+                    "in": "body",
+                    "description": "Add-In that will be (de)activated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinToBeActivated"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinResponse"
+                    }
+                },
+                "400": {
+                    "description": "Add-In has been updated in the meantime"
+                },
+                "404": {
+                    "description": "Add-In cannot be found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_EDIT": [
+                        "create:addin"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "addins"
+            ],
+            "summary": "Unregister an Add-In",
+            "description": "",
+            "operationId": "addinsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addin",
+                    "in": "body",
+                    "description": "Add-In that will be unregistered",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/addins_definitions.json#/definitions/AddinToBeUnregistered"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "404": {
+                    "description": "Add-In cannot be found"
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_EDIT": [
+                        "create:addin"
+                    ]
+                }
+            ]
+        }
+    }
+}

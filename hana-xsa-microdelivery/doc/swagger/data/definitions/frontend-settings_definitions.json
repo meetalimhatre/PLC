@@ -1,0 +1,284 @@
+{
+    "definitions": {
+        "FrontendSettingsModel": {
+            "type": "object",
+            "required": [
+                "SETTING_ID",
+                "SETTING_NAME",
+                "SETTING_TYPE",
+                "SETTING_CONTENT"
+            ],
+            "properties": {
+                "SETTING_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001"
+                },
+                "SETTING_NAME": {
+                    "type": "string",
+                    "description": "ex: Corp1 Filter"
+                },
+                "SETTING_TYPE": {
+                    "type": "string",
+                    "description": "ex: Filter"
+                },
+                "USER_ID": {
+                    "type": "string",
+                    "description": "ex User_ABC"
+                },
+                "SETTING_CONTENT": {
+                    "type": "string",
+                    "description": "a string to be interpreted by the frontend"
+                }
+            }
+        },
+        "FrontendSettingsResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "SETTINGS": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FrontendSettingsModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "FrontendSettingsPostBody": {
+            "type": "object",
+            "required": [
+                "SETTING_ID",
+                "SETTING_NAME",
+                "SETTING_TYPE",
+                "SETTING_CONTENT"
+            ],
+            "properties": {
+                "SETTING_ID": {
+                    "type": "integer",
+                    "description": "ex: -1"
+                },
+                "SETTING_NAME": {
+                    "type": "string",
+                    "description": "ex: Corp1 Filter"
+                },
+                "SETTING_TYPE": {
+                    "type": "string",
+                    "description": "ex: Filter"
+                },
+                "SETTING_CONTENT": {
+                    "type": "string",
+                    "description": "a string to be interpreted by the frontend"
+                }
+            }
+        },
+        "FrontendSettingsPostResponseModel": {
+            "type": "object",
+            "required": [
+                "SETTING_ID",
+                "SETTING_NAME",
+                "SETTING_TYPE",
+                "SETTING_CONTENT",
+                "HANDLE_ID"
+            ],
+            "properties": {
+                "SETTING_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001"
+                },
+                "HANDLE_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001"
+                },
+                "SETTING_NAME": {
+                    "type": "string",
+                    "description": "ex: Corp1 Filter"
+                },
+                "SETTING_TYPE": {
+                    "type": "string",
+                    "description": "ex: Filter"
+                },
+                "USER_ID": {
+                    "type": "string",
+                    "description": "ex User_ABC"
+                },
+                "SETTING_CONTENT": {
+                    "type": "string",
+                    "description": "a string to be interpreted by the frontend"
+                }
+            }
+        },
+        "FrontendSettingsPostResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "SETTINGS": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FrontendSettingsPostResponseModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "FrontendSettingsPutBody": {
+            "type": "object",
+            "required": [
+                "SETTING_ID",
+                "SETTING_NAME"
+            ],
+            "properties": {
+                "SETTING_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001"
+                },
+                "SETTING_NAME": {
+                    "type": "string",
+                    "description": "ex: Corp1 Filter"
+                },
+                "SETTING_CONTENT": {
+                    "type": "string",
+                    "description": "a string to be interpreted by the frontend"
+                }
+            }
+        },       
+        "FrontendSettingDeleteBody": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "SETTING_ID"
+                ],
+                "properties": {
+                    "SETTING_ID": {
+                        "type": "integer",
+                        "description": "ex: 1001"
+                    }
+                }
+            }
+        },
+        "MessageGeneralEntityNotFoundFrontendSettingsError": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GENERAL_ENTITY_NOT_FOUND_ERROR"
+                                        ],
+                                        "default": "GENERAL_ENTITY_NOT_FOUND_ERROR",
+                                        "description": "PLC Code GENERAL_ENTITY_NOT_FOUND_ERROR will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "properties": {
+                                            "settingsObj": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "SETTING_ID": {
+                                                            "type": "integer",
+                                                            "description": "Ex. -1"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageWriteFrontendSettingNamingConflict": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "WRITE_FRONTEND_SETTING_NAMING_CONFLICT"
+                                        ],
+                                        "default": "WRITE_FRONTEND_SETTING_NAMING_CONFLICT",
+                                        "description": "PLC Code WRITE_FRONTEND_SETTING_NAMING_CONFLICT will be returned"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "properties": {
+                                            "settingsObj": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "SETTING_ID": {
+                                                            "type": "integer",
+                                                            "description": "Ex. -1"
+                                                        },
+                                                        "SETTING_NAME": {
+                                                            "type": "string",
+                                                            "description": "ex: Corp1 Filter"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

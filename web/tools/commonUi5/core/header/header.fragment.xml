@@ -1,0 +1,16 @@
+
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"  
+    xmlns:core="sap.ui.core">
+
+        <Image src="/ui5/common/core/css/images/SAP_Logo.png" />
+        <ToolbarSpacer/>
+        <Text id="Header" text="{headerModel>/HeaderText}" wrapping="false" />
+        <ToolbarSpacer/>
+        <Button icon="sap-icon://person-placeholder" press=".Logout.onUserNamePress">
+            <dependents>
+                <core:Fragment fragmentName="core.header.ActionSheet" type="XML"/>
+            </dependents>
+        </Button>
+</core:FragmentDefinition>

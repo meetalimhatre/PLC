@@ -1,0 +1,14 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_MAKT__TEXT" AFTER DELETE ON "sap.plc.db::repl.t_makt_t006"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_material__text"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE     "sap.plc.db::basis.t_material__text"."MATERIAL_ID" = :OLDROW."MATNR"
+        AND "sap.plc.db::basis.t_material__text"."LANGUAGE" = :OLDROW."LANGU" 
+        AND "sap.plc.db::basis.t_material__text"."_VALID_FROM" < :lv_current_utctimestamp
+        AND "sap.plc.db::basis.t_material__text"."_VALID_TO" IS NULL;
+end
+;

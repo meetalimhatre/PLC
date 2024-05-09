@@ -1,0 +1,19 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.DeleteCalculationHelper::p_delete_all_versions_with_id_greater_than" (  
+	IN calcVersionid INTEGER
+) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA "SAP_PLC"
+	AS
+BEGIN
+--closes and deletes a calculation version
+--NOT TESTED; DO NOT USE IN PRODUCTIVE CODE
+delete from "sap.plc.db::basis.t_open_calculation_versions"  where "CALCULATION_VERSION_ID" > :calcVersionid;
+
+delete from "sap.plc.db::basis.t_item_temporary"  where "CALCULATION_VERSION_ID" > :calcVersionid;
+delete from "sap.plc.db::basis.t_item"  where "CALCULATION_VERSION_ID"  > :calcVersionid;
+
+delete from "sap.plc.db::basis.t_calculation_version_temporary"  where "CALCULATION_VERSION_ID" > :calcVersionid;
+delete from "sap.plc.db::basis.t_calculation_version"  where "CALCULATION_VERSION_ID" > :calcVersionid;
+
+END;

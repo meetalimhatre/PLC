@@ -1,0 +1,547 @@
+{
+    "items": {
+        "get": {
+            "tags": [
+                "items"
+            ],
+            "summary": "Gets Prices for an item",
+            "description": "",
+            "operationId": "itemsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "query",
+                    "description": "In combination with item id and getPrices, the prices of an specific item can be retrieved.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "In combination with item calculation_version_id and getPrices, the prices of an specific item can be retrieved.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "getPrices",
+                    "in": "query",
+                    "description": "In combination with item id and calculation_version_id, the prices of an specific item can be retrieved.",
+                    "required": true,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/items-definitions.json#/definitions/ItemsGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested item is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "items"
+            ],
+            "summary": "Updates a specific item , that was sent into request body with specified values",
+            "description": "",
+            "operationId": "itemsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this item",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "name": "item",
+                    "in": "body",
+                    "description": "Item that will be updated",
+                    "required": true,
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "../definitions/items-definitions.json#/definitions/ItemToBeUpdated"
+                        }
+                    }
+                },
+                {
+                   "name": "compressedResult",
+                    "in": "query",
+                    "description": "Parameter that compresses the result. If the parameters is set to true, transactional data will be an object with arrays of values for each property.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "omitItems",
+                    "in": "query",
+                    "description": "Parameter that sets the ITEMS as an empty array in the response. compressedResult must be false for omitItems to work.",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/items-definitions.json#/definitions/ItemsPutPostDeleteResponse"
+                    }
+                },
+                "400": {
+                    "description": "If the service was called using wrong value parameter"
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documentType"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },
+                {
+                    "Privileges.SALES_ORGANIZATION_READ": [
+                        "read:salesOrganization"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "items"
+            ],
+            "summary": "Creates a specific item , that was sent into request body with specified values",
+            "description": "",
+            "operationId": "itemsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this item",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "name": "mode",
+                    "in": "query",
+                    "description": "If the parameter mode=replace is set, an import is executed; the request must contain a parent item for the import",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "replace"
+                    ]
+                },
+                {
+                    "name": "item",
+                    "in": "body",
+                    "description": "Item that will be created",
+                    "required": true,
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "../definitions/items-definitions.json#/definitions/ItemToBeCreated"
+                        }
+                    }
+                },
+                {
+                    "name": "compressedResult",
+                    "in": "query",
+                    "description": "Parameter that compresses the result. If the parameters is set to true, transactional data will be an object with arrays of values for each property.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "omitItems",
+                    "in": "query",
+                    "description": "Parameter that sets the ITEMS as an empty array in the response. compressedResult must be false for omitItems to work.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "noResponseBody",
+                    "in": "query",
+                    "description": "In case the parameter value is \"true\" there will be no response body returned.",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/items-definitions.json#/definitions/ItemsPutPostDeleteResponse"
+                    }
+                },
+                "400": {
+                    "description": "If the service was called using wrong value parameter"
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documentType"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },
+                {
+                    "Privileges.SALES_ORGANIZATION_READ": [
+                        "read:salesOrganization"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "items"
+            ],
+            "summary": "Deletes a specific item , that was sent into request body with specified values",
+            "description": "",
+            "operationId": "itemsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this item",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "name": "item",
+                    "in": "body",
+                    "description": "Item that will be deleted",
+                    "required": true,
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "../definitions/items-definitions.json#/definitions/ItemToBeDeleted"
+                        }
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/items-definitions.json#/definitions/ItemsPutPostDeleteResponse"
+                    }
+                },
+                "400": {
+                    "description": "If the service was called using wrong value parameter"
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                }
+            ]
+        }
+    }
+}

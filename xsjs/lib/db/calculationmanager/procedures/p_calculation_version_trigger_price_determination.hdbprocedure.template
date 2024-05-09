@@ -1,0 +1,214 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_calculation_version_trigger_price_determination" (
+		IN iv_cv_id 				INTEGER,
+		IN iv_session_id 			NVARCHAR(50),
+		IN iv_update_scenario       NVARCHAR(40),
+	    OUT ot_updated_items 		"sap.plc.db.calculationmanager.procedures::ts_item_temporary" default empty,
+	    OUT ot_messages 			"sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+	
+	lc_calculated_price     INTEGER DEFAULT 4;
+	-- scenario used when changing price strategies
+	lc_activity_scenario    NVARCHAR(40) DEFAULT 'ACTIVITY_PRICE_DETERMINATION_SCENARIO';
+	lc_material_scenario    NVARCHAR(40) DEFAULT 'MATERIAL_PRICE_DETERMINATION_SCENARIO';
+	lc_all_scenario         NVARCHAR(25) DEFAULT 'ALL_CATEGORIES_SCENARIO';
+	-- categories used when iv_update_scenario is: MATERIAL_PRICE_DETERMINATION_SCENARIO
+	lc_document 			INTEGER DEFAULT 1;
+    lc_material 			INTEGER DEFAULT 2;
+	lc_subcontracting 		INTEGER DEFAULT 6;
+    lc_external_activity    INTEGER DEFAULT 4;
+	-- categories used when iv_update_scenario is: ACTIVITY_PRICE_DETERMINATION_SCENARIO
+    lc_internal_activity 	INTEGER DEFAULT 3;
+	-- when iv_update_scenario is: ALL_CATEGORIES_SCENARIO no condition is needed since price determination is needed for all item categories
+BEGIN
+
+lt_cv_data = select  version.master_data_timestamp, version.valuation_date, version.report_currency_id, project.controlling_area_id,
+											project.project_id, version.customer_id, version.material_price_strategy_id, version.activity_price_strategy_id
+										from "sap.plc.db::basis.t_calculation_version_temporary" as version
+										inner join "sap.plc.db::basis.t_calculation" as calculation
+											on 	calculation.calculation_id = version.calculation_id
+											and	version.calculation_version_id = :iv_cv_id
+											and	version.session_id = :iv_session_id
+										inner join "sap.plc.db::basis.t_project" as project
+											on project.project_id = calculation.project_id;
+
+if is_empty(:lt_cv_data) then
+	return;
+end if;
+	    
+-- read all parent items of respective calculation version and session	    
+lt_all_parents = select distinct parent_item_id from "sap.plc.db::basis.t_item_temporary"
+		 					where calculation_version_id = :iv_cv_id
+		 					and session_id = :iv_session_id
+							and parent_item_id is not null
+							and is_deleted = 0;
+
+-- read all items (leaves) of respective calculation version, session and parameter iv_update_scenario
+lt_items = select items.item_id, items.parent_item_id, items.item_category_id,items.child_item_category_id, items.material_id, items.plant_id, items.vendor_id,
+                  items.activity_type_id, items.cost_center_id, items.price_source_id, items.price_source_type_id, items.is_price_split_active, 
+				  items.is_disabling_account_determination, items.price_id, items.confidence_level_id, 
+				  items.price_fixed_portion, items.price_variable_portion,
+                  items.transaction_currency_id, items.price_unit, items.price_unit_uom_id, items.is_disabling_price_determination,
+                  items.purchasing_group, items.purchasing_document, items.local_content
+                  {{masterdataCustomFieldsWithPrefix Material_Price 'plcExtTable'}}
+                  {{masterdataCustomFieldsWithPrefix Activity_Price 'plcExtTable'}}
+			from "sap.plc.db::basis.t_item_temporary" as items
+			LEFT OUTER JOIN {{t_temporaryExtensionTable Item}} as plcExtTable ON
+			items.item_id = plcExtTable.item_id AND items.calculation_version_id = plcExtTable.calculation_version_id AND items.session_id = plcExtTable.session_id
+			where 
+					items.calculation_version_id = :iv_cv_id 
+					and items.session_id = :iv_session_id
+					and items.is_deleted = 0
+					and items.item_id not in (select parent_item_id from :lt_all_parents)
+					and ( 
+							(items.item_category_id = lc_internal_activity and :iv_update_scenario = lc_activity_scenario) 
+							OR
+							(items.item_category_id in (lc_document, lc_material, lc_subcontracting, lc_external_activity) and :iv_update_scenario = lc_material_scenario)
+							OR
+							( :iv_update_scenario = lc_all_scenario)
+					);				
+
+-- determine prices for items
+-- procedure p_item_price_determination_all:
+--		- determines the prices when mass updates / import is executed
+--		- is applied only on leaves
+call "sap.plc.db.calculationmanager.procedures::p_item_price_determination_all"
+(
+	:iv_cv_id,
+	:lt_items,
+	:lt_cv_data,
+	:lt_determined_prices,
+	:ot_messages
+); 
+	    
+-- persist price information (sap.plc.db.calculationmanager.procedures::ts_item_price_determination_output) for items
+update "sap.plc.db::basis.t_item_temporary" as db
+set 
+	db.item_id = updated.item_id,
+	db.price_fixed_portion = updated.price_fixed_portion,
+	db.price_variable_portion = updated.price_variable_portion,
+	db.transaction_currency_id = updated.transaction_currency_id,
+	db.price_unit = updated.price_unit,
+	db.price_unit_uom_id = updated.price_unit_uom_id,
+	db.is_price_split_active = updated.is_price_split_active,
+	db.price_id = updated.price_id,
+	db.confidence_level_id = updated.confidence_level_id,
+	db.price_source_id      = updated.price_source_id,
+	db.price_source_type_id    = updated.price_source_type_id,
+	db.vendor_id            = updated.vendor_id,
+	db.purchasing_group     = updated.purchasing_group,
+	db.purchasing_document  = updated.purchasing_document,
+	db.local_content        = updated.local_content
+from "sap.plc.db::basis.t_item_temporary" as db, :lt_determined_prices as updated
+where 
+	db.calculation_version_id = :iv_cv_id 
+    and db.session_id = :iv_session_id
+    and db.item_id = updated.item_id
+	and db.is_deleted = 0;
+
+-- Update extension table t_item_temporary_ext with the price information
+{{#if Material_Price.customFields}}
+	update {{t_temporaryExtensionTable Item}} as db
+	set
+		{{setMasterdataCustomFieldsWithPrefixes Material_Price 'db' 'updated'}}
+	from {{t_temporaryExtensionTable Item}} as db, :lt_determined_prices as updated
+	where
+		db.calculation_version_id = :iv_cv_id 
+	    and db.session_id = :iv_session_id
+	    and db.item_id = updated.item_id;
+{{/if}}	
+{{#if Activity_Price.customFields}}
+	update {{t_temporaryExtensionTable Item}} as db
+	set
+		{{setMasterdataCustomFieldsWithPrefixes Activity_Price 'db' 'updated'}}
+	from {{t_temporaryExtensionTable Item}} as db, :lt_determined_prices as updated
+	where
+		db.calculation_version_id = :iv_cv_id 
+    	and db.session_id = :iv_session_id
+    	and db.item_id = updated.item_id;
+{{/if}}	
+
+-- reset price information for all found leaf items, which are about to become assembly items
+update "sap.plc.db::basis.t_item_temporary" as db
+	set	price = null,
+		price_fixed_portion = null,
+		price_variable_portion = null, 
+		price_for_total_quantity = null, 
+		price_for_total_quantity_fixed_portion = null,
+		price_for_total_quantity_variable_portion =  null,
+		price_for_total_quantity2 = null, 
+		price_for_total_quantity2_fixed_portion = null,
+		price_for_total_quantity2_variable_portion =  null,
+		price_for_total_quantity3 = null, 
+		price_for_total_quantity3_fixed_portion = null,
+		price_for_total_quantity3_variable_portion =  null,
+		price_source_id = price_source.price_source_id,
+		price_source_type_id = price_source.price_source_type_id,
+		price_id = null,
+		is_price_split_active = 0,
+		transaction_currency_id =	(																-- reset transaction_currency_id to report_currency_id for the version
+											select report_currency_id 
+											from "sap.plc.db::basis.t_calculation_version_temporary" 	
+											where	calculation_version_id = :iv_cv_id 
+													and session_id = :iv_session_id
+										),
+		price_unit = 1.0,
+		price_unit_uom_id =	(																			-- set the price_unit_uom_id back to the total_quantity_uom_id of the root item
+								select total_quantity_uom_id 											-- (the root item is the only item for which total_quantity_uom_id is allowed to be set)
+								from "sap.plc.db::basis.t_item_temporary" 
+								where 	parent_item_id is null 
+										and calculation_version_id = :iv_cv_id 
+										and session_id = :iv_session_id
+							)
+	from  
+		"sap.plc.db::basis.t_item_temporary" as db, 
+		:lt_all_parents as parent,
+		(
+			select 
+				top 1 price_source_id, price_source_type_id
+			from 
+				"sap.plc.db::basis.t_price_source" 
+			where
+				price_source_type_id = lc_calculated_price 
+		) as price_source
+	where 	
+		db.item_id = parent.parent_item_id	
+		and db.session_id = :iv_session_id
+		and db.calculation_version_id = :iv_cv_id;
+
+-- read all updated items of respective calculation version and session 	
+ot_updated_items = select items.session_id, items.item_id, items.calculation_version_id, parent_item_id, predecessor_item_id, is_active, highlight_green, highlight_orange, highlight_yellow, item_category_id,child_item_category_id, referenced_calculation_version_id, account_id, determined_account_id, document_type_id, document_id,
+						document_version, document_part, document_status_id, design_office_id, material_id, material_type_id, material_group_id, is_phantom_material, is_configurable_material, material_source, 
+						overhead_group_id, valuation_class_id, purchasing_group, purchasing_document, local_content, activity_type_id, process_id, lot_size, lot_size_calculated, lot_size_is_manual,
+					engineering_change_number_id, company_code_id, cost_center_id, plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id, 
+						quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+					total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+					base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+						price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, price_variable_portion, price_variable_portion_calculated,
+						price_variable_portion_is_manual, price, transaction_currency_id, price_unit, price_unit_calculated,
+						price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, price_id, confidence_level_id, price_source_id, price_source_type_id, surcharge, is_disabling_price_determination, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+						created_on, created_by, last_modified_on, last_modified_by,
+						price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+						price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+						price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+						other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+						total_cost, total_cost_fixed_portion, total_cost_variable_portion,
+						total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion,
+						total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion,
+						item_description, comment, is_dirty, is_deleted,
+						TOTAL_COST_PER_UNIT_FIXED_PORTION, TOTAL_COST_PER_UNIT_VARIABLE_PORTION, TOTAL_COST_PER_UNIT,
+						TOTAL_COST2_PER_UNIT_FIXED_PORTION, TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, TOTAL_COST2_PER_UNIT,
+						TOTAL_COST3_PER_UNIT_FIXED_PORTION, TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, TOTAL_COST3_PER_UNIT, 
+						TOTAL_QUANTITY_OF_VARIANTS, BOM_COMPARE_KEY
+	                    {{customFieldsWithTablePrefix Item}} 
+					from 	"sap.plc.db::basis.t_item_temporary" as items
+					LEFT OUTER JOIN {{t_temporaryExtensionTable Item}} as plcExtTable ON 
+					 items.item_id = plcExtTable.item_id AND items.calculation_version_id = plcExtTable.calculation_version_id AND items.session_id = plcExtTable.session_id 
+					where  items.calculation_version_id = :iv_cv_id 
+					and items.session_id = :iv_session_id
+					and items.is_deleted = 0;
+
+END;
+

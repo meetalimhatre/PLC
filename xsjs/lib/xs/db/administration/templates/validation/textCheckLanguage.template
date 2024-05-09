@@ -1,0 +1,16 @@
+update temp_table
+					set	temp_table.ERROR_CODE = 'GENERAL_ENTITY_NOT_FOUND_ERROR',
+					temp_table.ERROR_DETAILS = '{"businessObj":"Language","administrationObjType": "MainObj"}'
+					from {{temporaryTextTable MasterdataBusinessObject}} as temp_table,
+					( select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE 
+					    from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+						where temp_table.LANGUAGE not in 
+						 (select language from "sap.plc.db::basis.t_language"
+						    where _VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and _VALID_TO is null and texts_maintainable = 1)
+						and temp_table.operation in ('Create','Upsert')
+						and ( temp_table.error_code = '' or  temp_table.error_code is null )
+					) as result
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+					and temp_table.LANGUAGE = result.LANGUAGE
+					and temp_table.operation in ('Create','Upsert')
+					and ( temp_table.error_code = '' or  temp_table.error_code is null )

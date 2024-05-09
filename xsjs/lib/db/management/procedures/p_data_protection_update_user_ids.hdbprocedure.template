@@ -1,0 +1,791 @@
+PROCEDURE "sap.plc.db.management.procedures::p_data_protection_update_user_ids" (
+IN ID_USER_IN NVARCHAR(256),
+OUT OV_AFFECTED_ROWS INTEGER
+ ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+/************************************************************************* 
+	The procedure will replace user ids with the placeholder 'DELETED' 
+ *************************************************************************/
+DECLARE lv_user varchar(256) := 'DELETED';
+DECLARE ID_USER varchar(256) := UPPER (ID_USER_IN);
+
+OV_AFFECTED_ROWS = 0;
+
+        UPDATE  "sap.plc.db::basis.t_account" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_account_account_group" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_account_group" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_component_split_account_group" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_account_group__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_account__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_activity_price" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;		
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_activity_price" 
+        SET _CREATED_BY_FIRST_VERSION =  lv_user 
+	    WHERE UPPER (_CREATED_BY_FIRST_VERSION) = ID_USER;		
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_activity_price__first_version" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;		
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_activity_type" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_activity_type__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_addin_configuration_header" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_addin_configuration_header" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_addin_version" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_addin_version" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_business_area" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_business_area__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_process" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_process__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_calculation" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_calculation" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_calculation_version" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_calculation_version_temporary" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_company_code" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_company_code__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_component_split" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_component_split__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_controlling_area" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_controlling_area__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_base" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_base_row" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_overhead" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_overhead_row" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_row" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_row_dependencies" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet_row__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_costing_sheet__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_cost_center" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+	    
+	    OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_cost_center__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_currency" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_currency_conversion" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_currency__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_customer" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_dimension" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_dimension__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document_material" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document_status" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document_status__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document_type" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document_type__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_document__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_item" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_item" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+		
+		UPDATE  "sap.plc.db::basis.t_item_category" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_item_category" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_item_temporary" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_item_temporary" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_design_office" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_design_office__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_language" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_account_determination" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_group" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_group__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_plant" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_type" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_type__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata_item_attributes" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata_item_attributes" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata__text" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata__text" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata_staging" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata_staging" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata__text_staging" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_metadata__text_staging" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_overhead_group" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_overhead_group__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_plant" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_plant__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_price" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_price" 
+        SET _CREATED_BY_FIRST_VERSION =  lv_user 
+	    WHERE UPPER (_CREATED_BY_FIRST_VERSION) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_material_price__first_version" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_price_source" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_price_source" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_price_determination_strategy"
+        SET CREATED_BY =  lv_user
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_price_determination_strategy"
+        SET LAST_MODIFIED_BY =  lv_user
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_exchange_rate_type" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_exchange_rate_type" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_exchange_rate_type__text" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_exchange_rate_type__text" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_profit_center" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_profit_center__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project" 
+        SET PROJECT_RESPONSIBLE =  lv_user 
+	    WHERE UPPER (PROJECT_RESPONSIBLE) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project_lifecycle_configuration" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project_lifecycle_period_type" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project_monthly_lifecycle_period" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_project_total_quantities" 
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_one_time_project_cost"
+        SET LAST_MODIFIED_BY =  lv_user
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_one_time_product_cost"
+        SET LAST_MODIFIED_BY =  lv_user
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_uom" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_uom__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_valuation_class" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_valuation_class__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant"
+        SET LAST_CALCULATED_BY =  lv_user 
+	    WHERE UPPER (LAST_CALCULATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant"
+        SET LAST_MODIFIED_BY =  lv_user 
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant"
+        SET LAST_REMOVED_MARKINGS_BY =  lv_user 
+	    WHERE UPPER (LAST_REMOVED_MARKINGS_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant_temporary"
+        SET LAST_CALCULATED_BY =  lv_user
+	    WHERE UPPER (LAST_CALCULATED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant_temporary"
+        SET LAST_MODIFIED_BY =  lv_user
+	    WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+        UPDATE  "sap.plc.db::basis.t_variant_temporary"
+        SET LAST_REMOVED_MARKINGS_BY =  lv_user
+	    WHERE UPPER (LAST_REMOVED_MARKINGS_BY) = ID_USER;
+
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_tag"
+        SET CREATED_BY =  lv_user
+        WHERE UPPER (CREATED_BY) = ID_USER;
+
+        OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_entity_tags"
+        SET CREATED_BY =  lv_user
+        WHERE UPPER (CREATED_BY) = ID_USER;
+
+        OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_status"
+        SET CREATED_BY =  lv_user
+        WHERE UPPER (CREATED_BY) = ID_USER;
+
+        OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_status"
+        SET LAST_MODIFIED_BY =  lv_user
+        WHERE UPPER (LAST_MODIFIED_BY) = ID_USER;
+
+        OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_vendor" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_work_center" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_work_center_activity_type" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_work_center__text" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_work_center_process" 
+        SET _CREATED_BY =  lv_user 
+	    WHERE UPPER (_CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		
+		UPDATE  "sap.plc.db::basis.t_folder" 
+        SET CREATED_BY =  lv_user 
+	    WHERE UPPER (CREATED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::basis.t_folder" 
+        SET MODIFIED_BY =  lv_user 
+	    WHERE UPPER (MODIFIED_BY) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+
+		UPDATE  "sap.plc.db::map.t_replication_run" 
+        SET USER_ID =  lv_user 
+	    WHERE UPPER (USER_ID) = ID_USER;
+		
+		OV_AFFECTED_ROWS = OV_AFFECTED_ROWS + ::ROWCOUNT;
+END;

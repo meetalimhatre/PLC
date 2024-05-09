@@ -1,0 +1,45 @@
+{
+    "lock": {
+        "delete": {
+            "tags": [
+                "lock"
+            ],
+            "summary": "Release a lock for a current logged in user",
+            "description": "",
+            "operationId": "lockDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LockDeleteResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "lock"
+                    ]
+                }
+            ]
+        }
+    }
+}

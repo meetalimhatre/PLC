@@ -1,0 +1,11 @@
+view "sap.plc.db.views::v_replication_log" ( "TABLE_NAME", "MESSAGE_TIME", "FIELD_NAME", "FIELD_VALUE", "MESSAGE_TEXT", "MESSAGE_TYPE", "OPERATION", "RUN_ID" ) as select	
+	TABLE_NAME,	
+    MESSAGE_TIME,	
+    FIELD_NAME,	
+    FIELD_VALUE,	
+    MESSAGE_TEXT,	
+    MESSAGE_TYPE,
+    OPERATION,
+    RUN_ID
+from "sap.plc.db::map.t_replication_log"
+with read only; 

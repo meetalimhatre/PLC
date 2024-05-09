@@ -1,0 +1,128 @@
+{
+    "privileges": {
+        "get": {
+            "tags": [
+                "privileges"
+            ],
+            "summary": "Get privileges for project",
+            "description": "Get privileges for project",
+            "operationId": "privilegesProjectGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "entity_type",
+                    "in": "query",
+                    "description": "get privileges for a specific entity",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "Project"
+                    ]
+                },
+                {
+                    "name": "entity_id",
+                    "in": "query",
+                    "description": "get privileges for a specific entity id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/PrivilegesProjectModel"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_OPEN": [
+                        "open:projects"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "privileges"
+            ],
+            "summary": "Administration of the privileges for project",
+            "description": "Administration of the privileges for project",
+            "operationId": "privilegesProjectEdit",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Batch operation to create, update and delete privileges",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/PrivilegesBatchRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/PrivilegesBatchResponse"
+                    }
+                },
+                "400": {
+                    "description": "Project with no administrator",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/ProjectWithNoAdministratorError"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_OPEN": [
+                        "open:projects"
+                    ]
+                }
+            ]
+        }
+    }
+}

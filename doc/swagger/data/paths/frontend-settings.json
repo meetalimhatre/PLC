@@ -1,0 +1,247 @@
+{
+    "frontend-settings": {
+        "get": {
+            "tags": [
+                "frontend-settings"
+            ],
+            "summary": "Gets corporate and personal frontend settings (for the invoking user)",
+            "description": "",
+            "operationId": "frontendSettingsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "type",
+                    "in": "query",
+                    "description": "Type of settings to be retrieved",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingsResponse"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "403": {
+                    "description": "The requesting user has no sufficient privileges to retrieve frontend settings",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": []
+                }
+            ]
+        },
+        "post":{
+            "tags":[
+                "frontend-settings"
+            ],
+            "summary":"Creates corporate or personal frontend settings (for the invoking user)",
+            "description":"",
+            "operationId":"frontendSettingsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the frontend setting is corporate or personal",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "The frontend settings to be created",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingsPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingsPostResponse"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "403": {
+                    "description": "Forbidden. If the requesting user has not sufficient access rights to create frontend settings",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    }
+                },
+                "409":{
+                    "description":"If the name of the frontend-setting is not unique for the setting type and user_id",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/MessageWriteFrontendSettingNamingConflict"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [],
+                    "Privileges.FRONTEND_SETTINGS_CORPORATE_EDIT":[]
+                }
+            ]
+        },
+        "put":{
+            "tags":[
+                "frontend-settings"
+            ],
+            "summary":"Updates either corporate or personal frontend settings (for the invoking user)",
+            "description":"",
+            "operationId":"frontendSettingsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the frontend setting is saved as personal or corporate",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "The frontend settings to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingsPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingsResponse"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "403": {
+                    "description": "The requesting user has no sufficient privileges to update frontend settings",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    }
+                },
+                "409":{
+                    "description":"The name of the frontend setting is not unique for the setting type and user_id",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/MessageWriteFrontendSettingNamingConflict"
+                    }
+                },
+                "404":{
+                    "description": "Frontend setting to be updated is not found",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/MessageGeneralEntityNotFoundFrontendSettingsError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [],
+                    "Privileges.FRONTEND_SETTINGS_CORPORATE_EDIT":[]
+                }
+            ]
+        },
+        "delete":{
+            "tags":[
+                "frontend-settings"
+            ],
+            "summary":"Deletes the given frontend settings",
+            "description":"",
+            "operationId":"frontendSettingsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                 {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the frontend settings to be deleted are personal or corporate",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Frontend setting IDs that need to be deleted (the id).",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/FrontendSettingDeleteBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request"
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "403": {
+                    "description": "The requesting user has no sufficient privileges to delete frontend settings",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    }
+                },
+                "404":{
+                    "description": "Frontend setting to be deleted is not found",
+                    "schema": {
+                        "$ref": "../definitions/frontend-settings_definitions.json#/definitions/MessageGeneralEntityNotFoundFrontendSettingsError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [],
+                    "Privileges.FRONTEND_SETTINGS_CORPORATE_EDIT":[]
+                }
+            ]
+        }
+    }
+}

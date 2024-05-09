@@ -1,0 +1,38 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_company_code_read" ( 
+		IN iv_logon_language          NVARCHAR(11),
+		IN iv_master_data_timestamp   TIMESTAMP,
+		IN iv_controlling_area_id     NVARCHAR(4),
+		IN ot_company_code_key     "sap.plc.db.administration::masterdata.tt_company_code_key",
+        OUT ot_company_code        "sap.plc.db.administration::masterdata.tt_company_code" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+ 
+ --select company codes		
+  			
+ ot_company_code = 
+ 				 select  
+	 				 plcTable.COMPANY_CODE_ID, 
+	 				 plcTable.CONTROLLING_AREA_ID, 
+	 				 plcTable.COMPANY_CODE_CURRENCY_ID, 
+	 				 plcTable._VALID_FROM, 
+	 				 plcTable._VALID_TO, 
+	 				 plcTable._SOURCE, 
+	 				 plcTable._CREATED_BY,
+		             null AS _VALID_FROM_FIRST_VERSION,
+		             null AS _CREATED_BY_FIRST_VERSION,
+	 				 plcTextTable.COMPANY_CODE_DESCRIPTION 
+ 				 from "sap.plc.db::basis.t_company_code" as plcTable 
+ 				 left outer join "sap.plc.db::basis.t_company_code__text" as plcTextTable 
+ 				 	on  plcTable.COMPANY_CODE_ID = plcTextTable.COMPANY_CODE_ID 
+ 				 	and plcTextTable.LANGUAGE = :iv_logon_language  
+ 				 	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+ 				 	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+ 				 where plcTable._VALID_FROM <= :iv_master_data_timestamp and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+ 				 	and  ( (  plcTable.COMPANY_CODE_ID in ( select COMPANY_CODE_ID from :ot_company_code_key ) )
+ 				 	or ( plcTable.CONTROLLING_AREA_ID = :iv_controlling_area_id ));
+
+
+END;

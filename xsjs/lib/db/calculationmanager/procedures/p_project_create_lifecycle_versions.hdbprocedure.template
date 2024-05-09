@@ -1,0 +1,717 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_project_create_lifecycle_versions" ( 
+	IN 	iv_project_id 							               	NVARCHAR(35),
+	IN 	iv_user_id									            NVARCHAR(256),
+	IN  iv_overwrite_versions                                   TINYINT,
+	IN  iv_one_time_cost_item_description						NVARCHAR(30),
+	OUT ot_created_lifecycle_versions 				      "sap.plc.db.calculationmanager.procedures::ts_create_lifecycle_versions_output" -- no "default empty" since the output parameter need to be defined; there were issues with unset output parameter
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+/***************************** 
+	Since the execution of this procedure is done via XS Follow-up the user who execute the follow-up task is the technical user.
+	For this reason the user id of the task is passed as a parameter in order to set LAST_MODIFIED_BY field correctly.
+	Creates copies of the base calculation versions of the given project selected for lifecycle calculation for each lifecycle period with non-null total quantities.
+Steps:
+	1. Delete entries of existing lifecycle versions from t_item and t_item_ext for base versions of the project which are selected for lifecycle calculation
+	2. Delete existing entries from t_calculation_version for selected lifecycle versions of the project where total quantity is null
+	3. Clone lifecycle versions into t_calculation_version
+	4. Copy items from base versions in t_item for all lifecycle versions
+	4.1 Add items that holds one time costs in t_item for all lifecycle versions to be calculated
+
+	5. Copy custom fields for items in t_item_ext
+	6. Set referenced versions in lifecycle versions to lifecycle versions of referenced versions
+
+The procedure returns the ids and lifecycle_period_from value of the (re-)created lifecycle versions, ordered by the lifecycle_period_from (see select of output parameter for details).
+
+ *****************************/
+
+--declare a series of constants and variable that will be used for one time costs
+declare  i															INTEGER;
+declare  lv_number_of_items_per_one_time_project_cost				INTEGER;
+declare  lc_variable_item_category integer = 8;
+declare  lc_one_time_cost_quantity_uom_id NVARCHAR(2) = 'PC';
+declare  lc_one_time_total_quantity_depends_on integer = 0;
+
+-- declare a local variable for the current timestamp, which is then used in favor of using  current_utctimestamp function; this is done because otherwise HANA needs to
+-- execute the function for each duplicated item 3 times, which leads to out-of-memory issues pretty fast (not sure why); additionally, the created_on/last_modified_on 
+-- values would differe slightly if the function is executed multiple times
+declare lv_current_utctimestamp	timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+ -- contains lifecycle versions and manual lifecycle versions(depending on the bool variable iv_overwrite_versions) that already exist for base versions that have to be lifecycle-calculated
+ lt_existing_lc_versions_to_overwrite = 
+ 	select 
+ 		existing_versions.calculation_version_id, 
+ 		existing_versions.base_version_id, 
+ 		existing_versions.lifecycle_period_from 
+ 	from "sap.plc.db::basis.t_calculation" calculation
+ 	inner join "sap.plc.db::basis.t_project_lifecycle_configuration" total_quantities
+ 		on calculation.calculation_id = total_quantities.calculation_id 
+ 			and total_quantities.calculation_version_id is not null
+ 	inner join "sap.plc.db::basis.t_calculation_version" existing_versions
+ 		on existing_versions.base_version_id = total_quantities.calculation_version_id and ( existing_versions.calculation_version_type = 2 
+		 or (existing_versions.calculation_version_type = 16 and :iv_overwrite_versions = 1) )					
+  	where calculation.project_id = :iv_project_id
+ ;
+
+ -- contains all manual lifecycle versions that are not to be overwritten
+ -- table is needed in order to exclude the versions that don`t need to be overwritten
+  lt_manual_versions_not_to_overwrite = 
+ 	select 
+ 		existing_versions.calculation_version_id
+ 	from "sap.plc.db::basis.t_calculation" calculation
+ 	inner join "sap.plc.db::basis.t_project_lifecycle_configuration" total_quantities
+ 		on calculation.calculation_id = total_quantities.calculation_id 
+ 			and total_quantities.calculation_version_id is not null
+ 	inner join "sap.plc.db::basis.t_calculation_version" existing_versions
+ 		on existing_versions.base_version_id = total_quantities.calculation_version_id and ( existing_versions.calculation_version_type = 16 and :iv_overwrite_versions = 0 )					
+  	where calculation.project_id = :iv_project_id
+ ;
+
+ -- contains base versions to clone for given project, lifecycle periods and their values
+ lt_lifecycle_periods =
+	select
+ 		total_quantities.calculation_version_id,
+ 		lc_values.lifecycle_period_from,
+ 		lc_values.value,
+		to_integer((lc_values.lifecycle_period_from/12) + 1900) as periodYear,
+		periodTypes.period_type,
+		monthlyPeriods.selected_month,
+		monthlyPeriods.month_description
+ 	from "sap.plc.db::basis.t_project_lifecycle_configuration" as total_quantities
+	inner join "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" as lc_values
+		on total_quantities.project_id = lc_values.project_id
+		and total_quantities.calculation_id = lc_values.calculation_id
+	inner join "sap.plc.db::basis.t_project_lifecycle_period_type" as periodTypes
+		on periodTypes.project_id = :iv_project_id
+		and periodTypes.year = to_integer((lc_values.lifecycle_period_from/12) + 1900)
+	left join "sap.plc.db::basis.t_project_monthly_lifecycle_period" monthlyPeriods
+		on periodTypes.project_id = :iv_project_id
+		and monthlyPeriods.year = to_integer((lc_values.lifecycle_period_from/12) + 1900)
+		and monthlyPeriods.selected_month = mod(lc_values.lifecycle_period_from, 12) + 1
+		and monthlyPeriods.project_id = :iv_project_id
+	inner join "sap.plc.db::basis.t_calculation" as calculation
+		on calculation.calculation_id = total_quantities.calculation_id
+	where calculation.project_id = :iv_project_id											-- take calculations from the given project
+		and total_quantities.calculation_version_id is not null 							-- take only versions to calculate. calculations without versions are not calculated.
+;
+
+-----------------------------------------------------------------------------------
+-- 1. Delete entries of existing lifecycle versions from item-related tables for base versions of the project which are selected for lifecycle calculation.
+---- This is done to clean up these tables from entries left from previous calculation runs.
+-----------------------------------------------------------------------------------
+delete from "sap.plc.db::basis.t_item" item where item.calculation_version_id in
+ 	(select calculation_version_id from :lt_existing_lc_versions_to_overwrite);	
+ 
+delete from "sap.plc.db::basis.t_item_ext" item where item.calculation_version_id in
+ 	(select calculation_version_id from :lt_existing_lc_versions_to_overwrite);
+ 
+delete from "sap.plc.db::basis.t_item_calculated_values_component_split" where calculation_version_id in
+      (select calculation_version_id from :lt_existing_lc_versions_to_overwrite);
+
+delete from "sap.plc.db::basis.t_item_calculated_values_costing_sheet" where calculation_version_id in
+      (select calculation_version_id from :lt_existing_lc_versions_to_overwrite);
+
+delete from "sap.plc.db::basis.t_item_referenced_version_component_split" where master_calculation_version_id in
+      (select calculation_version_id from :lt_existing_lc_versions_to_overwrite);
+ 
+-----------------------------------------------------------------------------------
+-- 2. Delete existing entries from t_calculation_version for selected lifecycle versions of the project which have t_project_lifecycle_period_quantity_value.VALUE = null
+---- This removes existing lifecycle versions where total quantity was set to 0. Other existing versions are overwritten in later steps.
+-----------------------------------------------------------------------------------
+delete from "sap.plc.db::basis.t_calculation_version" versions where versions.calculation_version_id in
+ 	(select 
+ 		existing_lc_versions.calculation_version_id
+ 	 from :lt_existing_lc_versions_to_overwrite existing_lc_versions
+ 	 left outer join :lt_lifecycle_periods versions_to_clone  								-- left join in combination with where is null takes only versions from existing_lc_versions which do not exist in versions_to_clone
+	 	on existing_lc_versions.base_version_id = versions_to_clone.calculation_version_id and existing_lc_versions.lifecycle_period_from = versions_to_clone.lifecycle_period_from
+ 	 where versions_to_clone.lifecycle_period_from is null 
+ 	 		or versions_to_clone.lifecycle_period_from = 0  								-- actually the 0 values should not be saved, but we added this condition as precaution to avoid side effects
+ 	)
+ ;	
+
+-----------------------------------------------------------------------------------
+-- 3. Clone lifecycle versions in t_calculation_version
+---- All manual and lifecycle versions are taken first 
+---- Versions that don`t need to be created are excluded
+---- Upsert is necessary to take over the Ids for existing lifecycle versions
+-----------------------------------------------------------------------------------
+lt_all_lifecycle_versions =
+	select
+		ifnull (existing_versions.calculation_version_id, "sap.plc.db.sequence::s_calculation_version".nextval) -- take existing id if it exists, otherwise create a new id
+			as calculation_version_id,
+		base_versions.calculation_id,
+		case
+			when upper(lc_values.period_type) = 'YEARLY' then
+				concat(concat(base_versions.calculation_version_name, ' - '), 
+					to_varchar(to_integer(lc_values.lifecycle_period_from/12) + 1900))
+			when lc_values.month_description is not null then
+				concat(concat(concat(base_versions.calculation_version_name, ' - '),
+					to_varchar(to_integer(lc_values.lifecycle_period_from/12) + 1900)), concat(' - ', lc_values.month_description))
+			else
+				concat(concat(concat(base_versions.calculation_version_name, ' - '),
+					to_varchar(to_integer(lc_values.lifecycle_period_from/12) + 1900)), concat(' - M', lc_values.selected_month))
+		end as calculation_version_name,
+		base_versions.root_item_id, 
+		base_versions.customer_id, 
+		base_versions.sales_price, 
+		base_versions.sales_price_currency_id, 
+		base_versions.report_currency_id, 
+		base_versions.costing_sheet_id, 
+		base_versions.component_split_id, 
+		base_versions.start_of_production,
+		base_versions.end_of_production,
+		case 
+			when project.lifecycle_valuation_date is null then null 		-- valuation date for lifecycle is created by adding month to the date. In this way the day/month are preserved
+			when upper(lc_values.period_type) = 'YEARLY' then add_months(project.lifecycle_valuation_date, ( lc_values.lifecycle_period_from - (year(project.lifecycle_valuation_date) - 1900)*12 ))
+			else add_months(project.lifecycle_valuation_date, ( lc_values.lifecycle_period_from - (year(project.lifecycle_valuation_date) - 1900)*12 - month(project.lifecycle_valuation_date) + 1 ))
+		end as valuation_date,
+		:lv_current_utctimestamp as last_modified_on, 
+		:iv_user_id as last_modified_by,
+		base_versions.master_data_timestamp,
+		base_versions.is_frozen,
+		base_versions.exchange_rate_type_id,
+		base_versions.sales_document,
+		2 as calculation_version_type, 										-- 2 indicates that this is a lifecycle version		
+		lc_values.lifecycle_period_from,
+		base_versions.calculation_version_id as base_version_id,
+		lc_values.value as value,
+		base_versions.material_price_strategy_id as material_price_strategy_id,
+		base_versions.activity_price_strategy_id as activity_price_strategy_id,
+		base_versions.selected_total_costing_sheet,
+		base_versions.selected_total_component_split
+	 from :lt_lifecycle_periods as lc_values
+	 inner join "sap.plc.db::basis.t_calculation_version" as base_versions
+		on lc_values.calculation_version_id = base_versions.calculation_version_id
+	 inner join "sap.plc.db::basis.t_calculation" as calculation
+		on calculation.calculation_id = base_versions.calculation_id
+	 inner join "sap.plc.db::basis.t_project" as project
+		on project.project_id = calculation.project_id
+	 left outer join "sap.plc.db::basis.t_calculation_version" as existing_versions -- left outer is needed since the lifecycle versions from previous calculations may not exist for all lifecycle periods
+	   on existing_versions.base_version_id = lc_values.calculation_version_id and existing_versions.lifecycle_period_from = lc_values.lifecycle_period_from
+;
+
+lt_lifecycle_versions_to_create = 
+    select * from :lt_all_lifecycle_versions 
+     where calculation_version_id not in (select calculation_version_id  from :lt_manual_versions_not_to_overwrite);
+
+upsert "sap.plc.db::basis.t_calculation_version"(
+		calculation_version_id, calculation_id, calculation_version_name, root_item_id, customer_id, 
+		sales_price, sales_price_currency_id, report_currency_id, costing_sheet_id, component_split_id, 
+		start_of_production, end_of_production, valuation_date, last_modified_on, last_modified_by,
+		master_data_timestamp, is_frozen, sales_document, calculation_version_type, 
+		lifecycle_period_from, base_version_id, exchange_rate_type_id, material_price_strategy_id, activity_price_strategy_id,
+		selected_total_costing_sheet, selected_total_component_split
+	)
+	select
+		calculation_version_id, calculation_id, calculation_version_name, root_item_id, customer_id, 
+		sales_price, sales_price_currency_id, report_currency_id, costing_sheet_id, component_split_id, 
+		start_of_production, end_of_production, valuation_date, last_modified_on, last_modified_by,
+		master_data_timestamp, is_frozen, sales_document, calculation_version_type, 
+		lifecycle_period_from, base_version_id, exchange_rate_type_id, material_price_strategy_id, activity_price_strategy_id,
+		selected_total_costing_sheet, selected_total_component_split
+	 from :lt_lifecycle_versions_to_create
+;
+
+-----------------------------------------------------------------------------------
+-- 4. Copy items from base versions in t_item for all lifecycle versions to be calculated
+-----------------------------------------------------------------------------------
+insert into "sap.plc.db::basis.t_item"(
+		item_id, calculation_version_id, parent_item_id, predecessor_item_id, is_active,
+		item_category_id, child_item_category_id, account_id, determined_account_id, document_type_id, document_id, document_version, document_part, 
+		document_status_id, design_office_id, material_id, material_type_id, material_group_id,
+		overhead_group_id, valuation_class_id, activity_type_id, process_id, 
+		lot_size, lot_size_calculated, lot_size_is_manual, engineering_change_number_id,
+		company_code_id, cost_center_id,
+		plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id, 
+		quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+		total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+		price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, 
+		price_variable_portion, price_variable_portion_calculated, price_variable_portion_is_manual, 
+		price, transaction_currency_id, price_unit, price_unit_calculated, price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, 
+		price_id, confidence_level_id, price_source_id, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+		created_on, created_by,	last_modified_on, last_modified_by, 
+		price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+		price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+		price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+		other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+		total_cost, total_cost_fixed_portion, total_cost_variable_portion,
+		total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion,
+		total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion,
+		item_description, comment, highlight_green, highlight_orange, highlight_yellow, referenced_calculation_version_id, is_phantom_material, is_configurable_material,
+		material_source, price_source_type_id, purchasing_group, purchasing_document, local_content,
+		base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+		is_disabling_price_determination, 
+		total_cost_per_unit_fixed_portion, total_cost_per_unit_variable_portion, total_cost_per_unit, 
+		total_cost2_per_unit_fixed_portion, total_cost2_per_unit_variable_portion, total_cost2_per_unit, 
+		total_cost3_per_unit_fixed_portion, total_cost3_per_unit_variable_portion, total_cost3_per_unit, 
+		total_quantity_of_variants, bom_compare_key
+	)
+	select 
+		item.item_id,
+		lc_versions_to_create.calculation_version_id,
+		item.parent_item_id,
+		item.predecessor_item_id,
+		item.is_active,
+		item.item_category_id,
+		item.child_item_category_id,
+		item.account_id,
+		item.determined_account_id,
+		item.document_type_id,
+		item.document_id,
+		item.document_version,
+		item.document_part,
+		item.document_status_id,
+		item.design_office_id,
+		item.material_id,
+		item.material_type_id,
+		item.material_group_id,
+		item.overhead_group_id,
+		item.valuation_class_id,
+		item.activity_type_id,
+		item.process_id,
+		item.lot_size,
+		item.lot_size_calculated,
+		item.lot_size_is_manual,
+		item.engineering_change_number_id,
+		item.company_code_id,
+		item.cost_center_id,
+		item.plant_id,
+		item.work_center_id,
+		item.work_center_category, 
+		item.efficiency,
+		item.business_area_id,
+		item.profit_center_id,
+		item.quantity,
+		item.quantity_calculated,
+		item.quantity_is_manual,
+		item.quantity_uom_id,
+		case 
+			when item.parent_item_id is null then lc_versions_to_create.value	-- set total_quantity for root item to the value for lifecycle period
+			else item.total_quantity
+		end as total_quantity,
+		item.total_quantity_uom_id,
+		item.total_quantity_depends_on,
+		item.is_relevant_to_costing_in_erp,
+		item.price_fixed_portion,
+		item.price_fixed_portion_calculated,
+		item.price_fixed_portion_is_manual,
+		item.price_variable_portion,
+		item.price_variable_portion_calculated,
+		item.price_variable_portion_is_manual,
+		item.price,
+		item.transaction_currency_id,
+		item.price_unit,
+		item.price_unit_calculated,
+		item.price_unit_is_manual,
+		item.price_unit_uom_id,
+		item.is_price_split_active, 
+		item.is_disabling_account_determination,
+		item.price_id,
+		item.confidence_level_id,
+		item.price_source_id,
+		item.vendor_id,
+		item.target_cost,
+		item.target_cost_calculated,
+		item.target_cost_is_manual,
+		item.target_cost_currency_id,
+		:lv_current_utctimestamp as created_on, 
+		:iv_user_id as created_by,	
+		:lv_current_utctimestamp as last_modified_on,
+		:iv_user_id as last_modified_by,
+		item.price_for_total_quantity,
+		item.price_for_total_quantity_fixed_portion,
+		item.price_for_total_quantity_variable_portion,
+		item.price_for_total_quantity2,
+		item.price_for_total_quantity2_fixed_portion,
+		item.price_for_total_quantity2_variable_portion,
+		item.price_for_total_quantity3,
+		item.price_for_total_quantity3_fixed_portion,
+		item.price_for_total_quantity3_variable_portion,
+		item.other_cost,
+		item.other_cost_fixed_portion,
+		item.other_cost_variable_portion,
+		item.total_cost,
+		item.total_cost_fixed_portion,
+		item.total_cost_variable_portion,
+		item.total_cost2,
+		item.total_cost2_fixed_portion,
+		item.total_cost2_variable_portion,
+		item.total_cost3,
+		item.total_cost3_fixed_portion,
+		item.total_cost3_variable_portion,
+		item.item_description,
+		item.comment,
+		item.highlight_green,
+		item.highlight_orange,
+		item.highlight_yellow,
+		item.referenced_calculation_version_id,
+		item.is_phantom_material,
+		item.is_configurable_material,
+		item.material_source,
+		item.price_source_type_id,
+		item.purchasing_group,
+		item.purchasing_document,
+		item.local_content,
+		item.base_quantity,
+		item.base_quantity_calculated,
+		item.base_quantity_is_manual,
+		item.quantity_per_base_unit,
+		item.quantity_per_base_unit_uom_id,
+		item.is_disabling_price_determination,
+		total_cost_per_unit_fixed_portion,
+		total_cost_per_unit_variable_portion,
+		total_cost_per_unit,
+		total_cost2_per_unit_fixed_portion,
+		total_cost2_per_unit_variable_portion,
+		total_cost2_per_unit,
+		total_cost3_per_unit_fixed_portion,
+		total_cost3_per_unit_variable_portion,
+		total_cost3_per_unit,
+		total_quantity_of_variants,
+		bom_compare_key
+	from :lt_lifecycle_versions_to_create as lc_versions_to_create
+	inner join "sap.plc.db::basis.t_item" item 
+		on item.calculation_version_id = lc_versions_to_create.base_version_id
+;
+
+
+-----------------------------------------------------------------------------------
+-- 4.1 Add items that holds one time costs in t_item for all lifecycle versions to be calculated
+
+select count(*) into lv_number_of_items_per_one_time_project_cost
+		from "sap.plc.db::basis.t_one_time_project_cost"
+		where project_id = :iv_project_id;
+
+if lv_number_of_items_per_one_time_project_cost > 0 then
+
+	lt_calculation_versions_one_time =
+		select	ifnull(max(item_id), 0) + 1 as item_id, versions_to_create.calculation_id,versions_to_create.calculation_version_id, versions_to_create.base_version_id,
+			 versions_to_create.root_item_id, versions_to_create.lifecycle_period_from
+		from "sap.plc.db::basis.t_item" item
+		inner join :lt_lifecycle_versions_to_create as versions_to_create
+		on versions_to_create.base_version_id = item.calculation_version_id
+		inner join "sap.plc.db::basis.t_project_lifecycle_configuration"  project_lifecycle_configuration
+			on project_lifecycle_configuration.calculation_version_id = versions_to_create.base_version_id
+			and project_lifecycle_configuration.is_one_time_cost_assigned = 1
+		group by versions_to_create.calculation_id,versions_to_create.calculation_version_id, versions_to_create.base_version_id,
+			versions_to_create.root_item_id, versions_to_create.lifecycle_period_from;
+
+	--first insert the root items for the one time costs
+	insert into "sap.plc.db::basis.t_item"(
+					item_id,
+					calculation_version_id,
+					parent_item_id,
+					predecessor_item_id,
+					is_active,
+					item_category_id,
+					child_item_category_id,
+					item_description,
+					quantity,
+					quantity_is_manual,
+					quantity_uom_id,
+					total_quantity_depends_on,
+					created_on,
+					created_by,
+					last_modified_on,
+					last_modified_by
+					)
+				select
+					calculation_versions_one_time.item_id,
+					calculation_versions_one_time.calculation_version_id,
+					calculation_versions_one_time.root_item_id,
+					null,
+					1,
+					:lc_variable_item_category,
+					:lc_variable_item_category,
+					:iv_one_time_cost_item_description,
+					1,
+					1,
+					:lc_one_time_cost_quantity_uom_id,
+					:lc_one_time_total_quantity_depends_on,
+					:lv_current_utctimestamp,
+					:iv_user_id,
+					:lv_current_utctimestamp,
+					:iv_user_id
+				from :lt_calculation_versions_one_time calculation_versions_one_time
+			;
+	-- then insert the CFF for the root one time costs
+	{{#if Item.customFields}}
+	insert into {{t_extensionTable Item}} (item_id, calculation_version_id {{customFields Item}})
+			select calculation_versions_one_time.item_id, calculation_versions_one_time.calculation_version_id
+			{{customFieldsOneTimeCost Item}}
+			from :lt_calculation_versions_one_time calculation_versions_one_time
+			left outer join :lt_lifecycle_versions_to_create calculation_versions_one_time_toCreate 
+			on calculation_versions_one_time.calculation_version_id = calculation_versions_one_time_toCreate.calculation_version_id;
+	{{/if}}
+	
+		--since the one time roots are placed a first child of the root we have to update the old first items
+
+	update "sap.plc.db::basis.t_item" item
+		set
+			predecessor_item_id = calculation_versions_one_time.item_id
+		from "sap.plc.db::basis.t_item" item
+		inner join :lt_calculation_versions_one_time calculation_versions_one_time
+			on item.calculation_version_id = calculation_versions_one_time.calculation_version_id
+		where predecessor_item_id is null
+			and parent_item_id = calculation_versions_one_time.root_item_id
+			and item.item_id <> calculation_versions_one_time.item_id
+	;
+
+		lt_one_time_projects_costs =
+		select
+			calculation_versions_one_time.calculation_version_id,
+			one_time_project_cost.cost_description as item_description,
+			one_time_project_cost.account_id,
+			one_time_cost_lifecycle_value.value * one_time_project_cost.fixed_cost_portion / 100 as price_fixed_portion,
+			one_time_cost_lifecycle_value.value * (100 - one_time_project_cost.fixed_cost_portion) / 100 as price_variable_portion,
+			one_time_project_cost.cost_currency_id as transaction_currency_id,
+			ROW_NUMBER() OVER (PARTITION BY one_time_project_cost.project_id, calculation_versions_one_time.calculation_version_id) AS row_num
+		from "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+		inner join "sap.plc.db::basis.t_one_time_cost_lifecycle_value" one_time_cost_lifecycle_value
+			on one_time_project_cost.one_time_cost_id = one_time_cost_lifecycle_value.one_time_cost_id
+		inner join :lt_calculation_versions_one_time calculation_versions_one_time
+			on one_time_cost_lifecycle_value.calculation_id = calculation_versions_one_time.calculation_id
+			and one_time_cost_lifecycle_value.lifecycle_period_from = calculation_versions_one_time.lifecycle_period_from
+		where one_time_project_cost.project_id = :iv_project_id
+	;
+
+	--once the roots are created populate the one-time-cost leafs
+	for i in 1..lv_number_of_items_per_one_time_project_cost  do
+
+		insert into "sap.plc.db::basis.t_item"(
+			item_id,
+			calculation_version_id,
+			parent_item_id,
+			predecessor_item_id,
+			is_active,
+			item_category_id,
+			child_item_category_id,
+			item_description,
+			account_id,
+			quantity,
+			quantity_is_manual,
+			quantity_uom_id,
+			total_quantity_depends_on,
+			price_fixed_portion,
+			price_fixed_portion_is_manual,
+			price_variable_portion,
+			price_variable_portion_is_manual,
+			transaction_currency_id,
+			price_unit,
+			price_unit_uom_id,
+			created_on,
+			created_by,
+			last_modified_on,
+			last_modified_by
+		)
+		select
+			calculation_versions_one_time.item_id + i as item_id,
+			calculation_versions_one_time.calculation_version_id,
+			calculation_versions_one_time.item_id as parent_item_id,
+			case
+				when i = 1 then null
+				else calculation_versions_one_time.item_id + i - 1
+			end as predecessor_item_id,
+			1 as is_active,
+			:lc_variable_item_category,
+			:lc_variable_item_category,
+			one_time_projects_costs.item_description,
+			one_time_projects_costs.account_id,
+			1 as quantity,
+			1 as quantity_is_manual,
+			:lc_one_time_cost_quantity_uom_id,
+			:lc_one_time_total_quantity_depends_on,
+			one_time_projects_costs.price_fixed_portion,
+			1 as price_fixed_portion_is_manual,
+			one_time_projects_costs.price_variable_portion,
+			1 as price_variable_portion_is_manual,
+			one_time_projects_costs.transaction_currency_id,
+			1 as price_unit,
+			:lc_one_time_cost_quantity_uom_id,
+			:lv_current_utctimestamp as created_on,
+			:iv_user_id as created_by,
+			:lv_current_utctimestamp as last_modified_on,
+			:iv_user_id as last_modified_by
+		from :lt_one_time_projects_costs as one_time_projects_costs
+		inner join :lt_calculation_versions_one_time calculation_versions_one_time
+			on calculation_versions_one_time.calculation_version_id = one_time_projects_costs.calculation_version_id
+		where row_num = i;
+	
+	-- then insert the CFF for the leaf items one time costs
+	{{#if Item.customFields}}
+		insert into {{t_extensionTable Item}} (item_id, calculation_version_id {{customFields Item}})
+		select
+			calculation_versions_one_time.item_id + i as item_id,
+			calculation_versions_one_time.calculation_version_id
+			{{customFieldsOneTimeCost Item}}
+			from :lt_one_time_projects_costs as one_time_projects_costs
+		inner join :lt_calculation_versions_one_time calculation_versions_one_time
+			on calculation_versions_one_time.calculation_version_id = one_time_projects_costs.calculation_version_id
+		left outer join :lt_lifecycle_versions_to_create calculation_versions_one_time_toCreate
+		on calculation_versions_one_time.calculation_version_id = calculation_versions_one_time_toCreate.calculation_version_id
+		where row_num = i;	
+	{{/if}}
+	end for;
+end if;
+
+-----------------------------------------------------------------------------------
+-- 5. Copy custom fields for items in t_item_ext from base versions for all lifecycle versions to be calculated
+-----------------------------------------------------------------------------------
+
+{{#if Item.customFields}}
+insert into {{t_extensionTable Item}} (item_id, calculation_version_id {{customFields Item}})
+	select plcExtTable.item_id, lc_versions_to_create.calculation_version_id AS calculation_version_id {{customFieldsWithTablePrefix Item}}
+	from :lt_lifecycle_versions_to_create as lc_versions_to_create
+	inner join {{t_extensionTable Item}} AS plcExtTable
+		on plcExtTable.calculation_version_id = lc_versions_to_create.base_version_id
+;		
+{{/if}}
+
+
+-----------------------------------------------------------------------------------
+-- 6. Set referenced versions in lifecycle versions of the project selected for lifecycle calculation to lifecycle versions of referenced versions
+-- Logic:
+--   a. If for referenced version a lifecycle version for the same lifecycle period exists, then the reference to this version in the lifecycle version of the master version.
+--   b. If not, check if any previous lifecycle version of the referenced version and set this one as reference. Thus, the most recent lifecycle version found is taken.
+--   c. In case there is no previous lifecycle version for the referenced version, the base version of the referenced version is kept as reference in the lifecycle version. No update has to be done in this case, since the references to the base versions are already set after creating lifecycle versions. 
+-----------------------------------------------------------------------------------
+
+-- Contains items of created lifecycle versions that reference other versions (items of lifecycle master versions with category "Referenced version")
+lt_version_reference_items = 
+	select 
+		lc_versions.calculation_version_id, 
+		item.item_id, 
+		lc_versions.lifecycle_period_from, 
+		item.referenced_calculation_version_id
+	from "sap.plc.db::basis.t_calculation_version" lc_versions
+	inner join :lt_lifecycle_periods lifecycle_periods
+		on lc_versions.base_version_id = lifecycle_periods.calculation_version_id 
+		and lc_versions.lifecycle_period_from = lifecycle_periods.lifecycle_period_from
+	inner join "sap.plc.db::basis.t_item" item 
+		on item.calculation_version_id = lc_versions.calculation_version_id 
+		and item.item_category_id = 10											-- select only items of category "Referenced version"
+;
+		
+-- Contains instances of referenced source lifecycle versions
+lt_adjusted_version_references =
+	 select 
+	 	lc_versions.calculation_version_id,
+	 	lc_versions.base_version_id,
+	 	lc_versions.lifecycle_period_from,							-- found best suitable lifecycle period
+	 	base_versions_and_periods.original_lifecycle_period_from,	-- original lifecycle period for which the referenced lifecycle period is searched
+	 	lc_versions.root_item_id,
+	 	lc_versions.report_currency_id
+	 from "sap.plc.db::basis.t_calculation_version" lc_versions
+	 inner join 
+		( -- Contains same or recent lc versions of referenced versions, grouped according to their base version 
+			select 
+				ref_lc_versions.base_version_id, 
+				version_reference_items.lifecycle_period_from as original_lifecycle_period_from,
+				max(ref_lc_versions.lifecycle_period_from) as lifecycle_period_from						-- max() is used to select the same or most recent lifecycle version for reference
+			from :lt_version_reference_items version_reference_items
+			inner join "sap.plc.db::basis.t_calculation_version" ref_lc_versions
+				on ref_lc_versions.base_version_id = version_reference_items.referenced_calculation_version_id  	-- lifecycle versions of the referenced base versions
+			where ref_lc_versions.lifecycle_period_from <= version_reference_items.lifecycle_period_from      		-- only same or recent lifecycle periods
+			group by ref_lc_versions.base_version_id, version_reference_items.lifecycle_period_from
+		) base_versions_and_periods
+	  on lc_versions.base_version_id = base_versions_and_periods.base_version_id 
+	  and lc_versions.lifecycle_period_from = base_versions_and_periods.lifecycle_period_from
+;
+
+-- Take over selected fields in t_item from root items of referenced versions.
+--   Here we take over only fields that can be changed in lifecycle version. Other fields are automatically set to default values during creating/updating an item with referenced version 
+update "sap.plc.db::basis.t_item" item
+	set 
+		referenced_calculation_version_id = referenced_root_items.calculation_version_id, 			
+		quantity_uom_id = referenced_root_items.total_quantity_uom_id, 
+		price_fixed_portion = referenced_root_items.total_cost_fixed_portion, 
+		price_variable_portion = referenced_root_items.total_cost_variable_portion, 
+		price = referenced_root_items.total_cost, 
+		transaction_currency_id = adjusted_version_references.report_currency_id, 
+		price_unit = referenced_root_items.total_quantity, 
+		price_unit_uom_id = referenced_root_items.total_quantity_uom_id,
+		price_source_id = referenced_root_items.price_source_id,
+		account_id = referenced_root_items.account_id,
+		determined_account_id = referenced_root_items.determined_account_id,
+		business_area_id = referenced_root_items.business_area_id,
+		comment = referenced_root_items.comment,
+		company_code_id = referenced_root_items.company_code_id,
+		is_price_split_active = referenced_root_items.is_price_split_active, 
+		is_disabling_account_determination = referenced_root_items.is_disabling_account_determination,
+		price_id = referenced_root_items.price_id,
+		confidence_level_id = referenced_root_items.confidence_level_id,
+		document_id = referenced_root_items.document_id,
+		document_part = referenced_root_items.document_part,
+		document_status_id = referenced_root_items.document_status_id,
+		document_type_id = referenced_root_items.document_type_id,
+		document_version = referenced_root_items.document_version,
+		engineering_change_number_id = referenced_root_items.engineering_change_number_id,
+		is_configurable_material = referenced_root_items.is_configurable_material,
+		is_disabling_price_determination = referenced_root_items.is_disabling_price_determination,
+		is_phantom_material = referenced_root_items.is_phantom_material,
+		is_relevant_to_costing_in_erp = referenced_root_items.is_relevant_to_costing_in_erp,
+		design_office_id = referenced_root_items.design_office_id,
+		local_content = referenced_root_items.local_content,
+		material_group_id = referenced_root_items.material_group_id,
+		material_id = referenced_root_items.material_id,
+		material_source = referenced_root_items.material_source,
+		material_type_id = referenced_root_items.material_type_id,
+		overhead_group_id = referenced_root_items.overhead_group_id,
+		plant_id = referenced_root_items.plant_id,
+		profit_center_id = referenced_root_items.profit_center_id,
+		purchasing_group = referenced_root_items.purchasing_group,
+		purchasing_document = referenced_root_items.purchasing_document,
+		target_cost = referenced_root_items.target_cost,
+		target_cost_calculated = referenced_root_items.target_cost_calculated,
+		target_cost_currency_id = referenced_root_items.target_cost_currency_id,
+		target_cost_is_manual = referenced_root_items.target_cost_is_manual,
+		total_quantity_uom_id = referenced_root_items.total_quantity_uom_id,
+		valuation_class_id = referenced_root_items.valuation_class_id,
+		vendor_id = referenced_root_items.vendor_id,
+		work_center_id = referenced_root_items.work_center_id,
+		work_center_category = referenced_root_items.work_center_category, 
+		efficiency = referenced_root_items.efficiency
+	from "sap.plc.db::basis.t_item" item
+	inner join :lt_version_reference_items version_reference_items													-- contains items of created lifecycle versions which are referencing versions
+		on item.calculation_version_id = version_reference_items.calculation_version_id 
+		and item.item_id = version_reference_items.item_id
+	inner join :lt_adjusted_version_references adjusted_version_references								-- contains instances of referenced lifecycle versions
+		on adjusted_version_references.base_version_id = version_reference_items.referenced_calculation_version_id 
+		and adjusted_version_references.original_lifecycle_period_from = version_reference_items.lifecycle_period_from
+	inner join "sap.plc.db::basis.t_item" referenced_root_items  						-- contains root items of lifecycle versions for which the values should be taken over
+		on referenced_root_items.item_id = adjusted_version_references.root_item_id 
+		and referenced_root_items.calculation_version_id = adjusted_version_references.calculation_version_id	
+;
+
+
+{{#if Item.customFields}}			
+	-- overwrite item values with relevant ones from referenced (source) calculation version and root item 
+update {{t_extensionTable Item}} as master_calc_ver_item_ext
+	set	{{updateAllCustomFields_referencedCvId Item}}
+	from {{t_extensionTable Item}} as master_calc_ver_item_ext
+	inner join :lt_version_reference_items version_reference_items													-- contains items of created lifecycle versions which are referencing versions
+		on master_calc_ver_item_ext.calculation_version_id = version_reference_items.calculation_version_id 
+		and master_calc_ver_item_ext.item_id = version_reference_items.item_id
+	inner join :lt_adjusted_version_references adjusted_version_references								-- contains instances of referenced lifecycle versions
+		on adjusted_version_references.base_version_id = version_reference_items.referenced_calculation_version_id 
+		and adjusted_version_references.original_lifecycle_period_from = version_reference_items.lifecycle_period_from
+	inner join {{t_extensionTable Item}} source_root_item_ext  					
+		on source_root_item_ext.item_id = adjusted_version_references.root_item_id 
+		and source_root_item_ext.calculation_version_id = adjusted_version_references.calculation_version_id		
+;
+{{/if}} 
+
+-- preparing the output: for all the (re-)created calculation versions the id and the lifecycle_period_from value is returned, order by lifecycle_period_from because
+-- the procedure is one step in the creation of lifecycle version; for the subsequent price determination is required that the versions are
+-- returned in the correct order; this could also be done in the XS integration logic, but it's considered more efficient here
+ot_created_lifecycle_versions = 
+	select 	calculation_version_id,
+			lifecycle_period_from
+	from :lt_lifecycle_versions_to_create
+	order by lifecycle_period_from asc;					
+END
+
+

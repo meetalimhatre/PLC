@@ -1,0 +1,9 @@
+TYPE "sap.plc.db.calcengine::calcengine_types.ts_calculate_item_ext" AS TABLE (
+	"CALCULATION_VERSION_ID" INT,
+	"ITEM_ID" INT
+{{#if Item.customFields}}
+	 , {{ddl_customFields Item}}
+{{/if}}
+)
+
+

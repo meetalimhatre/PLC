@@ -1,0 +1,157 @@
+PROCEDURE "sap.plc.db.calcengine.procedures::p_calculate_sum_variant" (
+        IN iv_calculation_version_id   INTEGER,
+		IN iv_exchange_rate_type 		NVARCHAR(20),
+		IN iv_report_currency_id 		NVARCHAR(3),
+        IN it_variant_ids              "sap.plc.db.calcengine::calcengine_types.ts_variant_header_key" default empty,
+        OUT ot_calculated_variant_header  "sap.plc.db.calcengine::calcengine_types.ts_variant_header_calculated" default empty,
+        OUT ot_calculated_variant_items   "sap.plc.db.calcengine::calcengine_types.ts_variant_items_calculated" default empty,
+        OUT ot_errors                     "sap.plc.db.calcengine::calcengine_types.ts_variant_errors" default empty
+    )
+    LANGUAGE SQLSCRIPT
+    SQL SECURITY INVOKER
+    AS
+
+BEGIN
+
+	lt_sum_variant_header = select variants.VARIANT_ID, 
+		variants.CALCULATION_VERSION_ID, 
+		variants.VARIANT_NAME,
+		variants.COMMENT,
+		:iv_exchange_rate_type as EXCHANGE_RATE_TYPE_ID, 
+		:iv_report_currency_id as REPORT_CURRENCY_ID,
+		variants.SALES_PRICE,
+		variants.SALES_PRICE_CURRENCY_ID,
+		variants.VARIANT_ORDER,
+		variants.IS_SELECTED,
+		variants.VARIANT_TYPE,
+		variants.LAST_REMOVED_MARKINGS_ON,
+		variants.LAST_REMOVED_MARKINGS_BY,
+		variants.LAST_MODIFIED_ON,
+		variants.LAST_MODIFIED_BY,
+		variants.LAST_CALCULATED_ON,
+		variants.LAST_CALCULATED_BY
+		from "sap.plc.db::basis.t_variant_temporary" variants
+		where variants.CALCULATION_VERSION_ID = :iv_calculation_version_id
+        and variants.VARIANT_TYPE = 1;
+
+	lt_sum_variant_items = select sumVariantHeader.VARIANT_ID,
+		items.ITEM_ID,
+		ifnull(sumVariantItems.IS_INCLUDED, 1) as IS_INCLUDED,
+		ifnull(sumVariantItems.QUANTITY, items.QUANTITY) as QUANTITY,
+		ifnull(sumVariantItems.QUANTITY_STATE, 1) as QUANTITY_STATE,
+		items.QUANTITY_UOM_ID as QUANTITY_UOM_ID
+        from "sap.plc.db::basis.t_item" items
+		inner join :lt_sum_variant_header sumVariantHeader on sumVariantHeader.CALCULATION_VERSION_ID = items.CALCULATION_VERSION_ID
+		left outer join "sap.plc.db::basis.t_variant_item_temporary" sumVariantItems
+		on sumVariantItems.ITEM_ID = items.ITEM_ID and sumVariantItems.VARIANT_ID = sumVariantHeader.VARIANT_ID
+		where items.CALCULATION_VERSION_ID = :iv_calculation_version_id;
+
+	
+	IF IS_EMPTY(:lt_sum_variant_header) -- if sum variant does not exist we need to generate it
+		THEN 
+			lt_sum_variant_header = select
+			-1 as VARIANT_ID,
+			:iv_calculation_version_id as CALCULATION_VERSION_ID,
+			null as VARIANT_NAME,
+			null as COMMENT,
+			:iv_exchange_rate_type as EXCHANGE_RATE_TYPE_ID,
+			:iv_report_currency_id as REPORT_CURRENCY_ID,
+			null as SALES_PRICE,
+			calcV.REPORT_CURRENCY_ID as SALES_PRICE_CURRENCY_ID,
+			null as VARIANT_ORDER,
+			1 as IS_SELECTED,
+			1 as VARIANT_TYPE,
+			null as LAST_REMOVED_MARKINGS_ON,
+			null as LAST_REMOVED_MARKINGS_BY,
+			null as LAST_MODIFIED_ON,
+			null as LAST_MODIFIED_BY,
+			null LAST_CALCULATED_ON,
+			null as LAST_CALCULATED_BY
+			from "sap.plc.db::basis.t_calculation_version" calcV where CALCULATION_VERSION_ID = :iv_calculation_version_id;
+
+			lt_sum_variant_items = select 
+			-1 as VARIANT_ID,
+			items.ITEM_ID,
+			1 as IS_INCLUDED,
+			items.QUANTITY,
+			1 as QUANTITY_STATE,
+			items.QUANTITY_UOM_ID
+			from "sap.plc.db::basis.t_item" items
+			where items.CALCULATION_VERSION_ID = :iv_calculation_version_id;
+
+	END IF;
+
+
+    lt_variant_header = select variantTemp.VARIANT_ID, 
+		variantTemp.CALCULATION_VERSION_ID, 
+		variantTemp.VARIANT_NAME,
+		variantTemp.COMMENT,
+		variantTemp.EXCHANGE_RATE_TYPE_ID, 
+		variantTemp.REPORT_CURRENCY_ID,
+		variantTemp.SALES_PRICE,
+		variantTemp.SALES_PRICE_CURRENCY_ID,
+		variantTemp.VARIANT_ORDER,
+		variantTemp.IS_SELECTED,
+		variantTemp.VARIANT_TYPE,
+		variantTemp.LAST_REMOVED_MARKINGS_ON,
+		variantTemp.LAST_REMOVED_MARKINGS_BY,
+		variantTemp.LAST_MODIFIED_ON,
+		variantTemp.LAST_MODIFIED_BY,
+		variantTemp.LAST_CALCULATED_ON,
+		variantTemp.LAST_CALCULATED_BY
+    	from "sap.plc.db::basis.t_variant_temporary" variantTemp
+    	inner join :it_variant_ids variantInput on variantTemp.VARIANT_ID = variantInput.VARIANT_ID and variantTemp.CALCULATION_VERSION_ID = :iv_calculation_version_id
+		and variantTemp.VARIANT_TYPE = 0
+
+        union all
+        
+        select sumVariant.VARIANT_ID, 
+		sumVariant.CALCULATION_VERSION_ID, 
+		sumVariant.VARIANT_NAME,
+		sumVariant.COMMENT,
+		sumVariant.EXCHANGE_RATE_TYPE_ID, 
+		sumVariant.REPORT_CURRENCY_ID,
+		sumVariant.SALES_PRICE,
+		sumVariant.SALES_PRICE_CURRENCY_ID,
+		sumVariant.VARIANT_ORDER,
+		sumVariant.IS_SELECTED,
+		sumVariant.VARIANT_TYPE,
+		sumVariant.LAST_REMOVED_MARKINGS_ON,
+		sumVariant.LAST_REMOVED_MARKINGS_BY,
+		sumVariant.LAST_MODIFIED_ON,
+		sumVariant.LAST_MODIFIED_BY,
+		sumVariant.LAST_CALCULATED_ON,
+		sumVariant.LAST_CALCULATED_BY
+        from :lt_sum_variant_header sumVariant;
+
+    lt_variant_items = select variantItemTemp.VARIANT_ID,
+		variantItemTemp.ITEM_ID,
+		variantItemTemp.IS_INCLUDED,
+		variantItemTemp.QUANTITY,
+		variantItemTemp.QUANTITY_STATE,
+		variantItemTemp.QUANTITY_UOM_ID
+        from "sap.plc.db::basis.t_variant_item_temporary" variantItemTemp
+        inner join :lt_variant_header variantHeaders on variantItemTemp.VARIANT_ID = variantHeaders.VARIANT_ID
+		and variantItemTemp.CALCULATION_VERSION_ID = variantHeaders.CALCULATION_VERSION_ID and variantHeaders.VARIANT_TYPE = 0
+		and variantItemTemp.IS_INCLUDED = 1
+		
+		union all
+		
+		select sumVariantItems.VARIANT_ID,
+		sumVariantItems.ITEM_ID,
+		sumVariantItems.IS_INCLUDED,
+		sumVariantItems.QUANTITY,
+		sumVariantItems.QUANTITY_STATE,
+		sumVariantItems.QUANTITY_UOM_ID
+		from :lt_sum_variant_items sumVariantItems;
+
+	call "sap.plc.db.calcengine.procedures::p_calculate_variant"(
+		:iv_calculation_version_id,
+		:lt_variant_header,
+		:lt_variant_items,
+		ot_calculated_variant_header,
+        ot_calculated_variant_items,
+        ot_errors 
+);
+
+END;

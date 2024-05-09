@@ -1,0 +1,147 @@
+{
+    "definitions": {
+        "AddinConfigurationModel": {
+            "type": "object",
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Add-In certificate created at date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "Add-In created by user, ex: I055799"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Add-In certificate last modified by date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "Add-In last modified by user, ex: I055799"
+                },
+                "CONFIG_DATA": {
+                    "type": "array",
+                    "description": "Add-In Configuration stated as array of key-value pairs",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "CONFIG_KEY": {
+                                "type": "string",
+                                "description": "Configuration Key, ex: FOLDER_PATH"
+                            },
+                            "CONFIG_VALUE": {
+                                "type": "string",
+                                "description": "Configuration Value, ex: /etc/log/tmp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "AddinConfigurationResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "$ref": "#/definitions/AddinConfigurationModel"
+                }
+            }
+        },
+        "AddinConfigurationToBeCreated": {
+            "type": "object",
+            "required": [
+                "ADDIN_GUID",
+                "ADDIN_VERSION",
+                "CONFIG_DATA"
+            ],
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                },
+                "CONFIG_DATA": {
+                    "type": "array",
+                    "description": "Add-In Configuration stated as array of key-value pairs",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "CONFIG_KEY",
+                            "CONFIG_VALUE"
+                        ],
+                        "properties": {
+                            "CONFIG_KEY": {
+                                "type": "string",
+                                "description": "Configuration Key, ex: FOLDER_PATH"
+                            },
+                            "CONFIG_VALUE": {
+                                "type": "string",
+                                "description": "Configuration Value, ex: /etc/log/tmp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "AddinConfigurationToBeUpdated": {
+            "type": "object",
+            "required": [
+                "ADDIN_GUID",
+                "ADDIN_VERSION",
+                "LAST_MODIFIED_ON",
+                "CONFIG_DATA"
+            ],
+            "properties": {
+                "ADDIN_GUID": {
+                    "type": "string",
+                    "description": "Add-In GUID, ex: 09342CAF-BA6A-4AF2-B632-5A13B7BA58A0"
+                },
+                "ADDIN_VERSION": {
+                    "type": "string",
+                    "description": "Add-In Version, ex: 1.0.0.0"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Add-In Configuration last modified date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "CONFIG_DATA": {
+                    "type": "array",
+                    "description": "Add-In Configuration stated as array of key-value pairs",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "CONFIG_KEY",
+                            "CONFIG_VALUE"
+                        ],
+                        "properties": {
+                            "CONFIG_KEY": {
+                                "type": "string",
+                                "description": "Configuration Key, ex: FOLDER_PATH"
+                            },
+                            "CONFIG_VALUE": {
+                                "type": "string",
+                                "description": "Configuration Value, ex: /etc/log/tmp"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

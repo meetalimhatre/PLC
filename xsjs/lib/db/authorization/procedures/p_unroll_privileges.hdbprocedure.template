@@ -1,0 +1,117 @@
+PROCEDURE "sap.plc.db.authorization.procedures::p_unroll_privileges" ( 
+	IN it_privilege_object_filter "sap.plc.db.authorization.procedures::ts_privilege_object_filter"
+) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+
+-- read groups and their privileges
+lt_group_privs =
+	SELECT 
+		auth_g.OBJECT_TYPE,
+		auth_g.OBJECT_ID,
+		hier.QUERY_NODE AS USERGROUP_ID, 
+		MAX("sap.plc.db.authorization.functions::f_privilege_to_order"(auth_g.PRIVILEGE)) AS PRIVILEGE_ORDER
+	FROM 
+		"sap.plc.db.authorization.views::auth.V_GROUP_HIERARCHY" ( expression => 'ascendantsOrSelf(*)') AS hier
+	LEFT OUTER JOIN 
+		"sap.plc.db::auth.t_auth_usergroup" AS auth_g
+	ON 
+		hier.RESULT_NODE = auth_g.USERGROUP_ID
+		AND
+		(UCASE(auth_g.OBJECT_TYPE), auth_g.OBJECT_ID) IN (SELECT UCASE(OBJECT_TYPE), OBJECT_ID FROM :it_privilege_object_filter)
+	WHERE 
+		OBJECT_ID IS NOT NULL 
+		AND 
+		OBJECT_TYPE IS NOT NULL
+	GROUP BY 
+		hier.QUERY_NODE, 
+		auth_g.OBJECT_TYPE, 
+		auth_g.OBJECT_ID
+	;
+
+-- create list of group users and assign them privileges of the groups (highest)
+lt_privileges_from_groups =
+	SELECT 
+		gprivs.OBJECT_TYPE,
+		gprivs.OBJECT_ID,
+		user.USER_ID, 
+		gprivs.PRIVILEGE_ORDER
+	FROM
+		:lt_group_privs AS gprivs
+	LEFT OUTER JOIN
+		"sap.plc.db::auth.t_usergroup_user" AS user 
+	ON 
+		user.USERGROUP_ID = gprivs.USERGROUP_ID
+	WHERE
+		user.USER_ID IS NOT NULL --empty groups
+	;
+
+-- read list of users and their privileges
+lt_privileges_from_users = 
+	SELECT 
+		OBJECT_TYPE,
+		OBJECT_ID,
+		USER_ID,
+		"sap.plc.db.authorization.functions::f_privilege_to_order"(PRIVILEGE) AS PRIVILEGE_ORDER 
+	FROM 
+		"sap.plc.db::auth.t_auth_user"
+	WHERE
+		(UCASE(OBJECT_TYPE), OBJECT_ID) IN (SELECT UCASE(OBJECT_TYPE), OBJECT_ID  FROM :it_privilege_object_filter)
+	;
+
+--join both lists and keep the highest privilege per user/object
+lt_privileges = 
+	SELECT 
+		OBJECT_TYPE,
+		OBJECT_ID,
+		USER_ID,
+		"sap.plc.db.authorization.functions::f_order_to_privilege"(MAX(PRIVILEGE_ORDER)) AS PRIVILEGE
+	FROM
+	(
+		SELECT * FROM :lt_privileges_from_groups
+		UNION
+		SELECT * FROM :lt_privileges_from_users
+	)
+	GROUP BY 
+		OBJECT_TYPE, 
+		OBJECT_ID, 
+		USER_ID
+	;
+
+--write update values for type 'Project'
+lt_project_auth = 
+	SELECT 
+		OBJECT_ID AS PROJECT_ID,
+		USER_ID,
+		PRIVILEGE
+	FROM
+		:lt_privileges
+	WHERE 
+		UCASE(OBJECT_TYPE) = UCASE('Project')
+		AND
+		PRIVILEGE IS NOT NULL
+	;
+
+DELETE FROM 
+	"sap.plc.db::auth.t_auth_project" 
+WHERE 
+	PROJECT_ID IN 
+		(
+		SELECT 
+			OBJECT_ID AS PROJECT_ID 
+		FROM :it_privilege_object_filter 
+		WHERE 
+			UCASE(OBJECT_TYPE) = UCASE('Project')
+		)
+	;
+	
+INSERT INTO "sap.plc.db::auth.t_auth_project" 
+	SELECT * FROM :lt_project_auth
+	;
+	
+END
+
+

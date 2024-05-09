@@ -1,0 +1,98 @@
+* {
+    font-family: "BentonSans", Arial, Helvetica, sans-serif;
+    font-weight: 100;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    min-width: 700px;
+}
+.header {
+    background-color: #30608D;
+}
+.header > .navigation {
+    padding: 20px;
+    height: 45px;
+}
+.header > .navigation > .image {
+    left: 0;
+    float: left;
+    height: 32px;
+    width: 65px;
+    background-image: url('images/sap-logo.svg');
+    background-size: 100%;
+}
+.header > .navigation > .portal {
+    position: absolute;
+    display: block;
+    right: 20px;
+    color: #FFF;
+    text-decoration: none;
+}
+.header > .content {
+    padding: 30px;
+}
+.header > .content > span.title {
+    color: #FFF;
+    font-size: 40px;
+    font-weight: 400;
+    display: block;
+    line-height: 80px;
+}
+.header > .content > span.description {
+    display: block;
+    line-height: 60px;
+    color: #FFF;
+}
+.header > .content > .button {
+    color: #30608D;
+    display: inline-block;
+    font-weight: normal;
+    border-radius: 5px;
+    background-color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-color: #fff;
+    text-decoration: none;
+    margin-top: 20px;
+}
+.container {
+    color: #30608D;
+}
+.container > span.title {
+    display: block;
+    font-size: 40px;
+    padding: 30px;
+}
+.container > .note {
+    display: block;
+    width: 50%;
+    text-align: left;
+    padding-top: 40px;
+    line-height: 25px;
+}
+.container > .note > code {
+    padding: 0 5px;
+    font-weight: 350;
+    font-family: Monaco, monospace;
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.footer > ul {
+    display: flex;
+    justify-content: center;
+    float: none;
+    list-style: none;
+    font-size: 12px;
+}
+.footer > ul > li + li *:before {
+    content: "•";
+    padding: 0 13px 0 10px;
+}
+.footer > ul > li > a {
+    color: #30608D;
+    text-decoration: none;
+}

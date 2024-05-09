@@ -1,0 +1,225 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_material_plant" (
+    IN INPUT_TABLE TABLE (
+        "MATERIAL_ID" NVARCHAR(40),
+    	"PLANT_ID" NVARCHAR(8),
+    	"OVERHEAD_GROUP_ID" NVARCHAR(10),
+    	"VALUATION_CLASS_ID" NVARCHAR(4),
+    	"MATERIAL_LOT_SIZE" DECIMAL(28, 7),
+    	"MATERIAL_LOT_SIZE_UOM_ID" NVARCHAR(3),
+    	"_SOURCE" TINYINT
+        {{#if Material_Plant.customFields}}
+            {{ddl_masterdataCustomFieldsWithoutUnit Material_Plant}}
+        {{/if}}
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";     
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'PLANT_ID'                                                  as FIELD_NAME ,
+            it.PLANT_ID                                                 as FIELD_VALUE,
+            'Unknown Plant ID for Material ID ' || it.MATERIAL_ID       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                     as MESSAGE_TIME ,
+            'ERROR'                                                     as MESSAGE_TYPE ,
+            't_material_plant'                                          as TABLE_NAME ,
+            'Replication_Update'                                        as OPERATION  ,
+            :lv_run_id                                                  as RUN_ID
+        from :INPUT_TABLE as it
+        where it.PLANT_ID not in (select PLANT_ID from "sap.plc.db::basis.t_plant")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'MATERIAL_ID'                                               as FIELD_NAME ,
+            it.MATERIAL_ID                                              as FIELD_VALUE,
+            'Unknown Material ID for Plant ID ' || it.PLANT_ID          as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                     as MESSAGE_TIME ,
+            'ERROR'                                                     as MESSAGE_TYPE ,
+            't_material_plant'                                          as TABLE_NAME ,
+            'Replication_Update'                                        as OPERATION  ,
+            :lv_run_id                                                  as RUN_ID
+        from :INPUT_TABLE as it
+        where it.MATERIAL_ID not in (select MATERIAL_ID from "sap.plc.db::basis.t_material")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'OVERHEAD_GROUP_ID'                                                 as FIELD_NAME ,
+            it.OVERHEAD_GROUP_ID                                                as FIELD_VALUE,
+            'Unknown Overhead Group ID for Plant ID ' || it.PLANT_ID            as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material_plant'                                                  as TABLE_NAME ,
+            'Replication_Update'                                                as OPERATION  ,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where IFNULL(it.OVERHEAD_GROUP_ID, '') <> '' AND it.OVERHEAD_GROUP_ID not in (select OVERHEAD_GROUP_ID from "sap.plc.db::basis.t_overhead_group")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )-- check if plant exists
+        select 
+            'VALUATION_CLASS_ID'                                            as FIELD_NAME ,
+            it.VALUATION_CLASS_ID                                           as FIELD_VALUE,
+            'Unknown Valuation Class ID for Plant ID ' || it.PLANT_ID       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                         as MESSAGE_TIME ,
+            'ERROR'                                                         as MESSAGE_TYPE ,
+            't_material_plant'                                              as TABLE_NAME ,
+            'Replication_Update'                                            as OPERATION,
+            :lv_run_id                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where IFNULL(it.VALUATION_CLASS_ID, '') <> '' AND it.VALUATION_CLASS_ID not in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'MATERIAL_LOT_SIZE_UOM_ID'                                              as FIELD_NAME ,
+            it.MATERIAL_LOT_SIZE_UOM_ID                                             as FIELD_VALUE,
+            'Unknown Material Lot UOM ID for Plant ID ' || it.PLANT_ID              as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                 as MESSAGE_TIME ,
+            'ERROR'                                                                 as MESSAGE_TYPE ,
+            't_material_plant'                                                      as TABLE_NAME   ,
+            'Replication_Update'                                                    as OPERATION    ,
+            :lv_run_id                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where it.MATERIAL_LOT_SIZE_UOM_ID not in (select UOM_ID from "sap.plc.db::basis.t_uom")
+    ;
+    
+    lt_update_records =
+        select it.MATERIAL_ID, it.PLANT_ID, it.OVERHEAD_GROUP_ID, it.VALUATION_CLASS_ID, it.MATERIAL_LOT_SIZE, it.MATERIAL_LOT_SIZE_UOM_ID, it._SOURCE
+        {{masterdataCustomFieldsWithPrefixWithoutUnit Material_Plant 'it'}} 
+        from 
+        (select *, 
+            Count(*) OVER (PARTITION BY PLANT_ID, MATERIAL_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore not existing Plants, Materials, Overhead Groups, Valuation Classes, UOM
+            and it.PLANT_ID in (select PLANT_ID from "sap.plc.db::basis.t_plant") 
+            and it.MATERIAL_ID in (select MATERIAL_ID from "sap.plc.db::basis.t_material")
+            and (IFNULL(it.OVERHEAD_GROUP_ID,'') = '' or it.OVERHEAD_GROUP_ID in (select OVERHEAD_GROUP_ID from "sap.plc.db::basis.t_overhead_group"))
+            and (IFNULL(it.VALUATION_CLASS_ID,'') = '' or it.VALUATION_CLASS_ID  in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class"))
+            and (IFNULL(it.MATERIAL_LOT_SIZE_UOM_ID,'') = '' or it.MATERIAL_LOT_SIZE_UOM_ID  in (select UOM_ID from "sap.plc.db::basis.t_uom"))
+            -- ignore unchanged records 
+    	except
+              (select std.MATERIAL_ID, std.PLANT_ID, std.OVERHEAD_GROUP_ID, std.VALUATION_CLASS_ID, std.MATERIAL_LOT_SIZE, std.MATERIAL_LOT_SIZE_UOM_ID, std._SOURCE
+               {{masterdataCustomFieldsWithPrefixWithoutUnit Material_Plant 'plcExtTable'}}
+                    from "sap.plc.db::basis.t_material_plant" as std
+                    {{#if Material_Plant.customFields}}
+                    left outer join {{t_extensionTable Material_Plant}} as plcExtTable
+                        on  std.MATERIAL_ID         = plcExtTable.MATERIAL_ID
+                        and std.PLANT_ID            = plcExtTable.PLANT_ID
+                        and std._VALID_FROM         = plcExtTable._VALID_FROM
+                    {{/if}}
+                    where _VALID_TO IS NULL
+                    AND (std.MATERIAL_ID, std.PLANT_ID) in (select MATERIAL_ID, PLANT_ID from :INPUT_TABLE));
+              
+    SELECT COUNT(MATERIAL_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_material_plant" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.MATERIAL_ID, tbl.PLANT_ID)
+    		      in (select MATERIAL_ID, PLANT_ID
+    			      from :lt_update_records as upd 
+    			      where upd.MATERIAL_ID = tbl.MATERIAL_ID
+    			        and upd.PLANT_ID = tbl.PLANT_ID
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- insert the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_material_plant" 
+    		(MATERIAL_ID, PLANT_ID, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, MATERIAL_LOT_SIZE, MATERIAL_LOT_SIZE_UOM_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select MATERIAL_ID, PLANT_ID, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, MATERIAL_LOT_SIZE, MATERIAL_LOT_SIZE_UOM_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+
+        {{#if Material_Plant.customFields}}
+        -- also do Custom Fields
+        INSERT INTO {{t_extensionTable Material_Plant}} 
+            (
+                MATERIAL_ID,
+                PLANT_ID,
+                _VALID_FROM 
+                {{masterdataCustomFieldsWithoutUnit Material_Plant}} 
+            )
+            select 
+                MATERIAL_ID,  
+                PLANT_ID,             
+                :lv_current_utctimestamp as _VALID_FROM
+                {{masterdataCustomFieldsWithoutUnit Material_Plant}}
+            from :lt_update_records;
+        {{/if}}
+
+	END IF;
+END;

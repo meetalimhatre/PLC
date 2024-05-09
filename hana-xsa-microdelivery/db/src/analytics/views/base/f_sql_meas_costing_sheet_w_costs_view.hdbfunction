@@ -1,0 +1,144 @@
+function  "sap.plc.analytics.views.base::f_sql_meas_costing_sheet_w_costs_view" 
+(
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000)
+)
+RETURNS TABLE(
+	"CALCULATION_VERSION_ID" INTEGER, 
+	"REPORT_CURRENCY_ID" NVARCHAR(3), 
+	"ITEM_ID" INTEGER, 
+	"IS_ROLLED_UP_VALUE" TINYINT, 
+	"IS_OVERHEAD_ROLLED_UP" TINYINT, 
+	"COSTING_SHEET_ROW_ID" NVARCHAR(20), 
+	"COSTING_SHEET_ROW_TYPE" NVARCHAR(20), 
+	"COSTING_SHEET_OVERHEAD_ROW_ID" INTEGER, 
+	"ACCOUNT_ID" NVARCHAR(10), 
+	"COST" Decimal(28,7), 
+	"COST_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST2" DECIMAL (28, 7), 
+	"COST2_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST2_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST3" DECIMAL (28, 7), 
+	"COST3_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST3_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"TOTAL_QUANTITY" DECIMAL(28,7), 
+	"TOTAL_QUANTITY_UOM_ID" NVARCHAR(3) 
+	)
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+begin
+var_out = SELECT
+	calcVersion.calculation_version_id,
+	calcVersion.report_currency_id,
+	item.item_id,
+	csvalues.is_rolled_up_value,
+	csvalues.is_overhead_rolled_up,
+	csvalues.costing_sheet_row_id,
+	csvalues.costing_sheet_row_type,
+	csvalues.costing_sheet_overhead_row_id,
+	csvalues.account_id,
+	csvalues.cost,
+	csvalues.cost_fixed_portion,
+	csvalues.cost_variable_portion,
+	csvalues.cost2,
+	csvalues.cost2_fixed_portion,
+	csvalues.cost2_variable_portion,
+	csvalues.cost3,
+	csvalues.cost3_fixed_portion,
+	csvalues.cost3_variable_portion,
+	IFNULL(item.total_quantity, 0) AS total_quantity,
+ 	item.total_quantity_uom_id
+FROM "sap.plc.db::basis.t_calculation_version" calcVersion
+	-- join on t_item required to fetch also those items where no costing sheet rows were stored for
+	INNER JOIN "sap.plc.db::basis.t_item" item
+		ON item.calculation_version_id = calcVersion.calculation_version_id
+		AND (:versionId = '' OR item.calculation_version_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:versionId)))
+	INNER JOIN "sap.plc.db::basis.t_calculation" calculation
+		ON calculation.calculation_id = calcVersion.calculation_id
+		AND calculation.project_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId))
+	LEFT OUTER JOIN (
+        	-- select costs based on calculated costing sheets rows
+        SELECT
+		    csvalues.calculation_version_id,
+    		csvalues.item_id,
+	    	csvalues.is_rolled_up_value,
+    		csvalues.is_overhead_rolled_up,
+	    	csvalues.costing_sheet_row_id,
+				csrows.costing_sheet_row_type,
+    		csvalues.costing_sheet_overhead_row_id,
+	    	csvalues.account_id,
+    		csvalues.cost,
+    		csvalues.cost_fixed_portion,
+	    	csvalues.cost_variable_portion,
+			csvalues.cost2,
+    		csvalues.cost2_fixed_portion,
+	    	csvalues.cost2_variable_portion,
+			csvalues.cost3,
+    		csvalues.cost3_fixed_portion,
+	    	csvalues.cost3_variable_portion
+	    FROM "sap.plc.analytics.views.base::f_sql_meas_costing_sheet_view"(:projectId,:versionId) csvalues
+			LEFT OUTER JOIN	"sap.plc.analytics.views.base::v_sql_meas_costing_sheet_rows" csrows  
+						ON csvalues.costing_sheet_row_id = csrows.costing_sheet_row_id
+							and csvalues.calculation_version_id = csrows.calculation_version_id
+		    WHERE csvalues.is_leaf = 1 	                                                        -- include all values for leaf items
+			    OR (csvalues.is_leaf = 0 and csvalues.is_rolled_up_value = 1)                         -- include rolled-up overheads for assemblies
+			    
+	    UNION ALL
+    	-- Add total costs based on calculated values per item
+	    SELECT
+		    totalcosts.calculation_version_id,
+		    totalcosts.item_id,
+    		0 as is_rolled_up,
+	    	0 as is_overhead_rolled_up,
+    		'Total Cost' as costing_sheet_row_id,
+				null as costing_sheet_row_type,
+		    0 as costing_sheet_overhead_row_id,
+    		totalcosts.account_id,
+	    	totalcosts.total_cost as cost,
+		    totalcosts.total_cost_fixed_portion as cost_fixed_portion,
+    		totalcosts.total_cost_variable_portion as cost_variable_portion,
+			totalcosts.total_cost2 as cost2,
+		    totalcosts.total_cost2_fixed_portion as cost2_fixed_portion,
+    		totalcosts.total_cost2_variable_portion as cost2_variable_portion,
+			totalcosts.total_cost3 as cost3,
+		    totalcosts.total_cost3_fixed_portion as cost3_fixed_portion,
+    		totalcosts.total_cost3_variable_portion as cost3_variable_portion
+        FROM  "sap.plc.db::basis.t_item" totalcosts
+        
+	    UNION ALL
+	    -- Add other costs based on calculated values per item
+	    SELECT
+		    othercosts.calculation_version_id,
+    		othercosts.item_id,
+	    	0 as is_rolled_up,
+		    0 as is_overhead_rolled_up,
+    		'Other Costs' as costing_sheet_row_id,
+				null as costing_sheet_row_type,
+	    	0 as costing_sheet_overhead_row_id,
+		    othercosts.account_id,
+    		othercosts.other_cost as cost,
+	    	othercosts.other_cost_fixed_portion as cost_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost_variable_portion,
+			othercosts.other_cost as cost2,
+	    	othercosts.other_cost_fixed_portion as cost2_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost2_variable_portion,
+			othercosts.other_cost as cost3,
+	    	othercosts.other_cost_fixed_portion as cost3_fixed_portion,
+    		othercosts.other_cost_variable_portion as cost3_variable_portion
+	    FROM  "sap.plc.db::basis.t_item" othercosts
+		    WHERE othercosts.other_cost <> 0
+			    OR othercosts.other_cost_fixed_portion <> 0
+			    OR othercosts.other_cost_variable_portion <> 0
+	    ) csvalues
+	ON item.calculation_version_id = csvalues.calculation_version_id
+	AND item.item_id = csvalues.item_id; 
+return :var_out;
+END;
+-- join on t_item required to fetch also those items where no costing sheet rows were stored for
+-- select costs based on calculated costing sheets rows
+-- include all values for leaf items
+-- include rolled-up overheads for assemblies
+
+-- Add total costs based on calculated values per item
+-- Add other costs based on calculated values per item

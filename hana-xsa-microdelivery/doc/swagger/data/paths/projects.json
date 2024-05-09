@@ -1,0 +1,934 @@
+{
+    "projects": {
+        "get": {
+            "tags": [
+                "projects"
+            ],
+            "summary": "Gets projects",
+            "description": "",
+            "operationId": "projectsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: PROJECT_ID=P1 will get only accounts with the PROJECT_ID=P1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Inspection",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "get top projects",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "folderId",
+                    "in": "query",
+                    "description": "Get all projects inside the requested id",
+                    "required": false,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_READ": [
+                        "read:projects"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "projects"
+            ],
+            "summary": "Create, Open, Close a project.",
+            "description": "Using parameter action with value create it will create a new project with the values from request. When action is open or close it will open or close a specific project.",
+            "operationId": "projectsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "action",
+                    "in": "query",
+                    "description": "Parameter that specifies which action is performed: open, close or create",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "create",
+                        "open",
+                        "close"
+                    ]
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "Id of the project",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Project that needs to be created, opened or closed (For open and close the request body contains only PROJECT_ID)",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsPostPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK (It is returned when the open or close actions succeed. When close action succeeds and empty response is returned.)",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsResponse"
+                    }
+                },
+                "201": {
+                    "description": "Created",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "422": {
+                    "description": "General Entity Already Exists",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityAlreadyExistsError"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_OPEN": [
+                        "open:projects"
+                    ]
+                },
+                {
+                    "Privileges.PROJECTS_CREATE": [
+                        "create:projects"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.CONTROLLING_AREA_READ": [
+                        "read:controllingArea"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "projects"
+            ],
+            "summary": "Update a project.",
+            "description": "The implementation updates the database entry in t_projects based on JSON data in the request body. This update uses a opt-in approach, which means only properties that are contained in the request are updated. Properties that shall be set to <code>NULL</code> must be explicitly set to to <code>null</code> in the request data. last_modified_on/by fields are set automatically.",
+            "operationId": "projectsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Project that needs to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_UPDATE": [
+                        "update:projects"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.CONTROLLING_AREA_READ": [
+                        "read:controllingArea"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "projects"
+            ],
+            "summary": "Delete projects",
+            "description": "",
+            "operationId": "projectsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Project that is deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectsOpenCloseDeleteBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input. Following PLC error codes are possible: GENERAL_VALIDATION_ERROR if request content is invalid; PROJECT_IS_STILL_OPENED_ERROR if project is opened; CALCULATIONVERSION_IS_FROZEN_ERROR if any of calculation versions of the project is frozen; CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if any of calculation versions of the project is referenced in another calculation;CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if any of calculation versions of the project is referenced in another calculation; GENERAL_ENTITY_PART_OF_CALCULATION_ERROR if any of calculation version of the project is under calculation;"
+                },
+                "404": {
+                    "description": "If the requested project is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_DELETE": [
+                        "delete:projects"
+                    ]
+                }
+            ]
+        }
+    },
+    "projects?id={id}&action=calculate_lifecycle_versions&overwriteManualVersions={overwriteManualVersions}": {
+        "post": {
+            "tags": [
+                "projects"
+            ],
+            "summary": "Triggers the calculation of lifecycle versions. The calculation is executed in an asynchronous manner, meaning that the calculation is not done before clients receive the response to this request. The response contains the task created for the calculation. This information can be used by clients to get the current status of the calculation by querying .../tasks?{id}",
+            "description": "Modeled as extra resource since swagger is currently not able to express different response types depending on the parameter set. If possible fix this if a new swagger version is used",
+            "operationId": "projectCalculateLifecycle",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "id of the project for which the lifecycle versions shall be generated",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "action",
+                    "in": "path",
+                    "description": "Indicates the desired action, here calculate_lifecycle_versions in order to calculate the lifecycle versions. With the first calculation, the versions are generated and their values are written. After an initial (first) calculation, only the values inside the versions are overwritten. Versions keep their Ids.",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "overwriteManualVersions",
+                    "in": "path",
+                    "description": "Indicates the behavior when manually edited versions exist and decides if their values are overwritten or not. If the value is set to false, opened manual edited lifecycle versions will n ot cause a conflict.",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "name": "body",
+                    "in": "body",
+                    "required": false,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectCalculateLifecycleVersions"
+                    }
+                }    
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/TaskResponse"
+                    }
+                },
+                "403": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    },
+                    "description": "Forbidden. If the requesting user has not sufficient access rights (CREATE_EDIT) to trigger the calculation"
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found. If no project for the specified id can be found"
+                },
+                "400": {
+                    "description": "Bad request. In case the requesting user has not opened the project in write-mode",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageProjectNotWritableError"
+                    }
+                },
+                "409": {
+                    "description": "Conflict. In case another client already has requested the calculation of lifecycle versions for a project and the calculation is still running. Another case is when one or more users has a version opened",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageCalculationLifecycleVersionsConflict"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_CREATE": [
+                        "create:projects"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documenttype"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },                
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        }
+    },
+    "projects/activity-price-surcharges?id={id}": {
+        "get": {
+            "tags": [
+                "projects"
+            ],
+            "description": "Delivers the definition for all activity price surcharges in the project",
+            "operationId": "projectActivitySurchargesGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "Id of the project for which the activity price surcharges shall be retrieved",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectActivityPriceSurchargesGetResponse"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a project for the parameter id cannot be found)"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_READ": [
+                        "read:projects"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "projects"
+            ],
+            "description": "Replaces all defined activity price surcharges with the data of the request body",
+            "operationId": "projectActivitySurchargesPut",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "Id of the project for which the activity price surcharges shall be set",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "body",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectActivityPriceSurchargesPutRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectActivityPriceSurchargesPutResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors; or GENERAL_ENTITY_NOT_CURRENT_ERROR if an concurrent edit was detected; or GENERAL_UNIQUE_CONSTRAINT_VIOLATED_ERROR if the surcharge definition is not unique.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a project for the parameter id cannot be found)"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_UPDATE": [
+                        "update:projects"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.CONTROLLING_AREA_READ": [
+                        "read:controllingArea"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        }
+    },
+    "projects/material-price-surcharges?id={id}": {
+        "get": {
+            "tags": [
+                "projects"
+            ],
+            "description": "Delivers the definition for all material price surcharges in the project",
+            "operationId": "projectMaterialPriceSurchargesGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "Id of the project for which the material price surcharges shall be retrieved",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectMaterialPriceSurchargesGetResponse"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a project for the parameter id cannot be found)"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_READ": [
+                        "read:projects"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.CONTROLLING_AREA_READ": [
+                        "read:controllingArea"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "projects"
+            ],
+            "description": "Replaces all defined material price surcharges with the data of the request body",
+            "operationId": "projectMaterialPriceSurchargesPut",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "Id of the project for which the material price surcharges shall be set",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "body",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectMaterialPriceSurchargesPutRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/projects_definitions.json#/definitions/ProjectMaterialPriceSurchargesPutResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors; or GENERAL_ENTITY_NOT_CURRENT_ERROR if a concurrent edit was detected; or GENERAL_UNIQUE_CONSTRAINT_VIOLATED_ERROR if the surcharge definition is not unique.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a project for the parameter id cannot be found)"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROJECTS_UPDATE": [
+                        "update:projects"
+                    ]
+                }
+            ]
+        }
+    }
+}

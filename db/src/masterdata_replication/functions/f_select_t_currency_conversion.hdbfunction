@@ -1,0 +1,29 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_currency_conversion" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"EXCHANGE_RATE_TYPE_ID"	NVARCHAR(20),
+	"FROM_CURRENCY_ID"	NVARCHAR(3),
+	"TO_CURRENCY_ID"	NVARCHAR(3),
+	"FROM_FACTOR"	INTEGER,
+	"TO_FACTOR"	INTEGER,
+	"RATE"	DECIMAL(28, 7),
+	"VALID_FROM"	DATE,
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"EXCHANGE_RATE_TYPE_ID"	NVARCHAR(20),
+		"FROM_CURRENCY_ID"	NVARCHAR(3),
+		"TO_CURRENCY_ID"	NVARCHAR(3),
+		"FROM_FACTOR"	INTEGER,
+		"TO_FACTOR"	INTEGER,
+		"RATE"	DECIMAL(28, 7),
+		"VALID_FROM"	DATE,
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_currency_conversion', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

@@ -1,0 +1,253 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_price_determination_material" ( 
+        IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN it_calculation_version       "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",
+    	IN iv_use_multiple_plants       NVARCHAR(1),
+		IN lc_consider_vendor_filters	SMALLINT,
+		OUT ot_all_prices 	    		"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_all_prices_material_input_output" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+	
+    lc_material_price  INTEGER DEFAULT 1;
+	lc_wildcard 	   NVARCHAR(1) DEFAULT '*';
+	lv_controlling_area_id nvarchar(4);
+	lv_project_id nvarchar(35);
+	lv_master_data_timestamp timestamp;
+	lv_valuation_date  timestamp;
+	lv_customer_id nvarchar(10);
+	lv_material_price_strategy_id nvarchar(20);
+	lv_sql nvarchar(250);
+	lv_first_criteria nvarchar(25);
+	lv_second_criteria nvarchar(25);
+	lv_third_criteria nvarchar(25);
+	lv_fourth_criteria nvarchar(25);
+	lv_fifth_criteria nvarchar(25);
+	lv_is_generic_filter	  INTEGER DEFAULT 0;
+	lv_is_vendor_value_filter INTEGER DEFAULT 0;
+
+BEGIN
+
+lv_controlling_area_id = :it_calculation_version.controlling_area_id[1];
+lv_project_id = :it_calculation_version.project_id[1];
+lv_master_data_timestamp = :it_calculation_version.master_data_timestamp[1];
+lv_valuation_date = :it_calculation_version.valuation_date[1];
+lv_customer_id = :it_calculation_version.customer_id[1];
+lv_material_price_strategy_id = :it_calculation_version.material_price_strategy_id[1];
+/****************************************************************** 
+	Price Determination 
+ ******************************************************************/
+-- Procedure used to determine/select material prices for several items. 
+--
+-- Prerequisites: items should be leaves
+-- Input:  
+-- 		- it_items => table type of items for which material prices should be determined
+--      - it_calculation_version => table structure that contains columns from t_calculation_version_temporary. This structure contains all the needed information:
+--			- lv_controlling_area_id => controlling area of the calculation
+--			- lv_project_id => project_id
+--			- lv_master_data_timestamp => masterdata timestamp of the calculation version
+--			- lv_valuation_date => valuation date of the calculation version
+--			- lv_customer_id => customer_id
+--          - lv_material_price_strategy_id => material_price_strategy_id of the version that is used later to obtain prices
+--		- iv_use_multiple_plants => flag to determine if prices for multiple plants are considered		 
+-- Output:
+--		- ot_all_prices => contains all determined material prices
+--
+-- Logic:
+--1. Get all the price sources for material ( price_source_type_id = 1 )
+--2. Determine all the material prices
+--3. Get the filters for the current Controlling Area
+--4. Apply the filters on determined material prices
+
+/***************************** 
+	Get material prices for items 
+ *****************************/
+ 
+-- Get all price determination sources of type material that have their price_determination_strategy_id equal to material_price_strategy_id set on version level
+lt_material_price_strategy_sources = select  determination_strategy.price_source_id, determination_strategy.price_source_type_id,
+											 determination_strategy.determination_sequence, price_source.confidence_level_id 
+											from "sap.plc.db::basis.t_price_determination_strategy_price_source" as determination_strategy
+										inner join 	"sap.plc.db::basis.t_price_determination_strategy" as price_determination
+											on determination_strategy.PRICE_DETERMINATION_STRATEGY_ID = price_determination.PRICE_DETERMINATION_STRATEGY_ID
+											and determination_strategy.PRICE_DETERMINATION_STRATEGY_TYPE_ID = price_determination.PRICE_DETERMINATION_STRATEGY_TYPE_ID
+										inner join "sap.plc.db::basis.t_price_source" as price_source
+											on determination_strategy.PRICE_SOURCE_ID = price_source.PRICE_SOURCE_ID
+											and determination_strategy.PRICE_SOURCE_TYPE_ID = price_source.PRICE_SOURCE_TYPE_ID
+										where determination_strategy.price_determination_strategy_type_id = lc_material_price
+										and determination_strategy.price_determination_strategy_id = :lv_material_price_strategy_id;
+
+lt_materials = select material.material_id 
+				   from "sap.plc.db::basis.t_material" as material
+				   where material._valid_from <= :lv_master_data_timestamp and (material._valid_to > :lv_master_data_timestamp or material._valid_to is null)
+				   and material.material_id is not null
+				   and material.material_id <> ''
+				   and material.material_id in (select material_id from :it_items);
+
+--select all plants for the current controlling area
+lt_plants = select plant.plant_id
+			from "sap.plc.db::basis.t_plant" as plant
+			inner join "sap.plc.db::basis.t_company_code" as company_code 
+				on company_code.company_code_id = plant.company_code_id
+			    and company_code._valid_from <= :lv_master_data_timestamp and (company_code._valid_to > :lv_master_data_timestamp or company_code._valid_to is null)
+			    and company_code.controlling_area_id = :lv_controlling_area_id
+			where plant._valid_from <= :lv_master_data_timestamp and (plant._valid_to > :lv_master_data_timestamp or plant._valid_to is null)
+			union
+			select :lc_wildcard
+			from "sap.plc.db::DUMMY";
+
+lt_vendors = select vendor.vendor_id
+			 from "sap.plc.db::basis.t_vendor" as vendor
+			 where vendor._valid_from <= :lv_master_data_timestamp and (vendor._valid_to > :lv_master_data_timestamp or vendor._valid_to is null)
+			 union
+			 select :lc_wildcard
+			 from "sap.plc.db::DUMMY";
+
+select IS_VENDOR_GENERIC_FILTER, IS_VENDOR_VALUE_FILTER into lv_is_generic_filter, lv_is_vendor_value_filter
+					   from "sap.plc.db::basis.t_price_determination_strategy" as determination_strategy
+					   where determination_strategy.price_determination_strategy_type_id = lc_material_price
+					   and determination_strategy.price_determination_strategy_id = :lv_material_price_strategy_id;
+
+lt_all_material_prices = 	select   price.price_id, price.price_source_id, price.material_id, price.plant_id, price.vendor_id, price.project_id,
+										 price.valid_from, price.customer_id, price.valid_to, price.valid_from_quantity, price.valid_to_quantity,
+										 price.purchasing_group, price.purchasing_document, price.local_content,
+                                         price._valid_from_first_version, price._created_by_first_version,
+										 price.price_fixed_portion, price.price_variable_portion, price.transaction_currency_id, price.price_unit,
+										 price.price_unit_uom_id, price.IS_PRICE_SPLIT_ACTIVE, price.IS_PREFERRED_VENDOR,
+										 price._valid_from, price._valid_to, price._source, price_strategy_source.confidence_level_id,
+										 price_strategy_source.determination_sequence, price_strategy_source.price_source_type_id
+										 {{masterdataCustomFieldsWithPrefix Material_Price 'price'}}
+								from( 	
+					 				select
+									    plcTable.PRICE_ID, plcTable.PRICE_SOURCE_ID, plcTable.MATERIAL_ID, plcTable.PLANT_ID, plcTable.VENDOR_ID,
+										plcTable.PROJECT_ID,					
+										plcTable.VALID_FROM, plcTable.CUSTOMER_ID, plcTable.VALID_TO, plcTable.VALID_FROM_QUANTITY, plcTable.VALID_TO_QUANTITY,
+										plcTable.PURCHASING_GROUP, plcTable.PURCHASING_DOCUMENT, plcTable.LOCAL_CONTENT, plcTable._VALID_FROM_FIRST_VERSION, plcTable._CREATED_BY_FIRST_VERSION,
+										plcTable.PRICE_FIXED_PORTION, plcTable.PRICE_VARIABLE_PORTION, plcTable.TRANSACTION_CURRENCY_ID, plcTable.PRICE_UNIT,
+										plcTable.PRICE_UNIT_UOM_ID,
+										case  when price_components.price_id is not null then plcTable.IS_PRICE_SPLIT_ACTIVE else 0
+                                    	end as IS_PRICE_SPLIT_ACTIVE,
+										plcTable.IS_PREFERRED_VENDOR, plcTable._VALID_FROM, plcTable._VALID_TO, plcTable._SOURCE
+										{{customFieldsWithTablePrefix Material_Price}}
+						 			from "sap.plc.db::basis.t_material_price" as plcTable
+						 			LEFT OUTER JOIN {{t_extensionTable Material_Price}} as plcExtTable ON 
+						 				plcTable.PRICE_ID = plcExtTable.PRICE_ID
+							 			and plcTable._VALID_FROM = plcExtTable._VALID_FROM	
+									LEFT OUTER JOIN (SELECT DISTINCT components.PRICE_ID, components._VALID_FROM
+                                   		FROM "sap.plc.db::basis.t_price_component" as components  
+	                               			 INNER JOIN  "sap.plc.db::basis.t_material_price" as material_price
+	                               			 ON material_price.PRICE_ID = components.PRICE_ID
+											 and material_price._VALID_FROM = components._VALID_FROM	
+										     and components.CONTROLLING_AREA_ID = :lv_controlling_area_id
+									) as price_components
+									on 	plcTable.PRICE_ID = price_components.PRICE_ID and plcTable._VALID_FROM = price_components._VALID_FROM	  
+							        where plcTable.valid_from <= :lv_valuation_date 
+									     	and (plcTable.valid_to >= :lv_valuation_date or plcTable.valid_to is null)
+								            and plcTable._VALID_FROM <= :lv_master_data_timestamp 
+								            and (plcTable._VALID_TO > :lv_master_data_timestamp or plcTable._VALID_TO is null)
+								            and (plcTable.PROJECT_ID in (:lc_wildcard, :lv_project_id))
+								            and (plcTable.CUSTOMER_ID in (:lc_wildcard, :lv_customer_id))
+					          
+							   ) as price
+					   		   inner join :lt_material_price_strategy_sources as price_strategy_source
+									on price_strategy_source.price_source_id = price.price_source_id
+							   where price.material_id in (select material_id from :lt_materials)
+							   and (price.plant_id in (select plant_id from :lt_plants))
+							   and (price.vendor_id in (select vendor_id from :lt_vendors));
+
+lt_material_prices = select price.price_id, item.item_id,item.IS_DISABLING_PRICE_DETERMINATION,
+								price.price_source_id, price.material_id, 
+								nullif(price.plant_id, :lc_wildcard) as plant_id,
+								nullif(price.vendor_id, :lc_wildcard) as vendor_id,
+								item.vendor_id as item_vendor_id,
+								nullif(price.project_id, :lc_wildcard) as project_id,
+								nullif(price.customer_id, :lc_wildcard) as customer_id,
+								price.purchasing_group, price.purchasing_document, price.local_content,
+								price.valid_from, price.valid_to, price.valid_from_quantity, price.valid_to_quantity,
+								price.price_fixed_portion, price.price_variable_portion, price.transaction_currency_id, price.price_unit,
+								price.price_unit_uom_id, price.IS_PRICE_SPLIT_ACTIVE, price.IS_PREFERRED_VENDOR,
+								price._valid_from, price._valid_to, price._source,
+								price.confidence_level_id,
+								price.determination_sequence, price.price_source_type_id,
+								price._valid_from_first_version, price._created_by_first_version
+							    {{masterdataCustomFieldsWithPrefix Material_Price 'price'}}
+					   		from :it_items as item	
+							inner join :lt_all_material_prices as price  
+								on price.material_id = item.material_id
+								and (( price.plant_id = item.plant_id or price.plant_id = :lc_wildcard) 
+								    or ((item.plant_id is null or item.plant_id = '') and :iv_use_multiple_plants = 'X'))
+								and price.vendor_id in (select * from :lt_vendors)
+							order by item_id, determination_sequence;
+
+if :lv_is_generic_filter = 1 and :lc_consider_vendor_filters = 1 then
+	lt_prices_wo_vendor = select * from :lt_material_prices price
+							where ifnull(item_vendor_id, '') = ''
+								  and ifnull(vendor_id, '') = '';
+else
+	lt_prices_wo_vendor = select * from :lt_material_prices price
+							where ifnull(item_vendor_id, '') = ''
+								  and ifnull(vendor_id, :lc_wildcard) in (select vendor_id from :lt_vendors);
+end if;
+				
+if :lv_is_vendor_value_filter = 1 and :lc_consider_vendor_filters = 1 then
+	lt_prices_with_vendor = select * from :lt_material_prices price
+							where ifnull(item_vendor_id, '') != ''
+								  and ifnull(vendor_id, '') = item_vendor_id;
+else
+	lt_prices_with_vendor = select price.* from :lt_material_prices price
+							where ifnull(item_vendor_id, '') != ''
+								  and ifnull(vendor_id, '') in (item_vendor_id, '');
+end if;
+
+if is_empty(:lt_material_prices) then				   
+	return;
+end if;
+
+lt_filtered_prices = select * from :lt_prices_with_vendor
+					 union
+					 select * from :lt_prices_wo_vendor;
+
+lt_associated_rules = select
+						  case
+							  when rule_code = 'NEW' then 'VALID_FROM desc'
+							  when rule_code = 'PLANT' then 'PLANT_ID NULLS LAST'
+							  when rule_code = 'VENDOR' then 'VENDOR_ID NULLS LAST'
+							  when rule_code = 'PROJECT' then 'PROJECT_ID NULLS LAST'
+							  when rule_code = 'CUSTOMER' then 'CUSTOMER_ID NULLS LAST'
+						  end as column_name
+					  from "sap.plc.db::basis.t_price_determination_strategy_rule"
+					  where PRICE_DETERMINATION_STRATEGY_TYPE_ID = :lc_material_price
+					  and PRICE_DETERMINATION_STRATEGY_ID = :lv_material_price_strategy_id
+					  order by priority asc;
+
+lv_first_criteria = :lt_associated_rules.column_name[1];
+lv_second_criteria = :lt_associated_rules.column_name[2];
+lv_third_criteria = :lt_associated_rules.column_name[3];
+lv_fourth_criteria = :lt_associated_rules.column_name[4];
+lv_fifth_criteria = :lt_associated_rules.column_name[5];
+
+lv_sql = 'select *, RANK() OVER (ORDER BY ITEM_ID,DETERMINATION_SEQUENCE,' 
+			  || :lv_first_criteria || ','
+			  || :lv_second_criteria || ','
+			  || :lv_third_criteria || ','
+			  || :lv_fourth_criteria || ','
+			  || :lv_fifth_criteria || ') AS PRICE_RANK from :lt_filtered_prices';
+
+execute immediate lv_sql into ot_all_prices using :lt_filtered_prices;			   
+
+ot_all_prices = select price_id, item_id, IS_DISABLING_PRICE_DETERMINATION,
+					   price_source_id, material_id,
+					   ifnull(plant_id, :lc_wildcard) as plant_id,
+					   ifnull(vendor_id, :lc_wildcard) as vendor_id,
+ 					   purchasing_group, purchasing_document,local_content,
+					   ifnull(project_id, :lc_wildcard) as project_id,
+					   valid_from,  
+					   ifnull(customer_id, :lc_wildcard) as customer_id,
+					   valid_to, valid_from_quantity, valid_to_quantity,
+					   price_fixed_portion, price_variable_portion, transaction_currency_id, price_unit,
+					   price_unit_uom_id, IS_PRICE_SPLIT_ACTIVE, IS_PREFERRED_VENDOR,
+					   _valid_from, _valid_to, _source, confidence_level_id,
+					   determination_sequence, price_source_type_id,
+					   _valid_from_first_version, _created_by_first_version, price.PRICE_RANK
+					   {{masterdataCustomFieldsWithPrefix Material_Price 'price'}}
+				from :ot_all_prices as price;						
+END;

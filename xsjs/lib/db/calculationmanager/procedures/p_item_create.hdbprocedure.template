@@ -1,0 +1,1048 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_create" ( 
+		IN 	iv_session_id 						NVARCHAR(50),
+		IN 	iv_cv_id 	  						INTEGER,
+		IN  iv_import     						INTEGER,
+		IN  iv_setDefaultValues					INTEGER,
+		IN  iv_updateMasterDataAndPrices		INTEGER,
+		OUT ot_new_items 						"sap.plc.db.calculationmanager.procedures::ts_item_create_output" default empty,
+		OUT ot_updated_items 					"sap.plc.db.calculationmanager.procedures::ts_item_temporary" default empty,
+		OUT ot_messages 						"sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty,
+		OUT ov_not_existing_versions 			"sap.plc.db.calculationmanager::calculationmanager_types.tt_calculation_version_ids" default empty,
+		OUT ov_items_with_forbidden_subitems 	"sap.plc.db.calculationmanager::calculationmanager_types.tt_item_ids" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+	
+	lc_calculated_price     		INTEGER DEFAULT 4;
+	lv_report_currency_id   		NVARCHAR(3);
+	lv_max_item_id					INTEGER;
+	
+BEGIN
+declare lv_current_utctimestamp	timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+-- Procedure to create new entities in t_item_temporary. It can be used to for single as well as mass inserts (import). Since the insert logic
+-- is quite complex the procedure has to take care of multiple aspects:
+--				1. generate ids for new items and update placeholder references from input struture
+--				2. run copy masterdata referenced by the new item(s); run set of dependent fields, account and price determination
+--				3. reset price fields of a parent if the insert of an new item would make it an assembly
+--				4. update predecessor_item_id of successor if the item(s) are inserted before existing items
+
+-- Input:
+-- 		- table sap.plc.db::basis.gtt_item_temporary => since this procedure is called from XS, table type parameter should be avoided
+-- 				(would prevent SQL cache hit); the set of items to be created is read from this table
+--		- iv_session_id => session id which is used for all (!) created items
+--		- iv_cv_id => calculation version id which is used for all created items; calculation_version_id column of lt_items is NOT used
+--		- iv_setDefaultValues => flag for setting the default values in the procedure
+--		- iv_updateMasterDataAndPrices => flag for triggering price & account determination in the procedure
+-- Output:
+--		- ot_new_items => all new items inserted into t_item_temporary
+--		- ot_updated_items => all items that were updated during the creation of the new items; this could happen due to the reset
+--							  of price fields of a former leaf item, which is an assembly after the insert
+
+
+lt_items = 	select 	session_id, item_id, calculation_version_id, parent_item_id, predecessor_item_id, is_active, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, item_category_id,child_item_category_id, referenced_calculation_version_id, account_id, determined_account_id, document_type_id, document_id,
+					document_version, document_part, document_status_id, design_office_id, material_id, material_type_id, material_group_id, is_phantom_material, is_configurable_material, material_source,
+					overhead_group_id, valuation_class_id, purchasing_group, purchasing_document, local_content, activity_type_id, process_id, lot_size, lot_size_calculated, lot_size_is_manual,
+					engineering_change_number_id, company_code_id, cost_center_id, plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id,
+					quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+					total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+					base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+					price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, price_variable_portion, price_variable_portion_calculated,
+					price_variable_portion_is_manual, price, transaction_currency_id, price_unit, price_unit_calculated,
+					price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, price_id, confidence_level_id, price_source_id, price_source_type_id, surcharge, is_disabling_price_determination, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+					created_on, created_by, last_modified_on, last_modified_by,
+					price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+					price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+					price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+					other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+					total_cost, total_cost_fixed_portion, total_cost_variable_portion,
+					total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion,
+					total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion,
+					item_description, comment, is_dirty, is_deleted,
+					total_cost_per_unit_fixed_portion, total_cost_per_unit_variable_portion, total_cost_per_unit, 
+					total_cost2_per_unit_fixed_portion, total_cost2_per_unit_variable_portion, total_cost2_per_unit, 
+					total_cost3_per_unit_fixed_portion, total_cost3_per_unit_variable_portion, total_cost3_per_unit, 
+					total_quantity_of_variants, bom_compare_key
+					{{customFields Item}}
+						from "sap.plc.db::basis.gtt_item_temporary"
+						where 		calculation_version_id = :iv_cv_id
+									and session_id = :iv_session_id;
+
+--parents of the items should not be of type referenced version or text, they cannot have subitems
+ov_items_with_forbidden_subitems = SELECT item_id from "sap.plc.db::basis.t_item_temporary" where session_id = :iv_session_id and calculation_version_id = :iv_cv_id and
+			item_id in (select distinct parent_item_id from :lt_items where parent_item_id is not null) and item_category_id = 10;-- referenced version item
+
+IF NOT IS_EMPTY(:ov_items_with_forbidden_subitems) THEN
+		RETURN;
+END IF;
+
+-- ################################################################################################################
+-- 		generation of item ids; update references; server-generated values
+-- ################################################################################################################
+-- since item_ids are generated only on server-side, the client has to use placeholders for item_id, parent_item_id, predecessor_item_id; 
+-- in this first step the item_id is created and references made by parent_item_id, predecessor_item_id are updated by using 2 left outer joins
+
+-- select maximal item_id used in calculation version till now
+select ifnull(max(item_id), 0) into lv_max_item_id  
+	from "sap.plc.db::basis.t_item_temporary"
+	where	calculation_version_id = :iv_cv_id
+			and session_id = :iv_session_id;
+
+
+-- generate new item_ids based on the maximal item_id. 
+-- a db sequence for generation of item_ids is not used in this case, since the item_ids would increase too quick in this case that may lead to sequence overflow and non-unique item ids.
+--  by generating item_ids sequentially within one calculation version as below we can keep the item ids small. this is possible since the items are anyway identified by tuple <calculation_version_id, item_id>   
+lt_generated_item_ids =	select 	(row_number() over() + lv_max_item_id) as item_id, -- generate item ids
+								item_id as handle_id,
+								parent_item_id,
+								predecessor_item_id
+						from :lt_items
+						where item_id < 0;             -- only items with placeholder ids are used from the input structure
+
+-- self-join :lt_generated_item_ids 2-times on parent_item_id and predecessor_item_id in order to update the placeholds used for this columns; left-outer join is required
+-- since not items to create can reference an existing parent or predecessor (ids > 0); in case there was no match in the left-outer join the parent_item_id and predecessor_item_id
+-- from the input structure is untouched; it's assumed that in this case nothing needs to be updated (ids > 0)
+lt_updated_item_references =	select 	item.item_id,
+										ifnull(parent.item_id, item.parent_item_id) as parent_item_id, 					-- fallback to parent_item_id, predecessor_item_id from lt_items
+										ifnull(predecessor.item_id, item.predecessor_item_id) as predecessor_item_id,	-- in case the join does not match; otherwise the null will be selected
+										item.handle_id						 											-- as values
+								from :lt_generated_item_ids	as item
+									left outer join :lt_generated_item_ids as parent
+										on item.parent_item_id = parent.handle_id
+									left outer join :lt_generated_item_ids as predecessor
+										on item.predecessor_item_id = predecessor.handle_id;
+
+-- select server-generated values; enfores that all items correspond to the same calculation version and have the session_id
+lt_generated_values = 	select	item_id,
+								:iv_session_id as session_id,
+								:iv_cv_id as calculation_version_id,
+								to_tinyint(1) as is_dirty,
+								to_tinyint(0) as is_deleted,
+								:lv_current_utctimestamp as created_on,
+								:lv_current_utctimestamp as last_modified_on,
+								:iv_session_id as created_by,													-- session_id correspond to the current user; user(), current_user, ...
+								:iv_session_id as last_modified_by												-- does not, since the technical user SAP_PLC_TECHNICAL_USER is invoking this procedure
+						from 	:lt_items;
+
+-- ################################################################################################################
+-- 		automatic value determination
+-- ################################################################################################################
+-- execute copy of masterdata, set dependent fields, price and account determination; the results by this procedure must be joined together later
+-- before that can is done, a new data structure for the items is created, which already contains all the generated values (ids, timestamps, ...)
+-- this is necessary in order to set enable the subsequent procedure to produce the correct message details
+
+--get report currency id in order to use it in custom fields
+select report_currency_id into lv_report_currency_id
+	from "sap.plc.db::basis.t_calculation_version_temporary"
+	where	calculation_version_id = :iv_cv_id
+			and session_id = :iv_session_id;
+
+--get defaults values standard fields
+lt_defaults = select distinct meta.column_id, attr.item_category_id, attr.default_value
+				from "sap.plc.db::basis.t_metadata" as meta
+				inner join "sap.plc.db::basis.t_metadata_item_attributes" as attr
+						on meta.business_object = attr.business_object
+						and meta.path = attr.path
+						and meta.column_id = attr.column_id
+				where meta.path = 'Item' and meta.business_object = 'Item'
+				and meta.column_id in ('TRANSACTION_CURRENCY_ID','PRICE_UNIT_UOM_ID','TOTAL_QUANTITY_DEPENDS_ON','QUANTITY_UOM_ID');
+
+lt_items_prepared = 	select 	gens.session_id as session_id,							-- select generated session_id
+								refs.item_id as item_id,								-- select generated item_id
+								gens.calculation_version_id as calculation_version_id,	-- select generated calculation_version_id
+								refs.parent_item_id as parent_item_id,					-- select generated parent_item_id
+								refs.predecessor_item_id as predecessor_item_id,		-- select generated predecessor_item_id
+								is_active as is_active,
+								highlight_green,
+								highlight_orange,
+								highlight_yellow,
+								item_category_id as item_category_id,
+								child_item_category_id as child_item_category_id,
+								referenced_calculation_version_id as referenced_calculation_version_id,
+								account_id as account_id,
+								determined_account_id as determined_account_id,
+								document_type_id as document_type_id,
+								document_id as document_id,
+								document_version as document_version,
+								document_part as document_part,
+								document_status_id as document_status_id,
+								design_office_id as design_office_id,
+								material_id as material_id,
+								material_type_id as material_type_id,
+								material_group_id as material_group_id,
+								is_phantom_material as is_phantom_material,
+								is_configurable_material as is_configurable_material,
+								material_source as material_source,
+								overhead_group_id as overhead_group_id,
+								valuation_class_id as valuation_class_id,
+								purchasing_group as purchasing_group, 
+								purchasing_document as purchasing_document, 
+								local_content as local_content,
+								activity_type_id as activity_type_id,
+								process_id as process_id,
+								lot_size as lot_size,
+								lot_size_calculated as lot_size_calculated,
+								lot_size_is_manual as lot_size_is_manual,
+								engineering_change_number_id as engineering_change_number_id,
+								company_code_id as company_code_id,
+								cost_center_id as cost_center_id,
+								plant_id as plant_id,
+								work_center_id as work_center_id,
+								work_center_category as work_center_category, 
+								efficiency as efficiency, 
+								business_area_id as business_area_id,
+								profit_center_id as profit_center_id,
+								quantity as quantity,
+								quantity_calculated as quantity_calculated,
+								quantity_is_manual as quantity_is_manual,
+								CASE WHEN quantity_uom_id IS NULL AND :iv_setDefaultValues = 1 THEN
+							     (
+							       select defaults.default_value from :lt_defaults as defaults
+								    where defaults.item_category_id = items.item_category_id and defaults.column_id = 'QUANTITY_UOM_ID'
+							      )
+	   							ELSE quantity_uom_id  END AS quantity_uom_id,
+								total_quantity as total_quantity,
+								total_quantity_uom_id as total_quantity_uom_id,
+							    CASE WHEN total_quantity_depends_on IS NULL AND :iv_setDefaultValues = 1 THEN
+							    (
+							       select defaults.default_value from :lt_defaults as defaults
+								    where defaults.item_category_id = items.item_category_id and defaults.column_id = 'TOTAL_QUANTITY_DEPENDS_ON'
+							    )
+	   							ELSE total_quantity_depends_on  END AS total_quantity_depends_on,
+								is_relevant_to_costing_in_erp as is_relevant_to_costing_in_erp,
+								base_quantity as base_quantity, 
+								base_quantity_calculated as base_quantity_calculated, 
+								base_quantity_is_manual as base_quantity_is_manual, 
+								quantity_per_base_unit as quantity_per_base_unit, 
+								quantity_per_base_unit_uom_id as quantity_per_base_unit_uom_id,
+								price_fixed_portion as price_fixed_portion,
+								price_fixed_portion_calculated as price_fixed_portion_calculated,
+								price_fixed_portion_is_manual as price_fixed_portion_is_manual,
+								price_variable_portion as price_variable_portion,
+								price_variable_portion_calculated as price_variable_portion_calculated,
+								price_variable_portion_is_manual as price_variable_portion_is_manual,
+								price as price,
+								CASE WHEN transaction_currency_id IS NULL AND :iv_setDefaultValues = 1 THEN
+							    (
+							       select defaults.default_value from :lt_defaults as defaults
+								    where defaults.item_category_id = items.item_category_id and defaults.column_id = 'TRANSACTION_CURRENCY_ID'
+							    )
+							    ELSE transaction_currency_id END AS transaction_currency_id,
+								price_unit as price_unit,
+								price_unit_calculated as price_unit_calculated,
+								price_unit_is_manual as price_unit_is_manual,
+								CASE WHEN price_unit_uom_id IS NULL AND :iv_setDefaultValues = 1 THEN
+							    (
+							       select defaults.default_value from :lt_defaults as defaults
+								    where defaults.item_category_id = items.item_category_id and defaults.column_id = 'PRICE_UNIT_UOM_ID'
+							    )
+							    ELSE price_unit_uom_id END AS price_unit_uom_id,
+								is_price_split_active as is_price_split_active, 
+								is_disabling_account_determination as is_disabling_account_determination,
+								price_id as price_id,
+								confidence_level_id as confidence_level_id,
+								price_source_id as price_source_id,
+								price_source_type_id as price_source_type_id,
+                                surcharge as surcharge,
+								is_disabling_price_determination as is_disabling_price_determination,
+								vendor_id as vendor_id,
+								target_cost as target_cost,
+								target_cost_calculated as target_cost_calculated,
+								target_cost_is_manual as target_cost_is_manual,
+								target_cost_currency_id AS target_cost_currency_id,
+								gens.created_on as created_on,																-- select generated created_on
+								gens.created_by as created_by,												-- select generated created_by
+								gens.last_modified_on as last_modified_on,													-- select generated last_modified_on
+								gens.last_modified_by as last_modified_by,									-- select generated last_modified_by
+								price_for_total_quantity as price_for_total_quantity,
+								price_for_total_quantity_fixed_portion as price_for_total_quantity_fixed_portion,
+								price_for_total_quantity_variable_portion as price_for_total_quantity_variable_portion,
+								price_for_total_quantity2 as price_for_total_quantity2,
+								price_for_total_quantity2_fixed_portion as price_for_total_quantity2_fixed_portion,
+								price_for_total_quantity2_variable_portion as price_for_total_quantity2_variable_portion,
+								price_for_total_quantity3 as price_for_total_quantity3,
+								price_for_total_quantity3_fixed_portion as price_for_total_quantity3_fixed_portion,
+								price_for_total_quantity3_variable_portion as price_for_total_quantity3_variable_portion,
+								other_cost as other_cost,
+								other_cost_fixed_portion as other_cost_fixed_portion,
+								other_cost_variable_portion as other_cost_variable_portion,
+								total_cost as total_cost,
+								total_cost_fixed_portion as total_cost_fixed_portion,
+								total_cost_variable_portion as total_cost_variable_portion,
+								total_cost2 as total_cost2,
+								total_cost2_fixed_portion as total_cost2_fixed_portion,
+								total_cost2_variable_portion as total_cost2_variable_portion,
+								total_cost3 as total_cost3,
+								total_cost3_fixed_portion as total_cost3_fixed_portion,
+								total_cost3_variable_portion as total_cost3_variable_portion,
+								item_description as item_description,
+								comment as comment,
+								gens.is_dirty as is_dirty,																	-- select generated is_dirty
+								gens.is_deleted as is_deleted,																-- select generated is_deleted
+								total_cost_per_unit_fixed_portion, 
+								total_cost_per_unit_variable_portion, 
+								total_cost_per_unit, 
+								total_cost2_per_unit_fixed_portion, 
+								total_cost2_per_unit_variable_portion, 
+								total_cost2_per_unit, 
+								total_cost3_per_unit_fixed_portion, 
+								total_cost3_per_unit_variable_portion, 
+								total_cost3_per_unit, 
+								total_quantity_of_variants,
+								bom_compare_key
+								{{customFieldsDefaultValuesSelect Item}}
+						from	:lt_items as items
+									inner join :lt_updated_item_references as refs
+										on items.item_id = refs.handle_id
+									inner join	:lt_generated_values as gens
+										on items.item_id = gens.item_id;
+
+--only for import, the fields should be determine; for single create it's not necessary (this is done to increase performance for create item from the front-end application)
+if :iv_import = 1 or :iv_updateMasterDataAndPrices = 1 
+	then
+		insert into "sap.plc.db::basis.gtt_item_temporary_with_masterdata_custom_fields"
+		(
+			SESSION_ID, ITEM_ID, CALCULATION_VERSION_ID, PARENT_ITEM_ID, PREDECESSOR_ITEM_ID, IS_ACTIVE, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, ITEM_CATEGORY_ID, CHILD_ITEM_CATEGORY_ID,
+			ITEM_DESCRIPTION, REFERENCED_CALCULATION_VERSION_ID, ACCOUNT_ID, DETERMINED_ACCOUNT_ID, DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, 
+			DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID, MATERIAL_ID, MATERIAL_TYPE_ID, MATERIAL_GROUP_ID, IS_PHANTOM_MATERIAL, 
+			IS_CONFIGURABLE_MATERIAL, MATERIAL_SOURCE, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, PURCHASING_GROUP, PURCHASING_DOCUMENT, LOCAL_CONTENT, 
+			ACTIVITY_TYPE_ID, PROCESS_ID, LOT_SIZE, LOT_SIZE_CALCULATED, LOT_SIZE_IS_MANUAL, 
+			ENGINEERING_CHANGE_NUMBER_ID, COMPANY_CODE_ID, COST_CENTER_ID, 
+			PLANT_ID, WORK_CENTER_ID, WORK_CENTER_CATEGORY, EFFICIENCY, BUSINESS_AREA_ID, PROFIT_CENTER_ID, QUANTITY, QUANTITY_CALCULATED, 
+			QUANTITY_IS_MANUAL, QUANTITY_UOM_ID, TOTAL_QUANTITY, TOTAL_QUANTITY_UOM_ID, TOTAL_QUANTITY_DEPENDS_ON, 
+			IS_RELEVANT_TO_COSTING_IN_ERP, BASE_QUANTITY, BASE_QUANTITY_CALCULATED, BASE_QUANTITY_IS_MANUAL, QUANTITY_PER_BASE_UNIT, 
+			QUANTITY_PER_BASE_UNIT_UOM_ID, PRICE_FIXED_PORTION, PRICE_FIXED_PORTION_CALCULATED, PRICE_FIXED_PORTION_IS_MANUAL, 
+			PRICE_VARIABLE_PORTION, PRICE_VARIABLE_PORTION_CALCULATED, PRICE_VARIABLE_PORTION_IS_MANUAL, PRICE, TRANSACTION_CURRENCY_ID, 
+			PRICE_UNIT, PRICE_UNIT_CALCULATED, PRICE_UNIT_IS_MANUAL, PRICE_UNIT_UOM_ID, IS_PRICE_SPLIT_ACTIVE, 
+			IS_DISABLING_ACCOUNT_DETERMINATION, PRICE_ID, CONFIDENCE_LEVEL_ID, PRICE_SOURCE_ID, PRICE_SOURCE_TYPE_ID, SURCHARGE,
+			IS_DISABLING_PRICE_DETERMINATION, VENDOR_ID, TARGET_COST, TARGET_COST_CALCULATED, TARGET_COST_IS_MANUAL, TARGET_COST_CURRENCY_ID, 
+			CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, 
+			PRICE_FOR_TOTAL_QUANTITY, PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+			PRICE_FOR_TOTAL_QUANTITY2, PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+			PRICE_FOR_TOTAL_QUANTITY3, PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+			OTHER_COST, OTHER_COST_FIXED_PORTION, OTHER_COST_VARIABLE_PORTION, 
+			TOTAL_COST, TOTAL_COST_FIXED_PORTION, TOTAL_COST_VARIABLE_PORTION, 
+			TOTAL_COST2, TOTAL_COST2_FIXED_PORTION, TOTAL_COST2_VARIABLE_PORTION, 
+			TOTAL_COST3, TOTAL_COST3_FIXED_PORTION, TOTAL_COST3_VARIABLE_PORTION, 
+			COMMENT, IS_DIRTY, IS_DELETED,
+			TOTAL_COST_PER_UNIT_FIXED_PORTION, TOTAL_COST_PER_UNIT_VARIABLE_PORTION, TOTAL_COST_PER_UNIT, 
+			TOTAL_COST2_PER_UNIT_FIXED_PORTION, TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, TOTAL_COST2_PER_UNIT, 
+			TOTAL_COST3_PER_UNIT_FIXED_PORTION, TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, TOTAL_COST3_PER_UNIT, 
+			TOTAL_QUANTITY_OF_VARIANTS, BOM_COMPARE_KEY
+			{{masterdataCustomFields Item}}
+		)
+		select 
+			SESSION_ID, ITEM_ID, CALCULATION_VERSION_ID, PARENT_ITEM_ID, PREDECESSOR_ITEM_ID, IS_ACTIVE, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, ITEM_CATEGORY_ID, CHILD_ITEM_CATEGORY_ID,
+			ITEM_DESCRIPTION, REFERENCED_CALCULATION_VERSION_ID, ACCOUNT_ID, DETERMINED_ACCOUNT_ID, DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, 
+			DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID, MATERIAL_ID, MATERIAL_TYPE_ID, MATERIAL_GROUP_ID, IS_PHANTOM_MATERIAL, 
+			IS_CONFIGURABLE_MATERIAL, MATERIAL_SOURCE, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, PURCHASING_GROUP, PURCHASING_DOCUMENT, LOCAL_CONTENT, 
+			ACTIVITY_TYPE_ID, PROCESS_ID, LOT_SIZE, LOT_SIZE_CALCULATED, LOT_SIZE_IS_MANUAL, 
+			ENGINEERING_CHANGE_NUMBER_ID, COMPANY_CODE_ID, COST_CENTER_ID, 
+			PLANT_ID, WORK_CENTER_ID, WORK_CENTER_CATEGORY, EFFICIENCY, BUSINESS_AREA_ID, PROFIT_CENTER_ID, QUANTITY, QUANTITY_CALCULATED, 
+			QUANTITY_IS_MANUAL, QUANTITY_UOM_ID, TOTAL_QUANTITY, TOTAL_QUANTITY_UOM_ID, TOTAL_QUANTITY_DEPENDS_ON, 
+			IS_RELEVANT_TO_COSTING_IN_ERP, BASE_QUANTITY, BASE_QUANTITY_CALCULATED, BASE_QUANTITY_IS_MANUAL, QUANTITY_PER_BASE_UNIT, 
+			QUANTITY_PER_BASE_UNIT_UOM_ID, PRICE_FIXED_PORTION, PRICE_FIXED_PORTION_CALCULATED, PRICE_FIXED_PORTION_IS_MANUAL, 
+			PRICE_VARIABLE_PORTION, PRICE_VARIABLE_PORTION_CALCULATED, PRICE_VARIABLE_PORTION_IS_MANUAL, PRICE, TRANSACTION_CURRENCY_ID, 
+			PRICE_UNIT, PRICE_UNIT_CALCULATED, PRICE_UNIT_IS_MANUAL, PRICE_UNIT_UOM_ID, IS_PRICE_SPLIT_ACTIVE, IS_DISABLING_ACCOUNT_DETERMINATION,
+			PRICE_ID, CONFIDENCE_LEVEL_ID, PRICE_SOURCE_ID, PRICE_SOURCE_TYPE_ID, SURCHARGE,
+			IS_DISABLING_PRICE_DETERMINATION, VENDOR_ID, TARGET_COST, TARGET_COST_CALCULATED, TARGET_COST_IS_MANUAL, TARGET_COST_CURRENCY_ID, 
+			CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, 
+			PRICE_FOR_TOTAL_QUANTITY, PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+			PRICE_FOR_TOTAL_QUANTITY2, PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+			PRICE_FOR_TOTAL_QUANTITY3, PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+			OTHER_COST, OTHER_COST_FIXED_PORTION, OTHER_COST_VARIABLE_PORTION, 
+			TOTAL_COST, TOTAL_COST_FIXED_PORTION, TOTAL_COST_VARIABLE_PORTION, 
+			TOTAL_COST2, TOTAL_COST2_FIXED_PORTION, TOTAL_COST2_VARIABLE_PORTION, 
+			TOTAL_COST3, TOTAL_COST3_FIXED_PORTION, TOTAL_COST3_VARIABLE_PORTION, 
+			COMMENT, IS_DIRTY, IS_DELETED,
+			TOTAL_COST_PER_UNIT_FIXED_PORTION, TOTAL_COST_PER_UNIT_VARIABLE_PORTION, TOTAL_COST_PER_UNIT, 
+			TOTAL_COST2_PER_UNIT_FIXED_PORTION, TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, TOTAL_COST2_PER_UNIT, 
+			TOTAL_COST3_PER_UNIT_FIXED_PORTION, TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, TOTAL_COST3_PER_UNIT, 
+			TOTAL_QUANTITY_OF_VARIANTS, BOM_COMPARE_KEY
+			{{masterdataCustomFields Item}}
+		from :lt_items_prepared;
+		
+		call 	"sap.plc.db.calculationmanager.procedures::p_item_automatic_value_determination"
+				(
+					iv_cv_id => :iv_cv_id,
+					iv_session_id => :iv_session_id,
+					iv_reevaluate => CASE 
+										WHEN :iv_import = 1 THEN 'X' 
+										WHEN :iv_updateMasterDataAndPrices = 1 THEN 'X' 
+									END,
+					iv_acc_det_reevaluate => false,
+					iv_update_masterdata => false,
+					ot_items => :lt_determined_values,
+					ot_messages => :lt_value_determination_messages
+				);
+	else
+		lt_determined_values = select top 0
+						            itemTemp.session_id, itemTemp.ITEM_ID, itemTemp.CALCULATION_VERSION_ID, itemTemp.PARENT_ITEM_ID, itemTemp.PREDECESSOR_ITEM_ID,
+									itemTemp.IS_ACTIVE, itemTemp.HIGHLIGHT_GREEN, itemTemp.HIGHLIGHT_ORANGE, itemTemp.HIGHLIGHT_YELLOW, itemTemp.ITEM_CATEGORY_ID, itemTemp.CHILD_ITEM_CATEGORY_ID,itemTemp.REFERENCED_CALCULATION_VERSION_ID, itemTemp.ACCOUNT_ID, itemTemp.DETERMINED_ACCOUNT_ID, itemTemp.DOCUMENT_TYPE_ID, itemTemp.DOCUMENT_ID,
+									itemTemp.DOCUMENT_VERSION, itemTemp.DOCUMENT_PART, itemTemp.DOCUMENT_STATUS_ID, itemTemp.DESIGN_OFFICE_ID,
+									itemTemp.MATERIAL_ID, itemTemp.MATERIAL_TYPE_ID, itemTemp.MATERIAL_GROUP_ID, itemTemp.IS_PHANTOM_MATERIAL, itemTemp.IS_CONFIGURABLE_MATERIAL, itemTemp.MATERIAL_SOURCE,
+									itemTemp.OVERHEAD_GROUP_ID, itemTemp.VALUATION_CLASS_ID, itemTemp.PURCHASING_GROUP, itemTemp.PURCHASING_DOCUMENT, itemTemp.LOCAL_CONTENT, itemTemp.ACTIVITY_TYPE_ID,
+									itemTemp.PROCESS_ID, itemTemp.LOT_SIZE, itemTemp.LOT_SIZE_CALCULATED, itemTemp.LOT_SIZE_IS_MANUAL,
+									itemTemp.ENGINEERING_CHANGE_NUMBER_ID, itemTemp.COMPANY_CODE_ID, itemTemp.COST_CENTER_ID,
+									itemTemp.PLANT_ID, itemTemp.WORK_CENTER_ID, itemTemp.WORK_CENTER_CATEGORY, itemTemp.EFFICIENCY, itemTemp.BUSINESS_AREA_ID, itemTemp.PROFIT_CENTER_ID, itemTemp.QUANTITY, itemTemp.QUANTITY_CALCULATED,
+									itemTemp.QUANTITY_IS_MANUAL, itemTemp.QUANTITY_UOM_ID, itemTemp.TOTAL_QUANTITY, itemTemp.TOTAL_QUANTITY_UOM_ID,
+									itemTemp.TOTAL_QUANTITY_DEPENDS_ON, itemTemp.IS_RELEVANT_TO_COSTING_IN_ERP, itemTemp.BASE_QUANTITY, itemTemp.BASE_QUANTITY_CALCULATED, itemTemp.BASE_QUANTITY_IS_MANUAL, itemTemp.QUANTITY_PER_BASE_UNIT, 
+									itemTemp.QUANTITY_PER_BASE_UNIT_UOM_ID, itemTemp.PRICE_FIXED_PORTION, itemTemp.PRICE_FIXED_PORTION_CALCULATED, itemTemp.PRICE_FIXED_PORTION_IS_MANUAL,
+									itemTemp.PRICE_VARIABLE_PORTION, itemTemp.PRICE_VARIABLE_PORTION_CALCULATED, itemTemp.PRICE_VARIABLE_PORTION_IS_MANUAL, itemTemp.PRICE, itemTemp.TRANSACTION_CURRENCY_ID,
+									itemTemp.PRICE_UNIT, itemTemp.PRICE_UNIT_CALCULATED, itemTemp.PRICE_UNIT_IS_MANUAL, itemTemp.PRICE_UNIT_UOM_ID, itemTemp.IS_PRICE_SPLIT_ACTIVE, itemTemp.IS_DISABLING_ACCOUNT_DETERMINATION,
+									itemTemp.PRICE_ID, itemTemp.CONFIDENCE_LEVEL_ID, itemTemp.PRICE_SOURCE_ID, itemTemp.PRICE_SOURCE_TYPE_ID,  itemTemp.SURCHARGE,
+									itemTemp.IS_DISABLING_PRICE_DETERMINATION, itemTemp.VENDOR_ID, itemTemp.TARGET_COST, itemTemp.TARGET_COST_CALCULATED, itemTemp.TARGET_COST_IS_MANUAL, itemTemp.TARGET_COST_CURRENCY_ID, itemTemp.CREATED_ON,
+									itemTemp.CREATED_BY, itemTemp.LAST_MODIFIED_ON, itemTemp.LAST_MODIFIED_BY, 
+									itemTemp.PRICE_FOR_TOTAL_QUANTITY, itemTemp.PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, itemTemp.PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+									itemTemp.PRICE_FOR_TOTAL_QUANTITY2, itemTemp.PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, itemTemp.PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+									itemTemp.PRICE_FOR_TOTAL_QUANTITY3, itemTemp.PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, itemTemp.PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+									itemTemp.OTHER_COST, itemTemp.OTHER_COST_FIXED_PORTION, itemTemp.OTHER_COST_VARIABLE_PORTION, 
+									itemTemp.TOTAL_COST, itemTemp.TOTAL_COST_FIXED_PORTION, itemTemp.TOTAL_COST_VARIABLE_PORTION, 
+									itemTemp.TOTAL_COST2, itemTemp.TOTAL_COST2_FIXED_PORTION, itemTemp.TOTAL_COST2_VARIABLE_PORTION, 
+									itemTemp.TOTAL_COST3, itemTemp.TOTAL_COST3_FIXED_PORTION, itemTemp.TOTAL_COST3_VARIABLE_PORTION, 
+									itemTemp.item_description, itemTemp.comment, itemTemp.is_dirty, itemTemp.is_deleted,
+									itemTemp.total_cost_per_unit_fixed_portion, itemTemp.total_cost_per_unit_variable_portion, itemTemp.total_cost_per_unit, 
+									itemTemp.total_cost2_per_unit_fixed_portion, itemTemp.total_cost2_per_unit_variable_portion, itemTemp.total_cost2_per_unit, 
+									itemTemp.total_cost3_per_unit_fixed_portion, itemTemp.total_cost3_per_unit_variable_portion, itemTemp.total_cost3_per_unit, 
+									itemTemp.TOTAL_QUANTITY_OF_VARIANTS, itemTemp.BOM_COMPARE_KEY
+									{{masterdataCustomFieldsWithPrefix Item 'plcExtTable'}}
+							 	FROM "sap.plc.db::basis.t_item_temporary" as itemTemp
+								LEFT OUTER JOIN {{t_temporaryExtensionTable Item}} as plcExtTable ON
+									itemTemp.item_id = plcExtTable.item_id AND itemTemp.calculation_version_id = plcExtTable.calculation_version_id 
+									AND itemTemp.session_id = plcExtTable.session_id;
+		lt_value_determination_messages = select top 0 null as msg_id, null as item_id,
+										   null as md_id_1, null as md_id_2, null as md_id_3, null as business_object, null as price_source_id from "sap.plc.db::DUMMY";
+end if;
+
+-- this determines the number of items, which were leafs in t_item_temporary, but will become assemblies through the insert; for new assembly items rollups and prices must be changed/reset (see below)
+-- general idea: if an item is referenced by the column parent_item_id it's an assembly
+lt_leaf_parents = 	select distinct parent_item_id from :lt_items where parent_item_id > 0		-- select all distinct parent_item_ids from input; imporatant: parent_item_id > 0 to
+					minus																		-- ensure that only references to already existing items are used
+					select distinct parent_item_id from "sap.plc.db::basis.t_item_temporary"	-- substract the set of the items that already have children
+						where		session_id = :iv_session_id
+								and calculation_version_id = :iv_cv_id
+								and is_deleted = 0;
+
+-- ################################################################################################################
+-- 		insert new items
+-- ################################################################################################################
+-- before the items can be inserted into t_item_temporary, the previously determined values must be join with the input values; if could be that for certain values not all values can be determined
+-- automatically; a fallback to the input value is used in this case and a left outer join
+
+lt_insert_structure = 	select 	items.session_id as session_id,
+								items.item_id as item_id,
+								items.calculation_version_id as calculation_version_id,
+								items.parent_item_id as parent_item_id,
+								items.predecessor_item_id as predecessor_item_id,
+								items.is_active as is_active,
+								items.highlight_green,
+								items.highlight_orange,
+								items.highlight_yellow,
+								items.item_category_id as item_category_id,
+								items.child_item_category_id as child_item_category_id,
+								items.referenced_calculation_version_id as referenced_calculation_version_id,
+								determined.account_id,
+								determined.determined_account_id,
+								determined.document_type_id,
+								determined.document_id,
+								determined.document_version,
+								determined.document_part,
+								determined.document_status_id,
+								determined.design_office_id,
+								items.material_id as material_id,
+								determined.material_type_id,
+								determined.material_group_id,
+								determined.is_phantom_material,
+								determined.is_configurable_material,
+								items.material_source as material_source,
+								determined.overhead_group_id,
+								determined.valuation_class_id,
+								determined.purchasing_group,  
+								determined.purchasing_document,
+								determined.local_content, 
+								items.activity_type_id as activity_type_id,
+								items.process_id as process_id,
+								items.lot_size as lot_size,
+								items.lot_size_calculated as lot_size_calculated,
+								items.lot_size_is_manual as lot_size_is_manual,
+								items.engineering_change_number_id as engineering_change_number_id,
+								determined.company_code_id,
+								items.cost_center_id as cost_center_id,
+								determined.plant_id,
+								items.work_center_id as work_center_id,
+								items.work_center_category as work_center_category,
+								items.efficiency as efficiency,
+								items.business_area_id as business_area_id,
+								items.profit_center_id as profit_center_id,
+								items.quantity as quantity,
+								items.quantity_calculated as quantity_calculated,
+								items.quantity_is_manual as quantity_is_manual,
+								items.quantity_uom_id as quantity_uom_id,
+								items.total_quantity as total_quantity,
+								items.total_quantity_uom_id as total_quantity_uom_id,
+								items.total_quantity_depends_on as total_quantity_depends_on,
+								items.is_relevant_to_costing_in_erp as is_relevant_to_costing_in_erp,
+								items.base_quantity as base_quantity, 
+								items.base_quantity_calculated as base_quantity_calculated, 
+								items.base_quantity_is_manual as base_quantity_is_manual, 
+								items.quantity_per_base_unit as quantity_per_base_unit, 
+								items.quantity_per_base_unit_uom_id as quantity_per_base_unit_uom_id,
+								ifnull(determined.price_fixed_portion, items.price_fixed_portion) as price_fixed_portion,
+								items.price_fixed_portion_calculated as price_fixed_portion_calculated,
+								items.price_fixed_portion_is_manual as price_fixed_portion_is_manual,
+								ifnull(determined.price_variable_portion, items.price_variable_portion) as price_variable_portion,
+								items.price_variable_portion_calculated as price_variable_portion_calculated,
+								items.price_variable_portion_is_manual as price_variable_portion_is_manual,
+								items.price as price,
+								ifnull(determined.transaction_currency_id, items.transaction_currency_id) as transaction_currency_id,
+								ifnull(determined.price_unit, items.price_unit) as price_unit,
+								items.price_unit_calculated as price_unit_calculated,
+								items.price_unit_is_manual as price_unit_is_manual,
+								ifnull(determined.price_unit_uom_id, items.price_unit_uom_id) as price_unit_uom_id,
+								ifnull(determined.is_price_split_active, items.is_price_split_active) as is_price_split_active,
+								items.is_disabling_account_determination as is_disabling_account_determination,
+								ifnull(determined.price_id, items.price_id) as price_id,
+								determined.confidence_level_id,
+								ifnull(determined.price_source_id, items.price_source_id) as price_source_id,
+								ifnull(determined.price_source_type_id, items.price_source_type_id) as price_source_type_id,
+                                items.surcharge as surcharge,
+								items.is_disabling_price_determination as is_disabling_price_determination,
+								determined.vendor_id,
+								items.target_cost as target_cost,
+								items.target_cost_calculated as target_cost_calculated,
+								items.target_cost_is_manual as target_cost_is_manual,
+								items.target_cost_currency_id as target_cost_currency_id,
+								items.created_on as created_on,
+								items.created_by as created_by,
+								items.last_modified_on as last_modified_on,
+								items.last_modified_by as last_modified_by,
+								items.price_for_total_quantity as price_for_total_quantity,
+								items.price_for_total_quantity_fixed_portion as price_for_total_quantity_fixed_portion,
+								items.price_for_total_quantity_variable_portion as price_for_total_quantity_variable_portion,
+								items.price_for_total_quantity2 as price_for_total_quantity2,
+								items.price_for_total_quantity2_fixed_portion as price_for_total_quantity2_fixed_portion,
+								items.price_for_total_quantity2_variable_portion as price_for_total_quantity2_variable_portion,
+								items.price_for_total_quantity3 as price_for_total_quantity3,
+								items.price_for_total_quantity3_fixed_portion as price_for_total_quantity3_fixed_portion,
+								items.price_for_total_quantity3_variable_portion as price_for_total_quantity3_variable_portion,
+								items.other_cost as other_cost,
+								items.other_cost_fixed_portion as other_cost_fixed_portion,
+								items.other_cost_variable_portion as other_cost_variable_portion,
+								items.total_cost as total_cost,
+								items.total_cost_fixed_portion as total_cost_fixed_portion,
+								items.total_cost_variable_portion as total_cost_variable_portion,
+								items.total_cost2 as total_cost2,
+								items.total_cost2_fixed_portion as total_cost2_fixed_portion,
+								items.total_cost2_variable_portion as total_cost2_variable_portion,
+								items.total_cost3 as total_cost3,
+								items.total_cost3_fixed_portion as total_cost3_fixed_portion,
+								items.total_cost3_variable_portion as total_cost3_variable_portion,
+								case when :iv_import = 1 or :iv_updateMasterDataAndPrices = 1 then items.item_description else
+								determined.item_description end as item_description,
+								items.comment as comment,
+								items.is_dirty as is_dirty,
+								items.is_deleted as is_deleted,
+								items.total_cost_per_unit_fixed_portion, 
+								items.total_cost_per_unit_variable_portion, 
+								items.total_cost_per_unit, 
+								items.total_cost2_per_unit_fixed_portion, 
+								items.total_cost2_per_unit_variable_portion, 
+								items.total_cost2_per_unit, 
+								items.total_cost3_per_unit_fixed_portion, 
+								items.total_cost3_per_unit_variable_portion, 
+								items.total_cost3_per_unit, 
+								items.total_quantity_of_variants,
+								items.bom_compare_key
+								{{customFieldsWhenCreate Item}}
+						from :lt_items_prepared	as items
+							inner join :lt_determined_values as determined
+								on items.item_id = determined.item_id
+					union all 
+						select 	items.session_id as session_id,
+								items.item_id as item_id,
+								items.calculation_version_id as calculation_version_id,
+								items.parent_item_id as parent_item_id,
+								items.predecessor_item_id as predecessor_item_id,
+								items.is_active as is_active,
+								items.highlight_green,
+								items.highlight_orange,
+								items.highlight_yellow,
+								items.item_category_id as item_category_id,
+								items.child_item_category_id as child_item_category_id,
+								items.referenced_calculation_version_id as referenced_calculation_version_id,
+								items.account_id,
+								items.determined_account_id, 
+								items.document_type_id,
+								items.document_id,
+								items.document_version,
+								items.document_part,
+								items.document_status_id,
+								items.design_office_id,
+								items.material_id as material_id,
+								items.material_type_id,
+								items.material_group_id,
+								items.is_phantom_material,
+								items.is_configurable_material,
+								items.material_source as material_source,
+								items.overhead_group_id,
+								items.valuation_class_id,
+								items.purchasing_group,  
+								items.purchasing_document,
+								items.local_content, 
+								items.activity_type_id as activity_type_id,
+								items.process_id as process_id,
+								items.lot_size as lot_size,
+								items.lot_size_calculated as lot_size_calculated,
+								items.lot_size_is_manual as lot_size_is_manual,
+								items.engineering_change_number_id as engineering_change_number_id,
+								items.company_code_id,
+								items.cost_center_id as cost_center_id,
+								items.plant_id,
+								items.work_center_id as work_center_id,
+								items.work_center_category as work_center_category,
+								items.efficiency as efficiency,
+								items.business_area_id as business_area_id,
+								items.profit_center_id as profit_center_id,
+								items.quantity as quantity,
+								items.quantity_calculated as quantity_calculated,
+								items.quantity_is_manual as quantity_is_manual,
+								items.quantity_uom_id as quantity_uom_id,
+								items.total_quantity as total_quantity,
+								items.total_quantity_uom_id as total_quantity_uom_id,
+								items.total_quantity_depends_on as total_quantity_depends_on,
+								items.is_relevant_to_costing_in_erp as is_relevant_to_costing_in_erp,
+								items.base_quantity as base_quantity, 
+								items.base_quantity_calculated as base_quantity_calculated, 
+								items.base_quantity_is_manual as base_quantity_is_manual, 
+								items.quantity_per_base_unit as quantity_per_base_unit, 
+								items.quantity_per_base_unit_uom_id as quantity_per_base_unit_uom_id,
+								ifnull(determined.price_fixed_portion, items.price_fixed_portion) as price_fixed_portion,
+								items.price_fixed_portion_calculated as price_fixed_portion_calculated,
+								items.price_fixed_portion_is_manual as price_fixed_portion_is_manual,
+								ifnull(determined.price_variable_portion, items.price_variable_portion) as price_variable_portion,
+								items.price_variable_portion_calculated as price_variable_portion_calculated,
+								items.price_variable_portion_is_manual as price_variable_portion_is_manual,
+								items.price as price,
+								ifnull(determined.transaction_currency_id, items.transaction_currency_id) as transaction_currency_id,
+								ifnull(determined.price_unit, items.price_unit) as price_unit,
+								items.price_unit_calculated as price_unit_calculated,
+								items.price_unit_is_manual as price_unit_is_manual,
+								ifnull(determined.price_unit_uom_id, items.price_unit_uom_id) as price_unit_uom_id,
+								ifnull(determined.is_price_split_active, items.is_price_split_active) as is_price_split_active,
+								items.is_disabling_account_determination as is_disabling_account_determination,
+								ifnull(determined.price_id, items.price_id) as price_id,
+								items.confidence_level_id,
+								ifnull(determined.price_source_id, items.price_source_id) as price_source_id,
+								ifnull(determined.price_source_type_id, items.price_source_type_id) as price_source_type_id,
+                                items.surcharge as surcharge,
+								items.is_disabling_price_determination as is_disabling_price_determination,
+								items.vendor_id,
+								items.target_cost as target_cost,
+								items.target_cost_calculated as target_cost_calculated,
+								items.target_cost_is_manual as target_cost_is_manual,
+								items.target_cost_currency_id as target_cost_currency_id,
+								items.created_on as created_on,
+								items.created_by as created_by,
+								items.last_modified_on as last_modified_on,
+								items.last_modified_by as last_modified_by,
+								items.price_for_total_quantity as price_for_total_quantity,
+								items.price_for_total_quantity_fixed_portion as price_for_total_quantity_fixed_portion,
+								items.price_for_total_quantity_variable_portion as price_for_total_quantity_variable_portion,
+								items.price_for_total_quantity2 as price_for_total_quantity2,
+								items.price_for_total_quantity2_fixed_portion as price_for_total_quantity2_fixed_portion,
+								items.price_for_total_quantity2_variable_portion as price_for_total_quantity2_variable_portion,
+								items.price_for_total_quantity3 as price_for_total_quantity3,
+								items.price_for_total_quantity3_fixed_portion as price_for_total_quantity3_fixed_portion,
+								items.price_for_total_quantity3_variable_portion as price_for_total_quantity3_variable_portion,
+								items.other_cost as other_cost,
+								items.other_cost_fixed_portion as other_cost_fixed_portion,
+								items.other_cost_variable_portion as other_cost_variable_portion,
+								items.total_cost as total_cost,
+								items.total_cost_fixed_portion as total_cost_fixed_portion,
+								items.total_cost_variable_portion as total_cost_variable_portion,
+								items.total_cost2 as total_cost2,
+								items.total_cost2_fixed_portion as total_cost2_fixed_portion,
+								items.total_cost2_variable_portion as total_cost2_variable_portion,
+								items.total_cost3 as total_cost3,
+								items.total_cost3_fixed_portion as total_cost3_fixed_portion,
+								items.total_cost3_variable_portion as total_cost3_variable_portion,
+								items.item_description,
+								items.comment as comment,
+								items.is_dirty as is_dirty,
+								items.is_deleted as is_deleted,
+								items.total_cost_per_unit_fixed_portion, 
+								items.total_cost_per_unit_variable_portion, 
+								items.total_cost_per_unit,
+								items.total_cost2_per_unit_fixed_portion, 
+								items.total_cost2_per_unit_variable_portion, 
+								items.total_cost2_per_unit,
+								items.total_cost3_per_unit_fixed_portion, 
+								items.total_cost3_per_unit_variable_portion, 
+								items.total_cost3_per_unit,
+								items.total_quantity_of_variants,
+								items.bom_compare_key
+								{{customFieldsWhenCreate Item}}
+					from :lt_items_prepared	as items
+							left outer join :lt_determined_values as determined
+								on items.item_id = determined.item_id where determined.item_id is null;
+
+insert into	"sap.plc.db::basis.t_item_temporary"
+        ( session_id, item_id, calculation_version_id, parent_item_id, predecessor_item_id, is_active, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, item_category_id,child_item_category_id, referenced_calculation_version_id, account_id, determined_account_id, document_type_id, document_id,
+			document_version, document_part, document_status_id, design_office_id, material_id, material_type_id, material_group_id, is_phantom_material, is_configurable_material, material_source,
+			overhead_group_id, valuation_class_id, purchasing_group, purchasing_document, local_content, activity_type_id, process_id, lot_size, lot_size_calculated, lot_size_is_manual,
+			engineering_change_number_id, company_code_id, cost_center_id, plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id,
+			quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+			total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+			base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+			price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, price_variable_portion, price_variable_portion_calculated,
+			price_variable_portion_is_manual, price, transaction_currency_id, price_unit, price_unit_calculated,
+			price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, price_id, confidence_level_id, price_source_id, price_source_type_id, surcharge, is_disabling_price_determination, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+			created_on, created_by, last_modified_on, last_modified_by,
+			price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+			price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+			price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+			other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+			total_cost, total_cost_fixed_portion, total_cost_variable_portion, 
+			total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion, 
+			total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion, 
+			item_description, comment, is_dirty, is_deleted, 
+			total_cost_per_unit_fixed_portion, total_cost_per_unit_variable_portion, total_cost_per_unit, 
+			total_cost2_per_unit_fixed_portion, total_cost2_per_unit_variable_portion, total_cost2_per_unit, 
+			total_cost3_per_unit_fixed_portion, total_cost3_per_unit_variable_portion, total_cost3_per_unit, 
+			total_quantity_of_variants, bom_compare_key)
+		select	session_id,
+				item_id,
+				calculation_version_id,
+				parent_item_id,
+				predecessor_item_id,
+				is_active,
+				highlight_green,
+				highlight_orange,
+				highlight_yellow,
+				item_category_id,
+				child_item_category_id,
+				referenced_calculation_version_id,
+				account_id,
+				determined_account_id,
+				document_type_id,
+				document_id,
+				document_version,
+				document_part,
+				document_status_id,
+				design_office_id,
+				material_id,
+				material_type_id,
+				material_group_id,
+				is_phantom_material,
+				is_configurable_material,
+				material_source,
+				overhead_group_id,
+				valuation_class_id,
+				purchasing_group, 
+				purchasing_document, 
+				local_content,
+				activity_type_id,
+				process_id,
+				lot_size,
+				lot_size_calculated,
+				lot_size_is_manual,
+				engineering_change_number_id,
+				company_code_id,
+				cost_center_id,
+				plant_id,
+				work_center_id,
+				work_center_category,
+				efficiency,
+				business_area_id,
+				profit_center_id,
+				quantity,
+				quantity_calculated,
+				quantity_is_manual,
+				quantity_uom_id,
+				total_quantity,
+				total_quantity_uom_id,
+				total_quantity_depends_on,
+				is_relevant_to_costing_in_erp,
+				base_quantity, 
+				base_quantity_calculated, 
+				base_quantity_is_manual, 
+				quantity_per_base_unit,
+				quantity_per_base_unit_uom_id,
+				price_fixed_portion,
+				price_fixed_portion_calculated,
+				price_fixed_portion_is_manual,
+				price_variable_portion,
+				price_variable_portion_calculated,
+				price_variable_portion_is_manual,
+				price,
+				transaction_currency_id,
+				price_unit,
+				price_unit_calculated,
+				price_unit_is_manual,
+				price_unit_uom_id,
+				is_price_split_active, 
+				is_disabling_account_determination,
+				price_id,
+				confidence_level_id,
+				price_source_id,
+				price_source_type_id,
+                surcharge,
+				is_disabling_price_determination,
+				vendor_id,
+				target_cost,
+				target_cost_calculated,
+				target_cost_is_manual,
+				target_cost_currency_id,
+				created_on,
+				created_by,
+				last_modified_on,
+				last_modified_by,
+				price_for_total_quantity,
+				price_for_total_quantity_fixed_portion,
+				price_for_total_quantity_variable_portion,
+				price_for_total_quantity2,
+				price_for_total_quantity2_fixed_portion,
+				price_for_total_quantity2_variable_portion,
+				price_for_total_quantity3,
+				price_for_total_quantity3_fixed_portion,
+				price_for_total_quantity3_variable_portion,
+				other_cost,
+				other_cost_fixed_portion,
+				other_cost_variable_portion,
+				total_cost,
+				total_cost_fixed_portion,
+				total_cost_variable_portion,
+				total_cost2,
+				total_cost2_fixed_portion,
+				total_cost2_variable_portion,
+				total_cost3,
+				total_cost3_fixed_portion,
+				total_cost3_variable_portion,
+				item_description,
+				comment,
+				is_dirty,
+				is_deleted,
+				total_cost_per_unit_fixed_portion, 
+				total_cost_per_unit_variable_portion, 
+				total_cost_per_unit,
+				total_cost2_per_unit_fixed_portion, 
+				total_cost2_per_unit_variable_portion, 
+				total_cost2_per_unit,
+				total_cost3_per_unit_fixed_portion, 
+				total_cost3_per_unit_variable_portion, 
+				total_cost3_per_unit,
+				total_quantity_of_variants,
+				bom_compare_key
+		from :lt_insert_structure;
+
+{{#if Item.customFields}}
+-- custom fields part
+insert into	"sap.plc.db::basis.t_item_temporary_ext" (session_id, item_id,	calculation_version_id {{customFields Item}})
+	select session_id, item_id,	calculation_version_id {{customFields Item}} from :lt_insert_structure;
+{{/if}}
+
+lt_parents = select distinct parent_item_id from
+             (select parent_item_id from :lt_leaf_parents
+			  union
+			 select parent_item_id from :lt_insert_structure where parent_item_id > 0);
+
+{{#if Item.hasRollups}}
+-- set *_IS_MANUAL = 0 for parent items that have rollup-type > 0
+
+update "sap.plc.db::basis.t_item_temporary_ext" itemExt
+	set	{{customFieldsWithRollupType Item}}
+	from  "sap.plc.db::basis.t_item_temporary_ext" as itemExt, "sap.plc.db::basis.t_item_temporary" as item
+	where itemExt.item_id = item.item_id
+	and itemExt.calculation_version_id = item.calculation_version_id
+	and itemExt.session_id = item.session_id
+	and item.session_id = :iv_session_id
+	and item.calculation_version_id = :iv_cv_id
+	and item.item_id in ( select parent_item_id from :lt_parents);
+{{/if}}
+
+-- ################################################################################################################
+-- 		reset price information for all assembly items
+-- ################################################################################################################
+
+update "sap.plc.db::basis.t_item_temporary" as db
+	set	price = null,
+		price_fixed_portion = null,
+		price_variable_portion = null,
+		price_for_total_quantity = null,
+		price_for_total_quantity_fixed_portion = null,
+		price_for_total_quantity_variable_portion =  null,
+		price_for_total_quantity2 = null,
+		price_for_total_quantity2_fixed_portion = null,
+		price_for_total_quantity2_variable_portion =  null,
+		price_for_total_quantity3 = null,
+		price_for_total_quantity3_fixed_portion = null,
+		price_for_total_quantity3_variable_portion =  null,
+		price_source_id = price_source.price_source_id,
+		price_source_type_id = price_source.price_source_type_id,
+		is_price_split_active = 0,
+		price_id = null,
+		confidence_level_id = null,
+		transaction_currency_id =	:lv_report_currency_id,
+		price_unit = 1.0,
+		price_unit_uom_id =	( select total_quantity_uom_id										
+								from "sap.plc.db::basis.t_item_temporary" 
+								where 	parent_item_id is null 
+										and calculation_version_id = :iv_cv_id 
+										and session_id = :iv_session_id )
+	from  
+		"sap.plc.db::basis.t_item_temporary" as db, 
+		:lt_parents as parent,
+		(
+			select 
+				top 1 price_source_id, price_source_type_id
+			from 
+				"sap.plc.db::basis.t_price_source" 
+			where
+				price_source_type_id = lc_calculated_price 
+		) as price_source
+	where 	db.item_id = parent.parent_item_id
+			and db.session_id = :iv_session_id
+			and db.calculation_version_id = :iv_cv_id;
+
+-- ################################################################################################################
+-- 		update predecessor_item_id of a successor items
+-- ################################################################################################################
+-- the order between items of the same tree level is maintained within the column predecessor_item_id (refernece to the predecessor of an successor item); if an item is inserted in between an order of existing
+-- items, the successor's predecessor_item_id of the newly inserted item must be set to the id of the inserted item
+-- idea: find the item if the same predecessor_item_id as the newly inserted item on the same tree level (parent_item_id must be equal); that's the successor of the new item; set the predecessor_item_id to the
+-- new item id, to maintain the correct order
+
+update 	"sap.plc.db::basis.t_item_temporary" as db
+	set predecessor_item_id = refs.item_id
+	from "sap.plc.db::basis.t_item_temporary" as db, :lt_updated_item_references as refs
+	where 	ifnull(refs.predecessor_item_id, -1) = ifnull(db.predecessor_item_id, -1)	-- this is a workaround to enable a one-line check for predecessor_item_id, which can be null; however null cannot be checked
+			and refs.parent_item_id = db.parent_item_id									-- with '=', but only with 'is null'; that'd requrie 3 lines actually
+			and db.session_id = :iv_session_id
+			and db.calculation_version_id = :iv_cv_id
+			and db.item_id <> refs.item_id;												-- if this statement is executed after the insert, without this check also the newly created item would be affected
+
+-- ################################################################################################################
+-- 		update is_active state for parents
+-- ################################################################################################################
+-- if a new item is added to an inactive parent, the entire parent item tree branch must be activated; the procedures p_item_set_active_states is doing exactly that and returns all items that got activated;
+-- CAUTION: the return structure includes the inserted items, which are by definition marked as active during the insert
+--
+-- For the creating items, the active states of child items should be preserved. Otherwise this would lead to different results in case of import and copy&paste. But also creating item structures with predefined 
+-- active states at once (e.g., via from Addins) the child active state should be preserved. For this reason, iv_preserve_substructures_flag of p_item_set_active_states is constantly set to 1.
+
+insert into "sap.plc.db::temp.gtt_item_changed_active_state" (item_id, parent_item_id, is_active)  
+		select item_id, parent_item_id, is_active from :lt_insert_structure;
+call 	"sap.plc.db.calculationmanager.procedures::p_item_set_active_states"
+		(
+			iv_calculation_version_id      => :iv_cv_id,
+			iv_session_id                  => :iv_session_id,
+			iv_preserve_substructures_flag => 1,
+			item_ids_updated               => :lt_items_ids_changed_active_state
+		);
+
+--set values for items of type referenced version
+--we cannot use gtt_temporary_table since the item_id's are not the generated ones
+insert into "sap.plc.db::temp.gtt_item_ids" (item_id)
+		SELECT ITEM_ID FROM :lt_generated_item_ids;
+call 	"sap.plc.db.calculationmanager.procedures::p_item_create_set_referenced_version"
+		(
+			:iv_cv_id,
+			:iv_session_id,
+			:ov_not_existing_versions
+		);
+
+-- ################################################################################################################
+-- 		prepare output
+-- ################################################################################################################
+ot_new_items = 	select items.session_id, items.item_id, items.calculation_version_id, items.parent_item_id, items.predecessor_item_id, is_active, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, item_category_id,child_item_category_id,referenced_calculation_version_id, account_id, determined_account_id, document_type_id, document_id,
+					document_version, document_part, document_status_id, design_office_id, material_id, material_type_id, material_group_id, is_phantom_material, is_configurable_material, material_source,
+					overhead_group_id, valuation_class_id, purchasing_group, purchasing_document, local_content, activity_type_id, process_id, lot_size, lot_size_calculated, lot_size_is_manual,
+					engineering_change_number_id, company_code_id, cost_center_id, plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id,
+					quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+					total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+					base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+					price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, price_variable_portion, price_variable_portion_calculated,
+					price_variable_portion_is_manual, price, transaction_currency_id, price_unit, price_unit_calculated,
+					price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, price_id, confidence_level_id, price_source_id, price_source_type_id, is_disabling_price_determination, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+					created_on, created_by, last_modified_on, last_modified_by,
+					price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+					price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+					price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+					other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+					total_cost, total_cost_fixed_portion, total_cost_variable_portion,
+					total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion,
+					total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion,
+					item_description, comment, is_dirty, is_deleted,
+					total_cost_per_unit_fixed_portion, total_cost_per_unit_variable_portion, total_cost_per_unit, 
+					total_cost2_per_unit_fixed_portion, total_cost2_per_unit_variable_portion, total_cost2_per_unit, 
+					total_cost3_per_unit_fixed_portion, total_cost3_per_unit_variable_portion, total_cost3_per_unit, 
+					total_quantity_of_variants, bom_compare_key
+                    {{customFieldsWithTablePrefix Item}}
+                    , refs.handle_id
+					from 	"sap.plc.db::basis.t_item_temporary" as items
+					inner join :lt_generated_item_ids as refs
+						on items.item_id = refs.item_id
+					left outer join {{t_temporaryExtensionTable Item}} as plcexttable
+						on 	items.item_id = plcexttable.item_id
+						and items.calculation_version_id = plcexttable.calculation_version_id
+						and items.session_id = plcexttable.session_id
+					where 	items.item_id in (select item_id from :lt_insert_structure)
+							and items.session_id = :iv_session_id
+							and items.calculation_version_id = :iv_cv_id;
+
+-- determining the items which got updated; those are by definition:
+-- 1. items which became an assembly with the insert (item was added as child to an former leaf item) => price information are reset
+-- 2. items which were deactivated and got activated by the adding of an new child item; because p_set_active_states returns all items, also the newly created ones, the new created items must be filted
+--	  out
+-- inner join into ot_updated_items using lt_updated_item_ids filters the updated items
+lt_updated_item_ids = 	select parent_item_id as item_id from :lt_leaf_parents
+						union
+						(select item_id from :lt_items_ids_changed_active_state	minus select item_id from :lt_insert_structure); -- filter out the created items by this procedure to get only the updated items
+						
+ot_updated_items = 	select items.session_id, items.item_id, items.calculation_version_id, items.parent_item_id, items.predecessor_item_id, is_active, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW, item_category_id,child_item_category_id, referenced_calculation_version_id, account_id, determined_account_id, document_type_id, document_id,
+					document_version, document_part, document_status_id, design_office_id, material_id, material_type_id, material_group_id, is_phantom_material, is_configurable_material, material_source,
+					overhead_group_id, valuation_class_id, purchasing_group, purchasing_document, local_content, activity_type_id, process_id, lot_size, lot_size_calculated, lot_size_is_manual,
+					engineering_change_number_id, company_code_id, cost_center_id, plant_id, work_center_id, work_center_category, efficiency, business_area_id, profit_center_id,
+					quantity, quantity_calculated, quantity_is_manual, quantity_uom_id,
+					total_quantity, total_quantity_uom_id, total_quantity_depends_on, is_relevant_to_costing_in_erp,
+					base_quantity, base_quantity_calculated, base_quantity_is_manual, quantity_per_base_unit, quantity_per_base_unit_uom_id,
+					price_fixed_portion, price_fixed_portion_calculated, price_fixed_portion_is_manual, price_variable_portion, price_variable_portion_calculated,
+					price_variable_portion_is_manual, price, transaction_currency_id, price_unit, price_unit_calculated,
+					price_unit_is_manual, price_unit_uom_id, is_price_split_active, is_disabling_account_determination, price_id, confidence_level_id, price_source_id, price_source_type_id, surcharge, is_disabling_price_determination, vendor_id, target_cost, target_cost_calculated, target_cost_is_manual, target_cost_currency_id,
+					created_on, created_by, last_modified_on, last_modified_by,
+					price_for_total_quantity, price_for_total_quantity_fixed_portion, price_for_total_quantity_variable_portion,
+					price_for_total_quantity2, price_for_total_quantity2_fixed_portion, price_for_total_quantity2_variable_portion,
+					price_for_total_quantity3, price_for_total_quantity3_fixed_portion, price_for_total_quantity3_variable_portion,
+					other_cost, other_cost_fixed_portion, other_cost_variable_portion,
+					total_cost, total_cost_fixed_portion, total_cost_variable_portion,
+					total_cost2, total_cost2_fixed_portion, total_cost2_variable_portion,
+					total_cost3, total_cost3_fixed_portion, total_cost3_variable_portion,
+					item_description, comment, is_dirty, is_deleted,
+					total_cost_per_unit_fixed_portion, total_cost_per_unit_variable_portion, total_cost_per_unit, 
+					total_cost2_per_unit_fixed_portion, total_cost2_per_unit_variable_portion, total_cost2_per_unit, 
+					total_cost3_per_unit_fixed_portion, total_cost3_per_unit_variable_portion, total_cost3_per_unit, 
+					total_quantity_of_variants, bom_compare_key
+                    {{customFieldsWithTablePrefix Item}}
+					from 	"sap.plc.db::basis.t_item_temporary" as items
+					left outer join {{t_temporaryExtensionTable Item}} as plcExtTable 
+						on	items.item_id = plcExtTable.item_id 
+						and items.calculation_version_id = plcExtTable.calculation_version_id 
+						and items.session_id = plcExtTable.session_id
+					inner join :lt_updated_item_ids as update_items								-- using inner join to select only the updated items
+						on items.item_id = update_items.item_id
+					where 		items.calculation_version_id = iv_cv_id
+							and items.session_id = iv_session_id;
+
+ot_messages = 	select *
+				from :lt_value_determination_messages;
+				
+--insert changed items for the AFL
+insert into "sap.plc.db::temp.gtt_changed_items" (item_id)
+		select item_id from :ot_new_items;
+insert into "sap.plc.db::temp.gtt_changed_items" (item_id)
+		select item_id from :ot_updated_items;
+		
+END
+
+

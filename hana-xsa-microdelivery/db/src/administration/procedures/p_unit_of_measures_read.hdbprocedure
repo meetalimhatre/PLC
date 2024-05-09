@@ -1,0 +1,85 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_unit_of_measures_read" (
+		IN iv_logon_language 			NVARCHAR(11),
+		IN iv_master_data_timestamp 	TIMESTAMP, 
+		IN iv_filter_string	       	 	NVARCHAR(5000),
+		IN iv_no_max_records 			INTEGER,
+		IN iv_no_skip_records           INTEGER,
+	 	OUT ot_unit_of_measures 		"sap.plc.db.administration::masterdata.tt_uom" default empty,
+	 	OUT ot_dimension 				"sap.plc.db.administration::masterdata.tt_dimension" default empty,	 	
+	 	OUT ot_unit_of_measure_texts 	"sap.plc.db::basis.t_uom__text" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Procedure logic 
+ *****************************/
+ 
+  -- select unit of measures
+ ot_unit_of_measures_union = select * from (
+	 			select
+ 					plcTable.UOM_ID AS UOM_ID,
+ 					plcTable.DIMENSION_ID,
+ 					plcTable.NUMERATOR,
+ 					plcTable.DENOMINATOR,
+ 					plcTable.EXPONENT_BASE10,
+ 					plcTable.SI_CONSTANT,
+ 					plcTable._VALID_FROM,
+ 					plcTable._VALID_TO,
+ 					plcTable._SOURCE,
+ 					plcTable._CREATED_BY,
+ 					minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+					minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+ 					plcTextTable.UOM_CODE,
+ 					plcTextTable.UOM_DESCRIPTION
+ 				from "sap.plc.db::basis.t_uom" as plcTable
+ 				inner join 
+				( 	select A._VALID_FROM, A.UOM_ID, A._CREATED_BY
+					from "sap.plc.db::basis.t_uom" as A
+					inner join 
+					(	select MIN(_VALID_FROM) as _VALID_FROM, UOM_ID
+						from "sap.plc.db::basis.t_uom"
+							group by UOM_ID
+					) as B
+						on A._VALID_FROM = B._VALID_FROM and A.UOM_ID = B.UOM_ID
+				) as minValues
+					on plcTable.UOM_ID = minValues.UOM_ID
+				left outer join "sap.plc.db::basis.t_uom__text" as plcTextTable 
+	                on  plcTable.UOM_ID = plcTextTable.UOM_ID 
+	                and plcTextTable.LANGUAGE = :iv_logon_language 
+	                and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+	                and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)
+				where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+				    and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null ))
+				    order by UOM_ID;
+ 
+ ot_unit_of_measures_filter = APPLY_FILTER(:ot_unit_of_measures_union, :iv_filter_string) ;      
+	
+ ot_unit_of_measures = 
+ 		select UOM_ID,DIMENSION_ID,NUMERATOR,DENOMINATOR,EXPONENT_BASE10,
+ 			   SI_CONSTANT,_VALID_FROM, _VALID_TO,_SOURCE,_CREATED_BY,_VALID_FROM_FIRST_VERSION,
+			   _CREATED_BY_FIRST_VERSION,UOM_CODE,UOM_DESCRIPTION 
+		from :ot_unit_of_measures_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+                
+ ot_unit_of_measure_texts = 
+ 				
+ 				select
+ 					plcTextTable.UOM_ID,
+					plcTextTable.LANGUAGE,
+					plcTextTable.UOM_CODE,
+					plcTextTable.UOM_DESCRIPTION,
+					plcTextTable._VALID_FROM, 
+					plcTextTable._VALID_TO,
+					plcTextTable._SOURCE,
+					plcTextTable._CREATED_BY
+ 				from "sap.plc.db::basis.t_uom__text" as plcTextTable 
+				where ( plcTextTable.UOM_ID) in ( select UOM_ID from :ot_unit_of_measures ) 
+					and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+					and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+							
+tt_dimension_key = select distinct DIMENSION_ID from :ot_unit_of_measures;
+call "sap.plc.db.administration.procedures::p_ref_dimension_read"(:iv_logon_language, :iv_master_data_timestamp, :tt_dimension_key, ot_dimension);		
+
+END;

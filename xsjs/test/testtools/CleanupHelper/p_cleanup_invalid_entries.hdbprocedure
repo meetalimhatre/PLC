@@ -1,0 +1,21 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.CleanupHelper::p_cleanup_invalid_entries" ( ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA "SAP_PLC"
+	AS
+BEGIN
+--delete from t_item_temporary (non opened)
+delete from "sap.plc.db::basis.t_item_temporary" where CALCULATION_VERSION_ID not in (select CALCULATION_VERSION_ID from "sap.plc.db::basis.t_open_calculation_versions");
+
+-- I305774: commented for now in order to pass the nightly transport
+--delete from "SAP_PLC"."sap.plc.db::basis.t_item_temporary_ext" where CALCULATION_VERSION_ID not in (select CALCULATION_VERSION_ID from "SAP_PLC"."sap.plc.db::basis.t_open_calculation_versions");
+
+--delete from t_calction_version_temporary (non opened)
+delete from "sap.plc.db::basis.t_calculation_version_temporary" where CALCULATION_VERSION_ID not in (select CALCULATION_VERSION_ID from "sap.plc.db::basis.t_open_calculation_versions");
+
+
+--delete from _open tables if there is no corresponding entry in temporary tables
+delete from "sap.plc.db::basis.t_open_calculation_versions" where CALCULATION_VERSION_ID not in (select CALCULATION_VERSION_ID from "sap.plc.db::basis.t_item_temporary");
+delete from "sap.plc.db::basis.t_open_calculation_versions" where CALCULATION_VERSION_ID not in (select CALCULATION_VERSION_ID from "sap.plc.db::basis.t_calculation_version_temporary");
+
+END;

@@ -1,0 +1,23 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.DeleteCalculationHelper::p_delete_all_calculations_with_id_greater_than" ( 
+	IN calcid INTEGER
+) 
+	LANGUAGE SQLSCRIPT 
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA "SAP_PLC"
+	AS
+	
+	CURSOR calculationVersions FOR
+		SELECT CALCULATION_VERSION_ID from "sap.plc.db::basis.t_calculation_version" where CALCULATION_ID > :calcid;
+	
+BEGIN
+--closes and deletes a calculation and all its versions
+--NOT TESTED; DO NOT USE IN PRODUCTIVE CODE
+
+FOR cur_calcVersion AS calculationVersions DO
+	call "sap.plc_test.testtools.DeleteCalculationHelper::p_calculation_version_delete"(cur_calcVersion.CALCULATION_VERSION_ID);		
+END FOR;	
+
+
+delete from "sap.plc.db::basis.t_calculation"  where "CALCULATION_ID" > :calcid;
+
+END;

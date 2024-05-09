@@ -1,0 +1,42 @@
+update temp_table
+					set	temp_table.ERROR_CODE = CASE 
+												  WHEN result._VALID_FROM is null THEN 'GENERAL_ENTITY_DUPLICATE_ERROR'
+												  WHEN result._VALID_FROM is not null THEN 'GENERAL_ENTITY_NOT_CURRENT_ERROR'
+												  ELSE ''
+												END, 
+					temp_table.ERROR_DETAILS = CASE 
+											     WHEN result._VALID_FROM is null THEN '{"administrationObjType": "TextObj"}'
+											     WHEN result._VALID_FROM is not null THEN '{"administrationConflictDetailsObj" : {"newValidFromDate": "'
+													              ||(TO_NVARCHAR(result._VALID_FROM, 'YYYY-MM-DD')||'T'||TO_NVARCHAR(result._VALID_FROM, 'HH24:MI:SS.FF3')||'Z')
+													              ||'","userId":"'||result._CREATED_BY||'","operationUserId":"Create", "objType": "TextObj"}}'
+									                     ELSE ''
+											   END
+					from {{temporaryTextTable MasterdataBusinessObject}} as temp_table,
+					( select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE, main_table._VALID_FROM, main_table._CREATED_BY
+				                from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+						inner join {{textTable MasterdataBusinessObject}} as main_table
+						on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+				                and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and main_table._VALID_TO is null
+				                and temp_table.LANGUAGE = main_table.LANGUAGE
+						and temp_table.operation = 'Create'
+						and ( temp_table.error_code = '' or  temp_table.error_code is null )
+					  union
+					  (SELECT {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table1'}}, temp_table1.LANGUAGE, null as _VALID_FROM, null as _CREATED_BY
+				                from {{temporaryTextTable MasterdataBusinessObject}} as temp_table1
+					        INNER JOIN (SELECT
+					                        {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table2'}}, temp_table2.LANGUAGE, COUNT(*) AS CountOf
+					                        from {{temporaryTextTable MasterdataBusinessObject}} as temp_table2
+					                        where temp_table2.operation = 'Create'
+						                and ( temp_table2.error_code = '' or  temp_table2.error_code is null )
+					                        GROUP BY {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table2'}}, temp_table2.LANGUAGE
+					                        HAVING COUNT(*) > 1 
+					                    ) as inserted_duplicates 
+					        ON {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table1' 'inserted_duplicates'}}
+				                        and temp_table1.LANGUAGE = inserted_duplicates.LANGUAGE 
+					   		and temp_table1.operation = 'Create' 
+					   		and ( temp_table1.error_code = '' or  temp_table1.error_code is null )) 
+					) as result 
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}} 
+				        and temp_table.LANGUAGE = result.LANGUAGE 
+					and temp_table.operation = 'Create' 
+					and ( temp_table.error_code = '' or  temp_table.error_code is null )

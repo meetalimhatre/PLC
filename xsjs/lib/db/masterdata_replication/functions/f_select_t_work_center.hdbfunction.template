@@ -1,0 +1,35 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_work_center" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"WORK_CENTER_ID"	NVARCHAR(15),
+	"PLANT_ID"	NVARCHAR(8),
+	"WORK_CENTER_CATEGORY"	NVARCHAR(50),
+	"COST_CENTER_ID"	NVARCHAR(10),
+	"CONTROLLING_AREA_ID"	NVARCHAR(4),
+	"WORK_CENTER_RESPONSIBLE"	NVARCHAR(256),
+	"EFFICIENCY"	DECIMAL(28, 7),
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	{{#if Work_Center.customFields}}
+		{{ddl_masterdataCustomFieldsWithoutUnit Work_Center}}
+	{{/if}}
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"WORK_CENTER_ID"	NVARCHAR(15),
+		"PLANT_ID"	NVARCHAR(8),
+		"WORK_CENTER_CATEGORY"	NVARCHAR(50),
+		"COST_CENTER_ID"	NVARCHAR(10),
+		"CONTROLLING_AREA_ID"	NVARCHAR(4),
+		"WORK_CENTER_RESPONSIBLE"	NVARCHAR(256),
+		"EFFICIENCY"	DECIMAL(28, 7),
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+		{{#if Work_Center.customFields}}
+			{{ddl_masterdataCustomFieldsWithoutUnit Work_Center}}
+		{{/if}}
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_work_center', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

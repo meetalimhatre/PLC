@@ -1,0 +1,187 @@
+namespace sap.plc_test.testtools.testrunner.db;
+
+/*
+*	This data dictionary contains exact copies of the metadata, -text and -item_attributes tables. Please also update it when changing the original tables.
+*	The copies of this tables are used by the testrunner, to story original metadata when creating custom fields for tests (and restore it afterwards)
+*/
+
+
+@Schema: 'SAP_PLC_TEST'
+context basis {
+
+    // t_metadata contains all required metadata about standard and custom PLC fields. As such it also features the fields of the item_metadata.xlsx .
+   @Catalog.tableType : #COLUMN 
+   entity t_metadata {
+      key PATH: String(127) not null; /* Path is used to describe what path is used to navigate through the client side models (business objects). Two examples should show this:
+       * - In the side pane you want to show the material type id and the material type description. To come to the material type description you need to navigate the following way through the models: item -> material -> material_type. Thus, the path is shown as item.material.material_type
+       * - In the admin UI you want  to maintain the cost center and the cost center is assigned to the controlling area, which is displayed with controlling area id and controlling area description. To navigate to the controlling area the following path is used. cost_center -> controlling_area. The path is shown as cost_center.controlling_area. */
+      key BUSINESS_OBJECT: String(127) not null; // Must contain the name of an existing standard table in the current PLC datamodel or an extension table in the customer schema
+      key COLUMN_ID: String(127) not null; // Must contain the name of an existing column in the table identified by TABLE_ID
+      IS_CUSTOM: hana.TINYINT not null default 0; /* If 0 (default), TABLE_ID and COLUMN_ID refer to an existing field in the PLC schema. Otherwise they point to a field in the customer schema.
+       *  */
+      ROLLUP_TYPE_ID: Integer default 0; /* Specifies whether this field is going to be rolled up, and, if yes, which aggregation function is to be used.
+       * 0 = no rollup
+       * 1 = SUM
+       * 2 = MIN
+       * 3 = MAX
+       * 4 = AVG
+       * 5 = COUNT
+       * 6 = DISTINCT
+       *  */
+      SIDE_PANEL_GROUP_ID: Integer;
+      DISPLAY_ORDER: Integer; // Display order of columns within the group
+      TABLE_DISPLAY_ORDER: Integer; // Display order of columns within the admin grid, this is especially used for the uom when multiple value fields have the same uom in order to have the column one one time in the table.
+      REF_UOM_CURRENCY_PATH: String(127); /* Path is used to describe what path is used to navigate through the client side models (business objects). Two examples should show this:
+       * - In the side pane you want to show the material type id and the material type description. To come to the material type description you need to navigate the following way through the models: item -> material -> material_type. Thus, the path is shown as item.material.material_type
+       * - In the admin UI you want  to maintain the cost center and the cost center is assigned to the controlling area, which is displayed with controlling area id and controlling area description. To navigate to the controlling area the following path is used. cost_center -> controlling_area. The path is shown as cost_center.controlling_area.
+       * 
+       *  */
+      REF_UOM_CURRENCY_BUSINESS_OBJECT: String(127); // only valid for numeric fields; references the table where the column with the UoM or the currency can be find, which belongs to this value
+      REF_UOM_CURRENCY_COLUMN_ID: String(127); // only valid for numeric fields; references the column where the UoM or the currency can be found, which belongs to this value
+      UOM_CURRENCY_FLAG: hana.TINYINT; /* 1: for all columns which store a UoM or currency
+       * 0: for all columns which does not store a UoM or currency
+       * necessary for UI to know which column should be displayed independentyl and which column should be displayed as UoM/currency field */
+      SEMANTIC_DATA_TYPE: String(35) not null; /* from Item_Metadata.xlsx
+       * 
+       * Mapping from HANA datatypes to C# datatypes. For example, HANA does not know BOOLEAN and uses TINYINT instead. However,  BOOLEAN exists as a datatype in C# and the customer would also rather choose BOOLEAN.  Therefore, we need to store that TINYINT actually means BOOLEAN for a particular field. 
+       * 
+       * Possible values are:
+       * 0 : Date
+       * 1 : Time
+       * 2 : TimeStamp
+       * 3 : Currency
+       * 4 : Unit of Measure
+       * 5 : String
+       * 6 : Number  (Decimal (20,5))
+       * 7 : Boolean
+       * ---
+       * 8 : BooleanInt
+       * 9 : Integer
+       * 10 : PositiveInteger
+       * 11 : NegativeInteger
+       * 
+       * 0-7 are the semantic datatypes the enduser can choose from when creating a custom field.
+       * 
+       * 8-11 are additional semantic  data types that are used for semantic validation between frontend and backend. For example, new item IDs are always PostiveIntegers, client-side handles for newly created entities are always NegativeIntegers. BooleanInt expresses that the value is represented by 0 and 1, whereas Boolean applies TRUE and FALSE. This distinction is also required for validity checks.
+       * 
+       * Decimals are always 20,5. 
+       * The length of a string is specified in SEMANTIC_DATA_TYPE_LENGTH
+       *  */
+      SEMANTIC_DATA_TYPE_ATTRIBUTES: String(250); /* Used to define the SEMANTIC_DATA_TYPE in more detail. It is maintained in the following way: 
+       * 	- For String fields it describes the length with the syntax: "length=20"
+       * 	- For Decimal fields it specifies precision and scale with the syntax:  "precision=20; scale=5"
+       * 	- For integer and decimal field values, this syntax is used: 
+       * "lowerBound=0; upperBound = 100"
+       * 
+       *  */
+      VALIDATION_REGEX_ID: String(30);
+      PROPERTY_TYPE: Integer; /*         CostingSheetRow = 0,
+       *         Price = 1,
+       *         Number = 2,        
+       *         Text = 3,
+       *         TextArea = 4,
+       *         Boolean = 5,
+       *         UoM = 6,
+       *         Currency = 7,
+       *         MasterData = 8, 
+       *         ItemCategory = 9,
+       *         CustomField = 10 */
+      IS_IMMUTABLE_AFTER_SAVE: hana.TINYINT;
+      IS_REQUIRED_IN_MASTERDATA: hana.TINYINT; // from Item_Metadata.xlsx
+      IS_WILDCARD_ALLOWED: hana.TINYINT; // from Item_Metadata.xlsx
+      IS_USABLE_IN_FORMULA: hana.TINYINT;
+      RESOURCE_KEY_DISPLAY_NAME: String(256); /* This field contains the string that is shown on the UI as the field's label. This is mandatory for new custom fields and shall later also be used for standard fields.
+       *  */
+      RESOURCE_KEY_DISPLAY_DESCRIPTION: String(256);
+      CREATED_ON: UTCTimestamp;
+      CREATED_BY: String(256);
+      LAST_MODIFIED_ON: UTCTimestamp;
+      LAST_MODIFIED_BY: String(256);
+   };
+
+   @Catalog.tableType : #COLUMN 
+   entity t_metadata__text {
+      key PATH: String(127) not null; /* Path is used to describe what path is used to navigate through the client side models (business objects). Two examples should show this:
+       * - In the side pane you want to show the material type id and the material type description. To come to the material type description you need to navigate the following way through the models: item -> material -> material_type. Thus, the path is shown as item.material.material_type
+       * - In the admin UI you want  to maintain the cost center and the cost center is assigned to the controlling area, which is displayed with controlling area id and controlling area description. To navigate to the controlling area the following path is used. cost_center -> controlling_area. The path is shown as cost_center.controlling_area.
+       * 
+       *  */
+      key COLUMN_ID: String(127) not null;
+      key LANGUAGE: String(11) not null;
+      DISPLAY_NAME: String(250); /* This field contains the string that is shown on the UI as the field's label. This is mandatory for new custom fields and shall later also be used for standard fields.
+       *  */
+      DISPLAY_DESCRIPTION: String(5000);
+      CREATED_ON: UTCTimestamp;
+      CREATED_BY: String(256);
+      LAST_MODIFIED_ON: UTCTimestamp;
+      LAST_MODIFIED_BY: String(256);
+  };
+
+   /* As of Dec 2014, there exists an Excel file  item_metadata.xlsx  which specifies the different metadata properties of an item  field (isMandatory, ..., Comments). Four of the metadata properties depend on the item category and whether the item has children (isMandatory, isRequiredForCompleteness, isReadOnly, isTransferable). For example, if we have a "preliminary material", the MATERIAL_ID is not required for completing an item entry. The opposite  is true when we have an item category "material". In addition some of the fields also differ if the current item has children.
+    * 	
+    * This kind of metadata is maintained  in the Excel file and imported from Excel into XS for validity checks.  
+    * 
+    * Handling and persisting such metadata for custom fields requires corresponding storage in the database. Accordingly, it is expected that the metadata contained in Excel will eventually also be replicated into the PLC database.
+    * 	
+    * Note, that eventually such metadata is also envisioned for the fields on higher levels and potentially also master data. On such levels we do not have to distinguish between different item categories at all.
+    * However, for the metadata properties depending on item category, there is a 1:N relation between the description of the field itself, e.g., MATERIAL_ID, and its different properties depending on the item category (as outlined in the example above). 
+    * 	
+    * The four metadata properties for item fields which depend on the item category are captured in this table. Accordingly, we find foreign keys to t_metadata and two additional keys, namely, ITEM_CATEGORY_ID and SUBITEM_STATE. 
+    * If we maintain metadata properties for a field that does not depend on item category and/or has children, the two additional keys are amended by default values.
+    * 
+    * 
+    * 
+    *  */
+   @Catalog.tableType : #COLUMN 
+   entity t_metadata_item_attributes {
+      key PATH: String(127) not null; /* Path is used to describe what path is used to navigate through the client side models (business objects). Two examples should show this:
+       * - In the side pane you want to show the material type id and the material type description. To come to the material type description you need to navigate the following way through the models: item -> material -> material_type. Thus, the path is shown as item.material.material_type
+       * - In the admin UI you want  to maintain the cost center and the cost center is assigned to the controlling area, which is displayed with controlling area id and controlling area description. To navigate to the controlling area the following path is used. cost_center -> controlling_area. The path is shown as cost_center.controlling_area.
+       * 
+       * 
+       *  */
+      key BUSINESS_OBJECT: String(127) not null; // Refers to t_metadata.TABLE_ID
+      key COLUMN_ID: String(127) not null; // Refers to t_metadata.COLUMN_ID
+      key ITEM_CATEGORY_ID: Integer not null; /* Same enumeration as  t_item.ITEM_CATEGORY_ID
+       * However, -1 means "default" or "for all categories" */
+      key SUBITEM_STATE: hana.SMALLINT not null; /* If true, the current entry in this table refers to the meaning of the metadata properties below when the corresponding item has child items
+       * However, -1 means "default" or "do not care"
+       *  */
+      IS_MANDATORY: hana.TINYINT; /* Stems from Item_Metadata.xlsx
+       * Field has to be entered such that calculation version can be saved
+       * 
+       * Field depends on item type and if item has children
+       * Field is potentially relevant for higher levels and master data tables
+       *  */
+      IS_READ_ONLY: hana.TINYINT; /* Stems from Item_Metadata.xlsx
+       * Some fields might contain calculated values, e.g., the price of an assembly item whose value has been rolled up and cannot be changed accordingly. 
+       * Field depends on item type and if item has children
+       * Field is potentially relevant for higher levels and master data tables
+       *  */
+      IS_TRANSFERABLE: hana.TINYINT; /* Stems from Item_Metadata.xlsx 
+       * Field depends on item type and if item has children
+       * Field is potentially relevant for higher levels and master data tables
+       *  */
+      DEFAULT_VALUE: String(5000);
+      CREATED_ON: UTCTimestamp;
+      CREATED_BY: String(256);
+      LAST_MODIFIED_ON: UTCTimestamp;
+      LAST_MODIFIED_BY: String(256);
+   };
+   
+  @Catalog.tableType : #COLUMN 
+   entity t_formula {
+      key FORMULA_ID: Integer not null;
+      PATH: String(127) not null; /* Path is used to describe what path is used to navigate through the client side models (business objects). Two examples should show this:
+       * - In the side pane you want to show the material type id and the material type description. To come to the material type description you need to navigate the following way through the models: item -> material -> material_type. Thus, the path is shown as item.material.material_type
+       * - In the admin UI you want  to maintain the cost center and the cost center is assigned to the controlling area, which is displayed with controlling area id and controlling area description. To navigate to the controlling area the following path is used. cost_center -> controlling_area. The path is shown as cost_center.controlling_area. */
+      BUSINESS_OBJECT: String(127) not null;
+      COLUMN_ID: String(127) not null;
+      ITEM_CATEGORY_ID: Integer not null; /* Same enumeration as  t_item.ITEM_CATEGORY_ID
+       * However, -1 means "default" or "for all categories" */
+      IS_FORMULA_USED: hana.TINYINT not null;
+      FORMULA_STRING: String(5000) not null; // Must contain the formula string in Excel syntax
+      FORMULA_DESCRIPTION: String(500);
+   };
+
+};

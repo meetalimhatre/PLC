@@ -1,0 +1,2 @@
+APPLICATION_TIMEOUT_ID,VALUE_IN_SECONDS,TIMEOUT_DESCRIPTION
+SessionTimeout,10800,3 hours time out of session 

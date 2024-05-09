@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+        <Schema Namespace="default" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <EntityType Name="V_BOM_COMPAREType" sap:semantics="aggregate">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.String" Nullable="false" MaxLength="2147483647" sap:filterable="false"/>
+                <Property Name="ACCOUNT_ID" Type="Edm.String" MaxLength="10" sap:label="ACCOUNT_ID" sap:aggregation-role="dimension"/>
+                <Property Name="ACCOUNT_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="ACCOUNT_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ACTIVITY_TYPE_ID" Type="Edm.String" MaxLength="12" sap:label="ACTIVITY_TYPE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="ACTIVITY_TYPE_ID_BOMC2" Type="Edm.String" MaxLength="12" sap:label="ACTIVITY_TYPE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="BASE_QUANTITY_IS_MANUAL" Type="Edm.Byte" sap:label="BASE_QUANTITY_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="BASE_QUANTITY_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="BASE_QUANTITY_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="BUSINESS_AREA_ID" Type="Edm.String" MaxLength="15" sap:label="BUSINESS_AREA_ID" sap:aggregation-role="dimension"/>
+                <Property Name="BUSINESS_AREA_ID_BOMC2" Type="Edm.String" MaxLength="15" sap:label="BUSINESS_AREA_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="CALCULATION_VERSION_ID" Type="Edm.Int32" sap:label="CALCULATION_VERSION_ID" sap:aggregation-role="dimension"/>
+                <Property Name="CALCULATION_VERSION_ID_BOMC2" Type="Edm.Int32" sap:label="CALCULATION_VERSION_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="COMMENT" Type="Edm.String" MaxLength="5000" sap:label="COMMENT" sap:aggregation-role="dimension"/>
+                <Property Name="COMMENT_BOMC2" Type="Edm.String" MaxLength="5000" sap:label="COMMENT_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="COMPANY_CODE_ID" Type="Edm.String" MaxLength="4" sap:label="COMPANY_CODE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="COMPANY_CODE_ID_BOMC2" Type="Edm.String" MaxLength="4" sap:label="COMPANY_CODE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="CONFIDENCE_LEVEL_ID" Type="Edm.Int32" sap:label="CONFIDENCE_LEVEL_ID" sap:aggregation-role="dimension"/>
+                <Property Name="CONFIDENCE_LEVEL_ID_BOMC2" Type="Edm.Int32" sap:label="CONFIDENCE_LEVEL_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="COST_CENTER_ID" Type="Edm.String" MaxLength="10" sap:label="COST_CENTER_ID" sap:aggregation-role="dimension"/>
+                <Property Name="COST_CENTER_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="COST_CENTER_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="CREATED_BY" Type="Edm.String" MaxLength="256" sap:label="CREATED_BY" sap:aggregation-role="dimension"/>
+                <Property Name="CREATED_BY_BOMC2" Type="Edm.String" MaxLength="256" sap:label="CREATED_BY_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="CREATED_ON" Type="Edm.DateTime" sap:label="CREATED_ON" sap:aggregation-role="dimension"/>
+                <Property Name="CREATED_ON_BOMC2" Type="Edm.DateTime" sap:label="CREATED_ON_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DESIGN_OFFICE_ID" Type="Edm.String" MaxLength="3" sap:label="DESIGN_OFFICE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="DESIGN_OFFICE_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="DESIGN_OFFICE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DETERMINED_ACCOUNT_ID" Type="Edm.String" MaxLength="10" sap:label="DETERMINED_ACCOUNT_ID" sap:aggregation-role="dimension"/>
+                <Property Name="DETERMINED_ACCOUNT_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="DETERMINED_ACCOUNT_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_ID" Type="Edm.String" MaxLength="40" sap:label="DOCUMENT_ID" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_ID_BOMC2" Type="Edm.String" MaxLength="40" sap:label="DOCUMENT_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_PART" Type="Edm.String" MaxLength="3" sap:label="DOCUMENT_PART" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_PART_BOMC2" Type="Edm.String" MaxLength="3" sap:label="DOCUMENT_PART_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_STATUS_ID" Type="Edm.String" MaxLength="2" sap:label="DOCUMENT_STATUS_ID" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_STATUS_ID_BOMC2" Type="Edm.String" MaxLength="2" sap:label="DOCUMENT_STATUS_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_TYPE_ID" Type="Edm.String" MaxLength="3" sap:label="DOCUMENT_TYPE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_TYPE_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="DOCUMENT_TYPE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_VERSION" Type="Edm.String" MaxLength="2" sap:label="DOCUMENT_VERSION" sap:aggregation-role="dimension"/>
+                <Property Name="DOCUMENT_VERSION_BOMC2" Type="Edm.String" MaxLength="2" sap:label="DOCUMENT_VERSION_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="EFFICIENCY" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="EFFICIENCY" sap:aggregation-role="dimension"/>
+                <Property Name="EFFICIENCY_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="EFFICIENCY_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ENGINEERING_CHANGE_NUMBER_ID" Type="Edm.String" MaxLength="250" sap:label="ENGINEERING_CHANGE_NUMBER_ID" sap:aggregation-role="dimension"/>
+                <Property Name="ENGINEERING_CHANGE_NUMBER_ID_BOMC2" Type="Edm.String" MaxLength="250" sap:label="ENGINEERING_CHANGE_NUMBER_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_GREEN" Type="Edm.Byte" sap:label="HIGHLIGHT_GREEN" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_GREEN_BOMC2" Type="Edm.Byte" sap:label="HIGHLIGHT_GREEN_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_ORANGE" Type="Edm.Byte" sap:label="HIGHLIGHT_ORANGE" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_ORANGE_BOMC2" Type="Edm.Byte" sap:label="HIGHLIGHT_ORANGE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_YELLOW" Type="Edm.Byte" sap:label="HIGHLIGHT_YELLOW" sap:aggregation-role="dimension"/>
+                <Property Name="HIGHLIGHT_YELLOW_BOMC2" Type="Edm.Byte" sap:label="HIGHLIGHT_YELLOW_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_ACTIVE" Type="Edm.Byte" sap:label="IS_ACTIVE" sap:aggregation-role="dimension"/>
+                <Property Name="IS_ACTIVE_BOMC2" Type="Edm.Byte" sap:label="IS_ACTIVE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_CONFIGURABLE_MATERIAL" Type="Edm.Byte" sap:label="IS_CONFIGURABLE_MATERIAL" sap:aggregation-role="dimension"/>
+                <Property Name="IS_CONFIGURABLE_MATERIAL_BOMC2" Type="Edm.Byte" sap:label="IS_CONFIGURABLE_MATERIAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_DISABLING_ACCOUNT_DETERMINATION" Type="Edm.Byte" sap:label="IS_DISABLING_ACCOUNT_DETERMINATION" sap:aggregation-role="dimension"/>
+                <Property Name="IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" Type="Edm.Byte" sap:label="IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_DISABLING_PRICE_DETERMINATION" Type="Edm.Byte" sap:label="IS_DISABLING_PRICE_DETERMINATION" sap:aggregation-role="dimension"/>
+                <Property Name="IS_DISABLING_PRICE_DETERMINATION_BOMC2" Type="Edm.Byte" sap:label="IS_DISABLING_PRICE_DETERMINATION_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_LEAF" Type="Edm.Byte" sap:label="IS_LEAF" sap:aggregation-role="dimension"/>
+                <Property Name="IS_LEAF_BOMC2" Type="Edm.Byte" sap:label="IS_LEAF_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_PHANTOM_MATERIAL" Type="Edm.Byte" sap:label="IS_PHANTOM_MATERIAL" sap:aggregation-role="dimension"/>
+                <Property Name="IS_PHANTOM_MATERIAL_BOMC2" Type="Edm.Byte" sap:label="IS_PHANTOM_MATERIAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_PRICE_SPLIT_ACTIVE" Type="Edm.Byte" sap:label="IS_PRICE_SPLIT_ACTIVE" sap:aggregation-role="dimension"/>
+                <Property Name="IS_PRICE_SPLIT_ACTIVE_BOMC2" Type="Edm.Byte" sap:label="IS_PRICE_SPLIT_ACTIVE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" Type="Edm.Byte" sap:label="IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_CATEGORY_ID" Type="Edm.Int32" sap:label="ITEM_CATEGORY_ID" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_CATEGORY_ID_BOMC2" Type="Edm.Int32" sap:label="ITEM_CATEGORY_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_DESCRIPTION" Type="Edm.String" MaxLength="250" sap:label="ITEM_DESCRIPTION" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_DESCRIPTION_BOMC2" Type="Edm.String" MaxLength="250" sap:label="ITEM_DESCRIPTION_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_ID" Type="Edm.Int32" sap:label="ITEM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_ID_BOMC2" Type="Edm.Int32" sap:label="ITEM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_KEY" Type="Edm.String" MaxLength="256" sap:label="ITEM_KEY" sap:aggregation-role="dimension"/>
+                <Property Name="ITEM_ORDER" Type="Edm.Int32" sap:label="ITEM_ORDER" sap:aggregation-role="dimension"/>
+                <Property Name="LAST_MODIFIED_BY" Type="Edm.String" MaxLength="256" sap:label="LAST_MODIFIED_BY" sap:aggregation-role="dimension"/>
+                <Property Name="LAST_MODIFIED_BY_BOMC2" Type="Edm.String" MaxLength="256" sap:label="LAST_MODIFIED_BY_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="LAST_MODIFIED_ON" Type="Edm.DateTime" sap:label="LAST_MODIFIED_ON" sap:aggregation-role="dimension"/>
+                <Property Name="LAST_MODIFIED_ON_BOMC2" Type="Edm.DateTime" sap:label="LAST_MODIFIED_ON_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="LEVEL" Type="Edm.Int32" sap:label="LEVEL" sap:aggregation-role="dimension"/>
+                <Property Name="LEVEL_BOMC2" Type="Edm.Int32" sap:label="LEVEL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="LOT_SIZE_IS_MANUAL" Type="Edm.Byte" sap:label="LOT_SIZE_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="LOT_SIZE_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="LOT_SIZE_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_GROUP_ID" Type="Edm.String" MaxLength="9" sap:label="MATERIAL_GROUP_ID" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_GROUP_ID_BOMC2" Type="Edm.String" MaxLength="9" sap:label="MATERIAL_GROUP_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_ID" Type="Edm.String" MaxLength="40" sap:label="MATERIAL_ID" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_ID_BOMC2" Type="Edm.String" MaxLength="40" sap:label="MATERIAL_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_SOURCE" Type="Edm.Byte" sap:label="MATERIAL_SOURCE" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_SOURCE_BOMC2" Type="Edm.Byte" sap:label="MATERIAL_SOURCE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_TYPE_ID" Type="Edm.String" MaxLength="4" sap:label="MATERIAL_TYPE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="MATERIAL_TYPE_ID_BOMC2" Type="Edm.String" MaxLength="4" sap:label="MATERIAL_TYPE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="NODE_ID" Type="Edm.String" MaxLength="256" sap:label="NODE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="NODE_ID_BOMC2" Type="Edm.String" MaxLength="256" sap:label="NODE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="OVERHEAD_GROUP_ID" Type="Edm.String" MaxLength="10" sap:label="OVERHEAD_GROUP_ID" sap:aggregation-role="dimension"/>
+                <Property Name="OVERHEAD_GROUP_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="OVERHEAD_GROUP_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PARENT_ID" Type="Edm.String" MaxLength="256" sap:label="PARENT_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PARENT_ID_BOMC2" Type="Edm.String" MaxLength="256" sap:label="PARENT_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PARENT_ITEM_ID" Type="Edm.Int32" sap:label="PARENT_ITEM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PARENT_ITEM_ID_BOMC2" Type="Edm.Int32" sap:label="PARENT_ITEM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PARENT_KEY" Type="Edm.String" MaxLength="256" sap:label="PARENT_KEY" sap:aggregation-role="dimension"/>
+                <Property Name="PLANT_ID" Type="Edm.String" MaxLength="8" sap:label="PLANT_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PLANT_ID_BOMC2" Type="Edm.String" MaxLength="8" sap:label="PLANT_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PREDECESSOR_ITEM_ID" Type="Edm.Int32" sap:label="PREDECESSOR_ITEM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PREDECESSOR_ITEM_ID_BOMC2" Type="Edm.Int32" sap:label="PREDECESSOR_ITEM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_FIXED_PORTION_IS_MANUAL" Type="Edm.Byte" sap:label="PRICE_FIXED_PORTION_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_ID" Type="Edm.String" MaxLength="32" sap:label="PRICE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_ID_BOMC2" Type="Edm.String" MaxLength="32" sap:label="PRICE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_SOURCE_ID" Type="Edm.String" MaxLength="20" sap:label="PRICE_SOURCE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_SOURCE_ID_BOMC2" Type="Edm.String" MaxLength="20" sap:label="PRICE_SOURCE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_SOURCE_TYPE_ID" Type="Edm.Byte" sap:label="PRICE_SOURCE_TYPE_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_SOURCE_TYPE_ID_BOMC2" Type="Edm.Byte" sap:label="PRICE_SOURCE_TYPE_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_UNIT_IS_MANUAL" Type="Edm.Byte" sap:label="PRICE_UNIT_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_UNIT_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="PRICE_UNIT_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_UNIT_UOM_ID" Type="Edm.String" MaxLength="3" sap:label="PRICE_UNIT_UOM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_UNIT_UOM_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="PRICE_UNIT_UOM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PRICE_VARIABLE_PORTION_IS_MANUAL" Type="Edm.Byte" sap:label="PRICE_VARIABLE_PORTION_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="PROCESS_ID" Type="Edm.String" MaxLength="12" sap:label="PROCESS_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PROCESS_ID_BOMC2" Type="Edm.String" MaxLength="12" sap:label="PROCESS_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PROFIT_CENTER_ID" Type="Edm.String" MaxLength="10" sap:label="PROFIT_CENTER_ID" sap:aggregation-role="dimension"/>
+                <Property Name="PROFIT_CENTER_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="PROFIT_CENTER_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PURCHASING_DOCUMENT" Type="Edm.String" MaxLength="10" sap:label="PURCHASING_DOCUMENT" sap:aggregation-role="dimension"/>
+                <Property Name="PURCHASING_DOCUMENT_BOMC2" Type="Edm.String" MaxLength="10" sap:label="PURCHASING_DOCUMENT_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="PURCHASING_GROUP" Type="Edm.String" MaxLength="20" sap:label="PURCHASING_GROUP" sap:aggregation-role="dimension"/>
+                <Property Name="PURCHASING_GROUP_BOMC2" Type="Edm.String" MaxLength="20" sap:label="PURCHASING_GROUP_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_IS_MANUAL" Type="Edm.Byte" sap:label="QUANTITY_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="QUANTITY_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_PER_BASE_UNIT_UOM_ID" Type="Edm.String" MaxLength="3" sap:label="QUANTITY_PER_BASE_UNIT_UOM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_UOM_ID" Type="Edm.String" MaxLength="3" sap:label="QUANTITY_UOM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="QUANTITY_UOM_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="QUANTITY_UOM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="RANK" Type="Edm.Int32" sap:label="RANK" sap:aggregation-role="dimension"/>
+                <Property Name="RANK_BOMC2" Type="Edm.Int32" sap:label="RANK_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="REFERENCED_CALCULATION_VERSION_ID" Type="Edm.Int32" sap:label="REFERENCED_CALCULATION_VERSION_ID" sap:aggregation-role="dimension"/>
+                <Property Name="REFERENCED_CALCULATION_VERSION_ID_BOMC2" Type="Edm.Int32" sap:label="REFERENCED_CALCULATION_VERSION_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="SURCHARGE" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="SURCHARGE" sap:aggregation-role="dimension"/>
+                <Property Name="SURCHARGE_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="SURCHARGE_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="TARGET_COST_CURRENCY_ID" Type="Edm.String" MaxLength="3" sap:label="TARGET_COST_CURRENCY_ID" sap:aggregation-role="dimension"/>
+                <Property Name="TARGET_COST_CURRENCY_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="TARGET_COST_CURRENCY_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="TARGET_COST_IS_MANUAL" Type="Edm.Byte" sap:label="TARGET_COST_IS_MANUAL" sap:aggregation-role="dimension"/>
+                <Property Name="TARGET_COST_IS_MANUAL_BOMC2" Type="Edm.Byte" sap:label="TARGET_COST_IS_MANUAL_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="TOTAL_QUANTITY_DEPENDS_ON" Type="Edm.Int32" sap:label="TOTAL_QUANTITY_DEPENDS_ON" sap:aggregation-role="dimension"/>
+                <Property Name="TOTAL_QUANTITY_DEPENDS_ON_BOMC2" Type="Edm.Int32" sap:label="TOTAL_QUANTITY_DEPENDS_ON_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="TOTAL_QUANTITY_UOM_ID" Type="Edm.String" MaxLength="3" sap:label="TOTAL_QUANTITY_UOM_ID" sap:aggregation-role="dimension"/>
+                <Property Name="TOTAL_QUANTITY_UOM_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="TOTAL_QUANTITY_UOM_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="TRANSACTION_CURRENCY_ID" Type="Edm.String" MaxLength="3" sap:label="TRANSACTION_CURRENCY_ID" sap:aggregation-role="dimension"/>
+                <Property Name="TRANSACTION_CURRENCY_ID_BOMC2" Type="Edm.String" MaxLength="3" sap:label="TRANSACTION_CURRENCY_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="VALUATION_CLASS_ID" Type="Edm.String" MaxLength="4" sap:label="VALUATION_CLASS_ID" sap:aggregation-role="dimension"/>
+                <Property Name="VALUATION_CLASS_ID_BOMC2" Type="Edm.String" MaxLength="4" sap:label="VALUATION_CLASS_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="VENDOR_ID" Type="Edm.String" MaxLength="10" sap:label="VENDOR_ID" sap:aggregation-role="dimension"/>
+                <Property Name="VENDOR_ID_BOMC2" Type="Edm.String" MaxLength="10" sap:label="VENDOR_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="WORK_CENTER_CATEGORY" Type="Edm.String" MaxLength="50" sap:label="WORK_CENTER_CATEGORY" sap:aggregation-role="dimension"/>
+                <Property Name="WORK_CENTER_CATEGORY_BOMC2" Type="Edm.String" MaxLength="50" sap:label="WORK_CENTER_CATEGORY_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="WORK_CENTER_ID" Type="Edm.String" MaxLength="15" sap:label="WORK_CENTER_ID" sap:aggregation-role="dimension"/>
+                <Property Name="WORK_CENTER_ID_BOMC2" Type="Edm.String" MaxLength="15" sap:label="WORK_CENTER_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="CHILD_ITEM_CATEGORY_ID" Type="Edm.Int32" sap:label="CHILD_ITEM_CATEGORY_ID" sap:aggregation-role="dimension"/>
+                <Property Name="CHILD_ITEM_CATEGORY_ID_BOMC2" Type="Edm.Int32" sap:label="CHILD_ITEM_CATEGORY_ID_BOMC2" sap:aggregation-role="dimension"/>
+                <Property Name="BASE_QUANTITY" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="BASE_QUANTITY" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="BASE_QUANTITY_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="BASE_QUANTITY_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="BASE_QUANTITY_CALCULATED" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="BASE_QUANTITY_CALCULATED" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="BASE_QUANTITY_CALCULATED_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="BASE_QUANTITY_CALCULATED_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="IS_RELEVANT_TO_COSTING_IN_ERP" Type="Edm.Int32" sap:label="IS_RELEVANT_TO_COSTING_IN_ERP" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOCAL_CONTENT" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOCAL_CONTENT" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOCAL_CONTENT_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOCAL_CONTENT_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOT_SIZE" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOT_SIZE" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOT_SIZE_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOT_SIZE_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOT_SIZE_CALCULATED" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOT_SIZE_CALCULATED" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="LOT_SIZE_CALCULATED_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="LOT_SIZE_CALCULATED_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST_FIXED_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST_FIXED_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST_FIXED_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST_FIXED_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST_VARIABLE_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST_VARIABLE_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="OTHER_COST_VARIABLE_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="OTHER_COST_VARIABLE_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FIXED_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FIXED_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FIXED_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FIXED_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_UNIT" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_UNIT" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_UNIT_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_UNIT_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_UNIT_CALCULATED" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_UNIT_CALCULATED" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_UNIT_CALCULATED_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_UNIT_CALCULATED_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_VARIABLE_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_VARIABLE_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_VARIABLE_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="PRICE_VARIABLE_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" Type="Edm.Int32" sap:label="PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY_CALCULATED" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY_CALCULATED" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY_CALCULATED_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY_CALCULATED_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY_PER_BASE_UNIT" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY_PER_BASE_UNIT" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="QUANTITY_PER_BASE_UNIT_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="QUANTITY_PER_BASE_UNIT_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TARGET_COST" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TARGET_COST" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TARGET_COST_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TARGET_COST_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_FIXED_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_FIXED_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_FIXED_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_FIXED_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT_FIXED_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT_FIXED_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT_VARIABLE_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT_VARIABLE_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_VARIABLE_PORTION" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_VARIABLE_PORTION" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_COST_VARIABLE_PORTION_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_COST_VARIABLE_PORTION_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_QUANTITY" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_QUANTITY" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_QUANTITY_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_QUANTITY_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_QUANTITY_OF_VARIANTS" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_QUANTITY_OF_VARIANTS" sap:aggregation-role="measure" sap:filterable="false"/>
+                <Property Name="TOTAL_QUANTITY_OF_VARIANTS_BOMC2" Type="Edm.Decimal" Precision="28" Scale="7" sap:label="TOTAL_QUANTITY_OF_VARIANTS_BOMC2" sap:aggregation-role="measure" sap:filterable="false"/>
+            </EntityType>
+            <EntityType Name="versionsearchType">
+                <Key>
+                    <PropertyRef Name="calculation_version_id"/>
+                </Key>
+                <Property Name="calculation_version_id" Type="Edm.Int32" Nullable="false"/>
+                <Property Name="calculation_version_name" Type="Edm.String" Nullable="false" MaxLength="500"/>
+                <Property Name="calculation_id" Type="Edm.Int32" Nullable="false"/>
+                <Property Name="calculation_name" Type="Edm.String" Nullable="false" MaxLength="500"/>
+                <Property Name="project_id" Type="Edm.String" Nullable="false" MaxLength="35"/>
+                <Property Name="project_name" Type="Edm.String" MaxLength="100"/>
+            </EntityType>
+            <EntityType Name="BOM_COMPAREType" sap:semantics="parameters">
+                <Key>
+                    <PropertyRef Name="versionId1"/>
+                    <PropertyRef Name="versionId2"/>
+                    <PropertyRef Name="languageId"/>
+                </Key>
+                <Property Name="versionId1" Type="Edm.Int32" Nullable="false" sap:parameter="mandatory" sap:label="versionId1" sap:filter-restriction="single-value"/>
+                <Property Name="versionId2" Type="Edm.Int32" Nullable="false" sap:parameter="mandatory" sap:label="versionId2" sap:filter-restriction="single-value"/>
+                <Property Name="languageId" Type="Edm.String" Nullable="false" MaxLength="11" sap:parameter="mandatory" sap:label="languageId" sap:filter-restriction="single-value"/>
+                <NavigationProperty Name="Execute" Relationship="default.BOM_COMPARE_to_V_BOM_COMPAREType" FromRole="BOM_COMPAREPrincipal" ToRole="V_BOM_COMPAREDependent" sap:creatable="false" sap:filterable="false"/>
+            </EntityType>
+            <Association Name="BOM_COMPARE_to_V_BOM_COMPAREType">
+                <End Type="default.BOM_COMPAREType" Role="BOM_COMPAREPrincipal" Multiplicity="1"/>
+                <End Type="default.V_BOM_COMPAREType" Role="V_BOM_COMPAREDependent" Multiplicity="*"/>
+            </Association>
+            <EntityContainer Name="v2" m:IsDefaultEntityContainer="true">
+                <EntitySet Name="V_BOM_COMPARE" EntityType="default.V_BOM_COMPAREType" sap:addressable="false" sap:creatable="false" sap:updatable="false" sap:deletable="false"/>
+                <EntitySet Name="versionsearch" EntityType="default.versionsearchType" sap:creatable="false" sap:updatable="false" sap:deletable="false"/>
+                <EntitySet Name="BOM_COMPARE" EntityType="default.BOM_COMPAREType" sap:addressable="false" sap:creatable="false" sap:updatable="false" sap:deletable="false"/>
+                <AssociationSet Name="BOM_COMPARE_to_V_BOM_COMPARE" Association="default.BOM_COMPARE_to_V_BOM_COMPAREType" sap:creatable="false" sap:updatable="false" sap:deletable="false">
+                    <End Role="BOM_COMPAREPrincipal" EntitySet="BOM_COMPARE"/>
+                    <End Role="V_BOM_COMPAREDependent" EntitySet="V_BOM_COMPARE"/>
+                </AssociationSet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

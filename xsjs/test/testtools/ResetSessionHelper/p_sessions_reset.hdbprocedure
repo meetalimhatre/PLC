@@ -1,0 +1,26 @@
+PROCEDURE "SAP_PLC"."sap.plc_test.testtools.ResetSessionHelper::p_sessions_reset" ( 
+	IN applicationUserId NVARCHAR(256)
+) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY DEFINER 
+	DEFAULT SCHEMA "SAP_PLC"
+	--READS SQL DATA 
+	AS
+BEGIN
+
+	DELETE FROM "sap.plc.db::basis.t_item_temporary" WHERE session_id IN (
+		SELECT session_id FROM "sap.plc.db::basis.t_session"	WHERE UCASE(user_id) = UCASE(:applicationUserId));
+		
+-- I305774: commented for now in order to pass the nightly transport		
+--	DELETE FROM "sap.plc.db::basis.t_item_temporary_ext" WHERE session_id IN (
+--		SELECT session_id FROM "sap.plc.db::basis.t_session"	WHERE UCASE(user_id) = UCASE(:applicationUserId));
+		
+	DELETE FROM "sap.plc.db::basis.t_calculation_version_temporary" WHERE session_id IN ( 
+		SELECT session_id FROM "sap.plc.db::basis.t_session"	WHERE UCASE(user_id) = UCASE(:applicationUserId));
+		
+	DELETE FROM "sap.plc.db::basis.t_open_calculation_versions" WHERE session_id IN ( 
+		SELECT session_id FROM "sap.plc.db::basis.t_session"	WHERE UCASE(user_id) = UCASE(:applicationUserId));
+		
+	DELETE FROM "sap.plc.db::basis.t_session" WHERE UCASE(USER_ID) = UCASE(:applicationUserId);
+	
+END;

@@ -1,0 +1,34 @@
+<core:FragmentDefinition
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    controllerName="ui.controller.Upgrade">
+    <Dialog title="User Role List" >
+        <Table items="{path: '/aUserRole'}">
+            <columns>
+                <Column>
+                    <Text text="User" />
+                </Column>
+                <Column>
+                    <Text text="XSC Role" />
+                </Column>
+                <Column>
+                    <Text text="XSA Role Template" />
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{user}" />
+                        <Text text="{xscRoles}" />
+                        <Text text="{xsaRoleTemplates}" />
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <beginButton>
+            <Button text="Close" press="closeDialog" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>
+

@@ -1,0 +1,196 @@
+--!HDI REQUIRES "sap.plc.db::basis.t_item_ext" 
+
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_update_set_referenced_version" (
+		IN iv_session_id 								NVARCHAR(50),	
+		OUT ov_not_existing_versions 					"sap.plc.db.calculationmanager::calculationmanager_types.tt_calculation_version_ids" default empty,
+		OUT ov_source_calculation_versions_not_current 	"sap.plc.db.calculationmanager::calculationmanager_types.tt_calculation_version_ids" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+	
+	ov_calculation_version_id INTEGER;
+	ov_item_count INTEGER;
+	
+	
+BEGIN
+	DECLARE CURSOR c_item FOR
+		SELECT gtt.item_id,gtt.calculation_version_id from "sap.plc.db::temp.gtt_reference_calculation_version_items" AS gtt
+			INNER JOIN "sap.plc.db::basis.t_item_temporary" AS item
+			ON gtt.item_id = item.parent_item_id AND gtt.calculation_version_id = item.calculation_version_id
+			WHERE item.session_id = :iv_session_id AND item.is_deleted = 0;	
+	
+	--assumption: all items belong to the same calculation version!	
+	declare lv_current_utctimestamp	timestamp;
+	select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+	
+	--lock versions that shall be referenced		
+	SELECT CALCULATION_VERSION_ID 
+	FROM "sap.plc.db::basis.t_calculation_version"
+	WHERE CALCULATION_VERSION_ID IN (
+		SELECT REFERENCED_CALCULATION_VERSION_ID
+		FROM "sap.plc.db::temp.gtt_reference_calculation_version_items"
+	)
+	FOR UPDATE;
+	
+	--check if referenced versions exist	
+	ov_not_existing_versions = SELECT REFERENCED_CALCULATION_VERSION_ID AS CALCULATION_VERSION_ID --referenced versions that do not exist
+	FROM "sap.plc.db::temp.gtt_reference_calculation_version_items"
+	WHERE REFERENCED_CALCULATION_VERSION_ID NOT IN (
+		SELECT CALCULATION_VERSION_ID 
+		FROM "sap.plc.db::basis.t_calculation_version"	
+	);
+	
+	--list of items with changed ref-version-ids
+	ov_updated_ref_version_items = SELECT gtt.* 
+	FROM "sap.plc.db::temp.gtt_reference_calculation_version_items" AS gtt
+	INNER JOIN "sap.plc.db::basis.t_item_temporary" AS item
+	ON gtt.item_id = item.item_id AND gtt.calculation_version_id = item.calculation_version_id 
+	WHERE item.session_id = :iv_session_id AND 
+	IFNULL(gtt.referenced_calculation_version_id, 0) <> IFNULL(item.referenced_calculation_version_id, 0);
+	
+	--check if referenced versions are current (for the items with changed referenced_calculation_version_id)
+	ov_source_calculation_versions_not_current = SELECT referenced_calculation_version_id  AS CALCULATION_VERSION_ID --referenced versions that are not current
+		FROM :ov_updated_ref_version_items
+		WHERE referenced_calculation_version_id NOT IN (
+			SELECT current_calculation_version_id AS referenced_calculation_version_id
+			FROM "sap.plc.db::basis.t_calculation"
+			);
+	
+	IF NOT IS_EMPTY(:ov_not_existing_versions) OR  NOT IS_EMPTY(:ov_source_calculation_versions_not_current) THEN
+		RETURN;
+	END IF;
+	
+	--delete child items
+	--TODO: Mass-Enable Delete procedure!
+	FOR cur_item AS c_item
+	 DO
+	 	 CALL "sap.plc.db.calculationmanager.procedures::p_item_delete_item_with_children" (
+			iv_session_id => :iv_session_id,
+			iv_item_id => cur_item.item_id,
+			iv_calculation_version_id => cur_item.calculation_version_id,		
+			iv_delete_root => 0,
+			ov_calculation_version_id =>  :ov_calculation_version_id, --TODO: check how do use anonymous out parameters
+			ov_item_count => :ov_item_count
+		) ;	
+		
+	 END FOR;	
+		 
+	--update items
+	UPDATE "sap.plc.db::basis.t_item_temporary" AS master_calc_ver_item		
+		SET 
+		-- values from different fields
+			ITEM_CATEGORY_ID = temp.ITEM_CATEGORY_ID, 
+			REFERENCED_CALCULATION_VERSION_ID = temp.REFERENCED_CALCULATION_VERSION_ID, 
+			QUANTITY_UOM_ID = referenceRootItem.TOTAL_QUANTITY_UOM_ID, 
+			PRICE_FIXED_PORTION = referenceRootItem.TOTAL_COST_FIXED_PORTION, 
+			PRICE_VARIABLE_PORTION = referenceRootItem.TOTAL_COST_VARIABLE_PORTION, 
+			PRICE = referenceRootItem.TOTAL_COST, 
+			TRANSACTION_CURRENCY_ID = calcversion.REPORT_CURRENCY_ID, 
+			PRICE_UNIT = referenceRootItem.TOTAL_QUANTITY, 
+			PRICE_UNIT_UOM_ID = referenceRootItem.TOTAL_QUANTITY_UOM_ID,
+			PRICE_SOURCE_ID = referenceRootItem.PRICE_SOURCE_ID,
+			TOTAL_QUANTITY_OF_VARIANTS = referenceRootItem.TOTAL_QUANTITY_OF_VARIANTS,
+		-- values from same fields
+			ACCOUNT_ID = ifnull(temp.ACCOUNT_ID,case when master_calc_ver_item.REFERENCED_CALCULATION_VERSION_ID is null or master_calc_ver_item.REFERENCED_CALCULATION_VERSION_ID != referenceRootItem.CALCULATION_VERSION_ID then referenceRootItem.ACCOUNT_ID else master_calc_ver_item.ACCOUNT_ID end),				
+			DETERMINED_ACCOUNT_ID = ifnull(temp.ACCOUNT_ID, case when master_calc_ver_item.REFERENCED_CALCULATION_VERSION_ID is null or master_calc_ver_item.REFERENCED_CALCULATION_VERSION_ID != referenceRootItem.CALCULATION_VERSION_ID then referenceRootItem.DETERMINED_ACCOUNT_ID else master_calc_ver_item.DETERMINED_ACCOUNT_ID end),
+			ACTIVITY_TYPE_ID = null,
+			BASE_QUANTITY_CALCULATED = null, 
+			BASE_QUANTITY_IS_MANUAL = 1, 
+			LOT_SIZE_CALCULATED = null, 
+			LOT_SIZE_IS_MANUAL = 1, 
+			QUANTITY_CALCULATED = null, 
+			QUANTITY_IS_MANUAL = 1, 
+			BUSINESS_AREA_ID = referenceRootItem.BUSINESS_AREA_ID,
+			PROCESS_ID = null,
+			COMMENT = referenceRootItem.COMMENT,
+			COMPANY_CODE_ID = referenceRootItem.COMPANY_CODE_ID,
+			CONFIDENCE_LEVEL_ID = referenceRootItem.CONFIDENCE_LEVEL_ID,
+			COST_CENTER_ID = null,
+			DOCUMENT_ID = referenceRootItem.DOCUMENT_ID,
+			DOCUMENT_PART = referenceRootItem.DOCUMENT_PART,
+			DOCUMENT_STATUS_ID = referenceRootItem.DOCUMENT_STATUS_ID,
+			DOCUMENT_TYPE_ID = referenceRootItem.DOCUMENT_TYPE_ID,
+			DOCUMENT_VERSION = referenceRootItem.DOCUMENT_VERSION,
+			ENGINEERING_CHANGE_NUMBER_ID = referenceRootItem.ENGINEERING_CHANGE_NUMBER_ID,
+			IS_CONFIGURABLE_MATERIAL = referenceRootItem.IS_CONFIGURABLE_MATERIAL,
+			IS_DIRTY = 1,
+			IS_DISABLING_PRICE_DETERMINATION = referenceRootItem.IS_DISABLING_PRICE_DETERMINATION,
+			IS_PHANTOM_MATERIAL = referenceRootItem.IS_PHANTOM_MATERIAL,
+			IS_RELEVANT_TO_COSTING_IN_ERP = referenceRootItem.IS_RELEVANT_TO_COSTING_IN_ERP,
+			ITEM_DESCRIPTION = null,
+			DESIGN_OFFICE_ID = referenceRootItem.DESIGN_OFFICE_ID,
+			LAST_MODIFIED_ON = :lv_current_utctimestamp,
+			LAST_MODIFIED_BY = :iv_session_id,
+			LOCAL_CONTENT = referenceRootItem.LOCAL_CONTENT,
+			MATERIAL_GROUP_ID = referenceRootItem.MATERIAL_GROUP_ID,
+			MATERIAL_ID = referenceRootItem.MATERIAL_ID,
+			MATERIAL_SOURCE = referenceRootItem.MATERIAL_SOURCE,
+			MATERIAL_TYPE_ID = referenceRootItem.MATERIAL_TYPE_ID,
+			OVERHEAD_GROUP_ID = referenceRootItem.OVERHEAD_GROUP_ID,
+			PLANT_ID = referenceRootItem.PLANT_ID,
+			PRICE_FIXED_PORTION_CALCULATED = null,
+			PRICE_FIXED_PORTION_IS_MANUAL = 1,
+			PRICE_SOURCE_TYPE_ID = 4,
+			PRICE_UNIT_CALCULATED = null,
+			PRICE_UNIT_IS_MANUAL = 1,
+			PRICE_VARIABLE_PORTION_CALCULATED = null,
+			PRICE_VARIABLE_PORTION_IS_MANUAL = 1,
+			IS_PRICE_SPLIT_ACTIVE = 0,
+			IS_DISABLING_ACCOUNT_DETERMINATION = referenceRootItem.IS_DISABLING_ACCOUNT_DETERMINATION,
+			PRICE_ID = null,
+			PROFIT_CENTER_ID = referenceRootItem.PROFIT_CENTER_ID,
+			PURCHASING_GROUP = referenceRootItem.PURCHASING_GROUP,
+			PURCHASING_DOCUMENT = referenceRootItem.PURCHASING_DOCUMENT,
+			TARGET_COST = referenceRootItem.TARGET_COST,
+			TARGET_COST_CALCULATED = referenceRootItem.TARGET_COST_CALCULATED,
+			TARGET_COST_CURRENCY_ID = referenceRootItem.TARGET_COST_CURRENCY_ID,
+			TARGET_COST_IS_MANUAL = referenceRootItem.TARGET_COST_IS_MANUAL,
+			TOTAL_QUANTITY_UOM_ID = referenceRootItem.TOTAL_QUANTITY_UOM_ID,
+			VALUATION_CLASS_ID = referenceRootItem.VALUATION_CLASS_ID,
+			VENDOR_ID = referenceRootItem.VENDOR_ID,
+			WORK_CENTER_ID = referenceRootItem.WORK_CENTER_ID,
+			WORK_CENTER_CATEGORY = referenceRootItem.WORK_CENTER_CATEGORY,
+			EFFICIENCY = referenceRootItem.EFFICIENCY,
+			CHILD_ITEM_CATEGORY_ID = temp.ITEM_CATEGORY_ID
+
+	FROM "sap.plc.db::basis.t_item_temporary" AS master_calc_ver_item
+	INNER JOIN
+	"sap.plc.db::temp.gtt_reference_calculation_version_items" AS temp
+	ON master_calc_ver_item.item_id = temp.item_id AND master_calc_ver_item.calculation_version_id = temp.calculation_version_id
+	INNER JOIN "sap.plc.db::basis.t_calculation_version" AS calcversion
+	ON temp.referenced_calculation_version_id = calcversion.calculation_version_id
+	INNER JOIN "sap.plc.db::basis.t_item" AS referenceRootItem
+	ON calcversion.root_item_id = referenceRootItem.item_id 
+	AND calcversion.calculation_version_id = referenceRootItem.calculation_version_id
+	WHERE  master_calc_ver_item.session_id = :iv_session_id
+		AND master_calc_ver_item.item_id =temp.item_id 
+  		AND master_calc_ver_item.calculation_version_id = temp.calculation_version_id;
+		
+   		
+{{#if Item.customFields}}
+	-- custom fields part					
+	-- overwrite item values with relevant ones from referenced (source) calculation version and root item 
+	UPDATE "sap.plc.db::basis.t_item_temporary_ext" AS master_calc_ver_item_ext
+		SET	{{updateAllCustomFields_referencedCvId Item}}
+		
+		FROM "sap.plc.db::basis.t_item_temporary_ext" AS master_calc_ver_item_ext
+		INNER JOIN
+		"sap.plc.db::temp.gtt_reference_calculation_version_items" AS temp
+		ON master_calc_ver_item_ext.item_id = temp.item_id AND master_calc_ver_item_ext.calculation_version_id = temp.calculation_version_id
+		INNER JOIN "sap.plc.db::basis.t_calculation_version" AS calcversion
+		ON temp.referenced_calculation_version_id = calcversion.calculation_version_id
+		INNER JOIN "sap.plc.db::basis.t_item_ext" AS source_root_item_ext
+		ON calcversion.root_item_id = source_root_item_ext.item_id 
+		AND calcversion.calculation_version_id = source_root_item_ext.calculation_version_id
+		WHERE  master_calc_ver_item_ext.session_id = :iv_session_id
+			AND master_calc_ver_item_ext.item_id =temp.item_id 
+			AND master_calc_ver_item_ext.calculation_version_id = temp.calculation_version_id;
+	
+{{/if}} 
+insert into "sap.plc.db::temp.gtt_calculation_version_ids" (calculation_version_id)
+		SELECT REFERENCED_CALCULATION_VERSION_ID FROM "sap.plc.db::temp.gtt_reference_calculation_version_items";
+		
+END;
+
+

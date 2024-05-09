@@ -1,0 +1,8 @@
+VIEW "sap.plc.db.replication.views::v_cbpt" ( "KOKRS", "PRZNR", "LANGU", "KTEXT" ) AS select CBPT.KOKRS,	CBPT.PRZNR,	CBPT.LANGU,	CBPT.KTEXT
+                from "sap.plc.db::repl.t_cbpt" AS CBPT
+                	WHERE CBPT.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.t_cbpt" AS CBPT1
+                								WHERE CBPT1.KOKRS = CBPT.KOKRS AND 
+                									  CBPT1.PRZNR = CBPT.PRZNR AND  
+                									  CBPT1.LANGU = CBPT.LANGU)
+                	  AND CBPT.DATBI >= TO_DATS(CURRENT_DATE)

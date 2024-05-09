@@ -1,0 +1,417 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_price_determination_trigger" ( 
+        IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN iv_calculation_version_id    INTEGER,
+		IN iv_session_id 				NVARCHAR(50),
+		IN it_calculation_version       "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",	
+		OUT ot_determined_prices 	    "sap.plc.db.calculationmanager.procedures::ts_item_price_determination_output" default empty,
+		OUT ot_messages                 "sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+	
+	lc_document 			INTEGER DEFAULT 1;
+    lc_material 			INTEGER DEFAULT 2;
+    lc_internal_activity 	INTEGER DEFAULT 3;
+    lc_subcontracting 		INTEGER DEFAULT 6;
+    lc_process     INTEGER DEFAULT 5;
+    lc_resources_and_tools  INTEGER DEFAULT 7;
+    lc_variable_item        INTEGER DEFAULT 8;
+    lc_external_activity    INTEGER DEFAULT 4;
+    lc_text_item            INTEGER DEFAULT 9;
+    lc_manual_price 		INTEGER DEFAULT 3;
+    lc_psource_changed      		NVARCHAR(100) DEFAULT 'PRICEDETERMINATION_PRICESOURCE_CHANGED_INFO';
+BEGIN
+
+/****************************************************************** 
+	Price Determination 
+ ******************************************************************/
+-- Procedure used to:
+--		-identify the cases for which price determination should be done
+--		-determine the prices
+--
+-- Prerequisites: items should be leaves
+--
+-- Input:  
+-- 		- it_items => table type of items 
+--      - iv_calculation_version_id => calculation version id
+--      - it_calculation_version => table structure neede later in order to call: p_item_price_determination_all 
+-- Output:
+--		- ot_determined_prices => contains all determined prices
+--		- ot_messages => contains all the messages
+-- Logic:
+-- 1. take the fields from it_items and t_item_temporary in order to be able to compare the value using where conditions
+-- 2. determine if one of the price fields was changes => if yes, change the price source to Manual Price and get corresponding confidence level
+-- 5. determine if one of the fields MATERIAL_ID, PLANT_ID / COST_CENTER_ID, ACTIVITY_TYPE_ID/ VENDOR_ID => if yes, determine the price automatically
+-- 6. determine if the item category was changed 
+--		=>if yes, and new item category Internal Activity => determine the price automatically
+--      =>if yes, and new item category is other change the price source to manual
+
+/******************************************************************************* 
+  Select all the new & old values for each item
+ *******************************************************************************/
+ lt_new_old_values = select item_new.item_id,
+ 							item_new.parent_item_id,
+ 							item_new.item_category_id as item_category_id_new,
+ 		                    item_new.material_id as material_id_new,
+ 		                    item_new.plant_id as plant_id_new,
+ 		                    item_new.vendor_id as vendor_id_new,
+ 		                    item_new.cost_center_id as cost_center_id_new,
+ 		                    item_new.activity_type_id as activity_type_id_new,
+ 		                    item_new.price_source_id as price_source_id_new,
+ 		                    item_new.price_source_type_id as price_source_type_new,
+							item_new.is_price_split_active as is_price_split_active_new, 
+							item_new.price_id as price_id_new, 
+ 		                    item_new.confidence_level_id as confidence_level_id_new,
+ 		                    item_new.price_fixed_portion as price_fixed_portion_new,
+ 		                    item_new.price_variable_portion as price_variable_portion_new,
+ 		                    item_new.transaction_currency_id as transaction_currency_id_new,
+ 		                    item_new.price_unit as price_unit_new,
+ 		                    item_new.price_unit_uom_id as price_unit_uom_id_new,
+ 		                    item_new.is_disabling_price_determination as is_disabling_price_determination_new,
+ 		                    item_new.purchasing_group as purchasing_group_new,
+ 		                    item_new.purchasing_document as purchasing_document_new,
+ 		                    item_new.local_content as local_content_new,
+ 		                    item_old.item_category_id as item_category_id_old,
+ 		                    item_old.material_id as material_id_old,
+ 		                    item_old.plant_id as plant_id_old,
+ 		                    item_old.vendor_id as vendor_id_old,
+ 		                    item_old.cost_center_id as cost_center_id_old,
+ 		                    item_old.activity_type_id as activity_type_id_old,
+ 		                    item_old.price_source_id as price_source_id_old,
+ 		                    item_old.price_source_type_id as price_source_type_old,
+							item_old.is_price_split_active as is_price_split_active_old,
+							item_old.price_id as price_id_old,
+ 		                    item_old.confidence_level_id as confidence_level_id_old,
+ 		                    item_old.price_fixed_portion as price_fixed_portion_old,
+ 		                    item_old.price_variable_portion as price_variable_portion_old,
+ 		                    item_old.transaction_currency_id as transaction_currency_id_old,
+ 		                    item_old.price_unit as price_unit_old,
+ 		                    item_old.price_unit_uom_id as price_unit_uom_id_old,
+ 		                    item_old.is_disabling_price_determination as is_disabling_price_determination_old
+ 		                    {{masterdataCustomFieldsWithPrefix Material_Price 'item_new'}}
+ 		                    {{masterdataCustomFieldsWithPrefix Activity_Price 'item_new'}}
+ 		                    from :it_items as item_new
+ 		                    inner join "sap.plc.db::basis.t_item_temporary" as item_old 
+ 		                    	on item_new.item_id = item_old.item_id
+ 		                    	and item_old.calculation_version_id = :iv_calculation_version_id
+ 		                    	and item_old.session_id = :iv_session_id
+ 		                    	and item_old.is_deleted = 0;
+
+/******************************************************************************* 
+	Determine if the prices were changed manualy.
+	(If the prices were changed manually and flag IS_DISABLING_PRICE_DETERMINATION is not set)
+ *******************************************************************************/
+ lt_items_with_changed_prices_manual =  select 
+ 											item_id,
+					  						parent_item_id as parent_item_id,
+					 						item_category_id_new as item_category_id,
+					 		                material_id_new as material_id,
+					 		                plant_id_new as plant_id,
+					 		                vendor_id_new as vendor_id,
+					 		                activity_type_id_new as activity_type_id,
+					 		                cost_center_id_new as cost_center_id,
+					 		                price_source_id_new as price_source_id,
+					 		                price_source_type_new as price_source_type_id,
+											is_price_split_active_new as is_price_split_active,
+											price_id_new as price_id, 
+					 		                confidence_level_id_new as confidence_level_id,
+					 		                price_fixed_portion_new as price_fixed_portion,
+					 		                price_variable_portion_new as price_variable_portion,
+					 		                transaction_currency_id_new as transaction_currency_id,
+					 		                price_unit_new as price_unit,
+					 		                price_unit_uom_id_new as price_unit_uom_id,
+					 		                is_disabling_price_determination_new as is_disabling_price_determination,
+	 		                    			purchasing_group_new as purchasing_group,
+	 		                    			purchasing_document_new as purchasing_document,
+	 		                    			local_content_new as local_content
+	 		                    			{{masterdataCustomFields Material_Price}}
+	 		                    			{{masterdataCustomFields Activity_Price}}
+			 						  from :lt_new_old_values
+			 						  where ((price_fixed_portion_new is not null and price_fixed_portion_new != price_fixed_portion_old)
+			 						  	or 	(price_variable_portion_new is not null and price_variable_portion_new != price_variable_portion_old)
+			 						  	or 	(transaction_currency_id_new is not null and transaction_currency_id_new != transaction_currency_id_old)
+			 						  	or 	(price_unit_new is not null and price_unit_new != price_unit_old)
+			 						  	or 	(price_unit_uom_id_new is not null and price_unit_uom_id_new != price_unit_uom_id_old));
+ 
+ lt_potential_prices_manual_mat = select item.item_id,
+  									 item.vendor_id, 
+				 					 item.price_fixed_portion, 
+				 					 item.price_variable_portion, 
+				 					 item.transaction_currency_id, 
+									 item.price_unit, 
+									 item.price_unit_uom_id,
+									 0 as is_price_split_active,
+									 null as price_id,
+									 price_source.confidence_level_id,
+									 price_source.price_source_id,
+									 price_source.price_source_type_id,
+									 '' as purchasing_group,
+			 		                 '' as purchasing_document,
+			 		                 item.local_content
+			 		                 {{masterdataCustomFieldsWithPrefix Material_Price 'item'}}
+			 		                 {{getMasterdataCustomFieldsAsNull Activity_Price}}
+							  from :lt_items_with_changed_prices_manual as item
+							  inner join (select top 1 * from "sap.plc.db::basis.t_price_source" ) as price_source		
+								   on price_source.price_source_type_id = lc_manual_price
+							  where item.item_category_id in (lc_document,lc_material,lc_external_activity,lc_subcontracting)
+							  and (item.is_disabling_price_determination is null or item.is_disabling_price_determination = 0);
+
+ lt_potential_prices_manual_act = select item.item_id,
+  									 item.vendor_id, 
+				 					 item.price_fixed_portion, 
+				 					 item.price_variable_portion, 
+				 					 item.transaction_currency_id, 
+									 item.price_unit, 
+									 item.price_unit_uom_id,
+									 0 as is_price_split_active,
+									 null as price_id,
+									 price_source.confidence_level_id,
+									 price_source.price_source_id,
+									 price_source.price_source_type_id,
+									 item.purchasing_group,
+			 		                 item.purchasing_document,
+			 		                 item.local_content
+			 		                 {{getMasterdataCustomFieldsAsNull Material_Price}}
+			 		                 {{masterdataCustomFieldsWithPrefix Activity_Price 'item'}}
+							  from :lt_items_with_changed_prices_manual as item
+							  inner join (select top 1 * from "sap.plc.db::basis.t_price_source" ) as price_source		
+								   on price_source.price_source_type_id = lc_manual_price
+							  where item.item_category_id = lc_internal_activity
+							  and (item.is_disabling_price_determination is null or item.is_disabling_price_determination = 0);
+							  
+/******************************************************************************* 
+	Determine if the fields MATERIAL_ID, PLANT_ID / COST_CENTER_ID, ACTIVITY_TYPE_ID, VENDOR_ID were changed
+	  & 
+	Determine if the item category was changed to internal activity
+ *******************************************************************************/  
+ lt_items_with_changed_fields = select 	item_id,
+				  						parent_item_id as parent_item_id,
+				 						item_category_id_new as item_category_id,
+				 		                material_id_new as material_id,
+				 		                plant_id_new as plant_id,
+				 		                vendor_id_new as vendor_id,
+				 		                activity_type_id_new as activity_type_id,
+				 		                cost_center_id_new as cost_center_id,
+				 		                price_source_id_new as price_source_id,
+				 		                price_source_type_new as price_source_type_id,
+										is_price_split_active_new as is_price_split_active,
+										price_id_new as price_id, 
+					 		            confidence_level_id_new as confidence_level_id,
+				 		                price_fixed_portion_new as price_fixed_portion,
+				 		                price_variable_portion_new as price_variable_portion,
+				 		                transaction_currency_id_new as transaction_currency_id,
+				 		                price_unit_new as price_unit,
+				 		                price_unit_uom_id_new as price_unit_uom_id,
+				 		                is_disabling_price_determination_new as is_disabling_price_determination,
+ 		                    			purchasing_group_new as purchasing_group,
+ 		                    			purchasing_document_new as purchasing_document,
+ 		                    			local_content_new as local_content
+ 		                    			{{masterdataCustomFields Material_Price}}
+ 		                    			{{masterdataCustomFields Activity_Price}}
+		 						  	from :lt_new_old_values
+		 						  	where ( 
+		 						  				item_category_id_new in (lc_document,lc_material,lc_external_activity,lc_subcontracting)					
+		 						  			and	( ifnull(material_id_new, '') != ifnull(material_id_old, '')					
+		 						  			      or ifnull(plant_id_new, '') != ifnull(plant_id_old, '')
+												  or ifnull(vendor_id_new, '') != ifnull(vendor_id_old, '')
+		 						  			      or ((is_disabling_price_determination_new is null or is_disabling_price_determination_new = 0) and 
+		 						  			          is_disabling_price_determination_old = 1))
+		 						  		  )
+		 								  or 
+		 								  ( 
+		 								  		item_category_id_new = lc_internal_activity 
+		 								  	and (ifnull(activity_type_id_new, '') != ifnull(activity_type_id_old, '') 
+		 								  	     or	ifnull(cost_center_id_new, '') != ifnull(cost_center_id_old, '')
+		 								  	     or ((is_disabling_price_determination_new is null or is_disabling_price_determination_new = 0) and 
+		 						  			         is_disabling_price_determination_old = 1))
+		 								  );
+
+ lt_items_with_changed_category_int_act = select item_id,
+					  						parent_item_id as parent_item_id,
+					 						item_category_id_new as item_category_id,
+					 		                material_id_new as material_id,
+					 		                plant_id_new as plant_id,
+					 		                vendor_id_new as vendor_id,
+					 		                activity_type_id_new as activity_type_id,
+					 		                cost_center_id_new as cost_center_id,
+					 		                price_source_id_new as price_source_id,
+					 		                price_source_type_new as price_source_type_id,
+											is_price_split_active_new as is_price_split_active,
+											price_id_new as price_id, 
+					 		                confidence_level_id_new as confidence_level_id,
+					 		                price_fixed_portion_new as price_fixed_portion,
+					 		                price_variable_portion_new as price_variable_portion,
+					 		                transaction_currency_id_new as transaction_currency_id,
+					 		                price_unit_new as price_unit,
+					 		                price_unit_uom_id_new as price_unit_uom_id,
+					 		                is_disabling_price_determination_new as is_disabling_price_determination,
+	 		                    			purchasing_group_new as purchasing_group,
+	 		                    			purchasing_document_new as purchasing_document,
+	 		                    			local_content_new as local_content
+	 		                    			{{masterdataCustomFields Material_Price}}
+	 		                    			{{masterdataCustomFields Activity_Price}}
+				 						from :lt_new_old_values
+			 						  	where 	item_category_id_old != item_category_id_new 
+			 						  		and	item_category_id_new = lc_internal_activity;
+
+lt_potential_prices_for_items_with_other_changed_category = select  item.item_id,
+						                                         item.vendor_id_new as vendor_id, 
+											 					 item.price_fixed_portion_new as price_fixed_portion, 
+											 					 item.price_variable_portion_new as price_variable_portion, 
+											 					 item.transaction_currency_id_new as transaction_currency_id, 
+																 item.price_unit_new as price_unit, 
+																 item.price_unit_uom_id_new as price_unit_uom_id,
+																 item.is_price_split_active_new as is_price_split_active,
+																 item.price_id_new as price_id,
+																 item.confidence_level_id_new as confidence_level_id,
+																 price_source.price_source_id,
+																 price_source.price_source_type_id,
+																 item.purchasing_group_new as purchasing_group,
+										 		                 item.purchasing_document_new as purchasing_document,
+										 		                 item.local_content_new as local_content
+										 		                 {{getMasterdataCustomFieldsAsNull Material_Price}}
+										 		                 {{getMasterdataCustomFieldsAsNull Activity_Price}}
+									 						from :lt_new_old_values as item
+									 						inner join (select top 1 * from "sap.plc.db::basis.t_price_source" ) as price_source		
+													   	         on price_source.price_source_type_id = lc_manual_price
+								 						  	where 	item.item_category_id_old != item.item_category_id_new 
+								 						  		and	item.item_category_id_new in (lc_process, lc_resources_and_tools, lc_variable_item, lc_text_item);
+
+--if the new category will be material/document/external activity/subcontracting, then we should have default value for material price custom fields
+--the default values will be already set in the input parameter it_items
+lt_potential_prices_for_items_with_changed_category_mat = select  item.item_id,
+						                                         item.vendor_id_new as vendor_id, 
+											 					 item.price_fixed_portion_new as price_fixed_portion, 
+											 					 item.price_variable_portion_new as price_variable_portion, 
+											 					 item.transaction_currency_id_new as transaction_currency_id, 
+																 item.price_unit_new as price_unit, 
+																 item.price_unit_uom_id_new as price_unit_uom_id,
+																 item.is_price_split_active_new as is_price_split_active,
+																 item.price_id_new as price_id,
+																 item.confidence_level_id_new as confidence_level_id,
+																 price_source.price_source_id,
+																 price_source.price_source_type_id,
+																 item.purchasing_group_new as purchasing_group,
+										 		                 item.purchasing_document_new as purchasing_document,
+										 		                 item.local_content_new as local_content
+										 		                 {{masterdataCustomFieldsWithPrefix Material_Price 'item'}}
+										 		                 {{getMasterdataCustomFieldsAsNull Activity_Price}}
+									 						from :lt_new_old_values as item
+									 						inner join (select top 1 * from "sap.plc.db::basis.t_price_source" ) as price_source		
+													   	         on price_source.price_source_type_id = lc_manual_price
+								 						  	where 	item.item_category_id_old != item.item_category_id_new 
+								 						  		and item.item_category_id_old = lc_internal_activity
+								 						  		and item.item_category_id_new in (lc_document,lc_material,lc_external_activity,lc_subcontracting);
+								 						  		     
+--it's not allowed to change price source; it can be changed only when a price is set from the popup
+lt_potential_prices_price_source_changed = select item.item_id,
+		                                         item.vendor_id_new as vendor_id, 
+							 					 item.price_fixed_portion_new as price_fixed_portion, 
+							 					 item.price_variable_portion_new as price_variable_portion, 
+							 					 item.transaction_currency_id_new as transaction_currency_id, 
+												 item.price_unit_new as price_unit, 
+												 item.price_unit_uom_id_new as price_unit_uom_id,
+												 item.is_price_split_active_new as is_price_split_active,
+												 item.price_id_new as price_id,
+												 item.confidence_level_id_new as confidence_level_id,
+												 item.price_source_id_old as price_source_id,
+												 item.price_source_type_old as price_source_type_id,
+												 item.purchasing_group_new as purchasing_group,
+						 		                 item.purchasing_document_new as purchasing_document,
+						 		                 item.local_content_new as local_content
+						 		                 {{masterdataCustomFieldsWithPrefix Material_Price 'item'}}
+						 		                 {{masterdataCustomFieldsWithPrefix Activity_Price 'item'}}
+					 						from :lt_new_old_values as item
+				 						  	where 	price_source_id_old != price_source_id_new 
+				 						  	and (is_disabling_price_determination_new is null or is_disabling_price_determination_new = 0);
+					  
+/******************************************************************************* 
+	Determine if flag IS_DISABLING_PRICE_DETERMINATION is set; if it is set, the prices should be checked;
+	If they are not valid, the price source should be changed to manual price.)
+ *******************************************************************************/
+ lt_items_with_changed_prices =  select *
+		 						 	from :lt_items_with_changed_prices_manual
+		 						    where is_disabling_price_determination is not null and is_disabling_price_determination = 1;
+
+ lt_changed_items = select * from :lt_items_with_changed_fields
+ 				      union all
+ 					select * from :lt_items_with_changed_category_int_act
+ 					  union all
+ 					select * from :lt_items_with_changed_prices;
+ 					
+ call 	"sap.plc.db.calculationmanager.procedures::p_item_price_determination_all"
+  		(
+			:iv_calculation_version_id,
+  			:lt_changed_items, 
+  			:it_calculation_version,
+  			lt_potential_prices_for_changed_items, 
+  			lt_messages_for_changed_items
+  		);
+  		
+lt_determined_prices = select * from :lt_potential_prices_manual_act
+                         union all
+ 						select * from :lt_potential_prices_manual_mat
+ 						 union all
+ 						select * from :lt_potential_prices_for_changed_items
+ 						 union all
+ 						select * from :lt_potential_prices_for_items_with_other_changed_category
+ 						 union all
+ 						select * from :lt_potential_prices_for_items_with_changed_category_mat
+ 						 union all
+ 						select * from :lt_potential_prices_price_source_changed;
+ 
+-- items for which no price was set
+lt_remaining_items	=  select item_id, 
+                          vendor_id ,
+						  price_fixed_portion, 
+						  price_variable_portion,
+						  transaction_currency_id, 
+ 						  price_unit, 
+ 						  price_unit_uom_id,
+						  is_price_split_active, 
+						  price_id,
+ 						  confidence_level_id, 
+ 						  price_source_id, 
+ 						  price_source_type_id,
+ 						  purchasing_group, 
+ 						  purchasing_document, 
+ 						  local_content
+ 						  {{masterdataCustomFields Material_Price}}
+ 						  {{masterdataCustomFields Activity_Price}}
+ 					   from :it_items
+ 					   where item_id not in (select item_id from :lt_determined_prices);
+ 					   			  		
+lt_messages_manual = select 
+	 				 	lc_psource_changed as msg_id,--the price source was changed automatically to manual
+	 				 	item_id,
+	 				 	null as md_id_1,
+	 				 	null as md_id_2,
+	 				 	null as md_id_3,
+	 				 	null as business_object,
+	 				 	null as price_source_id
+	 				 	from (select item_id from :lt_potential_prices_manual_act 
+	 				 	         union all select item_id from :lt_potential_prices_manual_mat
+	 				 	         union all select item_id from :lt_potential_prices_for_items_with_other_changed_category);
+	 				 	         
+	 				 	          		
+ /******************************************************************************* 
+	Finalize 
+ *******************************************************************************/ 
+  
+ ot_determined_prices = select * from
+ 						( select * from :lt_determined_prices
+                         union all
+ 						select * from :lt_remaining_items )
+ 						order by item_id;
+ 
+ ot_messages = select * from
+               ( select * from :lt_messages_manual
+	                union all
+	             select * from :lt_messages_for_changed_items )
+	            order by item_id;
+
+
+END;
+
+

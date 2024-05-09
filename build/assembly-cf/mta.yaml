@@ -1,0 +1,417 @@
+_schema-version: '3.1'
+ID: com.sap.xsac.plc
+description: SAP Product Lifecycle Costing
+version: ${revision}
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - echo building the java tree
+        - mvn clean package -P all -Dmaven.test.skip=true -f ../../../java-plc-parent/pom.xml
+        - echo parsing the CSV files
+        - npm run parseCSVs
+        - echo cleaning up the CSV files and parser
+        - npm run cleanupCSVs
+        - echo before-all finished sucessfully
+
+modules:
+  - name: xsac-plc-db
+    type: nodejs
+    path: db
+    parameters:
+      command: npm run start:cf
+      buildpack: https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.8.9/nodejs-buildpack-cflinuxfs4-v1.8.9.zip
+      stack: cflinuxfs4
+    requires:
+      - name: xsac-plc-synonym-grantor-service
+    properties:
+      hdi_dynamic_deploy_user: ${generated-user}
+      hdi_dynamic_deploy_password: ${generated-password}
+    provides:
+      - name: dynamic_db_deployment
+        properties:
+          url: ${default-url}
+          user: ${generated-user}
+          password: ${generated-password}
+
+  - name: xsac-plc-broker
+    type: nodejs
+    parameters:
+      memory: 128M
+      buildpack: https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.8.9/nodejs-buildpack-cflinuxfs4-v1.8.9.zip
+      stack: cflinuxfs4
+    path: ./broker
+    requires:
+      - name: xsac-plc-uaa-broker-service
+      - name: xsac-plc-auditlog
+
+  - name: xsac-plc-xsjs
+    type: nodejs
+    parameters:
+      memory: 8192M
+      buildpack: https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.8.9/nodejs-buildpack-cflinuxfs4-v1.8.9.zip
+      stack: cflinuxfs4
+    path: xsjs
+    properties:
+      SAP_JWT_TRUST_ACL: '[{"clientid":"*","identityzone":"*"}]'
+      PLC_METADATA: '{"id": "com.sap.xsac.plc", "version": "${revision}"}'
+      OPTIMIZE_MEMORY: true
+      XS_APP_LOG_LEVEL: info
+      SAP_PLC_KEEPALIVETIMEOUT: 60000
+      SAP_PLC_TIMEOUT: 120000
+    provides:
+      - name: xsac-plc-xs-api
+        properties:
+          url: ${default-url}
+          user: ${generated-user}
+          password: ${generated-password}
+    requires:
+      - name: xsac-plc-postgres
+      - name: xsac-plc-service-manager
+      - name: xsac-plc-uaa-broker-service
+      - name: xsac-plc-job-scheduler
+      - name: xsac-plc-license-metering
+      - name: xsac-plc-auditlog
+      - name: xsac-plc-autoscaler-service
+        parameters:
+          path: servicesConfig/autoscaler/xsac-plc-xsjs.json
+      - name: xsac-plc-system-basic
+
+  - name: xsac-plc-xsahaa
+    type: java
+    path: ./
+    build-parameters:
+      builder: fetcher
+      fetcher-opts:
+        repo-type: maven
+        repo-coordinates: com.sap.xsahaa:java-xsahaa:${com.sap.xsahaa.java-xsahaa.version}:war
+      build-result: target/java-xsahaa-${com.sap.xsahaa.java-xsahaa.version}.war
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+      stack: cflinuxfs4
+    properties:
+      TARGET_RUNTIME: tomee7
+      JBP_CONFIG_RESOURCE_CONFIGURATION: "['tomee7/conf/server.xml': {'connector.maxHttpHeaderSize':16384}]"
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jdk.SAPMachineJDK']"
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      SET_LOGGING_LEVEL: '{com.sap.xsahaa: INFO, com: INFO}'
+      SAP_JWT_TRUST_ACL: '[{"clientid":"*","identityzone":"*"}]'
+      PERSONALIZE_JWT: true
+    provides:
+      - name: xsac-plc-xsahaa-api
+        properties:
+          url: "${default-url}"
+    requires:
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-service-manager
+      - name: xsac-plc-auditlog
+
+  - name: xsac-plc-mt
+    type: java
+    path: ../../../java-plc-parent/xsac-plc-mt
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: target/*.jar
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+      stack: cflinuxfs4
+    properties:
+      SERVICE_REPLACEMENTS: '[{"key" : "xsac-plc-synonym-grantor-service", "service" : "xsac-plc-synonym-grantor-service"}]'
+      SPRING_PROFILES_ACTIVE: cloud
+      COM_SAP_PLC_MT_SAAS_REGISTRY_SERVICE_NAME: xsac-plc-saas-registry
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+    provides:
+      - name: xsac-plc-mt-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-postgres
+      - name: xsac-plc-cred-store
+        properties:
+          COM_SAP_PLC_MT_HAAS_SYSTEM_CRED_STORE_NAMESPACE: ~{haasSystemNamespace}
+          COM_SAP_PLC_MT_MDR_PREVIEW_CRED_STORE_NAMESPACE: ~{mdrPreviewNamespace}
+      - name: xsac-plc-service-manager
+        properties:
+          COM_SAP_PLC_MT_SM_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-uaa-service
+        properties:
+          COM_SAP_PLC_MT_UAA_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-auditlog
+      - name: xsac-plc-synonym-grantor-service
+        properties:
+          COM_SAP_PLC_MT_SYNONYM_GRANTOR_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-xs-api
+        properties:
+          PLC_XSJS_SERVICE_URL: ~{url}
+      - name: dynamic_db_deployment
+        properties:
+          COM_SAP_PLC_MT_DYNAMIC_DB_DEPLOYMENT_URL: ~{url}
+          COM_SAP_PLC_MT_DYNAMIC_DB_DEPLOYMENT_USER: ~{user}
+          COM_SAP_PLC_MT_DYNAMIC_DB_DEPLOYMENT_PASSWORD: ~{password}
+          COM_SAP_PLC_MT_REST_TEMPLATE_CONNECTION_REQUEST_TIMEOUT_MILLIS: 5000
+          COM_SAP_PLC_MT_REST_TEMPLATE_CONNECTION_TIMEOUT_MILLIS: 5000
+          COM_SAP_PLC_MT_REST_TEMPLATE_READ_TIMEOUT_MILLIS: 3600000
+
+  - name: xsac-plc-publicapi
+    type: java
+    path: ../../../java-plc-parent/publicapi-parent
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: modules/xsac-plc-publicapi/target/*.jar
+    parameters:
+      host: plc-papi
+      memory: 2048M
+      instances: 1
+      buildpack: sap_java_buildpack
+      stack: cflinuxfs4
+    properties:
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+      TARGET_RUNTIME: java_main
+      SPRING_PROFILES_ACTIVE: cloud
+      TRACK_USER_ACTIVITY: true
+      JAVA_OPTS: '-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+      PLC_DB_MAX_POOL_SIZE: 100
+      PLC_DB_MIN_IDLE: 10
+    provides:
+      - name: xsac-plc-public-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-uaa-broker-service
+      - name: xsac-plc-auditlog
+      - name: xsac-plc-service-manager
+        properties:
+          SM_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-autoscaler-service
+        parameters:
+          path: servicesConfig/autoscaler/xsac-plc-publicapi.json
+
+  - name: xsac-plc-map
+    type: java
+    path: ../../../java-plc-parent/xsac-plc-map
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: target/*.jar
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+      stack: cflinuxfs4
+    properties:
+      # activate the spring cloud profile to choose right configurations
+      SPRING_PROFILES_ACTIVE: cloud
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+      PLC_DB_MAX_POOL_SIZE: 100
+      PLC_DB_MIN_IDLE: 10
+    provides:
+      - name: xsac-plc-map-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-cred-store
+        properties:
+          COM_SAP_PLC_MAP_MDR_PREVIEW_CRED_STORE_NAMESPACE: ~{mdrPreviewNamespace}
+      - name: xsac-plc-service-manager
+        properties:
+          SM_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-uaa-service
+        properties:
+          COM_SAP_PLC_MAP_UAA_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-auditlog
+      - name: xsac-plc-autoscaler-service
+        parameters:
+          path: servicesConfig/autoscaler/xsac-plc-map.json
+
+  - name: xsac-plc-scheduler
+    type: java
+    path: ../../../java-plc-parent/xsac-plc-scheduler
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: target/*.jar
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+      stack: cflinuxfs4
+    properties:
+      # activate the spring cloud profile to choose right configurations
+      SPRING_PROFILES_ACTIVE: cloud
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+      PLC_DB_MAX_POOL_SIZE: 100
+      PLC_DB_MIN_IDLE: 10
+    provides:
+      - name: xsac-plc-scheduler-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-service-manager
+        properties:
+          SM_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-auditlog
+      - name: xsac-plc-postgres
+        properties:
+          POSTGRES_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-autoscaler-service
+        parameters:
+          path: servicesConfig/autoscaler/xsac-plc-scheduler.json
+
+  - name: xsac-plc-web
+    type: html5
+    path: web
+    parameters:
+      host: plc
+      command: npm run start:cf
+      stack: cflinuxfs4
+      buildpack: https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.8.9/nodejs-buildpack-cflinuxfs4-v1.8.9.zip
+    properties:
+      XS_APP_LOG_LEVEL: info
+      PRESERVE_FRAGMENT: "false"
+      httpHeaders: '[{"X-Frame-Options": "deny"}, {"Content-Security-Policy": "style-src ''self'' ''unsafe-inline'' https://sapui5.hana.ondemand.com; script-src ''self'' ''unsafe-eval'' https://sapui5.hana.ondemand.com; img-src ''self'';"}]'
+    requires:
+      - name: xsac-plc-uaa-service
+        properties:
+          UAA_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-xs-api
+        group: destinations
+        properties:
+          name: xsac-plc-xs-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-public-api
+        group: destinations
+        properties:
+          name: xsac-plc-api-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-mt-api
+        group: destinations
+        properties:
+          name: xsac-plc-mt-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-map-api
+        group: destinations
+        properties:
+          name: xsac-plc-map-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-scheduler-api
+        group: destinations
+        properties:
+          name: xsac-plc-scheduler-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-xsahaa-api
+        group: destinations
+        properties:
+          name: xsac-plc-xsahaa-destination
+          url: ~{url}
+          forwardAuthToken: true
+          strictSSL: false
+
+resources:
+  - name: xsac-plc-synonym-grantor-service
+    type: org.cloudfoundry.existing-service
+    properties:
+      service-name: ${service-name}
+
+  - name: xsac-plc-uaa-service
+    type: org.cloudfoundry.managed-service
+    properties:
+      service-name: ${service-name}
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: servicesConfig/xsuaa/xs-security-cf-app.json
+
+  - name: xsac-plc-uaa-broker-service
+    type: org.cloudfoundry.managed-service
+    properties:
+      service-name: ${service-name}
+    parameters:
+      service: xsuaa
+      service-plan: broker
+      path: servicesConfig/xsuaa/xs-security-cf-broker.json
+
+  - name: xsac-plc-service-manager
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: service-manager
+      service-plan: container
+      service-tags: [ "service-manager" ]
+    properties:
+      service-name: ${service-name}
+
+  - name: xsac-plc-postgres
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: postgresql-db
+      config:
+        memory: 2
+        storage: 5
+        engine_version: '11'
+        multi_az: false
+    properties:
+      service-name: ${service-name}
+
+  - name: xsac-plc-cred-store
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: credstore
+      service-plan: small
+    properties:
+      haasSystemNamespace: com.sap.plc.mt
+      mdrPreviewNamespace: com.sap.plc.mdrPreview
+
+  - name: xsac-plc-job-scheduler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: jobscheduler
+      service-plan: lite
+      config:
+        enable-xsuaa-support: true
+
+  - name: xsac-plc-license-metering
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: metering-service
+      service-plan: default
+      config:
+        providerToken:
+
+  - name: xsac-plc-auditlog
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: auditlog
+      service-plan: standard
+
+  - name: xsac-plc-autoscaler-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: lite
+
+  - name: xsac-plc-system-basic
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: cis
+      service-plan: system-basic

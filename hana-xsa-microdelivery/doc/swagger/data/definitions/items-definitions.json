@@ -1,0 +1,1323 @@
+{
+	"definitions": {
+		"ItemModel": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 3952"
+				},
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"PARENT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 5"
+				},
+				"PREDECESSOR_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 5"
+				},
+				"IS_ACTIVE": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"HIGHLIGHT_GREEN": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"HIGHLIGHT_ORANGE": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"HIGHLIGHT_YELLOW": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"ITEM_CATEGORY_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"REFERENCED_CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 13"
+				},
+				"ACCOUNT_ID": {
+					"type": "string",
+					"description": "ex: #AC13"
+				},
+				"DETERMINED_ACCOUNT_ID": {
+					"type": "string",
+					"description": "determined account id obtained by running the account determination procedure"
+				},
+				"DOCUMENT_TYPE_ID": {
+					"type": "string"
+				},
+				"DOCUMENT_ID": {
+					"type": "string"
+				},
+				"DOCUMENT_VERSION": {
+					"type": "string"
+				},
+				"DOCUMENT_PART": {
+					"type": "string"
+				},
+				"DOCUMENT_STATUS_ID": {
+					"type": "string"
+				},
+				"DESIGN_OFFICE_ID": {
+					"type": "string"
+				},
+				"MATERIAL_ID": {
+					"type": "string",
+					"description": "ex: #P-100"
+				},
+				"MATERIAL_TYPE_ID": {
+					"type": "string"
+				},
+				"MATERIAL_GROUP_ID": {
+					"type": "string"
+				},
+				"IS_PHANTOM_MATERIAL": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"IS_CONFIGURABLE_MATERIAL": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"MATERIAL_SOURCE": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"OVERHEAD_GROUP_ID": {
+					"type": "string"
+				},
+				"VALUATION_CLASS_ID": {
+					"type": "string"
+				},
+				"PURCHASING_GROUP": {
+					"type": "string",
+					"description": "Ex: 123456"
+				},
+				"PURCHASING_DOCUMENT": {
+					"type": "string",
+					"description": "Ex: 123"
+				},
+				"LOCAL_CONTENT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 20"
+				},
+				"ACTIVITY_TYPE_ID": {
+					"type": "string",
+					"description": "ex: #AT1"
+				},
+				"PROCESS_ID": {
+					"type": "string",
+					"description": "ex: #BP1"
+				},
+				"LOT_SIZE": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"LOT_SIZE_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"LOT_SIZE_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"ENGINEERING_CHANGE_NUMBER_ID": {
+					"type": "string"
+				},
+				"COMPANY_CODE_ID": {
+					"type": "string",
+					"description": "ex: #C1"
+				},
+				"COST_CENTER_ID": {
+					"type": "string",
+					"description": "ex: #Cost1"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "ex: #PT1"
+				},
+				"WORK_CENTER_ID": {
+					"type": "string",
+					"description": "ex: #WC1"
+				},
+				"WORK_CENTER_CATEGORY": {
+					"type": "string",
+					"description": "ex: #WC1"
+				},
+				"EFFICIENCY": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 99.9"
+				},
+				"BUSINESS_AREA_ID": {
+					"type": "string",
+					"description": "ex: #BA1"
+				},
+				"PROFIT_CENTER_ID": {
+					"type": "string",
+					"description": "ex: #PC1"
+				},
+				"QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"QUANTITY_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"QUANTITY_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"QUANTITY_UOM_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"TOTAL_QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TOTAL_QUANTITY_UOM_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"TOTAL_QUANTITY_DEPENDS_ON": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"IS_RELEVANT_TO_COSTING_IN_ERP": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"BASE_QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"BASE_QUANTITY_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"BASE_QUANTITY_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"QUANTITY_PER_BASE_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"QUANTITY_PER_BASE_UNIT_UOM_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"PRICE_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_FIXED_PORTION_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_FIXED_PORTION_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"PRICE_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_VARIABLE_PORTION_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"PRICE_VARIABLE_PORTION_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"PRICE": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TRANSACTION_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"PRICE_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"PRICE_UNIT_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 1"
+				},
+				"PRICE_UNIT_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"PRICE_UNIT_UOM_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"IS_PRICE_SPLIT_ACTIVE": {
+					"type": "number",
+					"format": "int32"
+				},
+				"IS_DISABLING_ACCOUNT_DETERMINATION": {
+					"type": "number",
+					"format": "int32"
+				},
+				"PRICE_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"CONFIDENCE_LEVEL_ID": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"SURCHARGE": {
+					"type": "number",
+					"format": "double",
+					"description": "The amount of the applied surcharge (ex. 5 => 5%) to the price of the item in a lifecycle calculation version, if any. If no surcharge is applied, the value either null or the property is not contained in the item object."
+				},
+				"PRICE_SOURCE_ID": {
+					"type": "string",
+					"description": "ex: 902"
+				},
+				"PRICE_SOURCE_TYPE_ID": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"IS_DISABLING_PRICE_DETERMINATION": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"VENDOR_ID": {
+					"type": "string",
+					"description": "ex: #VD1"
+				},
+				"TARGET_COST": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 120"
+				},
+				"TARGET_COST_CALCULATED": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 120"
+				},
+				"TARGET_COST_IS_MANUAL": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"TARGET_COST_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"CREATED_ON": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"CREATED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"LAST_MODIFIED_ON": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"LAST_MODIFIED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 7377.288"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 7377.288"
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 7377.288"
+				},
+				"OTHER_COST": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 0"
+				},
+				"OTHER_COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 0"
+				},
+				"OTHER_COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 0"
+				},
+				"TOTAL_COST": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 8115.0168"
+				},
+				"TOTAL_COST_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 2998.6704"
+				},
+				"TOTAL_COST_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 5116.3464"
+				},
+				"COMMENT": {
+					"type": "string",
+					"description": "ex: Demo item 1"
+				},
+				"IS_DELETED": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"IS_DIRTY": {
+					"type": "integer",
+					"format": "int32",
+					"description": "Ex: 1/0 Flag that indicates that item is dirty or not."
+				},
+				"CHILD_ITEM_CATEGORY_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 30"
+				}
+			}
+		},
+		"ItemModelCompressed": {
+			"type": "object",
+			"properties": {
+				"ITEM_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"PARENT_ITEM_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"PREDECESSOR_ITEM_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"IS_ACTIVE": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"HIGHLIGHT_GREEN": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"HIGHLIGHT_ORANGE": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"HIGHLIGHT_YELLOW": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"ITEM_CATEGORY_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"REFERENCED_CALCULATION_VERSION_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[1, 2]"
+					}
+				},
+				"ACCOUNT_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DETERMINED_ACCOUNT_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DOCUMENT_TYPE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DOCUMENT_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DOCUMENT_VERSION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DOCUMENT_PART": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DOCUMENT_STATUS_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"DESIGN_OFFICE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"MATERIAL_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"MATERIAL_TYPE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"MATERIAL_GROUP_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_PHANTOM_MATERIAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_CONFIGURABLE_MATERIAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"MATERIAL_SOURCE": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"OVERHEAD_GROUP_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"VALUATION_CLASS_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PURCHASING_GROUP": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PURCHASING_DOCUMENT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"LOCAL_CONTENT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"ACTIVITY_TYPE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PROCESS_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"LOT_SIZE": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"LOT_SIZE_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"ENGINEERING_CHANGE_NUMBER_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"COMPANY_CODE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"COST_CENTER_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PLANT_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"WORK_CENTER_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"WORK_CENTER_CATEGORY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"EFFICIENCY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"BUSINESS_AREA_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PROFIT_CENTER_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"QUANTITY_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"QUANTITY_UOM_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_QUANTITY_UOM_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_QUANTITY_DEPENDS_ON": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_RELEVANT_TO_COSTING_IN_ERP": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"BASE_QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"BASE_QUANTITY_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"QUANTITY_PER_BASE_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"QUANTITY_PER_BASE_UNIT_UOM_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_FIXED_PORTION_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_VARIABLE_PORTION_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TRANSACTION_CURRENCY_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_UNIT_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_UNIT_UOM_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_PRICE_SPLIT_ACTIVE": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"CONFIDENCE_LEVEL_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"SURCHARGE": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "The amount of the applied surcharge (ex. 5 => 5%) to the price of the item in a lifecycle calculation version, if any. If no surcharge is applied, the value either null or the property is not contained in the item object."
+					}
+				},
+				"PRICE_SOURCE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_SOURCE_TYPE_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_DISABLING_PRICE_DETERMINATION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"VENDOR_ID": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TARGET_COST": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TARGET_COST_IS_MANUAL": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TARGET_COST_CURRENCY_ID": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "ex: EUR"
+					}
+				},
+				"CREATED_ON": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"CREATED_BY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"LAST_MODIFIED_ON": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"LAST_MODIFIED_BY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_FOR_TOTAL_QUANTITY": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"OTHER_COST": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"OTHER_COST_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"OTHER_COST_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"TOTAL_COST_PER_UNIT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"COMMENT": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"IS_DELETED": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "ex: 0"
+					}
+				},
+				"IS_DIRTY": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"description": "Ex: 1/0 Flag that indicates that item is dirty or not."
+					}
+				},
+				"CHILD_ITEM_CATEGORY_ID": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"description": "[30, 31]"
+					}
+				}
+			}
+		},
+		"ItemsGetResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"masterdata": {
+							"type": "object",
+							"properties": {
+								"MATERIAL_PRICE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPriceModel"
+									}
+								},
+								"ACTIVITY_PRICE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityPriceModel"
+									}
+								},
+								"ACTIVITY_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ActivityTypeModel"
+									}
+								},
+								"PRICE_COMPONENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPriceComponentModel"
+									}
+								},
+								"MATERIAL_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialModel"
+									}
+								},
+								"MATERIAL_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupModel"
+									}
+								},
+								"MATERIAL_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeModel"
+									}
+								},
+								"PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+									}
+								},
+								"COMPANY_CODE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+									}
+								},
+								"COST_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CostCenterModel"
+									}
+								},
+								"CONTROLLING_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationControllingAreaModel"
+									}
+								},
+								"VENDOR_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorModel"
+									}
+								},
+								"CUSTOMER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+									}
+								},
+								"MESSAGES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/definitions.json#/definitions/GetPricesForItemMessagesModel"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"ItemToBeUpdated": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"description": "Value: 1031"
+				},
+				"ITEM_ID": {
+					"type": "integer",
+					"description": "Value: 100254"
+				},
+				"MATERIAL_ID": {
+					"type": "string",
+					"description": "Value: #100-110"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "Value: #PT1"
+				}
+			}
+		},
+		"ItemsPutPostDeleteResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"allOf": [{
+									"$ref": "#/definitions/ItemModel"
+								},
+								{
+									"type": "object",
+									"required": ["SESSION_ID"],
+									"properties": {
+										"SESSION_ID": {
+											"type": "string",
+											"description": "ex: Session1"
+										}
+									}
+								}]
+							}
+						},
+						"masterdata": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									
+								}
+							}
+						},
+						"calculated": {
+							"type": "object",
+							"properties": {
+								"ITEM_CALCULATED_FIELDS": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitModel"
+									}
+								},
+								"ITEM_CALCULATED_FIELDS_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT_COMPRESSED": {
+								    "$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitCompressedModel"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"ItemToBeCreated": {
+			"type": "object",
+			"properties": {
+				"BASE_QUANTITY": {
+					"type": "integer",
+					"description": "Value: 1"
+				},
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"description": "Value: 1031"
+				},
+				"IS_ACTIVE": {
+					"type": "integer",
+					"description": "Value: 1"
+				},
+				"ITEM_CATEGORY_ID": {
+					"type": "integer",
+					"description": "Value: 1"
+				},
+				"ITEM_ID": {
+					"type": "integer",
+					"description": "Value: 100254"
+				},
+				"PARENT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 5"
+				},
+				"PRICE_FIXED_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TRANSACTION_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: USD"
+				},
+				"PRICE_UNIT": {
+					"type": "integer",
+					"description": "ex: 10"
+				},
+				"PRICE_UNIT_UOM_ID": {
+					"type": "string",
+					"description": "ex: H"
+				},
+				"IS_PRICE_SPLIT_ACTIVE": {
+					"type": "number",
+					"format": "int32"
+				},
+				"PRICE_ID": {
+					"type": "string",
+					"description": "ex: PC"
+				},
+				"PRICE_VARIABLE_PORTION": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"TOTAL_QUANTITY_DEPENDS_ON": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"QUANTITY": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"QUANTITY_UOM_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"IS_PHANTOM_MATERIAL": {
+					"type": "integer",
+					"description": "Ex: 1"
+				},
+				"IS_CONFIGURABLE_MATERIAL": {
+					"type": "integer",
+					"description": "Ex: 1 or 0"
+				},
+				"IS_RELEVANT_TO_COSTING_IN_ERP": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"CHILD_ITEM_CATEGORY_ID": {
+					"type": "integer",
+					"description": "Value: 30"
+				}
+			}
+		},
+		"ItemToBeDeleted": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"description": "Value: 1031"
+				},
+				"ITEM_ID": {
+					"type": "integer",
+					"description": "Value: 100254"
+				}
+			}
+		}
+	}
+}

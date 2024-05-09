@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::activity_type_update_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_activity_type", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_activity_type__text", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		]
+	}
+}

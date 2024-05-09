@@ -1,0 +1,258 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_set_active_states" ( 
+		IN iv_calculation_version_id    	INTEGER,
+		IN iv_session_id 					NVARCHAR(50),
+		IN iv_preserve_substructures_flag	INTEGER, 		-- indicates if the active states of substructures in the input should be preserved (0 = do not preserve, 1 = preserve)
+		OUT item_ids_updated 				"sap.plc.db.calculationmanager.procedures::ts_item_ids_output" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+	
+	child_counter 			INTEGER DEFAULT 0;
+	parent_counter          INTEGER DEFAULT 0;
+	
+BEGIN
+
+-- This procedure calculates AND sets the correct active state for items of given calculation version in t_item_temporary.
+-- Along with that the active states for parents (incl. grandparents) and children (incl. grandchildren) of the changed item are updated:
+--
+-- The procedure MUST be provided  with a set of items of the calculation version that changed their active state and calculates the correct 
+-- active for potential child and parent items. The input is required to avoid ambiguity in the setting of the active state and for the sake of performance. 
+--
+-- In order to benefit from the SQL Plan Cache and avoid constant re-optimization of the procedure every time it's invoked, the procedure does not
+-- have any table typed input parameters. Instead it uses the global temporary table gtt_item_changed_active_state as input. 
+--
+-- Preconditions for procedure:
+-- 
+-- 1. gtt_item_changed_active_state contains items with a changed active state; it does NOT matter if those items are assemblies or leaf items
+-- 2. each item in gtt_item_changed_active_state is also contained in t_item_temporary; it does not matter if items in t_item_temporary have 
+--    is_deleted = 1 set; 
+--    (if an item in gtt_item_changed_active_state is not present in t_item_temporary, it's ignored by the procedure)
+--
+-- Preserve Substructures: 
+-- We speak of substructures in the input if the gtt_item_changed_active_state contains leaf items and their parents as well. If iv_preserve_substructures_flag 
+-- is set to 1, the active states of substructures in the input are preserved. 
+
+-- Scenarios:
+-- 		Activate
+--			- items to activate must be in gtt_item_changed_active_state with is_active = 1
+-- 		Deactivate
+-- 		 - items to deactivate must be in gtt_item_changed_active_state with is_active = 0
+-- 		Add item
+-- 			- added items must be in t_item_temporary before calling the procedure!
+-- 		 - the added items must be added to gtt_item_changed_active_state with their according active state
+-- 		Delete item
+-- 		 - deleted items must have set is_deleted = 1 in t_item_temporary before calling the procedure
+-- 		 - deleted items must be in gtt_item_changed_active_state with is_active = 0
+-- 		Import + Copy&paste
+-- 			- Active states of substructures should be preserved, and not re-calculated in order to paste or import items as copied
+-- 		 - iv_preserve_substructures_flag MUST BE 1
+-- 		Mass change
+--			- Mass change can lead to substructures in the input, if the active state is changed (e.g. "change all materials to inactive" can affect an assembly and children of it)
+--			- In this case children should inherit the active state of the parent, since this is as the user changes the active state of the parent directly 
+--			- iv_preserve_substructures_flag MUST BE 0
+--		
+-- After determining all items affected by the activate state change of the input items AND updates the activate state of all items in t_item_temporary.
+-- The output of the procedure is a set with all the ids of the not deleted items updated by this procedure (type: ts_item_ids_output). Clients can decide if 
+-- the want to receive additional data of the updated items.
+--
+--
+-- ###########################
+-- check input:
+-- use join to select only items that present in t_item_temporary (inner join) for calculation version and session id; if it_input_items
+-- is empty the procedure will return without doing anything
+-- fetch the data from t_item_temporary used for joins later on in order to make them more efficient
+lt_item_temporary =     select  item_id,
+                                parent_item_id,
+                                is_active,
+                                is_deleted 
+	   					from "sap.plc.db::basis.t_item_temporary"
+                        where       calculation_version_id = :iv_calculation_version_id
+                                and	session_id = :iv_session_id;
+
+it_input_items = select  	input.item_id,
+                        	input.parent_item_id,
+                        	input.is_active as input_is_active,
+							db.is_active as db_is_active,
+							db.is_deleted as db_is_deleted
+                from "sap.plc.db::temp.gtt_item_changed_active_state" as input
+                    inner join :lt_item_temporary as db
+                        on  input.item_id = db.item_id;
+
+if is_empty(:it_input_items) then
+	return;
+end if;
+
+
+-- initialize structure to collect all items to change active state with the input item set; input items are affected for sure and in order to prevent infinitive loops 
+-- it's necessary to keep input separated from collection of affected items (input is used for looping); deleted items are also excluded from the set of affected items;
+-- for this reason the join with :lt_item_temporary is used; this happens if the procedure is called with an already deleted input, as done in the remove-item scenario
+-- (procedure is called with the deleted item, re-validate parent active state; is_active for deleted item is not set to 0 necessarily)
+lt_items_to_update = select item_id,
+                            parent_item_id,
+                            input_is_active as is_active
+                    from    :it_input_items
+					where 		db_is_deleted = 0
+							and input_is_active <> db_is_active;		-- ATTENTION: only select the items with a different is_active state in the database; for add
+																		--			  scenarios might no change necessary
+
+-- select direct and not deleted children of the input items; those children which are part of an input assembly, are ignored (this would be the case for import/copy&paste),
+-- since in this case the pre-set active state of the children shall be preserved; the remaining child items (if any) are used to initialize the children loop; for those items
+-- it is important to pass the active state from the input (parent) to the children
+lt_input_assemblies =		select	parent.item_id									
+							from :it_input_items as parent
+								inner join :it_input_items as children				-- use an inner join to determine assemblies in the input structure; children of those 
+									on parent.item_id = children.parent_item_id;	-- assemblies are ignored in order to NOT override their active state
+
+lt_children =   select  db.item_id, 
+                        db.parent_item_id,
+                        input.input_is_active  as is_active            			-- ATTENTION: inherit active state from children to parent
+				from :it_input_items as input
+                    inner join :lt_item_temporary as db
+                        on 	db.parent_item_id = input.item_id
+				where 	 	db.is_deleted = 0;
+--						and	db.parent_item_id not in (						-- ATTENTION: filter out children which are part of input assemblies; the active state of those 
+--								select item_id from :lt_input_assemblies			--			  child items MUST be preserved
+--							);
+if :iv_preserve_substructures_flag = 0 then
+
+select count(*) into child_counter from :lt_children;
+
+while child_counter > 0 do
+    -- in loop: 
+	-- 	- extend lt_items_to_update with the set of the current children (see lt_items_to_update); note: union all 
+	--	  could add values multiple time; not changed to union, because select distinct alter makes sure that in the 
+	--    output every value is only present once (considered to be more performant)
+	-- 	- take direct children of the current level, set the value for is_active from the parent (see lt_children); 
+	lt_items_to_update =    select  item_id,
+                                    parent_item_id,
+                                    is_active
+                            from    :lt_children
+                            
+                            union	-- changed UNION ALL to UNION to eliminate duplicates. Performance is reduced when using UNION (values are selected distinct)
+                            		-- However, in case of huge calculation version, thousands of items, with multiple levels in tree, lt_items_to_update doubles size
+                            		-- every time a loop is made. Also any join with this local variable is now faster because number of records is decresed 
+                            
+                            select  item_id,
+                                    parent_item_id,
+                                    is_active
+                            from    :lt_items_to_update;
+    
+    lt_children =   select  db.item_id,
+                            db.parent_item_id,
+                            child.is_active                     	-- ATTENTION: select the child items, which will become the parents for the next iteration for is_active;
+    				from :lt_children as child						--			  value for is_active must be handed over from the parent (assembly) to the children!
+                        inner join :lt_item_temporary as db
+                            on 	db.parent_item_id = child.item_id
+					where 	 	db.is_deleted = 0
+							and	db.parent_item_id not in (						-- again filter out children of input assemblies; not sure if this necessary; shouldn't hurt
+									select item_id from :lt_input_assemblies
+								);
+    select count(*) into child_counter from :lt_children;
+end while;
+end if;
+
+-- select direct parents of the input items in order to initialize the parent loop; 
+lt_parents =    select   db.item_id,
+                         db.parent_item_id
+                from :it_input_items as input 
+                     inner join :lt_item_temporary as db
+                         on 	input.parent_item_id = db.item_id
+				where	db.is_deleted = 0;							-- ATTENTION: filter out parents if already deleted; should not be contained in the result set
+select count(*) into parent_counter from :lt_parents;
+
+while parent_counter > 0
+do
+-- in loop:
+--	- join current already determined active states for children with db contents in order to have the current data (see lt_updated_active_state)
+--  - determine the number of active children per item; a child is active if is_active = 1 and is_deleted = 0 (see lt_children_counts); 
+--	- set active state of an item, depending if it has children and if there is an active one; if an item has no children no active state shall be updated, 
+--	  happens after deleting the last child item (see lt_determined_active_state)
+-- 	- extend lt_items_to_update with the set of parents that changed the active state; 
+--		(note: union all  could add values multiple time; not changed to union, because select distinct alter makes sure that in the 
+--       output every value is only present once; considered to be more performant (see lt_items_to_update)
+--  - determine the next level of parents (if any) and initialize the data structures for the next iteration (see lt_parents)
+    lt_updated_active_state =   select  db.item_id,
+                                        db.parent_item_id,
+                                        ifnull(updated_items.is_active, db.is_active) as is_active,
+                                        db.is_deleted
+                                from :lt_item_temporary as db
+                                    left outer join :lt_items_to_update as updated_items
+                                        on db.item_id = updated_items.item_id;
+    
+    lt_children_counts =       select 	item.item_id as item_id,											-- count of children is determined by a group by parent_item_id
+                                    	ifnull(children.cnt, 0) as cnt,										-- count the number of children that refer the parent
+										ifnull(active_children.cnt, 0) as active_cnt						-- count the number of active children
+                               from :lt_updated_active_state as item										-- in order to have the parent item id and the number of children in
+                                    	left outer join (													-- correlation the "group by" must be done in a separate stmt and joined
+                                    		select 	parent_item_id,											-- together; left outer join must be used due to leaf items which don't 
+                                    				count(parent_item_id) as cnt							-- have any children; ifnull() function is used in this case to set the 
+                                    		from :lt_updated_active_state									-- value correctly
+                                            where       is_active = 1
+                                                    and is_deleted = 0                                      -- ATTENTION: is_deleted = 0 must be part of this condition, since
+                                    		group by parent_item_id											--			  otherwise activate but already deleted items would count	
+                                    	) as active_children
+                                    	on item.item_id = active_children.parent_item_id
+									   	left outer join (													-- use another join to determine the number of children, regardless if 
+										   select 	parent_item_id,											-- they are active or not
+												   	count(parent_item_id) as cnt							
+										   from 	:lt_updated_active_state								
+										   where  	is_deleted = 0
+										   group by parent_item_id											
+									   	) as children
+										on item.item_id = children.parent_item_id;
+
+    lt_determined_active_state =    select  parents.item_id,									-- sets the activate state for parents; join structure with number of activate
+                                            parents.parent_item_id,								-- children (lt_active_children) and select the correct activate state depending
+                                            (													-- on this
+                                                case when 		children_cnts.active_cnt = 0 	-- a parent item MUST be set inactive if it has 0 active children
+															and children_cnts.cnt > 0			-- if an item has no children at all, the active state should not be changed (otherwise
+													then 0										-- deleting the last child item of an assembly would disable the former assembly)
+                                                else 1 end										
+                                            ) as is_active
+                                    from    :lt_parents as parents
+                                        inner join :lt_children_counts as children_cnts
+                                            on  parents.item_id = children_cnts.item_id;
+    
+    lt_items_to_update =    select  touched_items.item_id,
+                                    touched_items.parent_item_id,
+                                    touched_items.is_active
+                            from    :lt_determined_active_state as touched_items
+                                inner join :lt_item_temporary as db
+                                    on   touched_items.item_id = db.item_id
+                                    and  ifnull(touched_items.parent_item_id, -1) = ifnull(db.parent_item_id, -1)       -- ATTENTION: the comparison with ifnull is correct because parent_item_id could be null; 
+                            where touched_items.is_active <> db.is_active												--			  -1 is safe since id >= 0
+
+                            union	-- changed UNION ALL to UNION to eliminate duplicates. Performance is reduced when using UNION (values are selected distinct)
+                            		-- However, in case of huge calculation version, thousands of items, with multiple levels in tree, lt_items_to_update doubles size
+                            		-- every time a loop is made. Also any join with this local variable is now faster because number of records is decresed
+                            
+                            select  item_id,
+                                    parent_item_id,
+                                    is_active
+                            from    :lt_items_to_update;
+
+    lt_parents =    select   db.item_id,
+                             db.parent_item_id
+                    from :lt_parents as current_parents
+                         inner join :lt_item_temporary as db
+                             on 	current_parents.parent_item_id = db.item_id
+							 	and db.is_deleted = 0;									-- filter out parents if already deleted; should not be contained in the result set
+																						-- not sure if it's needed; this a precaution here, since it shouldn't hurt
+    select count(*) into parent_counter from :lt_parents;    
+end while; 	
+
+-- finally after determining all children and parents of the input set of items, update the activate state of all them in t_item_temporary; note: due to the use of union all the update 
+-- of some items could be executed multiple times; the performance impact is considered to be negligible 
+update  "sap.plc.db::basis.t_item_temporary" as db
+    set db.is_active =  items_to_update.is_active, db.is_dirty = 1
+    from    "sap.plc.db::basis.t_item_temporary" as db, 
+            :lt_items_to_update as items_to_update
+    where       db.item_id = items_to_update.item_id
+            and db.calculation_version_id = :iv_calculation_version_id
+            and db.session_id = :iv_session_id;
+
+-- finally prepare the output of the procedure; note that the distinct is necessary, since the output structure could include the same items multiple times due to the use of "union all" in the code above			
+item_ids_updated =  select item_id
+                    from :lt_items_to_update; 
+END;

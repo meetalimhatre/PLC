@@ -1,0 +1,1373 @@
+{
+  "xsappname": "xsac-plc",
+  "tenant-mode": "shared",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Callback",
+      "description": "With this scope, the callbacks from the SaaS Provisioning service (formerly known as tenant-onboarding): onboarding, offboarding and getDependencies can be called.",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,sap-provisioning,tenant-onboarding)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.ApiDocR",
+      "description": "Read access for the swagger api documentation"
+    },
+    {
+      "name": "$XSAPPNAME.AnalyticsViewer",
+      "description": "Read all calculation views"
+    },
+    {
+      "name": "$XSAPPNAME.Base",
+      "description": "Basic access for init-session and ping"
+    },
+    {
+      "name": "$XSAPPNAME.CalcVerOpen",
+      "description": "Read all calculation versions, i.e. open them"
+    },
+    {
+      "name": "$XSAPPNAME.CFAdmE",
+      "description": "Modify tenant information, create HDI, deploy artifacts, run post-install. Is intended for operators and not grantable to customers"
+    },
+    {
+      "name": "$XSAPPNAME.MdrLogs",
+      "description": "Read master data replication logs table"
+    },
+    {
+      "name": "$XSAPPNAME.MdrStatistics",
+      "description": "Read master data replication statistics table"
+    },
+    {
+      "name": "$XSAPPNAME.Repl",
+      "description": "configure replication tool"
+    },
+    {
+      "name": "$XSAPPNAME.Sched",
+      "description": "configure internal scheduling tool"
+    },
+    {
+        "name": "$XSAPPNAME.RetPeriodsR",
+        "description": "read retention periods for user, customer, vendor, project"
+    },
+    {
+        "name": "$XSAPPNAME.RetPeriodsE",
+        "description": "create, update and delete retention periods for user, customer, vendor, project"
+    }
+  ],
+  "foreign-scope-references": [
+    "$ACCEPT_GRANTED_SCOPES"
+  ],
+  "authorities": [
+    "$ACCEPT_GRANTED_AUTHORITIES",
+    "$XSAPPNAME.CFAdmE"
+  ],
+  "role-templates": [
+    {
+      "name": "ApiDocRead_RT",
+      "scope-references": [
+        "$XSAPPNAME.ApiDocR"
+      ]
+    },
+    {
+      "name": "AcctEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctE"
+      ]
+    },
+    {
+      "name": "AcctGrpEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpE"
+      ]
+    },
+    {
+      "name": "AcctGrpRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpR"
+      ]
+    },
+    {
+      "name": "AcctRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR"
+      ]
+    },
+    {
+      "name": "ActPriceEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceE"
+      ]
+    },
+    {
+      "name": "ActPriceRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceR"
+      ]
+    },
+    {
+      "name": "ActTypeEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeE"
+      ]
+    },
+    {
+      "name": "ActTypeRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR"
+      ]
+    },
+    {
+      "name": "AddinEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinE"
+      ]
+    },
+    {
+      "name": "AddinReadActiv_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv"
+      ]
+    },
+    {
+      "name": "AddinReadAll_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRAll"
+      ]
+    },
+    {
+      "name": "Base_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "BizAreaEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaE"
+      ]
+    },
+    {
+      "name": "BizAreaRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR"
+      ]
+    },
+    {
+      "name": "ProcEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcE"
+      ]
+    },
+    {
+      "name": "ProcRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR"
+      ]
+    },
+    {
+      "name": "CalcVerCreateUpdt_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerCU"
+      ]
+    },
+    {
+      "name": "CalcVerDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerD"
+      ]
+    },
+    {
+      "name": "CalcVerFreeze_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerFreeze"
+      ]
+    },
+    {
+      "name": "CalcVerOpen_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerOpen",
+        "$XSAPPNAME.CalcVerOpen"
+      ]
+    },
+    {
+      "name": "CalcCreateUpdt_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcCU"
+      ]
+    },
+    {
+      "name": "CalcDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcD"
+      ]
+    },
+    {
+      "name": "CalcRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcR"
+      ]
+    },
+    {
+      "name": "CompanyCodeEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeE"
+      ]
+    },
+    {
+      "name": "CompanyCodeRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR"
+      ]
+    },
+    {
+      "name": "CompoSplitEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitE"
+      ]
+    },
+    {
+      "name": "CompoSplitRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR"
+      ]
+    },
+    {
+      "name": "ConfLevelRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR"
+      ]
+    },
+    {
+      "name": "CAEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CAE"
+      ]
+    },
+    {
+      "name": "CARead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR"
+      ]
+    },
+    {
+      "name": "CorpLayoutEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CorpLayoutE"
+      ]
+    },
+    {
+      "name": "CostCenterEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterE"
+      ]
+    },
+    {
+      "name": "CostCenterRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR"
+      ]
+    },
+    {
+      "name": "CostingSheetEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetE"
+      ]
+    },
+    {
+      "name": "CostingSheetRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR"
+      ]
+    },
+    {
+      "name": "CurrencyCnvEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvE"
+      ]
+    },
+    {
+      "name": "CurrencyCnvRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvR"
+      ]
+    },
+    {
+      "name": "CurrencyEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyE"
+      ]
+    },
+    {
+      "name": "CFFCreateUpdt_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CFFCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR"
+      ]
+    },
+    {
+      "name": "CustEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CustE"
+      ]
+    },
+    {
+      "name": "CustRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR"
+      ]
+    },
+    {
+      "name": "DocEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).DocE"
+      ]
+    },
+    {
+      "name": "DocRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).DocR"
+      ]
+    },
+    {
+      "name": "DocStatusRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).DocStatusR"
+      ]
+    },
+    {
+      "name": "DocTypeEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeE"
+      ]
+    },
+    {
+      "name": "DocTypeRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeR"
+      ]
+    },
+    {
+      "name": "ExcgRateTypeEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeE"
+      ]
+    },
+    {
+      "name": "ExcgRateTypeRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR"
+      ]
+    },
+    {
+      "name": "FrontendSetCorpEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).FrontendSetCorpE"
+      ]
+    },
+    {
+      "name": "GlobalDfltSetEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).GlobalDfltSetE"
+      ]
+    },
+    {
+      "name": "GrpEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).GrpE"
+      ]
+    },
+    {
+      "name": "GrpRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).GrpR"
+      ]
+    },
+    {
+      "name": "HideAdminView_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).HdAdmV"
+      ]
+    },
+    {
+      "name": "LangEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).LangE"
+      ]
+    },
+    {
+      "name": "MatAcctDetEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetE"
+      ]
+    },
+    {
+      "name": "MatAcctDetRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetR"
+      ]
+    },
+    {
+      "name": "MatlEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlE"
+      ]
+    },
+    {
+      "name": "MatlGrpEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpE"
+      ]
+    },
+    {
+      "name": "MatlGrpRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR"
+      ]
+    },
+    {
+      "name": "MatlPlantEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantE"
+      ]
+    },
+    {
+      "name": "MatlPlantRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantR"
+      ]
+    },
+    {
+      "name": "MatlPriceEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceE"
+      ]
+    },
+    {
+      "name": "MatlPriceRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceR"
+      ]
+    },
+    {
+      "name": "MatlRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR"
+      ]
+    },
+    {
+      "name": "MatlTypeEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeE"
+      ]
+    },
+    {
+      "name": "MatlTypeRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR"
+      ]
+    },
+    {
+      "name": "OvhdGrpEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpE"
+      ]
+    },
+    {
+      "name": "OvhdGrpRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR"
+      ]
+    },
+    {
+      "name": "PersonalDataRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PersonalDataR"
+      ]
+    },
+    {
+      "name": "PersonalDataDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PersonalDataD"
+      ]
+    },
+    {
+      "name": "PlantEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantE"
+      ]
+    },
+    {
+      "name": "PlantRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR"
+      ]
+    },
+    {
+      "name": "PriceSrcRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR"
+      ]
+    },
+    {
+      "name": "PriceSrcEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcE"
+      ]
+    },
+    {
+      "name": "PriceSrcDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcD"
+      ]
+    },
+    {
+      "name": "StatusRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR"
+      ]
+    },
+    {
+      "name": "StatusEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusE"
+      ]
+    },
+    {
+      "name": "TagRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TagR"
+      ]
+    },
+    {
+      "name": "TagEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TagC"
+      ]
+    },
+    {
+      "name": "TagDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TagD"
+      ]
+    },
+    {
+      "name": "PriceDetStratRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR"
+      ]
+    },
+    {
+      "name": "PriceDetStratEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratE"
+      ]
+    },
+    {
+      "name": "PriceDetStratDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratD"
+      ]
+    },
+    {
+      "name": "ProfitCenterEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterE"
+      ]
+    },
+    {
+      "name": "ProfitCenterRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR"
+      ]
+    },
+    {
+      "name": "PrjCreate_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjC",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR"
+      ]
+    },
+    {
+      "name": "PrjUpdt_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjU"
+      ]
+    },
+    {
+      "name": "PrjDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjD"
+      ]
+    },
+    {
+      "name": "PrjOpen_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen"
+      ]
+    },
+    {
+      "name": "PrjRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR"
+      ]
+    },
+    {
+      "name": "FldRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR"
+      ]
+    },
+    {
+      "name": "FldDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).FldD"
+      ]
+    },
+    {
+      "name": "FldEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).FldE"
+      ]
+    },
+    {
+      "name": "SalesOrgEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgE"
+      ]
+    },
+    {
+      "name": "SalesOrgRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgR"
+      ]
+    },
+    {
+      "name": "TasksRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR"
+      ]
+    },
+    {
+      "name": "TransExp_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TransExp"
+      ]
+    },
+    {
+      "name": "TransImp_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TransImp"
+      ]
+    },
+    {
+      "name": "UOMEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).UOME"
+      ]
+    },
+    {
+      "name": "UserDfltSetEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE"
+      ]
+    },
+    {
+      "name": "UsersRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).UsersR"
+      ]
+    },
+    {
+      "name": "ValuationClsEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsE"
+      ]
+    },
+    {
+      "name": "ValuationClsRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR"
+      ]
+    },
+    {
+      "name": "VendorEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorE"
+      ]
+    },
+    {
+      "name": "VendorRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR"
+      ]
+    },
+    {
+      "name": "WorkCenterEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterE"
+      ]
+    },
+    {
+      "name": "WorkCenterRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterR"
+      ]
+    },
+    {
+      "name": "Generators_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).Generators"
+      ]
+    },
+    {
+      "name": "AddinAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinE",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRAll",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AddinUser_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminCostingAndAnalysisAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctE",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsE",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminCostingAndAnalysisViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminFinanceAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminFinanceViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminGlobalSetAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyE",
+        "$XSAPPNAME(broker,xsac-plc-broker).LangE",
+        "$XSAPPNAME(broker,xsac-plc-broker).UOME",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).GlobalDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CorpLayoutE",
+        "$XSAPPNAME(broker,xsac-plc-broker).GrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).GrpE",
+        "$XSAPPNAME(broker,xsac-plc-broker).UsersR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatE",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminGlobalSetViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminLogisticsAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CustE",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocE",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantE",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorE",
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcE",
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocStatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminLogisticsViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocStatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminPricesAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceE",
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcD",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusE",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratD",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeE",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AdminPricesViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "AnalyticsViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).AnalyticsViewer",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME.AnalyticsViewer",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "BaseViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "CalcVerViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base",
+        "$XSAPPNAME.CalcVerOpen"
+      ]
+    },
+    {
+      "name": "CalcViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "Contributor_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjC",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerFreeze",
+        "$XSAPPNAME(broker,xsac-plc-broker).UsersR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagR",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagC",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagD",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocStatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvR",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base",
+        "$XSAPPNAME.CalcVerOpen"
+      ]
+    },
+    {
+      "name": "Controller_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjD",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcD",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerD",
+        "$XSAPPNAME(broker,xsac-plc-broker).CorpLayoutE",
+        "$XSAPPNAME(broker,xsac-plc-broker).FrontendSetCorpE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjC",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerFreeze",
+        "$XSAPPNAME(broker,xsac-plc-broker).UsersR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcVerOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagR",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagC",
+        "$XSAPPNAME(broker,xsac-plc-broker).TagD",
+        "$XSAPPNAME(broker,xsac-plc-broker).CalcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AcctGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompoSplitR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostingSheetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatAcctDetR",
+        "$XSAPPNAME(broker,xsac-plc-broker).OvhdGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ValuationClsR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CAR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CompanyCodeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).BizAreaR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ProfitCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CostCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ExcgRateTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CustR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocTypeR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlGrpR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPlantR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlR",
+        "$XSAPPNAME(broker,xsac-plc-broker).VendorR",
+        "$XSAPPNAME(broker,xsac-plc-broker).WorkCenterR",
+        "$XSAPPNAME(broker,xsac-plc-broker).SalesOrgR",
+        "$XSAPPNAME(broker,xsac-plc-broker).DocStatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).MatlPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ActPriceR",
+        "$XSAPPNAME(broker,xsac-plc-broker).CurrencyCnvR",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldD",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldE",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base",
+        "$XSAPPNAME.CalcVerOpen"
+      ]
+    },
+    {
+      "name": "CFFAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).CFFCU",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "DataProtectionOfficerRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PersonalDataR",
+        "$XSAPPNAME(broker,xsac-plc-broker).RetPeriodsR",
+        "$XSAPPNAME.RetPeriodsR"
+      ]
+    },
+    {
+      "name": "DataProtectionOfficerDel_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PersonalDataD",
+        "$XSAPPNAME(broker,xsac-plc-broker).RetPeriodsE",
+        "$XSAPPNAME.RetPeriodsE"
+      ]
+    },
+    {
+      "name": "RetentionPeriodsRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).RetPeriodsR",
+        "$XSAPPNAME.RetPeriodsR"
+      ]
+  },
+  {
+      "name": "RetentionPeriodsEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).RetPeriodsE",
+        "$XSAPPNAME.RetPeriodsE"
+      ]
+  },
+    {
+      "name": "PrjViewer_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjOpen",
+        "$XSAPPNAME(broker,xsac-plc-broker).PrjR",
+        "$XSAPPNAME(broker,xsac-plc-broker).Base",
+        "$XSAPPNAME(broker,xsac-plc-broker).StatusR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR",
+        "$XSAPPNAME(broker,xsac-plc-broker).UserDfltSetE",
+        "$XSAPPNAME(broker,xsac-plc-broker).TasksR",
+        "$XSAPPNAME(broker,xsac-plc-broker).ConfLevelR",
+        "$XSAPPNAME(broker,xsac-plc-broker).AddinRActiv",
+        "$XSAPPNAME(broker,xsac-plc-broker).FldR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceSrcR",
+        "$XSAPPNAME(broker,xsac-plc-broker).PriceDetStratR",
+        "$XSAPPNAME.Base"
+      ]
+    },
+    {
+      "name": "TransAdministrator_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).TransImp",
+        "$XSAPPNAME(broker,xsac-plc-broker).TransExp"
+      ]
+    },
+    {
+      "name": "MdrLogs_RT",
+      "scope-references": [
+        "$XSAPPNAME.MdrLogs"
+      ]
+    },
+    {
+      "name": "MdrStatistics_RT",
+      "scope-references": [
+        "$XSAPPNAME.MdrStatistics"
+      ]
+    },
+    {
+      "name": "Replication_RT",
+      "scope-references": [
+        "$XSAPPNAME.Repl"
+      ]
+    },
+    {
+      "name": "Scheduler_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).Sched",
+        "$XSAPPNAME.Sched"
+      ]
+    },
+    {
+      "name": "ActiveUsers_RT",
+      "description": "Role Template for reading the number of active users per month",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ActUsers"
+      ]
+    },
+    {
+      "name": "ItemCatRead_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatR"
+      ]
+    },
+    {
+      "name": "ItemCatEdit_RT",
+      "scope-references": [
+        "$XSAPPNAME(broker,xsac-plc-broker).ItemCatE"
+      ]
+    }
+  ],
+  "xsenableasyncservice":"true"
+}

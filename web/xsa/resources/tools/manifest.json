@@ -1,0 +1,86 @@
+{
+    "_version": "3.0.0",
+
+    "sap.app": {
+        "_version": "3.0.0",
+        "id": "plc",
+        "type": "application",
+        "applicationVersion": {
+            "version": "3.0.0"
+        }
+    },
+
+    "sap.ui": {
+        "_version": "3.0.0",
+        "technology": "UI5"
+    },
+
+    "sap.ui5": {
+        "rootView": {
+            "type": "XML",
+            "viewName": "ui.view.App"
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "css/style.css"
+                }
+            ]
+        },
+        "dependencies": {
+            "minUI5Version": "1.73",
+			"libs": {
+                "sap.m": {},
+                "sap.f": {}
+			}
+		},
+        "routing": {
+            "config": {
+               "routerClass": "sap.m.routing.Router",
+               "viewType": "XML",
+               "viewPath": "ui.view",
+               "controlId": "rootControl",
+               "controlAggregation":"pages",
+               "transition": "slide",
+               "clearTarget": true,
+               "async": true
+            },
+            "routes": [{
+                "pattern": "",
+                "name": "launchpad",
+                "target": "launchpad" 
+            },
+            {
+                "pattern": "freshInstall",
+                "name": "freshInstall",
+                "target":"freshInstall"
+            },{
+                "pattern": "preUpgrade",
+                "name": "preUpgrade",
+                "target":"preUpgrade" 
+            },{
+                "pattern": "upgrade",
+                "name": "upgrade",
+                "target": "upgrade"
+            }],
+            "targets": {
+                "launchpad":{
+                    "viewId": "launchpad",
+                    "viewName": "Launchpad"
+                },
+				"freshInstall": {
+					"viewId": "freshInstall",
+					"viewName": "FreshInstallation"
+                },
+                "preUpgrade":{
+                    "viewId": "preUpgrade",
+                    "viewName": "PrepareForUpgrade"
+                },
+                "upgrade":{
+                    "viewId": "upgrade",
+                    "viewName": "Upgrade"
+                }
+            }
+        }
+    }
+}

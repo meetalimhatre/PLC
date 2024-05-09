@@ -1,0 +1,122 @@
+<mvc:View controllerName="mdr.ui.controller.LogView"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable" displayBlock="true" height="100%">
+	<Page title="{i18n>XTIT_logsTitle}">
+		<content>
+			<VBox id="vboxMenuLogs" class="sapUiNoMargin">
+				<items>
+					<VBox id="vboxError"/>
+					<VBox id="vboxLogs" fitContainer="true">
+						<smartFilterBar:SmartFilterBar id="sfbLogs" initialized=".onSmartFilterBarInitialized('stLogs')" useToolbar="false" considerSelectionVariants="false">
+							<smartFilterBar:groupConfiguration>
+								<smartFilterBar:GroupConfiguration key="LogsOdata" label="{i18n>XTOL_logsOdataText}"/>
+							</smartFilterBar:groupConfiguration>
+							<smartFilterBar:controlConfiguration>
+								<smartFilterBar:ControlConfiguration key="MESSAGE_TIME" visibleInAdvancedArea="true" conditionType="sap.ui.comp.config.condition.DateRangeType" label="{i18n>XFLD_messageTime}"/>
+								<smartFilterBar:ControlConfiguration key="FIELD_NAME" visibleInAdvancedArea="false" label="{i18n>XFLD_fieldName}"/>
+								<smartFilterBar:ControlConfiguration key="FIELD_VALUE" visibleInAdvancedArea="false" label="{i18n>XFLD_fieldValue}"/>
+								<smartFilterBar:ControlConfiguration key="MESSAGE_TEXT" visibleInAdvancedArea="false" label="{i18n>XFLD_messageText}"/>
+								<smartFilterBar:ControlConfiguration key="MESSAGE_TYPE" visibleInAdvancedArea="false" label="{i18n>XFLD_messageType}"/>
+								<smartFilterBar:ControlConfiguration key="TABLE_NAME" visibleInAdvancedArea="false" label="{i18n>XFLD_tableName}"/>
+								<smartFilterBar:ControlConfiguration key="OPERATION" visibleInAdvancedArea="false" label="{i18n>XFLD_operation}"/>
+								<smartFilterBar:ControlConfiguration key="RUN_ID" visibleInAdvancedArea="false" label="{i18n>XFLD_runId}"/>
+							</smartFilterBar:controlConfiguration>
+							<smartFilterBar:layoutData>
+								<FlexItemData shrinkFactor="0"/>
+							</smartFilterBar:layoutData>
+						</smartFilterBar:SmartFilterBar>
+						<smartTable:SmartTable id="stLogs" smartFilterId="sfbLogs" tableType="ResponsiveTable" useTablePersonalisation="true" showTablePersonalisation="true" noData="{i18n>XMSG_noLogData}" useVariantManagement="false" header="{i18n>XTIT_numberOfEntries}" showRowCount="false" useExportToExcel="true" beforeRebindTable="onBeforeRebindSmartTable">
+							<smartTable:layoutData>
+								<FlexItemData growFactor="1" baseSize="0%"/>
+							</smartTable:layoutData>
+							<smartTable:customToolbar>
+								<OverflowToolbar design="Transparent">
+									<ToolbarSpacer/>
+									<Button id="btnSeeAllEntries" icon="sap-icon://reset" text="{i18n>XBUT_btnSeeAllEntries}" visible="false" press=".onSeeAllEntries('Logs')"/>
+								</OverflowToolbar>
+							</smartTable:customToolbar>
+							<Table id="tLogs" growing="true">
+								<columns>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "GenID", "columnIndex": "1", "leadingProperty": "GenID", "sortProperty": "GenID", "filterProperty" : "GenID", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XTIT_logId}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "TABLE_NAME", "columnIndex": "2", "leadingProperty": "TABLE_NAME", "sortProperty": "TABLE_NAME", "filterProperty" : "TABLE_NAME", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_tableName}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "MESSAGE_TIME", "columnIndex": "3", "leadingProperty": "MESSAGE_TIME", "sortProperty": "MESSAGE_TIME", "filterProperty" : "MESSAGE_TIME","type":"date"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_messageTime}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "FIELD_NAME", "columnIndex": "4", "leadingProperty": "FIELD_NAME", "sortProperty": "FIELD_NAME", "filterProperty" : "FIELD_NAME", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_fieldName}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "FIELD_VALUE", "columnIndex": "5", "leadingProperty": "FIELD_VALUE", "sortProperty": "FIELD_VALUE", "filterProperty" : "FIELD_VALUE", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_fieldValue}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "MESSAGE_TEXT", "columnIndex": "6", "leadingProperty": "MESSAGE_TEXT", "sortProperty": "MESSAGE_TEXT", "filterProperty" : "MESSAGE_TEXT", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_messageText}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "MESSAGE_TYPE", "columnIndex": "7", "leadingProperty": "MESSAGE_TYPE", "sortProperty": "MESSAGE_TYPE", "filterProperty" : "MESSAGE_TYPE","type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_messageType}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "OPERATION", "columnIndex": "8", "leadingProperty": "OPERATION", "sortProperty": "OPERATION", "filterProperty" : "OPERATION", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_operation}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "RUN_ID", "columnIndex": "9", "leadingProperty": "RUN_ID", "sortProperty": "RUN_ID", "filterProperty" : "RUN_ID", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_runId}"/>
+									</Column>
+								</columns>
+								<ColumnListItem highlight="{path:'MESSAGE_TYPE',formatter:'.formatRowHighlight'}">
+									<cells>
+										<Text text="{GenID}"/>
+										<Text text="{TABLE_NAME}"/>
+										<Text text="{MESSAGE_TIME}"/>
+										<Text text="{FIELD_NAME}"/>
+										<Text text="{FIELD_VALUE}"/>
+										<Text text="{MESSAGE_TEXT}"/>
+										<Text text="{MESSAGE_TYPE}"/>
+										<Text text="{OPERATION}"/>
+										<Text text="{RUN_ID}"/>
+									</cells>
+								</ColumnListItem>
+							</Table>
+						</smartTable:SmartTable>
+					</VBox>
+				</items>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

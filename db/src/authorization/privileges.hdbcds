@@ -1,0 +1,619 @@
+namespace sap.plc.db.authorization;
+using sap.plc.db::basis as basis;
+using sap.plc.db::auth as auth;
+
+context privileges
+{
+
+    view v_project_read as select from 
+    auth.t_auth_project as auth 
+    inner join basis.t_project as project 
+    on auth.PROJECT_ID = project.PROJECT_ID 
+    {
+        auth.USER_ID,
+
+        //all columns from t_project
+        project.PROJECT_ID,
+        project.REFERENCE_PROJECT_ID,
+        project.PROJECT_NAME,
+        project.PROJECT_RESPONSIBLE,
+        project.CONTROLLING_AREA_ID,
+        project.CUSTOMER_ID,
+        project.SALES_DOCUMENT,
+        project.SALES_PRICE,
+        project.SALES_PRICE_CURRENCY_ID,
+        project.COMMENT,
+        project.COMPANY_CODE_ID,
+        project.PLANT_ID,
+        project.BUSINESS_AREA_ID,
+        project.PROFIT_CENTER_ID,
+        project.REPORT_CURRENCY_ID,
+        project.COSTING_SHEET_ID,
+        project.COMPONENT_SPLIT_ID,
+        project.START_OF_PROJECT,
+        project.END_OF_PROJECT,
+        project.START_OF_PRODUCTION,
+        project.END_OF_PRODUCTION,
+        project.VALUATION_DATE,
+        project.LIFECYCLE_VALUATION_DATE,
+        project.LIFECYCLE_PERIOD_INTERVAL,
+        project.CREATED_ON,
+        project.CREATED_BY,
+        project.LAST_MODIFIED_ON,
+        project.LAST_MODIFIED_BY,
+        project.EXCHANGE_RATE_TYPE_ID,
+		project.ENTITY_ID,
+        project.MATERIAL_PRICE_STRATEGY_ID, 
+        project.ACTIVITY_PRICE_STRATEGY_ID
+    };
+
+    view v_project_create_edit as select from
+    auth.t_auth_project as auth
+    inner join basis.t_project as project
+    on auth.PROJECT_ID = project.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_project
+        project.PROJECT_ID,
+        project.REFERENCE_PROJECT_ID,
+        project.PROJECT_NAME,
+        project.PROJECT_RESPONSIBLE,
+        project.CONTROLLING_AREA_ID,
+        project.CUSTOMER_ID,
+        project.SALES_DOCUMENT,
+        project.SALES_PRICE,
+        project.SALES_PRICE_CURRENCY_ID,
+        project.COMMENT,
+        project.COMPANY_CODE_ID,
+        project.PLANT_ID,
+        project.BUSINESS_AREA_ID,
+        project.PROFIT_CENTER_ID,
+        project.REPORT_CURRENCY_ID,
+        project.COSTING_SHEET_ID,
+        project.COMPONENT_SPLIT_ID,
+        project.START_OF_PROJECT,
+        project.END_OF_PROJECT,
+        project.START_OF_PRODUCTION,
+        project.END_OF_PRODUCTION,
+        project.VALUATION_DATE,
+        project.LIFECYCLE_VALUATION_DATE,
+        project.LIFECYCLE_PERIOD_INTERVAL,
+        project.CREATED_ON,
+        project.CREATED_BY,
+        project.LAST_MODIFIED_ON,
+        project.LAST_MODIFIED_BY,
+        project.EXCHANGE_RATE_TYPE_ID,
+		project.ENTITY_ID,
+        project.MATERIAL_PRICE_STRATEGY_ID,
+        project.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('CREATE_EDIT', 'FULL_EDIT', 'ADMINISTRATE');
+
+    view v_project_full_edit as select from
+    auth.t_auth_project as auth
+    inner join basis.t_project as project
+    on auth.PROJECT_ID = project.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_project
+        project.PROJECT_ID,
+        project.REFERENCE_PROJECT_ID,
+        project.PROJECT_NAME,
+        project.PROJECT_RESPONSIBLE,
+        project.CONTROLLING_AREA_ID,
+        project.CUSTOMER_ID,
+        project.SALES_DOCUMENT,
+        project.SALES_PRICE,
+        project.SALES_PRICE_CURRENCY_ID,
+        project.COMMENT,
+        project.COMPANY_CODE_ID,
+        project.PLANT_ID,
+        project.BUSINESS_AREA_ID,
+        project.PROFIT_CENTER_ID,
+        project.REPORT_CURRENCY_ID,
+        project.COSTING_SHEET_ID,
+        project.COMPONENT_SPLIT_ID,
+        project.START_OF_PROJECT,
+        project.END_OF_PROJECT,
+        project.START_OF_PRODUCTION,
+        project.END_OF_PRODUCTION,
+        project.VALUATION_DATE,
+        project.LIFECYCLE_VALUATION_DATE,
+        project.LIFECYCLE_PERIOD_INTERVAL,
+        project.CREATED_ON,
+        project.CREATED_BY,
+        project.LAST_MODIFIED_ON,
+        project.LAST_MODIFIED_BY,
+        project.EXCHANGE_RATE_TYPE_ID,
+		project.ENTITY_ID,
+        project.MATERIAL_PRICE_STRATEGY_ID,
+        project.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('FULL_EDIT', 'ADMINISTRATE');
+
+    view v_project_administrate as select from
+    auth.t_auth_project as auth
+    inner join basis.t_project as project
+    on auth.PROJECT_ID = project.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_project
+        project.PROJECT_ID,
+        project.REFERENCE_PROJECT_ID,
+        project.PROJECT_NAME,
+        project.PROJECT_RESPONSIBLE,
+        project.CONTROLLING_AREA_ID,
+        project.CUSTOMER_ID,
+        project.SALES_DOCUMENT,
+        project.SALES_PRICE,
+        project.SALES_PRICE_CURRENCY_ID,
+        project.COMMENT,
+        project.COMPANY_CODE_ID,
+        project.PLANT_ID,
+        project.BUSINESS_AREA_ID,
+        project.PROFIT_CENTER_ID,
+        project.REPORT_CURRENCY_ID,
+        project.COSTING_SHEET_ID,
+        project.COMPONENT_SPLIT_ID,
+        project.START_OF_PROJECT,
+        project.END_OF_PROJECT,
+        project.START_OF_PRODUCTION,
+        project.END_OF_PRODUCTION,
+        project.VALUATION_DATE,
+        project.LIFECYCLE_VALUATION_DATE,
+        project.LIFECYCLE_PERIOD_INTERVAL,
+        project.CREATED_ON,
+        project.CREATED_BY,
+        project.LAST_MODIFIED_ON,
+        project.LAST_MODIFIED_BY,
+        project.EXCHANGE_RATE_TYPE_ID,
+		project.ENTITY_ID,
+        project.MATERIAL_PRICE_STRATEGY_ID,
+        project.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('ADMINISTRATE');
+
+    view v_calculation_read as select from 
+    auth.t_auth_project as auth 
+    inner join 
+    basis.t_calculation as calculation 
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_calculation
+        calculation.CALCULATION_ID,
+        calculation.PROJECT_ID,
+        calculation.CALCULATION_NAME,
+        calculation.CURRENT_CALCULATION_VERSION_ID,
+        calculation.CREATED_ON,
+        calculation.CREATED_BY,
+        calculation.LAST_MODIFIED_ON,
+        calculation.LAST_MODIFIED_BY
+    };
+
+    view v_calculation_create_edit as select from
+    auth.t_auth_project as auth
+    inner join
+    basis.t_calculation as calculation
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_calculation
+        calculation.CALCULATION_ID,
+        calculation.PROJECT_ID,
+        calculation.CALCULATION_NAME,
+        calculation.CURRENT_CALCULATION_VERSION_ID,
+        calculation.CREATED_ON,
+        calculation.CREATED_BY,
+        calculation.LAST_MODIFIED_ON,
+        calculation.LAST_MODIFIED_BY
+    }
+    where auth.PRIVILEGE in ('CREATE_EDIT', 'FULL_EDIT', 'ADMINISTRATE');
+
+    view v_calculation_full_edit as select from
+    auth.t_auth_project as auth
+    inner join
+    basis.t_calculation as calculation
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_calculation
+        calculation.CALCULATION_ID,
+        calculation.PROJECT_ID,
+        calculation.CALCULATION_NAME,
+        calculation.CURRENT_CALCULATION_VERSION_ID,
+        calculation.CREATED_ON,
+        calculation.CREATED_BY,
+        calculation.LAST_MODIFIED_ON,
+        calculation.LAST_MODIFIED_BY
+    }
+    where auth.PRIVILEGE in ('FULL_EDIT', 'ADMINISTRATE');
+
+    view v_calculation_administrate as select from
+    auth.t_auth_project as auth
+    inner join
+    basis.t_calculation as calculation
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+
+        //all columns from t_calculation
+        calculation.CALCULATION_ID,
+        calculation.PROJECT_ID,
+        calculation.CALCULATION_NAME,
+        calculation.CURRENT_CALCULATION_VERSION_ID,
+        calculation.CREATED_ON,
+        calculation.CREATED_BY,
+        calculation.LAST_MODIFIED_ON,
+        calculation.LAST_MODIFIED_BY
+    }
+    where auth.PRIVILEGE in ('ADMINISTRATE');
+
+    view v_calculation_version_read as select from 
+    auth.t_auth_project as auth 
+    inner join
+    (
+        basis.t_calculation as calculation 
+        inner join  
+        basis.t_calculation_version as calculation_version 
+        on calculation.CALCULATION_ID = calculation_version.CALCULATION_ID
+    )
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+        calculation.PROJECT_ID,
+
+        //all columns from t_calculation_version
+        calculation_version.CALCULATION_VERSION_ID,
+        calculation_version.CALCULATION_ID,
+        calculation_version.CALCULATION_VERSION_NAME,
+        calculation_version.STATUS_ID,
+        calculation_version.CALCULATION_VERSION_TYPE,
+        calculation_version.ROOT_ITEM_ID,
+        calculation_version.CUSTOMER_ID,
+        calculation_version.SALES_DOCUMENT,
+        calculation_version.SALES_PRICE,
+        calculation_version.SALES_PRICE_CURRENCY_ID,
+        calculation_version.REPORT_CURRENCY_ID,
+        calculation_version.COSTING_SHEET_ID,
+        calculation_version.COMPONENT_SPLIT_ID,
+        calculation_version.START_OF_PRODUCTION,
+        calculation_version.END_OF_PRODUCTION,
+        calculation_version.VALUATION_DATE,
+        calculation_version.LAST_MODIFIED_ON,
+        calculation_version.LAST_MODIFIED_BY,
+        calculation_version.MASTER_DATA_TIMESTAMP,
+        calculation_version.LIFECYCLE_PERIOD_FROM,
+        calculation_version.BASE_VERSION_ID,
+        calculation_version.IS_FROZEN,
+        calculation_version.VARIANT_ID,
+        calculation_version.EXCHANGE_RATE_TYPE_ID,
+        calculation_version.MATERIAL_PRICE_STRATEGY_ID,
+        calculation_version.ACTIVITY_PRICE_STRATEGY_ID
+    };
+
+    view v_calculation_version_create_edit as select from
+    auth.t_auth_project as auth
+    inner join
+    (
+        basis.t_calculation as calculation
+        inner join
+        (
+            select from basis.t_calculation_version as cv
+            {
+                //all columns from t_calculation_version
+                cv.CALCULATION_VERSION_ID,
+                cv.CALCULATION_ID,
+                cv.CALCULATION_VERSION_NAME,
+                cv.STATUS_ID,
+                cv.CALCULATION_VERSION_TYPE,
+                cv.ROOT_ITEM_ID,
+                cv.CUSTOMER_ID,
+                cv.SALES_DOCUMENT,
+                cv.SALES_PRICE,
+                cv.SALES_PRICE_CURRENCY_ID,
+                cv.REPORT_CURRENCY_ID,
+                cv.COSTING_SHEET_ID,
+                cv.COMPONENT_SPLIT_ID,
+                cv.START_OF_PRODUCTION,
+                cv.END_OF_PRODUCTION,
+                cv.VALUATION_DATE,
+                cv.LAST_MODIFIED_ON,
+                cv.LAST_MODIFIED_BY,
+                cv.MASTER_DATA_TIMESTAMP,
+                cv.LIFECYCLE_PERIOD_FROM,
+                cv.BASE_VERSION_ID,
+                cv.IS_FROZEN,
+                cv.VARIANT_ID,
+                cv.EXCHANGE_RATE_TYPE_ID,
+                cv.MATERIAL_PRICE_STRATEGY_ID,
+                cv.ACTIVITY_PRICE_STRATEGY_ID
+            }
+            union
+            select from basis.t_calculation_version_temporary as cvt
+            {
+                //all columns from t_calculation_version
+                cvt.CALCULATION_VERSION_ID,
+                cvt.CALCULATION_ID,
+                cvt.CALCULATION_VERSION_NAME,
+                cvt.STATUS_ID,
+                cvt.CALCULATION_VERSION_TYPE,
+                cvt.ROOT_ITEM_ID,
+                cvt.CUSTOMER_ID,
+                cvt.SALES_DOCUMENT,
+                cvt.SALES_PRICE,
+                cvt.SALES_PRICE_CURRENCY_ID,
+                cvt.REPORT_CURRENCY_ID,
+                cvt.COSTING_SHEET_ID,
+                cvt.COMPONENT_SPLIT_ID,
+                cvt.START_OF_PRODUCTION,
+                cvt.END_OF_PRODUCTION,
+                cvt.VALUATION_DATE,
+                cvt.LAST_MODIFIED_ON,
+                cvt.LAST_MODIFIED_BY,
+                cvt.MASTER_DATA_TIMESTAMP,
+                cvt.LIFECYCLE_PERIOD_FROM,
+                cvt.BASE_VERSION_ID,
+                cvt.IS_FROZEN,
+                cvt.VARIANT_ID,
+                cvt.EXCHANGE_RATE_TYPE_ID,
+                cvt.MATERIAL_PRICE_STRATEGY_ID,
+                cvt.ACTIVITY_PRICE_STRATEGY_ID
+            }
+        ) as calculation_version
+        on calculation.CALCULATION_ID = calculation_version.CALCULATION_ID
+    )
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+        calculation.PROJECT_ID,
+
+        //all columns from t_calculation_version
+        calculation_version.CALCULATION_VERSION_ID,
+        calculation_version.CALCULATION_ID,
+        calculation_version.CALCULATION_VERSION_NAME,
+        calculation_version.STATUS_ID,
+        calculation_version.CALCULATION_VERSION_TYPE,
+        calculation_version.ROOT_ITEM_ID,
+        calculation_version.CUSTOMER_ID,
+        calculation_version.SALES_DOCUMENT,
+        calculation_version.SALES_PRICE,
+        calculation_version.SALES_PRICE_CURRENCY_ID,
+        calculation_version.REPORT_CURRENCY_ID,
+        calculation_version.COSTING_SHEET_ID,
+        calculation_version.COMPONENT_SPLIT_ID,
+        calculation_version.START_OF_PRODUCTION,
+        calculation_version.END_OF_PRODUCTION,
+        calculation_version.VALUATION_DATE,
+        calculation_version.LAST_MODIFIED_ON,
+        calculation_version.LAST_MODIFIED_BY,
+        calculation_version.MASTER_DATA_TIMESTAMP,
+        calculation_version.LIFECYCLE_PERIOD_FROM,
+        calculation_version.BASE_VERSION_ID,
+        calculation_version.IS_FROZEN,
+        calculation_version.VARIANT_ID,
+        calculation_version.EXCHANGE_RATE_TYPE_ID,
+        calculation_version.MATERIAL_PRICE_STRATEGY_ID,
+        calculation_version.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('CREATE_EDIT', 'FULL_EDIT', 'ADMINISTRATE');
+
+    view v_calculation_version_full_edit as select from
+    auth.t_auth_project as auth
+    inner join
+    (
+        basis.t_calculation as calculation
+        inner join
+        (
+            select from basis.t_calculation_version as cv
+            {
+                //all columns from t_calculation_version
+                cv.CALCULATION_VERSION_ID,
+                cv.CALCULATION_ID,
+                cv.CALCULATION_VERSION_NAME,
+                cv.STATUS_ID,
+                cv.CALCULATION_VERSION_TYPE,
+                cv.ROOT_ITEM_ID,
+                cv.CUSTOMER_ID,
+                cv.SALES_DOCUMENT,
+                cv.SALES_PRICE,
+                cv.SALES_PRICE_CURRENCY_ID,
+                cv.REPORT_CURRENCY_ID,
+                cv.COSTING_SHEET_ID,
+                cv.COMPONENT_SPLIT_ID,
+                cv.START_OF_PRODUCTION,
+                cv.END_OF_PRODUCTION,
+                cv.VALUATION_DATE,
+                cv.LAST_MODIFIED_ON,
+                cv.LAST_MODIFIED_BY,
+                cv.MASTER_DATA_TIMESTAMP,
+                cv.LIFECYCLE_PERIOD_FROM,
+                cv.BASE_VERSION_ID,
+                cv.IS_FROZEN,
+                cv.VARIANT_ID,
+                cv.EXCHANGE_RATE_TYPE_ID,
+                cv.MATERIAL_PRICE_STRATEGY_ID,
+                cv.ACTIVITY_PRICE_STRATEGY_ID
+            }
+            union
+            select from basis.t_calculation_version_temporary as cvt
+            {
+                //all columns from t_calculation_version
+                cvt.CALCULATION_VERSION_ID,
+                cvt.CALCULATION_ID,
+                cvt.CALCULATION_VERSION_NAME,
+                cvt.STATUS_ID,
+                cvt.CALCULATION_VERSION_TYPE,
+                cvt.ROOT_ITEM_ID,
+                cvt.CUSTOMER_ID,
+                cvt.SALES_DOCUMENT,
+                cvt.SALES_PRICE,
+                cvt.SALES_PRICE_CURRENCY_ID,
+                cvt.REPORT_CURRENCY_ID,
+                cvt.COSTING_SHEET_ID,
+                cvt.COMPONENT_SPLIT_ID,
+                cvt.START_OF_PRODUCTION,
+                cvt.END_OF_PRODUCTION,
+                cvt.VALUATION_DATE,
+                cvt.LAST_MODIFIED_ON,
+                cvt.LAST_MODIFIED_BY,
+                cvt.MASTER_DATA_TIMESTAMP,
+                cvt.LIFECYCLE_PERIOD_FROM,
+                cvt.BASE_VERSION_ID,
+                cvt.IS_FROZEN,
+                cvt.VARIANT_ID,
+                cvt.EXCHANGE_RATE_TYPE_ID,
+                cvt.MATERIAL_PRICE_STRATEGY_ID,
+                cvt.ACTIVITY_PRICE_STRATEGY_ID
+            }
+        ) as calculation_version
+        on calculation.CALCULATION_ID = calculation_version.CALCULATION_ID
+    )
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+        calculation.PROJECT_ID,
+
+        //all columns from t_calculation_version
+        calculation_version.CALCULATION_VERSION_ID,
+        calculation_version.CALCULATION_ID,
+        calculation_version.CALCULATION_VERSION_NAME,
+        calculation_version.STATUS_ID,
+        calculation_version.CALCULATION_VERSION_TYPE,
+        calculation_version.ROOT_ITEM_ID,
+        calculation_version.CUSTOMER_ID,
+        calculation_version.SALES_DOCUMENT,
+        calculation_version.SALES_PRICE,
+        calculation_version.SALES_PRICE_CURRENCY_ID,
+        calculation_version.REPORT_CURRENCY_ID,
+        calculation_version.COSTING_SHEET_ID,
+        calculation_version.COMPONENT_SPLIT_ID,
+        calculation_version.START_OF_PRODUCTION,
+        calculation_version.END_OF_PRODUCTION,
+        calculation_version.VALUATION_DATE,
+        calculation_version.LAST_MODIFIED_ON,
+        calculation_version.LAST_MODIFIED_BY,
+        calculation_version.MASTER_DATA_TIMESTAMP,
+        calculation_version.LIFECYCLE_PERIOD_FROM,
+        calculation_version.BASE_VERSION_ID,
+        calculation_version.IS_FROZEN,
+        calculation_version.VARIANT_ID,
+        calculation_version.EXCHANGE_RATE_TYPE_ID,
+        calculation_version.MATERIAL_PRICE_STRATEGY_ID,
+        calculation_version.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('FULL_EDIT', 'ADMINISTRATE');
+
+    view v_calculation_version_administrate as select from
+    auth.t_auth_project as auth
+    inner join
+    (
+        basis.t_calculation as calculation
+        inner join
+        (
+            select from basis.t_calculation_version as cv
+            {
+                //all columns from t_calculation_version
+                cv.CALCULATION_VERSION_ID,
+                cv.CALCULATION_ID,
+                cv.CALCULATION_VERSION_NAME,
+                cv.STATUS_ID,
+                cv.CALCULATION_VERSION_TYPE,
+                cv.ROOT_ITEM_ID,
+                cv.CUSTOMER_ID,
+                cv.SALES_DOCUMENT,
+                cv.SALES_PRICE,
+                cv.SALES_PRICE_CURRENCY_ID,
+                cv.REPORT_CURRENCY_ID,
+                cv.COSTING_SHEET_ID,
+                cv.COMPONENT_SPLIT_ID,
+                cv.START_OF_PRODUCTION,
+                cv.END_OF_PRODUCTION,
+                cv.VALUATION_DATE,
+                cv.LAST_MODIFIED_ON,
+                cv.LAST_MODIFIED_BY,
+                cv.MASTER_DATA_TIMESTAMP,
+                cv.LIFECYCLE_PERIOD_FROM,
+                cv.BASE_VERSION_ID,
+                cv.IS_FROZEN,
+                cv.VARIANT_ID,
+                cv.EXCHANGE_RATE_TYPE_ID,
+                cv.MATERIAL_PRICE_STRATEGY_ID,
+                cv.ACTIVITY_PRICE_STRATEGY_ID
+            }
+            union
+            select from basis.t_calculation_version_temporary as cvt
+            {
+                //all columns from t_calculation_version
+                cvt.CALCULATION_VERSION_ID,
+                cvt.CALCULATION_ID,
+                cvt.CALCULATION_VERSION_NAME,
+                cvt.STATUS_ID,
+                cvt.CALCULATION_VERSION_TYPE,
+                cvt.ROOT_ITEM_ID,
+                cvt.CUSTOMER_ID,
+                cvt.SALES_DOCUMENT,
+                cvt.SALES_PRICE,
+                cvt.SALES_PRICE_CURRENCY_ID,
+                cvt.REPORT_CURRENCY_ID,
+                cvt.COSTING_SHEET_ID,
+                cvt.COMPONENT_SPLIT_ID,
+                cvt.START_OF_PRODUCTION,
+                cvt.END_OF_PRODUCTION,
+                cvt.VALUATION_DATE,
+                cvt.LAST_MODIFIED_ON,
+                cvt.LAST_MODIFIED_BY,
+                cvt.MASTER_DATA_TIMESTAMP,
+                cvt.LIFECYCLE_PERIOD_FROM,
+                cvt.BASE_VERSION_ID,
+                cvt.IS_FROZEN,
+                cvt.VARIANT_ID,
+                cvt.EXCHANGE_RATE_TYPE_ID,
+                cvt.MATERIAL_PRICE_STRATEGY_ID,
+                cvt.ACTIVITY_PRICE_STRATEGY_ID
+            }
+        ) as calculation_version
+        on calculation.CALCULATION_ID = calculation_version.CALCULATION_ID
+    )
+    on auth.PROJECT_ID = calculation.PROJECT_ID
+    {
+        auth.USER_ID,
+        calculation.PROJECT_ID,
+
+        //all columns from t_calculation_version
+        calculation_version.CALCULATION_VERSION_ID,
+        calculation_version.CALCULATION_ID,
+        calculation_version.CALCULATION_VERSION_NAME,
+        calculation_version.STATUS_ID,
+        calculation_version.CALCULATION_VERSION_TYPE,
+        calculation_version.ROOT_ITEM_ID,
+        calculation_version.CUSTOMER_ID,
+        calculation_version.SALES_DOCUMENT,
+        calculation_version.SALES_PRICE,
+        calculation_version.SALES_PRICE_CURRENCY_ID,
+        calculation_version.REPORT_CURRENCY_ID,
+        calculation_version.COSTING_SHEET_ID,
+        calculation_version.COMPONENT_SPLIT_ID,
+        calculation_version.START_OF_PRODUCTION,
+        calculation_version.END_OF_PRODUCTION,
+        calculation_version.VALUATION_DATE,
+        calculation_version.LAST_MODIFIED_ON,
+        calculation_version.LAST_MODIFIED_BY,
+        calculation_version.MASTER_DATA_TIMESTAMP,
+        calculation_version.LIFECYCLE_PERIOD_FROM,
+        calculation_version.BASE_VERSION_ID,
+        calculation_version.IS_FROZEN,
+        calculation_version.VARIANT_ID,
+        calculation_version.EXCHANGE_RATE_TYPE_ID,
+        calculation_version.MATERIAL_PRICE_STRATEGY_ID,
+        calculation_version.ACTIVITY_PRICE_STRATEGY_ID
+    }
+    where auth.PRIVILEGE in ('ADMINISTRATE');
+
+}; 

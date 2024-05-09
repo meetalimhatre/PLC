@@ -1,0 +1,5 @@
+{
+	"URL_START": "/sap/plc/map/api/",
+	"API_VERSION": "v1/",
+	"APP_NAME": "datamapper/"
+}

@@ -1,0 +1,12 @@
+<mvc:View controllerName="retentionperiods.ui.controller.App" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m" xmlns:tnt="sap.tnt" xmlns:core="sap.ui.core">
+	<tnt:ToolPage id="toolPage">
+		<tnt:header>
+			<tnt:ToolHeader>
+                <core:Fragment fragmentName="core.header.header" type="XML"/>
+			</tnt:ToolHeader>
+		</tnt:header>
+		<tnt:mainContents>
+			<App id="rootControl"/>
+		</tnt:mainContents>
+	</tnt:ToolPage>
+</mvc:View>

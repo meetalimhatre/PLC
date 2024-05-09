@@ -1,0 +1,112 @@
+{
+    "transportation": {
+        "get": {
+            "tags": [
+                "transportation"
+            ],
+            "summary": "Gets database information about t_metadata, t_metadata_item_attributes, t_metadata__text and t_formula",
+            "description": "",
+            "operationId": "transportationGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "businessObjects",
+                    "in": "query",
+                    "description": "Set of businessObjects that is requested for getting information about transportation. For now, only value = customizing is supported (metadata information)",
+                    "required": true,
+                    "default": "customizing",
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/TransportationDataModel"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.TRANSPORTATION_EXPORT": [
+                        "read:transportation"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "transportation"
+            ],
+            "summary": "Insert database information on tables t_metadata, t_metadata_item_attributes, t_metadata__text and t_formula",
+            "description": "Insert database information on tables t_metadata, t_metadata_item_attributes, t_metadata__text and t_formula",
+            "operationId": "transportationPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "businessObjects",
+                    "in": "query",
+                    "description": "Set of businessObjects that is requested for getting information about transportation. For now, only value = customizing is supported (metadata information)",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "replace",
+                        "append"
+                    ]
+                },
+                {
+                    "name": "transportationBody",
+                    "in": "body",
+                    "description": "Body entities that will be updated/inserted about transportation. For now, only value = customizing is supported (metadata information)",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/TransportationDataModel"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/TaskResponse"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.TRANSPORTATION_IMPORT": [
+                        "create:transportation"
+                    ]
+                }
+            ]
+        }
+    }
+}

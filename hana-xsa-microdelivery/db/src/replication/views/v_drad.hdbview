@@ -1,0 +1,2 @@
+VIEW "sap.plc.db.replication.views::v_drad" ( "DOKAR", "DOKNR", "DOKVR", "DOKTL", "OBJKY" ) AS select distinct DRAD.DOKAR , DRAD.DOKNR , DRAD.DOKVR, DRAD.DOKTL, DRAD.OBJKY
+                from "sap.plc.db::repl.drad" AS DRAD WITH READ ONLY

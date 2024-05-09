@@ -1,0 +1,70 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_calculation_create_as_copy" ( 
+		IN iv_old_calculation_version_id 	INTEGER,
+		IN iv_new_calculation_version_id	INTEGER,
+		IN iv_new_calculation_id			INTEGER,
+		IN iv_new_calculation_name			NVARCHAR(500),
+		IN iv_new_project_id                NVARCHAR(35),
+		IN iv_session_id 					NVARCHAR(50), 
+		OUT ot_new_calculation 				"sap.plc.db::basis.t_calculation" default empty,
+		OUT ot_new_calculation_version  	"sap.plc.db.calculationmanager.procedures::ts_calculation_version_temporary" default empty,
+		OUT ot_new_items                	"sap.plc.db.calculationmanager.procedures::ts_item_temporary" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+
+declare lv_current_utctimestamp	timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+-- get calculation details for the selected calculation version
+lt_calculation_version = SELECT CALCULATION_VERSION_ID, CALCULATION_ID, CALCULATION_VERSION_NAME 
+						   from "sap.plc.db::basis.t_calculation_version" 
+						   WHERE CALCULATION_VERSION_ID = :iv_old_calculation_version_id;
+			
+-- prepare basic data for new calculation			
+lt_calculation = 
+	SELECT
+		:iv_new_calculation_id AS calculation_id,
+		:iv_new_calculation_version_id as current_calculation_version_id,
+		IFNULL(:iv_new_project_id, PROJECT_ID) as project_id, -- if iv_new_project_id is null, then the calculation is copied within same project
+		:iv_new_calculation_name as CALCULATION_NAME, 
+		:lv_current_utctimestamp AS CREATED_ON,
+		iv_session_id AS CREATED_BY,
+		:lv_current_utctimestamp AS LAST_MODIFIED_ON,
+		iv_session_id AS LAST_MODIFIED_BY
+	FROM "sap.plc.db::basis.t_calculation"
+	WHERE CALCULATION_ID in ( select CALCULATION_ID from :lt_calculation_version );
+
+-- create a new calculation with the same basic data of calculation with selected version
+INSERT INTO "sap.plc.db::basis.t_calculation" ( calculation_id, PROJECT_ID, CALCULATION_NAME, CURRENT_CALCULATION_VERSION_ID, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY ) 
+		SELECT calculation_id, PROJECT_ID, CALCULATION_NAME, CURRENT_CALCULATION_VERSION_ID, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY from :lt_calculation;
+
+-- copy tags
+insert into "sap.plc.db::basis.t_entity_tags" (tag_id, entity_type, entity_id, created_on, created_by)
+        select tag_id, entity_type, :iv_new_calculation_id as entity_id, :lv_current_utctimestamp as created_on, :iv_session_id as created_by from "sap.plc.db::basis.t_entity_tags" where entity_id in ( select CALCULATION_ID from :lt_calculation_version ) and entity_type = 'C';
+
+-- copy calculation version
+call "sap.plc.db.calculationmanager.procedures::p_calculation_version_copy"(:iv_old_calculation_version_id,
+:iv_new_calculation_version_id,:iv_session_id,ot_new_calculation_version,ot_new_items);
+
+--update calculation in copied calculation version
+update "sap.plc.db::basis.t_calculation_version_temporary" 
+       set calculation_id = :iv_new_calculation_id
+       where session_id = :iv_session_id AND 
+       calculation_version_id = :iv_new_calculation_version_id;
+ot_new_calculation_version.CALCULATION_ID[1] = :iv_new_calculation_id;
+
+-- ################################################################################################################
+-- 		prepare output
+-- ################################################################################################################	
+
+-- return new calculation
+ot_new_calculation = SELECT CALCULATION_ID, PROJECT_ID, CALCULATION_NAME, CURRENT_CALCULATION_VERSION_ID, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY 
+						 FROM "sap.plc.db::basis.t_calculation" 
+	                     WHERE CALCULATION_ID = :iv_new_calculation_id;
+insert into "sap.plc.db::temp.gtt_calculation_version_ids" (calculation_version_id)
+		select distinct REFERENCED_CALCULATION_VERSION_ID from :ot_new_items where REFERENCED_CALCULATION_VERSION_ID is not null;
+END;
+
+

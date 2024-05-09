@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::personal_data_validity_create_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_personal_data_validity", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "INSERT" ] 
+		}
+		]
+	}
+}

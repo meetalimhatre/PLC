@@ -1,0 +1,198 @@
+{
+    "retention-periods": {      
+        "get": {
+            "tags":[
+                "retention-periods"
+            ],
+            "summary": "Retention Periods:  Read retention periods for personal data",
+            "description": "Retention Periods:  Read retention periods for personal data",
+            "operationId": "retentionPeriodsGet",
+            "consumes": [
+                "application/json"
+            ],           
+            "produces": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "Retention period retrieved was successful",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsBody"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                     
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.RetentionPeriodsRead": []
+            }]
+ 
+        },
+        "delete": {
+            "tags":[
+                "retention-periods"
+            ],
+            "summary": "Retention Periods:  Delete retention periods for personal data",
+            "description": "Retention Periods: Delete retention periods definitions for personal data",
+            "operationId": "retentionPeriodsDelete",
+            "consumes": [
+                "application/json"
+            ],           
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Delete request body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsDeleteRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Retention periods delete was successful"
+                },
+                "404": {
+                    "description": "If the retention is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                     
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.RetentionPeriodsEdit": []
+            }]
+ 
+        },
+        "post": {
+            "tags":[
+                "retention-periods"
+            ],
+            "summary": "Retention Periods:  Create retention periods for personal data",
+            "description": "Retention Periods:  Create retention periods for personal data",
+            "operationId": "retentionPeriodsPost",
+            "consumes": [
+                "application/json"
+            ],           
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Post request body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Retention period creation was successful",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsBody"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                     
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.RetentionPeriodsEdit": []
+            }]
+ 
+        },
+        "put": {
+            "tags":[
+                "retention-periods"
+            ],
+            "summary": "Retention Periods:  Update retention periods for personal data",
+            "description": "Retention Periods:  Update retention periods for personal data",
+            "operationId": "retentionPeriodsPut",
+            "consumes": [
+                "application/json"
+            ],           
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Put request body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Retention period creation was successful",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/retentionPeriodsBody"
+                    }
+                },
+                "404": {
+                    "description": "If the retention is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                     
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.RetentionPeriodsEdit": []
+            }]
+ 
+        }
+    }
+}

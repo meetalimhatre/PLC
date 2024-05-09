@@ -1,0 +1,34 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_customer_read" (
+		IN iv_master_data_timestamp     TIMESTAMP,	
+        IN  it_customer_key 			"sap.plc.db.administration::masterdata.tt_customer_key",
+        OUT ot_customer			    	"sap.plc.db.administration::masterdata.tt_customer" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Write your procedure logic 
+ *****************************/
+ 
+  ot_customer =  		
+ 		select
+ 			plcTable.CUSTOMER_ID,
+			plcTable.CUSTOMER_NAME,
+			plcTable.COUNTRY,
+			plcTable.POSTAL_CODE,
+			plcTable.REGION,
+			plcTable.CITY,
+			plcTable.STREET_NUMBER_OR_PO_BOX,
+			plcTable._VALID_FROM,
+			plcTable._VALID_TO,
+			plcTable._SOURCE,
+			plcTable._CREATED_BY,
+		    null AS _VALID_FROM_FIRST_VERSION,
+		    null AS _CREATED_BY_FIRST_VERSION
+		from "sap.plc.db::basis.t_customer" as plcTable
+		where plcTable._VALID_FROM <= :iv_master_data_timestamp and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+            and ( plcTable.CUSTOMER_ID ) in ( select CUSTOMER_ID from :it_customer_key );				
+ 
+END;

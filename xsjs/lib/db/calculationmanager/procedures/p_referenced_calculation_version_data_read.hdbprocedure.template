@@ -1,0 +1,287 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_referenced_calculation_version_data_read" (
+		IN  iv_logon_language 					NVARCHAR(11),
+		OUT ot_projects 						"sap.plc.db.calculationmanager.procedures::ts_t_project" default empty, 
+		OUT ot_calculations 					"sap.plc.db.calculationmanager.procedures::ts_t_calculation" default empty,
+		OUT ot_calculation_versions 			"sap.plc.db.calculationmanager.procedures::ts_calculation_version" default empty,
+		OUT ot_items 							"sap.plc.db.calculationmanager.procedures::ts_item" default empty,
+		--entries related to component split
+	    OUT ot_component_split           		"sap.plc.db.administration::masterdata.tt_component_split" default empty,
+	    OUT ot_component_split_account_group  	"sap.plc.db::basis.t_component_split_account_group" default empty,
+	    --entries related to costing sheet
+	    OUT ot_costing_sheet			 		"sap.plc.db.administration::masterdata.tt_costing_sheet" default empty,
+	    OUT ot_costing_sheet_row		 		"sap.plc.db.administration::masterdata.tt_costing_sheet_row" default empty,
+	    OUT ot_costing_sheet_base				"sap.plc.db::basis.t_costing_sheet_base" default empty,
+	    OUT ot_costing_sheet_base_row			"sap.plc.db::basis.t_costing_sheet_base_row" default empty,
+	    OUT ot_costing_sheet_overhead			"sap.plc.db::basis.t_costing_sheet_overhead" default empty,
+	    OUT ot_costing_sheet_overhead_row		"sap.plc.db.administration::masterdata.tt_costing_sheet_overhead_row" default empty,
+	    OUT ot_costing_sheet_row_dependencies	"sap.plc.db::basis.t_costing_sheet_row_dependencies" default empty,
+	    --entries related to account groups
+	    OUT ot_account_groups            		"sap.plc.db.administration::masterdata.tt_account_groups" default empty,
+		--entries required for price components
+		OUT ot_price_components					"sap.plc.db.administration::masterdata.tt_price_component" default empty,
+	    --masterdata
+		OUT ot_work_center               		"sap.plc.db.administration::masterdata.tt_work_center" default empty,
+		OUT ot_process          				"sap.plc.db.administration::masterdata.tt_process" default empty,
+	    OUT ot_activity_type             		"sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+	    OUT ot_cost_center               		"sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_profit_center             		"sap.plc.db.administration::masterdata.tt_profit_center" default empty,
+		OUT ot_accounts							"sap.plc.db.administration::masterdata.tt_accounts" default empty,
+		OUT ot_overhead_group		            "sap.plc.db.administration::masterdata.tt_overhead_group" default empty,
+		OUT ot_material_plant            		"sap.plc.db.administration::masterdata.tt_material_plant" default empty,
+		OUT ot_plant                     		"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_company_code              		"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_controlling_area          		"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_business_area             		"sap.plc.db.administration::masterdata.tt_business_area" default empty,
+	    OUT ot_material                  		"sap.plc.db.administration::masterdata.tt_material" default empty,
+	    OUT ot_material_group            		"sap.plc.db.administration::masterdata.tt_material_group" default empty,
+	    OUT ot_material_type             		"sap.plc.db.administration::masterdata.tt_material_type" default empty,
+	    OUT ot_document                         "sap.plc.db.administration::masterdata.tt_document" default empty,
+	    OUT ot_document_type                    "sap.plc.db.administration::masterdata.tt_document_type" default empty,
+	    OUT ot_document_status                  "sap.plc.db.administration::masterdata.tt_document_status" default empty,
+	    OUT ot_design_office         			"sap.plc.db.administration::masterdata.tt_design_office" default empty,
+	    OUT ot_vendor                    		"sap.plc.db.administration::masterdata.tt_vendor" default empty,
+	    OUT ot_customer                         "sap.plc.db.administration::masterdata.tt_customer" default empty, 
+	    OUT ot_valuation_class             		"sap.plc.db.administration::masterdata.tt_valuation_class" default empty,
+	    OUT ot_uom								"sap.plc.db.administration::masterdata.tt_uom" default empty,
+	    OUT ot_currency							"sap.plc.db.administration::masterdata.tt_currency" default empty,
+	    OUT ot_exchange_rate_type				"sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+--	READS SQL DATA
+	AS
+BEGIN
+DECLARE lv_current_utctimestamp			TIMESTAMP;
+DECLARE lt_account_groups               "sap.plc.db.administration::masterdata.tt_account_groups_input";
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+lt_calculation_versions = SELECT DISTINCT cv.CALCULATION_VERSION_ID, cv.CALCULATION_ID, cv.CALCULATION_VERSION_NAME, cv.STATUS_ID, cv.CALCULATION_VERSION_TYPE, cv.ROOT_ITEM_ID, cv.CUSTOMER_ID,
+						  cv.SALES_PRICE,
+ 						  cv.SALES_PRICE_CURRENCY_ID, cv.REPORT_CURRENCY_ID, cv.COSTING_SHEET_ID, cv.COMPONENT_SPLIT_ID,
+ 						  cv.START_OF_PRODUCTION, cv.END_OF_PRODUCTION, cv.VALUATION_DATE, cv.LAST_MODIFIED_ON, cv.LAST_MODIFIED_BY, cv.MASTER_DATA_TIMESTAMP,
+ 						  cv.LIFECYCLE_PERIOD_FROM, cv.BASE_VERSION_ID, cv.IS_FROZEN,
+ 						  cv.VARIANT_ID, cv.EXCHANGE_RATE_TYPE_ID, cv.MATERIAL_PRICE_STRATEGY_ID, cv.ACTIVITY_PRICE_STRATEGY_ID,
+						  cv.SELECTED_TOTAL_COSTING_SHEET, cv.SELECTED_TOTAL_COMPONENT_SPLIT,
+ 						  cv.SALES_DOCUMENT, project.CONTROLLING_AREA_ID
+ 						FROM "sap.plc.db::basis.t_calculation_version" cv 
+ 							INNER JOIN "sap.plc.db::basis.t_calculation" as calculation ON cv.calculation_id = calculation.calculation_id
+							INNER JOIN "sap.plc.db::basis.t_project" as project ON calculation.project_id = project.project_id
+ 							where CALCULATION_VERSION_ID in (select CALCULATION_VERSION_ID from "sap.plc.db::temp.gtt_calculation_version_ids");
+lt_items =	SELECT 
+			item.ITEM_ID, item.CALCULATION_VERSION_ID, item.PARENT_ITEM_ID, item.PREDECESSOR_ITEM_ID, item.IS_ACTIVE, item.ITEM_CATEGORY_ID,item.CHILD_ITEM_CATEGORY_ID,
+			item.ACCOUNT_ID, item.DETERMINED_ACCOUNT_ID, item.DOCUMENT_TYPE_ID, item.DOCUMENT_ID, item.DOCUMENT_VERSION, item.DOCUMENT_PART, item.DOCUMENT_STATUS_ID, item.DESIGN_OFFICE_ID,
+			item.MATERIAL_ID, item.MATERIAL_TYPE_ID, item.MATERIAL_GROUP_ID, item.IS_PHANTOM_MATERIAL, item.IS_CONFIGURABLE_MATERIAL, item.MATERIAL_SOURCE,
+			item.OVERHEAD_GROUP_ID, item.VALUATION_CLASS_ID, item.ACTIVITY_TYPE_ID, item.PROCESS_ID,
+			item.LOT_SIZE, item.LOT_SIZE_CALCULATED, item.LOT_SIZE_IS_MANUAL, item.ENGINEERING_CHANGE_NUMBER_ID, item.COMPANY_CODE_ID, item.COST_CENTER_ID, item.PLANT_ID, item.WORK_CENTER_ID, item.WORK_CENTER_CATEGORY, item.EFFICIENCY, item.BUSINESS_AREA_ID, item.PROFIT_CENTER_ID,
+			item.QUANTITY, item.QUANTITY_CALCULATED, item.QUANTITY_IS_MANUAL, item.QUANTITY_UOM_ID,
+			item.TOTAL_QUANTITY, item.TOTAL_QUANTITY_UOM_ID, item.TOTAL_QUANTITY_DEPENDS_ON, item.IS_RELEVANT_TO_COSTING_IN_ERP, item.PRICE_FIXED_PORTION,
+			item.PRICE_FIXED_PORTION_CALCULATED, item.PRICE_FIXED_PORTION_IS_MANUAL, item.PRICE_VARIABLE_PORTION, item.PRICE_VARIABLE_PORTION_CALCULATED,
+			item.PRICE_VARIABLE_PORTION_IS_MANUAL, item.PRICE, item.TRANSACTION_CURRENCY_ID, item.PRICE_UNIT, item.PRICE_UNIT_CALCULATED,
+			item.PRICE_UNIT_IS_MANUAL, item.PRICE_UNIT_UOM_ID, item.IS_PRICE_SPLIT_ACTIVE, item.IS_DISABLING_ACCOUNT_DETERMINATION, 
+			item.PRICE_ID, item.CONFIDENCE_LEVEL_ID, item.PRICE_SOURCE_ID, item.VENDOR_ID, item.TARGET_COST,
+			item.TARGET_COST_CALCULATED, item.TARGET_COST_IS_MANUAL, item.TARGET_COST_CURRENCY_ID, item.CREATED_ON, item.CREATED_BY,
+			item.LAST_MODIFIED_ON, item.LAST_MODIFIED_BY, 
+			item.PRICE_FOR_TOTAL_QUANTITY, item.PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, item.PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+			item.PRICE_FOR_TOTAL_QUANTITY2, item.PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, item.PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+			item.PRICE_FOR_TOTAL_QUANTITY3, item.PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, item.PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+			item.OTHER_COST, item.OTHER_COST_FIXED_PORTION, item.OTHER_COST_VARIABLE_PORTION,
+			item.TOTAL_COST, item.TOTAL_COST_FIXED_PORTION, item.TOTAL_COST_VARIABLE_PORTION, 
+			item.TOTAL_COST2, item.TOTAL_COST2_FIXED_PORTION, item.TOTAL_COST2_VARIABLE_PORTION, 
+			item.TOTAL_COST3, item.TOTAL_COST3_FIXED_PORTION, item.TOTAL_COST3_VARIABLE_PORTION, 
+			item.ITEM_DESCRIPTION, item.COMMENT, 
+			item.TOTAL_COST_PER_UNIT_FIXED_PORTION, item.TOTAL_COST_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST_PER_UNIT,
+			item.TOTAL_COST2_PER_UNIT_FIXED_PORTION, item.TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST2_PER_UNIT,
+			item.TOTAL_COST3_PER_UNIT_FIXED_PORTION, item.TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST3_PER_UNIT,
+			item.HIGHLIGHT_GREEN, item.HIGHLIGHT_ORANGE, item.HIGHLIGHT_YELLOW, item.REFERENCED_CALCULATION_VERSION_ID, item.PRICE_SOURCE_TYPE_ID,
+			item.PURCHASING_GROUP, item.PURCHASING_DOCUMENT, item.LOCAL_CONTENT, 
+			item.BASE_QUANTITY, item.BASE_QUANTITY_CALCULATED, item.BASE_QUANTITY_IS_MANUAL, item.QUANTITY_PER_BASE_UNIT,
+			item.QUANTITY_PER_BASE_UNIT_UOM_ID, item.IS_DISABLING_PRICE_DETERMINATION,
+			calculation_versions.controlling_area_id, calculation_versions.master_data_timestamp, calculation_versions.valuation_date, item.TOTAL_QUANTITY_OF_VARIANTS, item.BOM_COMPARE_KEY
+			{{customFieldsWithTablePrefix Item}}
+	 		FROM "sap.plc.db::basis.t_item" as item 
+			LEFT OUTER JOIN {{t_extensionTable Item}} as plcExtTable ON item.item_id = plcExtTable.item_id AND item.calculation_version_id = plcExtTable.calculation_version_id
+			INNER JOIN :lt_calculation_versions as calculation_versions on item.calculation_version_id = calculation_versions.calculation_version_id
+			WHERE (item.item_id, item.calculation_version_id) in (select root_item_id, calculation_version_id from :lt_calculation_versions);
+ot_calculation_versions = SELECT DISTINCT CALCULATION_VERSION_ID, CALCULATION_ID, CALCULATION_VERSION_NAME, STATUS_ID, CALCULATION_VERSION_TYPE, ROOT_ITEM_ID, CUSTOMER_ID,
+						  SALES_PRICE,
+ 						  SALES_PRICE_CURRENCY_ID, REPORT_CURRENCY_ID, COSTING_SHEET_ID, COMPONENT_SPLIT_ID,
+ 						  SALES_DOCUMENT, START_OF_PRODUCTION, END_OF_PRODUCTION, VALUATION_DATE, LAST_MODIFIED_ON, LAST_MODIFIED_BY, MASTER_DATA_TIMESTAMP,
+ 						  LIFECYCLE_PERIOD_FROM, BASE_VERSION_ID, null as LAST_USED_ON, IS_FROZEN,
+ 						  VARIANT_ID, EXCHANGE_RATE_TYPE_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID,
+						  SELECTED_TOTAL_COSTING_SHEET, SELECTED_TOTAL_COMPONENT_SPLIT
+ 						FROM :lt_calculation_versions; 
+ 						
+ --select from :lt_items both standard and custom fields
+ot_items =	SELECT 
+			plcExtTable.ITEM_ID, plcExtTable.CALCULATION_VERSION_ID, plcExtTable.PARENT_ITEM_ID, plcExtTable.PREDECESSOR_ITEM_ID, plcExtTable.IS_ACTIVE, plcExtTable.HIGHLIGHT_GREEN, plcExtTable.HIGHLIGHT_ORANGE, plcExtTable.HIGHLIGHT_YELLOW, plcExtTable.ITEM_CATEGORY_ID,plcExtTable.CHILD_ITEM_CATEGORY_ID,
+			plcExtTable.REFERENCED_CALCULATION_VERSION_ID, plcExtTable.ACCOUNT_ID, plcExtTable.DETERMINED_ACCOUNT_ID, plcExtTable.DOCUMENT_TYPE_ID, plcExtTable.DOCUMENT_ID, plcExtTable.DOCUMENT_VERSION, plcExtTable.DOCUMENT_PART, plcExtTable.DOCUMENT_STATUS_ID,
+			plcExtTable.DESIGN_OFFICE_ID,
+			plcExtTable.MATERIAL_ID, plcExtTable.MATERIAL_TYPE_ID, plcExtTable.MATERIAL_GROUP_ID, plcExtTable.IS_PHANTOM_MATERIAL, plcExtTable.IS_CONFIGURABLE_MATERIAL, plcExtTable.MATERIAL_SOURCE,
+			plcExtTable.OVERHEAD_GROUP_ID, plcExtTable.VALUATION_CLASS_ID, plcExtTable.PURCHASING_GROUP, plcExtTable.PURCHASING_DOCUMENT, plcExtTable.LOCAL_CONTENT, plcExtTable.ACTIVITY_TYPE_ID, plcExtTable.PROCESS_ID,
+			plcExtTable.LOT_SIZE, plcExtTable.LOT_SIZE_CALCULATED, plcExtTable.LOT_SIZE_IS_MANUAL, plcExtTable.ENGINEERING_CHANGE_NUMBER_ID,							  
+			plcExtTable.COMPANY_CODE_ID, plcExtTable.COST_CENTER_ID, plcExtTable.PLANT_ID, plcExtTable.WORK_CENTER_ID, plcExtTable.WORK_CENTER_CATEGORY, plcExtTable.EFFICIENCY, plcExtTable.BUSINESS_AREA_ID, plcExtTable.PROFIT_CENTER_ID,
+			plcExtTable.QUANTITY, plcExtTable.QUANTITY_CALCULATED, plcExtTable.QUANTITY_IS_MANUAL, plcExtTable.QUANTITY_UOM_ID,
+			plcExtTable.TOTAL_QUANTITY, plcExtTable.TOTAL_QUANTITY_UOM_ID, plcExtTable.TOTAL_QUANTITY_DEPENDS_ON, plcExtTable.IS_RELEVANT_TO_COSTING_IN_ERP,
+			plcExtTable.BASE_QUANTITY, plcExtTable.BASE_QUANTITY_CALCULATED, plcExtTable.BASE_QUANTITY_IS_MANUAL, plcExtTable.QUANTITY_PER_BASE_UNIT,
+			plcExtTable.QUANTITY_PER_BASE_UNIT_UOM_ID, plcExtTable.PRICE_FIXED_PORTION,
+			plcExtTable.PRICE_FIXED_PORTION_CALCULATED, plcExtTable.PRICE_FIXED_PORTION_IS_MANUAL, plcExtTable.PRICE_VARIABLE_PORTION, plcExtTable.PRICE_VARIABLE_PORTION_CALCULATED,
+			plcExtTable.PRICE_VARIABLE_PORTION_IS_MANUAL, plcExtTable.PRICE, plcExtTable.TRANSACTION_CURRENCY_ID, plcExtTable.PRICE_UNIT, plcExtTable.PRICE_UNIT_CALCULATED,
+			plcExtTable.PRICE_UNIT_IS_MANUAL, plcExtTable.PRICE_UNIT_UOM_ID, plcExtTable.IS_PRICE_SPLIT_ACTIVE, plcExtTable.IS_DISABLING_ACCOUNT_DETERMINATION, 
+			plcExtTable.PRICE_ID, plcExtTable.CONFIDENCE_LEVEL_ID, plcExtTable.PRICE_SOURCE_ID,
+			plcExtTable.PRICE_SOURCE_TYPE_ID,
+			plcExtTable.IS_DISABLING_PRICE_DETERMINATION, plcExtTable.VENDOR_ID,
+			plcExtTable.TARGET_COST, plcExtTable.TARGET_COST_CALCULATED, plcExtTable.TARGET_COST_IS_MANUAL, plcExtTable.TARGET_COST_CURRENCY_ID, plcExtTable.CREATED_ON, plcExtTable.CREATED_BY,
+			plcExtTable.LAST_MODIFIED_ON, plcExtTable.LAST_MODIFIED_BY, 
+			plcExtTable.PRICE_FOR_TOTAL_QUANTITY, plcExtTable.PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, plcExtTable.PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+			plcExtTable.PRICE_FOR_TOTAL_QUANTITY2, plcExtTable.PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, plcExtTable.PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+			plcExtTable.PRICE_FOR_TOTAL_QUANTITY3, plcExtTable.PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, plcExtTable.PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+			plcExtTable.OTHER_COST, plcExtTable.OTHER_COST_FIXED_PORTION, plcExtTable.OTHER_COST_VARIABLE_PORTION,
+			plcExtTable.TOTAL_COST, plcExtTable.TOTAL_COST_FIXED_PORTION, plcExtTable.TOTAL_COST_VARIABLE_PORTION, 
+			plcExtTable.TOTAL_COST2, plcExtTable.TOTAL_COST2_FIXED_PORTION, plcExtTable.TOTAL_COST2_VARIABLE_PORTION, 
+			plcExtTable.TOTAL_COST3, plcExtTable.TOTAL_COST3_FIXED_PORTION, plcExtTable.TOTAL_COST3_VARIABLE_PORTION, 
+			plcExtTable.ITEM_DESCRIPTION, plcExtTable.COMMENT,
+			plcExtTable.TOTAL_COST_PER_UNIT_FIXED_PORTION, plcExtTable.TOTAL_COST_PER_UNIT_VARIABLE_PORTION, plcExtTable.TOTAL_COST_PER_UNIT, 
+			plcExtTable.TOTAL_COST2_PER_UNIT_FIXED_PORTION, plcExtTable.TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, plcExtTable.TOTAL_COST2_PER_UNIT, 
+			plcExtTable.TOTAL_COST3_PER_UNIT_FIXED_PORTION, plcExtTable.TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, plcExtTable.TOTAL_COST3_PER_UNIT, 
+			plcExtTable.TOTAL_QUANTITY_OF_VARIANTS, plcExtTable.BOM_COMPARE_KEY
+			{{customFieldsWithTablePrefix Item}}
+	 		FROM :lt_items as plcExtTable; 
+ot_calculations = select DISTINCT CALCULATION_ID, PROJECT_ID, CALCULATION_NAME, CURRENT_CALCULATION_VERSION_ID, 
+				  CREATED_ON, CREATED_BY, LAST_MODIFIED_ON,LAST_MODIFIED_BY 
+ 				  FROM "sap.plc.db::basis.t_calculation" where CALCULATION_ID in (select CALCULATION_ID from :ot_calculation_versions);
+ot_projects = select DISTINCT PROJECT_ID, ENTITY_ID, REFERENCE_PROJECT_ID, PROJECT_NAME, PROJECT_RESPONSIBLE, CONTROLLING_AREA_ID, CUSTOMER_ID, SALES_DOCUMENT, SALES_PRICE,
+				SALES_PRICE_CURRENCY_ID, COMMENT, COMPANY_CODE_ID, PLANT_ID, BUSINESS_AREA_ID, PROFIT_CENTER_ID, REPORT_CURRENCY_ID, COSTING_SHEET_ID,
+				COMPONENT_SPLIT_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, END_OF_PRODUCTION, VALUATION_DATE, LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL,
+				CREATED_ON, CREATED_BY,	LAST_MODIFIED_ON, LAST_MODIFIED_BY, EXCHANGE_RATE_TYPE_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID
+				from "sap.plc.db::basis.t_project" where PROJECT_ID in (select PROJECT_ID from :ot_calculations);
+
+--select masterdata from calculation version
+
+ lt_component_split = SELECT component_split_id, master_data_timestamp from :lt_calculation_versions where component_split_id is not null;
+ lt_costing_sheet = SELECT costing_sheet_id, master_data_timestamp from :lt_calculation_versions where costing_sheet_id is not null;
+ lt_controlling_area = SELECT controlling_area_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects;
+ lt_customer = SELECT distinct customer_id, master_data_timestamp from
+			  (	SELECT customer_id, master_data_timestamp from :lt_calculation_versions where customer_id is not null
+			    union all
+				SELECT customer_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects where customer_id is not null);
+lt_price_components = select distinct price_id, master_data_timestamp, valuation_date from :lt_items
+								where price_id is not null;
+lt_work_center = select distinct work_center_id, plant_id, master_data_timestamp from :lt_items where work_center_id is not null and plant_id is not null;
+lt_process = select distinct process_id, controlling_area_id, master_data_timestamp from :lt_items where process_id is not null;
+lt_activity_type = select distinct activity_type_id, controlling_area_id, master_data_timestamp from :lt_items where activity_type_id is not null;
+lt_cost_center = select distinct cost_center_id, controlling_area_id, master_data_timestamp from :lt_items where cost_center_id is not null;
+lt_profit_center = select distinct profit_center_id, controlling_area_id, master_data_timestamp from
+				   (SELECT profit_center_id, controlling_area_id, master_data_timestamp from :lt_items where profit_center_id is not null
+			    		union all
+					SELECT profit_center_id, controlling_area_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects where profit_center_id is not null);
+lt_account = select distinct account_id, controlling_area_id, master_data_timestamp from :lt_items where account_id is not null;
+lt_material_plant = select distinct material_id, plant_id, null as master_data_timestamp from :lt_items where material_id is not null and plant_id is not null;
+lt_overhead_group = select distinct overhead_group_id, plant_id, master_data_timestamp from :lt_items where overhead_group_id is not null and plant_id is not null;
+lt_plant = select distinct plant_id, master_data_timestamp from
+			 (SELECT plant_id, master_data_timestamp from :lt_items where plant_id is not null
+			    		union all
+			  SELECT plant_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects where plant_id is not null);
+lt_company_code = select distinct company_code_id, master_data_timestamp from
+					(SELECT company_code_id, master_data_timestamp from :lt_items where company_code_id is not null
+			    		union all
+			  		SELECT company_code_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects where company_code_id is not null);
+lt_business_area = select distinct business_area_id, master_data_timestamp from
+					(SELECT business_area_id, master_data_timestamp from :lt_items where business_area_id is not null
+			    		union all
+			  		SELECT business_area_id, :lv_current_utctimestamp as master_data_timestamp from :ot_projects where business_area_id is not null);
+lt_material = select distinct material_id, master_data_timestamp from :lt_items where material_id is not null;
+lt_material_group = select distinct material_group_id, master_data_timestamp from :lt_items where material_group_id is not null;
+lt_material_type = select distinct material_type_id, master_data_timestamp from :lt_items where material_type_id is not null;
+lt_document = select distinct document_type_id, document_id, document_version, document_part, master_data_timestamp from :lt_items where document_type_id is not null and
+		document_id is not null and document_version is not null and document_part is not null;
+lt_document_type = select distinct document_type_id, master_data_timestamp from :lt_items where document_type_id is not null;
+lt_document_status = select distinct document_type_id, document_status_id, master_data_timestamp from :lt_items where document_type_id is not null and document_status_id is not null;
+lt_design_office = select distinct design_office_id, master_data_timestamp from :lt_items where design_office_id is not null;
+lt_vendor = select distinct vendor_id, master_data_timestamp from :lt_items where vendor_id is not null;
+lt_valuation_class = select distinct valuation_class_id, master_data_timestamp from :lt_items where valuation_class_id is not null;
+lt_uom = select distinct UOM_ID, MASTER_DATA_TIMESTAMP from
+							  (select quantity_uom_id as UOM_ID, MASTER_DATA_TIMESTAMP from :lt_items where quantity_uom_id is not null
+							   	 union all
+							   select total_quantity_uom_id as UOM_ID, MASTER_DATA_TIMESTAMP from :lt_items where total_quantity_uom_id is not null
+							   	 union all
+							   select price_unit_uom_id as UOM_ID, MASTER_DATA_TIMESTAMP from :lt_items where price_unit_uom_id is not null);
+lt_currency = select distinct CURRENCY_ID, MASTER_DATA_TIMESTAMP from
+							  (select transaction_currency_id as CURRENCY_ID, MASTER_DATA_TIMESTAMP from :lt_items where transaction_currency_id is not null
+								 union all
+							   select target_cost_currency_id as CURRENCY_ID, MASTER_DATA_TIMESTAMP from :lt_items where target_cost_currency_id is not null
+							     union all
+							   select sales_price_currency_id as CURRENCY_ID, MASTER_DATA_TIMESTAMP from :lt_calculation_versions where sales_price_currency_id is not null
+							   	 union all
+							   select report_currency_id as CURRENCY_ID, MASTER_DATA_TIMESTAMP from :lt_calculation_versions where report_currency_id is not null
+							   	 union all
+							   	select report_currency_id as CURRENCY_ID, :lv_current_utctimestamp as MASTER_DATA_TIMESTAMP from :ot_projects);
+lt_exchange_rate_type = select distinct exchange_rate_type_id from :lt_calculation_versions where exchange_rate_type_id is not null;
+
+call "sap.plc.db.administration.procedures::p_masterdata_read"( :iv_logon_language,
+    :lt_component_split,
+    :lt_costing_sheet,
+    :lt_account_groups,
+	:lt_price_components,
+    :lt_work_center,
+    :lt_process,
+    :lt_activity_type,
+    :lt_cost_center,
+    :lt_profit_center,
+    :lt_account,
+    :lt_material_plant,
+    :lt_overhead_group,
+	:lt_plant,
+	:lt_company_code,
+	:lt_controlling_area,
+	:lt_business_area,
+    :lt_material,
+    :lt_material_group,
+    :lt_material_type,
+    :lt_document,
+    :lt_document_type,
+    :lt_document_status,
+    :lt_design_office,
+    :lt_vendor,
+    :lt_customer,
+    :lt_valuation_class,
+    :lt_uom,
+    :lt_currency,
+    :lt_exchange_rate_type,
+    ot_component_split,
+    ot_component_split_account_group,
+    ot_costing_sheet,
+    ot_costing_sheet_row,
+    ot_costing_sheet_base,
+    ot_costing_sheet_base_row,
+    ot_costing_sheet_overhead,
+    ot_costing_sheet_overhead_row,
+    ot_costing_sheet_row_dependencies,
+    ot_account_groups,
+	ot_price_components,
+    ot_work_center,
+    ot_process,
+    ot_activity_type,
+    ot_cost_center,
+	ot_profit_center,
+	ot_accounts,
+	ot_overhead_group,
+	ot_material_plant,
+	ot_plant,
+	ot_company_code,
+	ot_controlling_area,
+	ot_business_area,
+    ot_material,
+    ot_material_group,
+    ot_material_type,
+    ot_document,
+    ot_document_type,
+    ot_document_status,
+    ot_design_office,
+    ot_vendor,
+    ot_customer,
+    ot_valuation_class,
+    ot_uom,
+    ot_currency,
+    ot_exchange_rate_type
+);
+
+END;

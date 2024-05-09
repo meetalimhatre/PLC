@@ -1,0 +1,832 @@
+{
+    "calculation-versions": {
+        "get": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Gets Calculation Versions",
+            "description": "it will return all calculations versions from a calculation when parameter calculation_id is used or top n calculations when used together with parameter top; it will return the current calculation versions for a list of calculation ids; it will return recently used calculation versions when parameter recently_used is true or top n calculations when used together with parameter top; it will always return root item for each calculation version; it will always return masterdata; it will return project and calculation only when parameter recently_used is true; it will return a list of calculation versions and all the related data according to the defined filters (used to search for versions to be referenced)",
+            "operationId": "calculation-versionsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_id",
+                    "in": "query",
+                    "description": "get calculation-versions for a specific calculation id",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "current",
+                    "in": "query",
+                    "description": "get current calculation versions for a list of calculation when current is true",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "recently_used",
+                    "in": "query",
+                    "description": "get recently used calculation-versions for current user",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "get top calculation-versions (default: 100)",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "get calculation-version by id",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "loadMasterdata",
+                    "in": "query",
+                    "description": "get calculation-versions together with masterdata",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "search",
+                    "in": "query",
+                    "description": "get calculation versions that match the filter criteria. Used to search for versions to be referenced",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "filter string to filter data. Ex: CALCULATION_VERSION=1. Other possible values: CALCULATION, PROJECT, PLANT, CUSTOMER, MATERIAL",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "sortingColumn",
+                    "in": "query",
+                    "description": "column id to be sorted by (default: CALCULATION_VERSION_NAME)",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "sortingDirection",
+                    "in": "query",
+                    "description": "sort results by a direction (default: Ascending)",
+                    "required": false,
+                    "type": "string",
+                    "enum": [
+                        "ASC",
+                        "DESC"
+                    ]
+                },
+                {
+                    "name": "omitItems",
+                    "in": "query",
+                    "description": "Parameter that sets the ITEMS as an empty array in the response. compressedResult must be false for omitItems to work.",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Updates a calculation-version.",
+            "description": "CThe implementation updates the database entry in t_calculation_version_temporary based on JSON data the client gives in the request body. This update uses a opt-in approach, which means only properties that are contained in the request are updated. Properties that shall be set to <code>NULL</code> must be explicitly set to to <code>null</code> in the request data.",
+            "operationId": "calculation-versionsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this calculation version",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "loadMasterdata",
+                    "in": "query",
+                    "description": "Parameter that specifies if the masterdata needs to be loaded",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "updateMasterdataTimestamp",
+                    "in": "query",
+                    "description": "Parameter that triggers masterdata timestamp update",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "compressedResult",
+                    "in": "query",
+                    "description": "Parameter that compresses the result for items to an object. It is only visible when used together with updateMasterdataTimestamp.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "returnLifecycle",
+                    "in": "query",
+                    "description": "Parameter that if set to false will return only the calculation versions without their associated lifecyle versions. Also the versions will have a new property HAS_LIFECYCLE with the values 0 for no lifecycles and 1 if it contains lifecycles. When set to true or if the parameter is not send the service will behave as it did in previous versions.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "omitItems",
+                    "in": "query",
+                    "description": "Parameter that sets the ITEMS as an empty array in the response. compressedResult must be false for omitItems to work.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Calculation version that needs to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsPutResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documentType"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },
+                {
+                    "Privileges.SALES_ORGANIZATION_READ": [
+                        "read:salesOrganization"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Creation, Saving, Opening or Closing a calculation version.",
+            "description": "Using parameter action with value create will create a new calculation with an initial calculation version and root item. The client POSTs a serialized calculation, calculation version and root item to the server, where as all the server generated Ids are set to -1 (undefined) and the server responds with a calculation, calculation version and root item with generated Id and all other server-generated values. When action is open or close it will open or close a calculation version. When action is save or save as it will save calculation version and in the save as case will ask for a new name. When action is copy, it will copy the selected calculation version",
+            "operationId": "calculation-versionsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Flag that indicates if a calculation is triggered for this calculation ",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "Parameter that specifies the id of calculation version affected by the action selected",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "loadMasterdata",
+                    "in": "query",
+                    "description": "Parameter that specifies if the masterdata is loaded",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "action",
+                    "in": "query",
+                    "description": "Parameter that specifies which action is performed: open, close, save, save as, copy or create",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "save",
+                        "save-as",
+                        "close",
+                        "copy",
+                        "create",
+                        "open",
+                        "freeze"
+                    ]
+                },
+                {
+                    "name": "compressedResult",
+                    "in": "query",
+                    "description": "Parameter that compresses the result for items to an object. It is only visible when used together with action=open.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "omitItems",
+                    "in": "query",
+                    "description": "Parameter that sets the ITEMS as an empty array in the response. compressedResult must be false for omitItems to work.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Calculation version that needs to be created",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsPostResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input. Following PLC error codes are possible: GENERAL_VALIDATION_ERROR if request content is invalid; CALCULATIONVERSION_IS_FROZEN_ERROR if calculation version if frozen; CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if calculation version is referenced in another calculation version, GENERAL_ENTITY_NOT_CURRENT_ERROR if a calculation is pending"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                },
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                },
+                {
+                    "Privileges.CALCULATION_VERSIONS_FREEZE": [
+                        "freeze:calculation-versions"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documentType"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },
+                {
+                    "Privileges.SALES_ORGANIZATION_READ": [
+                        "read:salesOrganization"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Delete calculation-versions",
+            "description": "",
+            "operationId": "calculation-versionsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Calculation version that is deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsDeleteBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsDeleteResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input. Following PLC error codes are possible: GENERAL_VALIDATION_ERROR if request content is invalid; CALCULATIONVERSION_IS_FROZEN_ERROR if calculation version if frozen; CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if calculation version is referenced in another calculation version; CALCULATIONVERSION_IS_SINGLE_ERROR if calculation version is the only one in the calculation; CALCULATIONVERSION_IS_STILL_OPENED_ERROR if calculation version is opened by another user(s); GENERAL_ENTITY_NOT_FOUND_ERROR if calculation version does not exist anymore; DELETE_CURRENT_VERSION_ERROR if calculation version is current in the calculation; LIFECYCLE_CALCULATIONVERSION_IS_STILL_OPENED_ERROR if any of lifecycle versions of the calculation version is opened by another user; LIFECYCLE_CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if any of lifecycle versions of the calculation version is referenced in another calculation version; GENERAL_ENTITY_PART_OF_CALCULATION_ERROR if calculation version is under calculation"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_DELETE": [
+                        "delete:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id": {
+        "get": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Gets a single calculation version",
+            "description": "Returns a single calculation version for the given id specified in the path variable. The items of the calculation version are included if the parameter expand=ITEMS is given (which is currently mandatory; might change in future).",
+            "operationId": "calculation-versionsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, which shall be retrieved",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "expand",
+                    "in": "query",
+                    "description": "Expands an association of the calculation version. Currently only the value \"ITEMS\" is allowed, which includes items in the response.",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "ITEMS"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsSingleGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        },
+        "patch": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Locks a single calculation version",
+            "description": "Locks a single calculation version for the given id specified in the path variable without the need to open the calculation version.",
+            "operationId": "calculation-versionsPatch",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, which shall be locked",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Defines (un)lock request",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsSinglePatchBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Request executed successfully"                    
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "417": {
+                    "description": "Expectation failed: the service was not able to process request as expected - no body content",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotWriteable"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id/lifecycles": {
+        "get": {
+            "tags": [
+                "calculation-versions"
+            ],
+            "summary": "Gets all lifecycle calculation versions for a given calculation version id",
+            "description": "Returns all lifecycle calculation versions for the given id specified in the path variable.",
+            "operationId": "lifecycle-versionsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which all lifecycle versions shall be retrieved",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculation_versions-definitions.json#/definitions/CalculationVersionsGetResponse"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,119 @@
+FUNCTION "sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_costing_sheet_w_costs_and_prices_cust" 
+(
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000)
+)
+RETURNS TABLE (
+	"PROJECT_ID" NVARCHAR (35), 
+	"CALCULATION_VERSION_ID" INTEGER, 
+	"ITEM_ID" NVARCHAR (22), 
+	"ITEM_CATEGORY_ID" INTEGER, 
+	"IS_LEAF" TINYINT, 
+	"IS_ROLLED_UP_VALUE" TINYINT, 
+	"IS_OVERHEAD_ROLLED_UP" TINYINT, 
+	"COSTING_SHEET_ROW_ID" NVARCHAR (5), 
+	"COSTING_SHEET_ROW_TYPE" NVARCHAR (20), 
+	"COSTING_SHEET_OVERHEAD_ROW_ID" INTEGER, 
+	"ACCOUNT_ID" NVARCHAR (10), 
+	"COST" DECIMAL (28, 7), 
+	"COST_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST2" DECIMAL (28, 7), 
+	"COST2_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST2_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"COST3" DECIMAL (28, 7), 
+	"COST3_FIXED_PORTION" DECIMAL (28, 7), 
+	"COST3_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"REPORT_CURRENCY_ID" NVARCHAR (3), 
+	"TOTAL_QUANTITY" DECIMAL (28, 7), 
+	"TOTAL_QUANTITY_UOM_ID" NVARCHAR (3), 
+	"TOTAL_COST_PER_UNIT" DECIMAL (28, 7),
+	"TOTAL_COST2_PER_UNIT" DECIMAL (28, 7),
+	"TOTAL_COST3_PER_UNIT" DECIMAL (28, 7),
+	"PRICE" DECIMAL (28, 7), 
+	"PRICE_FIXED_PORTION" DECIMAL (28, 7), 
+	"PRICE_VARIABLE_PORTION" DECIMAL (28, 7), 
+	"TRANSACTION_CURRENCY_ID" NVARCHAR (3), 
+	"PRICE_UNIT" DECIMAL (28, 7), 
+	"PRICE_UNIT_UOM_ID" NVARCHAR (3), 
+	"SURCHARGE" DECIMAL (28, 7),
+	"TARGET_COST" DECIMAL (28, 7), 
+	"TARGET_COST_CURRENCY_ID" NVARCHAR (3),
+	"BASE_QUANTITY" DECIMAL (28, 7), 
+	"BASE_QUANTITY_UOM_ID" NVARCHAR (3), 
+	"QUANTITY_PER_BASE_UNIT" DECIMAL (28, 7), 
+	"QUANTITY_PER_BASE_UNIT_UOM_ID" NVARCHAR (3),
+	"SALES_PRICE"  DECIMAL (28, 7), 
+	"SALES_PRICE_CURRENCY_ID" NVARCHAR (3), 
+	"PROJECT_SALES_PRICE" DECIMAL (28, 7), 
+	"PROJECT_SALES_PRICE_CURRENCY_ID" NVARCHAR (3), 
+	"TOTAL_QUANTITY_OF_VARIANTS" DECIMAL (28, 7)					
+	{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctList Item}}
+	{{/if}}
+)
+
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = SELECT
+		itemcosts.project_id,
+       	itemcosts.calculation_version_id,
+       	concat(itemcosts.calculation_version_id, concat('-', itemcosts.item_id)) as item_id,
+       	itemcosts.item_category_id, 
+	   	itemcosts.is_leaf,
+       	csvalues.is_rolled_up_value, 
+       	csvalues.is_overhead_rolled_up, 
+       	csvalues.costing_sheet_row_id,  
+       	csvalues.costing_sheet_row_type,
+       	csvalues.costing_sheet_overhead_row_id,
+	   	csvalues.account_id,        
+       	csvalues.cost, 
+       	csvalues.cost_fixed_portion, 
+		csvalues.cost_variable_portion, 
+		csvalues.cost2, 
+       	csvalues.cost2_fixed_portion, 
+		csvalues.cost2_variable_portion, 
+		csvalues.cost3, 
+       	csvalues.cost3_fixed_portion, 
+		csvalues.cost3_variable_portion, 
+		csvalues.report_currency_id,
+		csvalues.total_quantity,
+		csvalues.total_quantity_uom_id,
+		itemcosts.total_cost_per_unit,
+		itemcosts.total_cost2_per_unit,
+		itemcosts.total_cost3_per_unit,
+		itemcosts.price,
+		itemcosts.price_fixed_portion,
+		itemcosts.price_variable_portion,
+		itemcosts.transaction_currency_id,
+		itemcosts.price_unit,
+		itemcosts.price_unit_uom_id,
+		itemcosts.surcharge,
+		itemcosts.target_cost,
+		itemcosts.target_cost_currency_id,
+		itemcosts.base_quantity,
+		itemcosts.base_quantity_uom_id,
+		itemcosts.quantity_per_base_unit,
+		itemcosts.quantity_per_base_unit_uom_id,
+		itemcosts.sales_price,
+		itemcosts.sales_price_currency_id,
+		itemcosts.project_sales_price,
+		itemcosts.project_sales_price_currency_id,
+		itemcosts.total_quantity_of_variants
+		{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctSelect Item}}
+		{{/if}}
+FROM  "sap.plc.analytics.views.base::f_sql_meas_costing_sheet_w_costs_view" (:projectId, :versionId) csvalues
+    INNER JOIN (SELECT * FROM "sap.plc.analytics.views.base::f_sql_meas_item_costs_view"(:projectId, :versionId)) itemcosts
+		ON csvalues.calculation_version_id = itemcosts.calculation_version_id
+			AND csvalues.item_id = itemcosts.item_id
+	{{#if Item.customFields}}
+		LEFT OUTER JOIN {{t_extensionTable Item}} plcExtTable ON plcExtTable.item_id = csvalues.item_id AND plcExtTable.calculation_version_id = csvalues.calculation_version_id
+	{{/if}}
+;
+
+return :var_out;
+END;

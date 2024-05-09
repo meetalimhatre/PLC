@@ -1,0 +1,199 @@
+PROCEDURE "sap.plc.xs.postinstall.release_2_2_0::p_convert_chinese_language_identifier" ( ) 
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+lv_old_ZHCN NVARCHAR(11) DEFAULT 'ZH-CN';
+lv_old_ZHTW NVARCHAR(11) DEFAULT 'ZH-TW';
+lv_new_ZHHANS NVARCHAR(11) DEFAULT 'ZH-HANS';
+lv_new_ZHHANT NVARCHAR(11) DEFAULT 'ZH-HANT';
+
+
+BEGIN
+/*This procedure updates all PLC Text Tabels to the new Chinese Language IDENTIFIER and SETS TEXTS_MAINTAINABLE to 1 in t_language for the new entries*/
+
+
+UPDATE "sap.plc.db::basis.t_language" SET TEXTS_MAINTAINABLE = 1 WHERE LANGUAGE IN (lv_new_ZHHANT, lv_new_ZHHANS); 
+UPDATE "sap.plc.db::basis.t_language" SET TEXTS_MAINTAINABLE = 0 WHERE LANGUAGE IN (lv_old_ZHCN, lv_old_ZHTW);
+
+
+UPDATE  "sap.plc.db::basis.t_account__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_account__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;	
+
+UPDATE  "sap.plc.db::basis.t_account_group__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_account_group__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_activity_type__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_activity_type__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+
+UPDATE  "sap.plc.db::basis.t_business_area__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_business_area__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_process__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_process__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_confidence_level__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_confidence_level__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_company_code__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_company_code__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_component_split__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_component_split__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_controlling_area__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_controlling_area__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+  
+UPDATE  "sap.plc.db::basis.t_cost_center__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_cost_center__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_costing_sheet__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_costing_sheet__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+
+UPDATE  "sap.plc.db::basis.t_costing_sheet_row__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_costing_sheet_row__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_currency__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_currency__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_dimension__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_dimension__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_document__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_document__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_document_type__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_document_type__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_document_status__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_document_status__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_design_office__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_design_office__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+
+UPDATE  "sap.plc.db::basis.t_material__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_material__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_material_group__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_material_group__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_material_type__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_material_type__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_overhead_group__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_overhead_group__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_plant__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_plant__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_price_source__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_price_source__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_profit_center__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_profit_center__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_uom__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_uom__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_valuation_class__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_valuation_class__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_work_center__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_work_center__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_item_category__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_item_category__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+UPDATE  "sap.plc.db::basis.t_metadata__text"
+ SET LANGUAGE = lv_new_ZHHANS where LANGUAGE = lv_old_ZHCN;
+
+UPDATE  "sap.plc.db::basis.t_metadata__text"
+ SET LANGUAGE = lv_new_ZHHANT where LANGUAGE = lv_old_ZHTW;
+ 
+END;

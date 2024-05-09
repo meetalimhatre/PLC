@@ -1,0 +1,81 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout" 
+    xmlns:core="sap.ui.core">
+	<f:Form id="selectComparison"
+		editable="true">
+		<f:title>
+			<core:Title text="{i18n>XTIT_versionsTitle}" />
+		</f:title>
+		<f:layout>
+			<f:ResponsiveGridLayout
+				labelSpanXL="6"
+				labelSpanL="6"
+				labelSpanM="6"
+				labelSpanS="6"
+				adjustLabelSpan="false"
+				emptySpanXL="0"
+				emptySpanL="0"
+				emptySpanM="0"
+				emptySpanS="0"
+				columnsXL="3"
+				columnsL="3"
+				columnsM="3"
+				singleContainerFullSize="false" />
+		</f:layout>
+		<f:formContainers>
+			<f:FormContainer>
+				<f:formElements>
+					<f:FormElement id="PCV1">
+						<f:label>
+							<Label text="{i18n>XFLD_primaryCalculation}" class="sapMILILabel"/>
+						</f:label>
+						<f:fields>
+							<Input
+								id="CalVersionInput1"
+								placeholder="{i18n>XFLD_calulationInputPlaceHolder}"
+								showValueHelp="true"
+								showSuggestion="true"
+								valueHelpRequest=".onValueHelpRequest"
+								value="{view>/Version1}"
+								selectedKey="{view>/Version1ID}">
+							</Input>
+						</f:fields>
+					</f:FormElement>
+				</f:formElements>
+			</f:FormContainer>
+			<f:FormContainer>
+				<f:formElements>
+					<f:FormElement id="PCV2">
+						<f:label>
+							<Label text="{i18n>XFLD_secondaryCalculation}" class="sapMILILabel"/>
+						</f:label>
+						<f:fields>
+							<Input
+								id="CalVersionInput2"
+								placeholder="{i18n>XFLD_calulationInputPlaceHolder}"
+								showSuggestion="true"
+								showValueHelp="true"
+								valueHelpRequest=".onValueHelpRequest"
+								value="{view>/Version2}"
+								selectedKey="{view>/Version2ID}">
+							</Input>
+						</f:fields>
+					</f:FormElement>
+				</f:formElements>
+			</f:FormContainer>
+			<f:FormContainer>
+				<f:formElements>
+					<f:FormElement id="CompareBtn">
+						<f:fields>
+							<Button id="compare" busy="{view>/VersionBusy}"  
+							enabled="{= ${view>/Version1ID} !== '' &amp;&amp; ${view>/Version2ID} !== '' &amp;&amp; ${view>/Version1} !== '' &amp;&amp; ${view>/Version2} !== ''}"
+							text="{i18n>XBUT_compare}" type="Emphasized" press="onCompare" width="10rem"/>
+						</f:fields>
+					</f:FormElement>
+				</f:formElements>
+			</f:FormContainer>
+		</f:formContainers>
+	</f:Form>
+</core:FragmentDefinition>

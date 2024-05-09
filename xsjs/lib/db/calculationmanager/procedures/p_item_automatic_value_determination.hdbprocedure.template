@@ -1,0 +1,389 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_automatic_value_determination" (
+		IN iv_cv_id 				INTEGER,
+		IN iv_session_id 			NVARCHAR(50),
+		IN iv_reevaluate     			NVARCHAR(1),
+		IN iv_acc_det_reevaluate 	BOOLEAN, 
+		IN iv_update_masterdata 	BOOLEAN, 
+		OUT ot_items 				"sap.plc.db.calculationmanager.procedures::ts_item_temporary_with_masterdata_custom_fields" default empty,
+		OUT ot_messages 			"sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+declare 	lv_master_data_timestamp timestamp;
+declare		lv_controlling_area_id nvarchar(4);
+
+it_items = select 
+				SESSION_ID, ITEM_ID, CALCULATION_VERSION_ID, PARENT_ITEM_ID, PREDECESSOR_ITEM_ID, IS_ACTIVE, HIGHLIGHT_GREEN, HIGHLIGHT_ORANGE, HIGHLIGHT_YELLOW,  ITEM_CATEGORY_ID,CHILD_ITEM_CATEGORY_ID, 
+				ITEM_DESCRIPTION, REFERENCED_CALCULATION_VERSION_ID, ACCOUNT_ID, DETERMINED_ACCOUNT_ID, DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, 
+				DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID, MATERIAL_ID, MATERIAL_TYPE_ID, MATERIAL_GROUP_ID, IS_PHANTOM_MATERIAL, 
+				IS_CONFIGURABLE_MATERIAL, MATERIAL_SOURCE, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, PURCHASING_GROUP, PURCHASING_DOCUMENT, LOCAL_CONTENT, 
+				ACTIVITY_TYPE_ID, PROCESS_ID, LOT_SIZE, LOT_SIZE_CALCULATED, LOT_SIZE_IS_MANUAL, 
+				ENGINEERING_CHANGE_NUMBER_ID, COMPANY_CODE_ID, COST_CENTER_ID, 
+				PLANT_ID, WORK_CENTER_ID, WORK_CENTER_CATEGORY, EFFICIENCY, BUSINESS_AREA_ID, PROFIT_CENTER_ID, QUANTITY, QUANTITY_CALCULATED, 
+				QUANTITY_IS_MANUAL, QUANTITY_UOM_ID, TOTAL_QUANTITY, TOTAL_QUANTITY_UOM_ID, TOTAL_QUANTITY_DEPENDS_ON, 
+				IS_RELEVANT_TO_COSTING_IN_ERP, BASE_QUANTITY, BASE_QUANTITY_CALCULATED, BASE_QUANTITY_IS_MANUAL, QUANTITY_PER_BASE_UNIT, 
+				QUANTITY_PER_BASE_UNIT_UOM_ID, PRICE_FIXED_PORTION, PRICE_FIXED_PORTION_CALCULATED, PRICE_FIXED_PORTION_IS_MANUAL, 
+				PRICE_VARIABLE_PORTION, PRICE_VARIABLE_PORTION_CALCULATED, PRICE_VARIABLE_PORTION_IS_MANUAL, PRICE, TRANSACTION_CURRENCY_ID, 
+				PRICE_UNIT, PRICE_UNIT_CALCULATED, PRICE_UNIT_IS_MANUAL, PRICE_UNIT_UOM_ID, IS_PRICE_SPLIT_ACTIVE, IS_DISABLING_ACCOUNT_DETERMINATION, 
+				PRICE_ID, CONFIDENCE_LEVEL_ID, PRICE_SOURCE_ID, PRICE_SOURCE_TYPE_ID, SURCHARGE,
+				IS_DISABLING_PRICE_DETERMINATION, VENDOR_ID, TARGET_COST, TARGET_COST_CALCULATED, TARGET_COST_IS_MANUAL, TARGET_COST_CURRENCY_ID, 
+				CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, 
+				PRICE_FOR_TOTAL_QUANTITY, PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION, 
+				PRICE_FOR_TOTAL_QUANTITY2, PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION, 
+				PRICE_FOR_TOTAL_QUANTITY3, PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION, PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION, 
+				OTHER_COST, OTHER_COST_FIXED_PORTION, OTHER_COST_VARIABLE_PORTION, 
+				TOTAL_COST, TOTAL_COST_FIXED_PORTION, TOTAL_COST_VARIABLE_PORTION, 
+				TOTAL_COST2, TOTAL_COST2_FIXED_PORTION, TOTAL_COST2_VARIABLE_PORTION, 
+				TOTAL_COST3, TOTAL_COST3_FIXED_PORTION, TOTAL_COST3_VARIABLE_PORTION, 
+				COMMENT, IS_DIRTY, IS_DELETED,
+				TOTAL_COST_PER_UNIT_FIXED_PORTION, TOTAL_COST_PER_UNIT_VARIABLE_PORTION, TOTAL_COST_PER_UNIT, 
+				TOTAL_COST2_PER_UNIT_FIXED_PORTION, TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, TOTAL_COST2_PER_UNIT, 
+				TOTAL_COST3_PER_UNIT_FIXED_PORTION, TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, TOTAL_COST3_PER_UNIT, 
+				TOTAL_QUANTITY_OF_VARIANTS, BOM_COMPARE_KEY
+				{{masterdataCustomFields Item}} 
+		   from "sap.plc.db::basis.gtt_item_temporary_with_masterdata_custom_fields"
+		   		where calculation_version_id = :iv_cv_id and session_id = :iv_session_id;
+
+if is_empty(:it_items) then
+	return;
+end if;
+
+-- Wrapping procedure that combines the call of:
+--		1. p_item_determine_dependent_fields => set the values that depend on other values for an item
+--		2. p_item_price_determination => automatic price determination depending on selected price source for input items
+--		3. p_item_account_determination => automatic account determination for items if possible
+
+-- The subsequent procedures are only executed if all the necessary data for processing can be selected from t_calculation and t_calcualtion_version_temporary.
+-- The procedure returns without failure and just with an empty result set if this is the case. In some scenarios as "create calculation" where this procedure
+-- is used as well, the prerequisites are not fulfilled, but there shall be no additional code to bypass this procedure.
+
+-- ################################################################################################################
+-- 		0. check prerequisites
+-- ################################################################################################################
+-- the subsequent procedures can only be invoked if a controlling area (project-level), master data timestamp and valuation date (version level) are
+-- defined; in order to have a more robust implementation first 3 statements are checking if the necessary data is available and returns immediately if this
+-- is not the case (with a select from "sap.plc.db::DUMMY")
+lt_cv_data = 	select  version.master_data_timestamp, version.valuation_date, version.report_currency_id, project.controlling_area_id,
+						project.project_id, version.customer_id, version.material_price_strategy_id, version.activity_price_strategy_id
+					from "sap.plc.db::basis.t_calculation_version_temporary" as version
+					inner join "sap.plc.db::basis.t_calculation" as calculation
+						on 	calculation.calculation_id = version.calculation_id
+						and	version.calculation_version_id = :iv_cv_id
+						and	version.session_id = :iv_session_id
+					inner join "sap.plc.db::basis.t_project" as project
+						on project.project_id = calculation.project_id;
+
+if is_empty(:lt_cv_data) then
+	return;
+end if;
+
+lv_master_data_timestamp = :lt_cv_data.master_data_timestamp[1];
+lv_controlling_area_id = :lt_cv_data.controlling_area_id[1];
+
+-- ################################################################################################################
+-- 		1. set dependent fields
+-- ################################################################################################################
+
+-- set dependent fields
+lt_dependent_fields_input = 	select 	item_id,
+										item_description,
+										item_category_id,
+										material_id,
+										material_type_id,
+										material_group_id,
+										is_phantom_material,
+										is_configurable_material,
+										document_type_id,
+										document_id,
+										document_version,
+										document_part,
+										document_status_id,
+										plant_id,
+										work_center_id,
+										work_center_category,
+										efficiency,
+										company_code_id,
+										overhead_group_id,
+										valuation_class_id,
+										design_office_id,
+										cost_center_id,
+										activity_type_id,
+										process_id
+										{{masterdataCustomFields Cost_Center}}
+										{{masterdataCustomFields Material}}	
+										{{masterdataCustomFields Material_Plant}}
+										{{masterdataCustomFields Work_Center}}
+								from :it_items;
+
+call 	"sap.plc.db.calculationmanager.procedures::p_item_determine_dependent_fields"
+		(
+			:lt_dependent_fields_input,
+			:iv_cv_id,
+			:iv_session_id,
+			:lv_master_data_timestamp,
+			:lv_controlling_area_id,
+			:iv_reevaluate,
+			:iv_update_masterdata,
+			:lt_set_dependent_fields_output,
+			:lt_set_dependent_fields_messages
+		);
+
+-- ################################################################################################################
+-- 		2. price determination
+-- ################################################################################################################
+
+-- assumes that all the material are copied in t_material => must be executed after copy masterdata
+
+lt_price_determination_input = 	select	items.item_id,
+										items.parent_item_id,
+										items.item_category_id,
+										dependent_fields.material_id as material_id,
+										dependent_fields.plant_id as plant_id,
+										items.vendor_id,
+										items.activity_type_id,
+										dependent_fields.cost_center_id as cost_center_id,
+										items.price_source_id,
+										items.price_source_type_id, 
+										items.is_price_split_active, 
+										items.price_id,
+										items.confidence_level_id, 
+										items.price_fixed_portion,
+										items.price_variable_portion,
+										items.transaction_currency_id,
+										items.price_unit,
+										items.price_unit_uom_id,
+										items.is_disabling_price_determination,
+										items.purchasing_group,
+										items.purchasing_document,
+										items.local_content
+										{{masterdataCustomFieldsWithPrefix Material_Price 'items'}}
+										{{masterdataCustomFieldsWithPrefix Activity_Price 'items'}}
+								 from :it_items as items
+								 	inner join :lt_set_dependent_fields_output as dependent_fields
+										on items.item_id = dependent_fields.item_id;
+										
+call 	"sap.plc.db.calculationmanager.procedures::p_item_price_determination"
+		(
+			:lt_price_determination_input,
+			:iv_cv_id,
+			:iv_session_id,
+			:lt_cv_data,
+			:iv_reevaluate,
+			:lt_price_determination_output,
+			:lt_price_determination_messages
+		);
+
+-- ################################################################################################################
+-- 		3. account determination
+-- ################################################################################################################
+-- account determination is skipped for items that have field is_disabling_account_determination true (value 1)
+
+lt_account_determination_input = select	items.item_id,
+										items.item_category_id,
+										dependent_fields.material_id,
+										dependent_fields.material_type_id,
+										dependent_fields.valuation_class_id,
+										dependent_fields.plant_id,
+										items.activity_type_id,
+										items.process_id,
+										items.is_disabling_account_determination
+								 from :it_items as items
+								 	inner join :lt_set_dependent_fields_output as dependent_fields
+										on items.item_id = dependent_fields.item_id
+								 where ( items.is_disabling_account_determination  = 0 or  items.is_disabling_account_determination is null);
+
+if not is_empty(:lt_account_determination_input) then
+	call 	"sap.plc.db.calculationmanager.procedures::p_item_account_determination"
+			(
+				it_items => :lt_account_determination_input,
+				iv_session_id => :iv_session_id,
+				iv_cv_id => :iv_cv_id,
+				iv_controlling_area_id => :lv_controlling_area_id,
+				iv_master_data_timestamp => :lv_master_data_timestamp,
+				iv_reevaluate => iv_acc_det_reevaluate,
+				ot_accounts => :lt_account_determination_output,
+				ot_messages => :lt_account_determimation_messages
+			);
+end if;
+
+
+-- ################################################################################################################
+-- 		4. assemble output
+-- ################################################################################################################
+ot_items = 	select 	items.session_id,
+					items.item_id,
+					items.calculation_version_id,
+					items.parent_item_id,
+					items.predecessor_item_id,
+					items.is_active,
+					items.highlight_green,
+					items.highlight_orange,
+					items.highlight_yellow,
+					items.item_category_id,
+					items.child_item_category_id,
+					items.referenced_calculation_version_id,
+					case															-- through outer join accounts.* is null when :lt_account_determination_output has no matching entry
+						when accounts.item_id is not null then accounts.account_id  -- (=> means no account was determined for item); because account det could also reset account information
+						else items.account_id										-- (accounts.account_id is null), we test for accounts.item_id, to pick existing account info from items.* here
+					end as account_id,
+					ifnull(accounts.account_id, items.determined_account_id) as determined_account_id,
+					dependent_fields.document_type_id as document_type_id,
+					dependent_fields.document_id as document_id,
+					dependent_fields.document_version as document_version,
+					dependent_fields.document_part as document_part,
+					dependent_fields.document_status_id as document_status_id,
+					dependent_fields.design_office_id as design_office_id,
+					dependent_fields.material_id,
+					dependent_fields.material_type_id as material_type_id,
+					dependent_fields.material_group_id as material_group_id,
+					dependent_fields.is_phantom_material as is_phantom_material,
+					dependent_fields.is_configurable_material as is_configurable_material,
+					items.material_source,
+					dependent_fields.overhead_group_id as overhead_group_id,
+					dependent_fields.valuation_class_id as valuation_class_id,
+					case															
+						when prices.item_id is not null then prices.purchasing_group 
+						else items.purchasing_group										
+					end as purchasing_group, 
+					case															
+						when prices.item_id is not null then prices.purchasing_document 
+						else items.purchasing_document										
+					end as purchasing_document, 
+					case															
+						when prices.item_id is not null then prices.local_content 
+						else items.local_content										
+					end as local_content, 
+					items.activity_type_id,
+					items.process_id,
+					items.lot_size,
+					items.lot_size_calculated,
+					items.lot_size_is_manual,
+					items.engineering_change_number_id,
+					dependent_fields.company_code_id as company_code_id,
+					dependent_fields.cost_center_id as cost_center_id,
+					dependent_fields.plant_id as plant_id,
+					items.work_center_id,
+					dependent_fields.work_center_category as work_center_category,
+					dependent_fields.efficiency as efficiency,
+					items.business_area_id,
+					items.profit_center_id,
+					items.quantity,
+					items.quantity_calculated,
+					items.quantity_is_manual,
+					items.quantity_uom_id,
+					items.total_quantity,
+					items.total_quantity_uom_id,
+					items.total_quantity_depends_on,
+					items.is_relevant_to_costing_in_erp,
+					items.base_quantity, 
+					items.base_quantity_calculated, 
+					items.base_quantity_is_manual, 
+					items.quantity_per_base_unit, 
+					items.quantity_per_base_unit_uom_id,
+					ifnull(prices.price_fixed_portion,items.price_fixed_portion) as price_fixed_portion,
+					items.price_fixed_portion_calculated,
+					items.price_fixed_portion_is_manual,
+					ifnull(prices.price_variable_portion, items.price_variable_portion) as price_variable_portion,
+					items.price_variable_portion_calculated,
+					items.price_variable_portion_is_manual,
+					items.price,
+					ifnull(prices.transaction_currency_id, items.transaction_currency_id) as transaction_currency_id,
+					ifnull(prices.price_unit, items.price_unit) as price_unit,
+					items.price_unit_calculated,
+					items.price_unit_is_manual,
+					ifnull(prices.price_unit_uom_id, items.price_unit_uom_id) as price_unit_uom_id,
+					case
+						when items.is_disabling_price_determination = 1 or prices.is_price_split_active is null
+							then items.is_price_split_active
+						else prices.is_price_split_active
+					end as is_price_split_active,
+					items.is_disabling_account_determination,
+					prices.price_id,
+					case															
+						when prices.item_id is not null then prices.confidence_level_id 
+						else items.confidence_level_id										
+					end as confidence_level_id, 
+					ifnull(prices.price_source_id, items.price_source_id) as price_source_id,
+					ifnull(prices.price_source_type_id, items.price_source_type_id) as price_source_type_id,
+                    case when prices.item_id is not null
+                        then null
+                        else items.surcharge
+                    end as surcharge,
+					items.is_disabling_price_determination,
+					case
+						when prices.vendor_id = ''
+							then items.vendor_id
+						else prices.vendor_id
+					end as vendor_id,
+					items.target_cost,
+					items.target_cost_calculated,
+					items.target_cost_is_manual,
+					items.target_cost_currency_id,
+					items.created_on,
+					items.created_by,
+					items.last_modified_on,
+					items.last_modified_by,
+					items.price_for_total_quantity,
+					items.price_for_total_quantity_fixed_portion,
+					items.price_for_total_quantity_variable_portion,
+					items.price_for_total_quantity2,
+					items.price_for_total_quantity2_fixed_portion,
+					items.price_for_total_quantity2_variable_portion,
+					items.price_for_total_quantity3,
+					items.price_for_total_quantity3_fixed_portion,
+					items.price_for_total_quantity3_variable_portion,
+					items.other_cost,
+					items.other_cost_fixed_portion,
+					items.other_cost_variable_portion,
+					items.total_cost,
+					items.total_cost_fixed_portion,
+					items.total_cost_variable_portion,
+					items.total_cost2,
+					items.total_cost2_fixed_portion,
+					items.total_cost2_variable_portion,
+					items.total_cost3,
+					items.total_cost3_fixed_portion,
+					items.total_cost3_variable_portion,
+					case
+							when items.item_category_id = 1 or items.item_category_id = 2 or  items.item_category_id = 3 or  items.item_category_id = 4 or items.item_category_id = 5 or items.item_category_id = 6  then dependent_fields.item_description  -- for item category: Document, Material, Internal Activity, External Activity, Process or Subcontracting
+							else items.item_description	
+					end as item_description,
+					items.comment,
+					items.is_dirty,
+					items.is_deleted,
+					items.TOTAL_COST_PER_UNIT_FIXED_PORTION,  
+					items.TOTAL_COST_PER_UNIT_VARIABLE_PORTION,  
+					items.TOTAL_COST_PER_UNIT,
+					items.TOTAL_COST2_PER_UNIT_FIXED_PORTION,  
+					items.TOTAL_COST2_PER_UNIT_VARIABLE_PORTION,  
+					items.TOTAL_COST2_PER_UNIT,
+					items.TOTAL_COST3_PER_UNIT_FIXED_PORTION,  
+					items.TOTAL_COST3_PER_UNIT_VARIABLE_PORTION,  
+					items.TOTAL_COST3_PER_UNIT,
+					items.TOTAL_QUANTITY_OF_VARIANTS,
+					items.BOM_COMPARE_KEY
+					{{masterdataCustomFieldsWithPrefix Activity_Price 'prices'}}
+					{{masterdataCustomFieldsWithPrefix Cost_Center 'dependent_fields'}}		
+					{{masterdataCustomFieldsWithPrefix Material 'dependent_fields'}}	
+					{{masterdataCustomFieldsWithPrefix Material_Plant 'dependent_fields'}}
+					{{masterdataCustomFieldsWithPrefix Material_Price 'prices'}}
+					{{masterdataCustomFieldsWithPrefix Work_Center 'dependent_fields'}}				
+			from :it_items as items
+				left outer join :lt_price_determination_output as prices
+					on items.item_id = prices.item_id
+				left outer join :lt_account_determination_output as accounts
+					on items.item_id = accounts.item_id
+				left outer join :lt_set_dependent_fields_output as dependent_fields
+					on items.item_id = dependent_fields.item_id;
+
+ot_messages = 	select * from :lt_price_determination_messages
+				union all
+				select * from :lt_account_determimation_messages
+				union all
+				select * from :lt_set_dependent_fields_messages;
+END;
+
+

@@ -1,0 +1,34 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core" displayBlock="true" height="100%">
+	<Page id="homeTitle" title="{i18n>XTIT_homeTitle}">
+		<content>
+			<VBox>
+				<Panel expandable="true" headerText="{i18n>XMIT_configListItem}" width="auto" class="sapUiResponsiveMargin">
+					<content>
+						<Text text="{i18n>XFLD_configInfoText}" />
+					</content>
+				</Panel>
+				<Panel expandable="true" headerText="{i18n>XMIT_scheduleListItem}" width="auto" class="sapUiResponsiveMargin">
+					<content>
+						<Text text="{i18n>XFLD_scheduleInfoText}" />
+					</content>
+				</Panel>
+				<Panel expandable="true" headerText="{i18n>XMIT_logsListItem}" width="auto" class="sapUiResponsiveMargin">
+					<content>
+						<Text text="{i18n>XFLD_logsInfoText}" />
+					</content>
+				</Panel>
+				<Panel expandable="true" headerText="{i18n>XMIT_statisticsListItem}" width="auto" class="sapUiResponsiveMargin">
+					<content>
+						<Text text="{i18n>XFLD_statisticsInfoText}" />
+					</content>
+				</Panel>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

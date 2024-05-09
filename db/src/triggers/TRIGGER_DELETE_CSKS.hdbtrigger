@@ -1,0 +1,16 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_CSKS" AFTER DELETE ON "sap.plc.db::repl.csks"
+REFERENCING OLD ROW OLDROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+if ( :OLDROW."DATBI" >= TO_DATS(CURRENT_DATE) ) THEN
+    UPDATE "sap.plc.db::basis.t_cost_center"
+        SET _VALID_TO = :lv_current_utctimestamp  
+        WHERE "sap.plc.db::basis.t_cost_center"."CONTROLLING_AREA_ID" = :OLDROW."KOKRS"
+            AND "sap.plc.db::basis.t_cost_center"."COST_CENTER_ID" = :OLDROW."KOSTL" 
+            AND "sap.plc.db::basis.t_cost_center"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_cost_center"."_VALID_TO" IS NULL;
+END IF;
+end 
+;

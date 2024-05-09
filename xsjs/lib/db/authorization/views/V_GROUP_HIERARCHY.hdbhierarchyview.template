@@ -1,0 +1,12 @@
+COLUMN VIEW "sap.plc.db.authorization.views::auth.V_GROUP_HIERARCHY" TYPE HIERARCHY AS 
+SELECT 
+	u.USERGROUP_ID AS succ, 
+	uu.PARENT_USERGROUP_ID AS pred 
+FROM 
+	"sap.plc.db::auth.t_usergroup" AS u
+LEFT OUTER JOIN
+	"sap.plc.db::auth.t_usergroup_usergroup" as uu
+ON u.USERGROUP_ID = uu.CHILD_USERGROUP_ID
+WITH PARAMETERS ( 'hierarchyDefinition' = '{ "multiParent":true }' );
+
+

@@ -1,0 +1,96 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_controlling_area" (
+    IN INPUT_TABLE TABLE (
+    	"CONTROLLING_AREA_ID" NVARCHAR(4),
+    	"CONTROLLING_AREA_CURRENCY_ID" NVARCHAR(3),
+    	"_SOURCE" TINYINT
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+        SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+    
+        SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";
+        
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+		TABLE_NAME,
+		OPERATION,
+		RUN_ID
+    )-- check if the MAIN OBJECT is existing (no other checks needed, since done on the main object)
+        select 
+            'CONTROLLING_AREA_CURRENCY_ID'                                                          as FIELD_NAME ,
+            it.CONTROLLING_AREA_CURRENCY_ID                                                         as FIELD_VALUE,
+            'Unknown Currency ID for Controlling Area ID ' || it.CONTROLLING_AREA_ID                as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                                 as MESSAGE_TIME ,
+            'ERROR'                                                                                 as MESSAGE_TYPE ,
+            't_controlling_area'                                                                    as TABLE_NAME,
+            'Replication_Update'                                                                    as OPERATION,
+			:lv_run_id                                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where it.CONTROLLING_AREA_CURRENCY_ID not in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null )
+    ;
+    
+    lt_update_records =
+        select CONTROLLING_AREA_ID, CONTROLLING_AREA_CURRENCY_ID, _SOURCE
+        from 
+        (select *, 
+            Count(*) OVER (PARTITION BY CONTROLLING_AREA_ID) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore not existing Currency
+        and (it.CONTROLLING_AREA_CURRENCY_ID is null or it.CONTROLLING_AREA_CURRENCY_ID in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is  null) )
+            -- ignore unchanged records 
+          --and (it.CONTROLLING_AREA_ID, IFNULL(it.CONTROLLING_AREA_CURRENCY_ID,''), it._SOURCE) 
+          --    not in 
+          except    
+              (select CONTROLLING_AREA_ID, CONTROLLING_AREA_CURRENCY_ID, _SOURCE
+                    from "sap.plc.db::basis.t_controlling_area" as std
+                    where _VALID_TO IS NULL
+                    AND std.CONTROLLING_AREA_ID in (select CONTROLLING_AREA_ID from :INPUT_TABLE));
+    
+    SELECT COUNT(CONTROLLING_AREA_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_controlling_area" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      CONTROLLING_AREA_ID
+    		      in (select CONTROLLING_AREA_ID
+    			      from :lt_update_records as upd 
+    		      )
+    			  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- inser the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_controlling_area" 
+    		(CONTROLLING_AREA_ID, CONTROLLING_AREA_CURRENCY_ID , _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select CONTROLLING_AREA_ID, CONTROLLING_AREA_CURRENCY_ID, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+    
+END

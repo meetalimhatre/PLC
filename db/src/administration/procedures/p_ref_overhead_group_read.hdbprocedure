@@ -1,0 +1,33 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_overhead_group_read" ( 
+	 	IN iv_logon_language         NVARCHAR(11),	
+	    IN iv_master_data_timestamp  TIMESTAMP,
+		IN ot_overhead_group_key     "sap.plc.db.administration::masterdata.tt_overhead_group_key",
+        OUT ot_overhead_group        "sap.plc.db.administration::masterdata.tt_overhead_group" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+ 	ot_overhead_group =					
+					select
+						plcTable.OVERHEAD_GROUP_ID,
+						plcTable.PLANT_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE,
+						plcTable._CREATED_BY,
+						null AS _VALID_FROM_FIRST_VERSION,
+						null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.OVERHEAD_GROUP_DESCRIPTION
+					from "sap.plc.db::basis.t_overhead_group" as plcTable
+					left outer join "sap.plc.db::basis.t_overhead_group__text" as plcTextTable
+						on  plcTable.OVERHEAD_GROUP_ID = plcTextTable.OVERHEAD_GROUP_ID
+						and plcTable.PLANT_ID = plcTextTable.PLANT_ID
+						and plcTextTable.LANGUAGE = :iv_logon_language
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+						and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+					where plcTable._VALID_FROM <= :iv_master_data_timestamp
+						and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+						and ( plcTable.OVERHEAD_GROUP_ID, plcTable.PLANT_ID) in (select  OVERHEAD_GROUP_ID, PLANT_ID from :ot_overhead_group_key);	
+END;

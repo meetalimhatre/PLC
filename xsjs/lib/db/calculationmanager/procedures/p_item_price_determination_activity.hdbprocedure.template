@@ -1,0 +1,202 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_price_determination_activity" ( 
+		IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN it_calculation_version       "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",
+        OUT ot_all_prices 	    		"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_all_prices_activity_input_output" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+	
+	lc_activity_price INTEGER DEFAULT 2;
+	lc_wildcard 	  NVARCHAR(1) DEFAULT '*';
+	lc_reference_currency_eur NVARCHAR(3) DEFAULT 'EUR';
+	lv_sql nvarchar(300);
+	lv_first_criteria nvarchar(30);
+	lv_second_criteria nvarchar(30);
+	lv_third_criteria nvarchar(30);
+	lv_fourth_criteria nvarchar(30);
+	lv_fifth_criteria nvarchar(30);
+	lv_sixth_criteria nvarchar(30);
+	
+BEGIN
+ declare		lv_controlling_area_id nvarchar(4);
+ declare		lv_project_id nvarchar(35);
+ declare 	    lv_master_data_timestamp timestamp;
+ declare		lv_valuation_date date;
+ declare		lv_customer_id nvarchar(10);
+ declare 	    lv_activity_price_strategy_id nvarchar(20);
+
+ lv_controlling_area_id   =   :it_calculation_version.controlling_area_id[1];
+ lv_project_id            =   :it_calculation_version.project_id[1];
+ lv_master_data_timestamp =   :it_calculation_version.master_data_timestamp[1];
+ lv_valuation_date        =   :it_calculation_version.valuation_date[1];
+ lv_customer_id           =   :it_calculation_version.customer_id[1];
+ lv_activity_price_strategy_id = :it_calculation_version.activity_price_strategy_id[1];
+
+/****************************************************************** 
+	Price Determination 
+ ******************************************************************/
+-- Procedure used to determine/select activity prices for several items. 
+--
+-- Prerequisites: items should be leaves
+-- Input:  
+-- 		- it_items => table type of items for which activity prices should be determined
+--      - it_calculation_version => table structure that contains columns from t_calculation_version_temporary. This structure contains all the needed information:
+--			- lv_controlling_area_id => controlling area of the calculation
+--			- lv_project_id => project_id
+--			- lv_master_data_timestamp => masterdata timestamp of the calculation version
+--			- lv_valuation_date => valuation date of the calculation version
+--			- lv_customer_id => customer_id
+--          - lv_activity_price_strategy_id => activity_price_strategy_id of the version that is used later to obtain prices
+--				 
+-- Output:
+--		- ot_all_prices => contains all determined activity prices
+--
+-- Logic:
+--1. Get all the price sources for activities ( price_source_type_id = 2 )
+--2. Determine all the activity prices
+--3. Get the filters (Cost Centers and Activity Types) for the current Controlling Area
+--4. Apply the filters on determined activity prices
+
+/***************************** 
+	Get activity prices for items 
+ *****************************/
+
+-- Get all price determination sources of type activity that have their price_determination_strategy_id equal to activity_price_strategy_id set on version level
+lt_activity_price_strategy_sources = select  determination_strategy.price_source_id, determination_strategy.price_source_type_id,
+											 determination_strategy.determination_sequence, price_source.confidence_level_id 
+											from "sap.plc.db::basis.t_price_determination_strategy_price_source" as determination_strategy
+										inner join 	"sap.plc.db::basis.t_price_determination_strategy" as price_determination
+											on determination_strategy.PRICE_DETERMINATION_STRATEGY_ID = price_determination.PRICE_DETERMINATION_STRATEGY_ID
+											and determination_strategy.PRICE_DETERMINATION_STRATEGY_TYPE_ID = price_determination.PRICE_DETERMINATION_STRATEGY_TYPE_ID
+										inner join "sap.plc.db::basis.t_price_source" as price_source
+											on determination_strategy.PRICE_SOURCE_ID = price_source.PRICE_SOURCE_ID
+											and determination_strategy.PRICE_SOURCE_TYPE_ID = price_source.PRICE_SOURCE_TYPE_ID
+										where determination_strategy.price_determination_strategy_type_id = lc_activity_price
+										and determination_strategy.price_determination_strategy_id = :lv_activity_price_strategy_id;
+					
+-- Join the items and the prices and apply all the filters (filters: COST_CENTER_ID, ACTIVITY_TYPE_ID)
+-- Select all Cost Centers for the current Controlling Area
+lt_cost_centers = select cost.COST_CENTER_ID, cost.CONTROLLING_AREA_ID
+					from "sap.plc.db::basis.t_cost_center" as cost
+					where cost._VALID_FROM <= :lv_master_data_timestamp and (cost._VALID_TO > :lv_master_data_timestamp or cost._VALID_TO is null)
+					and cost.CONTROLLING_AREA_ID = :lv_controlling_area_id;
+
+-- Select all Activity types for the current Controlling Area
+lt_activity_type = select activity_type.ACTIVITY_TYPE_ID, activity_type.CONTROLLING_AREA_ID
+						from "sap.plc.db::basis.t_activity_type" as activity_type
+					where activity_type._VALID_FROM <= :lv_master_data_timestamp and (activity_type._VALID_TO > :lv_master_data_timestamp or activity_type._VALID_TO is null)
+					and activity_type.CONTROLLING_AREA_ID = :lv_controlling_area_id;
+
+lt_all_activity_prices = select activity.PRICE_ID, activity.PRICE_SOURCE_ID, activity.CONTROLLING_AREA_ID, activity.COST_CENTER_ID, activity.ACTIVITY_TYPE_ID, 
+							activity.PROJECT_ID, activity.VALID_FROM, activity.CUSTOMER_ID, activity.VALID_TO, activity.VALID_FROM_QUANTITY, activity.VALID_TO_QUANTITY, 
+							activity.PRICE_FIXED_PORTION, activity.PRICE_VARIABLE_PORTION, activity.TRANSACTION_CURRENCY_ID, 
+							activity.PRICE_UNIT, activity.PRICE_UNIT_UOM_ID,
+                            activity._VALID_FROM_FIRST_VERSION, activity._CREATED_BY_FIRST_VERSION,
+							case  when price_components.price_id is not null then activity.IS_PRICE_SPLIT_ACTIVE else 0
+                            end as IS_PRICE_SPLIT_ACTIVE,
+							activity._VALID_FROM, activity._VALID_TO, activity._SOURCE,
+							price_strategy_source.CONFIDENCE_LEVEL_ID, price_strategy_source.DETERMINATION_SEQUENCE, price_strategy_source.PRICE_SOURCE_TYPE_ID
+							{{masterdataCustomFieldsWithPrefix Activity_Price 'plcExtTable'}}
+						 from "sap.plc.db::basis.t_activity_price" as activity
+						 inner join :lt_activity_price_strategy_sources as price_strategy_source
+							on price_strategy_source.PRICE_SOURCE_ID = activity.PRICE_SOURCE_ID
+						 left outer join {{t_extensionTable Activity_Price}} as plcExtTable ON
+						    activity.PRICE_ID = plcExtTable.PRICE_ID 
+					        and activity._VALID_FROM = plcExtTable._VALID_FROM
+						 left outer join (SELECT DISTINCT components.PRICE_ID, components._VALID_FROM
+                                    	from "sap.plc.db::basis.t_price_component" as components  
+	                               			 inner join  "sap.plc.db::basis.t_activity_price" as activity_price
+	                               			 on activity_price.PRICE_ID = components.PRICE_ID
+											 and activity_price._VALID_FROM = components._VALID_FROM	
+										     and components.CONTROLLING_AREA_ID = :lv_controlling_area_id
+									) as price_components
+									on 	activity.PRICE_ID = price_components.PRICE_ID and activity._VALID_FROM = price_components._VALID_FROM	
+						 where activity.VALID_FROM <= :lv_valuation_date 
+							and (activity.VALID_TO >= :lv_valuation_date or activity.VALID_TO is null)
+							and activity._VALID_FROM <= :lv_master_data_timestamp
+							and (activity._VALID_TO > :lv_master_data_timestamp or activity._VALID_TO is null)
+							and (activity.PROJECT_ID in (:lc_wildcard, :lv_project_id))
+							and (activity.CONTROLLING_AREA_ID in (:lc_wildcard, :lv_controlling_area_id))
+							and (activity.CUSTOMER_ID in (:lc_wildcard, :lv_customer_id));
+
+-- Apply all filters on Activity Prices
+lt_filtered_activity_prices = select activity_prices.PRICE_ID, item.ITEM_ID, item.IS_DISABLING_PRICE_DETERMINATION,
+							activity_prices.PRICE_SOURCE_ID,
+							nullif(activity_prices.CONTROLLING_AREA_ID, :lc_wildcard) as CONTROLLING_AREA_ID,
+							nullif(activity_prices.COST_CENTER_ID, :lc_wildcard) as COST_CENTER_ID,
+							nullif(activity_prices.ACTIVITY_TYPE_ID, :lc_wildcard) as ACTIVITY_TYPE_ID,
+							nullif(activity_prices.PROJECT_ID, :lc_wildcard) as PROJECT_ID,
+							nullif(activity_prices.CUSTOMER_ID, :lc_wildcard) as CUSTOMER_ID,
+							activity_prices.VALID_FROM, activity_prices.VALID_TO, activity_prices.VALID_FROM_QUANTITY, activity_prices.VALID_TO_QUANTITY, 
+							activity_prices.PRICE_FIXED_PORTION, activity_prices.PRICE_VARIABLE_PORTION, activity_prices.TRANSACTION_CURRENCY_ID, 
+							activity_prices.PRICE_UNIT, activity_prices.PRICE_UNIT_UOM_ID, activity_prices.IS_PRICE_SPLIT_ACTIVE, activity_prices._VALID_FROM, activity_prices._VALID_TO, activity_prices._SOURCE,
+							activity_prices.CONFIDENCE_LEVEL_ID, activity_prices.DETERMINATION_SEQUENCE, activity_prices.PRICE_SOURCE_TYPE_ID,
+							activity_prices._VALID_FROM_FIRST_VERSION, activity_prices._CREATED_BY_FIRST_VERSION
+							{{masterdataCustomFieldsWithPrefix Activity_Price 'activity_prices'}}
+						from :it_items as item
+							left outer join :lt_cost_centers as cost
+								on cost.COST_CENTER_ID = item.COST_CENTER_ID
+								and cost.CONTROLLING_AREA_ID = :lv_controlling_area_id
+							left outer join :lt_activity_type as activity_type
+								on activity_type.ACTIVITY_TYPE_ID = item.ACTIVITY_TYPE_ID
+								and activity_type.CONTROLLING_AREA_ID = :lv_controlling_area_id
+							inner join :lt_all_activity_prices as activity_prices
+								on  ((activity_prices.COST_CENTER_ID = item.COST_CENTER_ID and cost.COST_CENTER_ID = item.COST_CENTER_ID) or 
+								     (activity_prices.COST_CENTER_ID = :lc_wildcard))
+								and ((activity_prices.ACTIVITY_TYPE_ID = item.ACTIVITY_TYPE_ID and activity_type.ACTIVITY_TYPE_ID = item.ACTIVITY_TYPE_ID) or 
+								     (activity_prices.ACTIVITY_TYPE_ID = :lc_wildcard))
+						order by ITEM_ID, DETERMINATION_SEQUENCE;
+
+if is_empty(:lt_filtered_activity_prices) then				   
+	return;
+end if;
+						
+lt_associated_rules = select
+						  case
+							  when rule_code = 'CONTROLLING_AREA' then 'CONTROLLING_AREA_ID NULLS LAST'
+							  when rule_code = 'NEW' then 'VALID_FROM desc'
+							  when rule_code = 'COST_CENTER' then 'COST_CENTER_ID NULLS LAST'
+							  when rule_code = 'ACTIVITY_TYPE' then 'ACTIVITY_TYPE_ID NULLS LAST'
+							  when rule_code = 'PROJECT' then 'PROJECT_ID NULLS LAST'
+							  when rule_code = 'CUSTOMER' then 'CUSTOMER_ID NULLS LAST'
+						  end as column_name
+					  from "sap.plc.db::basis.t_price_determination_strategy_rule"
+					  where PRICE_DETERMINATION_STRATEGY_TYPE_ID = :lc_activity_price
+					  and PRICE_DETERMINATION_STRATEGY_ID = :lv_activity_price_strategy_id
+					  order by priority asc;
+
+lv_first_criteria = :lt_associated_rules.column_name[1];
+lv_second_criteria = :lt_associated_rules.column_name[2];
+lv_third_criteria = :lt_associated_rules.column_name[3];
+lv_fourth_criteria = :lt_associated_rules.column_name[4];
+lv_fifth_criteria = :lt_associated_rules.column_name[5];
+lv_sixth_criteria = :lt_associated_rules.column_name[6];
+
+lv_sql = 'select *, RANK() OVER (ORDER BY ITEM_ID,DETERMINATION_SEQUENCE,' 
+			  || :lv_first_criteria || ','
+			  || :lv_second_criteria || ','
+			  || :lv_third_criteria || ','
+			  || :lv_fourth_criteria || ','
+			  || :lv_fifth_criteria || ','
+			  || :lv_sixth_criteria || ') AS PRICE_RANK from :lt_filtered_activity_prices';
+
+execute immediate lv_sql into ot_all_prices using :lt_filtered_activity_prices;
+
+ot_all_prices = select PRICE_ID, ITEM_ID, IS_DISABLING_PRICE_DETERMINATION,
+							PRICE_SOURCE_ID,
+							ifnull(CONTROLLING_AREA_ID, :lc_wildcard) as CONTROLLING_AREA_ID,
+							ifnull(COST_CENTER_ID, :lc_wildcard) as COST_CENTER_ID,
+							ifnull(ACTIVITY_TYPE_ID, :lc_wildcard) as ACTIVITY_TYPE_ID,
+							ifnull(PROJECT_ID, :lc_wildcard) as PROJECT_ID,
+							VALID_FROM,
+							ifnull(CUSTOMER_ID, :lc_wildcard) as CUSTOMER_ID,
+							VALID_TO, VALID_FROM_QUANTITY, VALID_TO_QUANTITY, 
+							PRICE_FIXED_PORTION, PRICE_VARIABLE_PORTION, TRANSACTION_CURRENCY_ID, 
+							PRICE_UNIT, PRICE_UNIT_UOM_ID, IS_PRICE_SPLIT_ACTIVE,_VALID_FROM, _VALID_TO, _SOURCE,
+						    CONFIDENCE_LEVEL_ID, DETERMINATION_SEQUENCE, PRICE_SOURCE_TYPE_ID,
+							_VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, activity_prices.PRICE_RANK
+							{{masterdataCustomFieldsWithPrefix Activity_Price 'activity_prices'}}
+					   from :ot_all_prices as activity_prices;
+							
+END;

@@ -1,0 +1,32 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_CSKU__TEXT" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_csku_tka01"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+SELECT COUNT(ACCOUNT_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_account__text"
+        WHERE "sap.plc.db::basis.t_account__text"."ACCOUNT_ID" = :NEWROW."KSTAR"
+            AND "sap.plc.db::basis.t_account__text"."CONTROLLING_AREA_ID" = :NEWROW."KOKRS" 
+            AND "sap.plc.db::basis.t_account__text"."LANGUAGE" = :NEWROW."LANGU" 
+            AND "sap.plc.db::basis.t_account__text"."ACCOUNT_DESCRIPTION" = :NEWROW."KTEXT"
+            AND "sap.plc.db::basis.t_account__text"."_SOURCE" = :lv_source
+            AND "sap.plc.db::basis.t_account__text"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_account__text"."_VALID_TO" IS NULL;
+              
+IF :lv_identical_rows_count = 0 THEN
+    UPDATE "sap.plc.db::basis.t_account__text" 
+            SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+            WHERE "sap.plc.db::basis.t_account__text"."CONTROLLING_AREA_ID" = :NEWROW."KOKRS" 
+                AND "sap.plc.db::basis.t_account__text"."ACCOUNT_ID" = :NEWROW."KSTAR" 
+                AND "sap.plc.db::basis.t_account__text"."LANGUAGE" = :NEWROW."LANGU" 
+                AND "sap.plc.db::basis.t_account__text"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_account__text"."_VALID_TO" IS NULL;
+    INSERT INTO "sap.plc.db::basis.t_account__text" 
+        (ACCOUNT_ID, CONTROLLING_AREA_ID, ACCOUNT_DESCRIPTION ,LANGUAGE,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+        VALUES (:NEWROW."KSTAR",:NEWROW."KOKRS",:NEWROW."KTEXT",:NEWROW."LANGU",:lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

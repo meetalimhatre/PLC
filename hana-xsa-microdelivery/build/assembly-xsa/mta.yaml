@@ -1,0 +1,241 @@
+_schema-version: '2.0'
+ID: com.sap.xsac.plc
+description: SAP Product Lifecycle Costing
+version: ${revision}
+
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - echo building the java tree
+        - mvn clean package -P all -Dmaven.test.skip=true -f ../../../java-plc-parent/pom.xml
+        - echo parsing the CSV files
+        - npm run parseCSVs
+        - echo cleaning up the CSV files and parser
+        - npm run cleanupCSVs
+        - echo before-all finished sucessfully
+
+
+modules:
+  - name: xsac-plc-db
+    type: hdb
+    path: db
+    parameters:
+      tasks:
+        - name: run deploy
+          command: npm run start:xsa
+          env:
+            EXIT: 1
+    requires:
+      - name: xsac-plc-db-service
+        properties:
+          TARGET_CONTAINER: ~{service-name}
+          HDI_DEPLOY_OPTIONS: { "trace": true }
+      - name: xsac-plc-synonym-grantor-service
+
+  - name: xsac-plc-xsjs
+    type: nodejs
+    path: xsjs
+    provides:
+      - name: xsac-plc-xs-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-db
+      - name: xsac-plc-db-service
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-synonym-grantor-service
+      - name: jobScheduler
+      - name: xsac-plc-auditlog
+    properties:
+      SAP_JWT_TRUST_ACL: '[{"clientid":"*","identityzone":"*"}]'
+      PLC_METADATA: '{"id": "com.sap.xsac.plc", "version": "${revision}"}'
+      OPTIMIZE_MEMORY: true
+      XS_APP_LOG_LEVEL: info
+
+  - name: xsac-plc-xsahaa
+    type: java
+    path: ./
+    build-parameters:
+      builder: fetcher
+      fetcher-opts:
+        repo-type: maven
+        repo-coordinates: com.sap.xsahaa:java-xsahaa:${com.sap.xsahaa.java-xsahaa.version}:war
+      build-result: target/java-xsahaa-${com.sap.xsahaa.java-xsahaa.version}.war
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+    properties:
+      TARGET_RUNTIME: tomee7
+      JBP_CONFIG_RESOURCE_CONFIGURATION: "['tomee7/webapps/ROOT/WEB-INF/web.xml': {'cors-origins':'*'},'tomee7/webapps/ROOT/WEB-INF/resources.xml': {'xsahaa-hdi-container':'xsac-plc-db-service'}, 'tomee7/conf/server.xml': {'connector.maxHttpHeaderSize':16384}]"
+      SET_LOGGING_LEVEL: '{com.sap.xsahaa: INFO, com: INFO}'
+      SAP_JWT_TRUST_ACL: '[{"clientid":"*","identityzone":"*"}]'
+      PERSONALIZE_JWT: true
+    provides:
+      - name: xsac-plc-xsahaa-api
+        properties:
+          url: "${default-url}"
+    requires:
+      - name: xsac-plc-db-service
+      - name: xsac-plc-uaa-service
+
+  - name: xsac-plc-publicapi
+    type: java
+    path: ../../../java-plc-parent/publicapi-parent
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: modules/xsac-plc-publicapi/target/*.jar
+    parameters:
+      memory: 2048M
+      buildpack: sap_java_buildpack
+    properties:
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+      TARGET_RUNTIME: java_main
+      SPRING_PROFILES_ACTIVE: xsa
+      JAVA_OPTS: '-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+      PLC_DB_MAX_POOL_SIZE: 100
+      PLC_DB_MIN_IDLE: 10
+    provides:
+      - name: xsac-plc-public-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-db-service
+        properties:
+          HANA_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-auditlog
+
+  - name: xsac-plc-map
+    type: java
+    path: ../../../java-plc-parent/xsac-plc-map
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: target/*.jar
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+    properties:
+      SPRING_PROFILES_ACTIVE: xsa
+      COM_SAP_PLC_MAP_MDR_PREVIEW_USERNAME: ' '
+      COM_SAP_PLC_MAP_MDR_PREVIEW_PASSWORD: ' '
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+      COM_SAP_PLC_MAP_MDR_PREVIEW_CREDENTIALS_TTL: 600000
+    provides:
+      - name: xsac-plc-map-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-db-service
+        properties:
+          COM_SAP_PLC_MAP_DB_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-uaa-service
+        properties:
+          COM_SAP_PLC_MAP_UAA_SERVICE_NAME: ~{service-name}
+      - name: xsac-plc-auditlog
+
+  - name: xsac-plc-scheduler
+    type: java
+    path: ../../../java-plc-parent/xsac-plc-scheduler
+    build-parameters:
+      builder: custom
+      commands: []
+      build-result: target/*.jar
+    parameters:
+      memory: 1024M
+      buildpack: sap_java_buildpack
+    properties:
+      SPRING_PROFILES_ACTIVE: xsa
+      JAVA_OPTS: '-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ParallelRefProcEnabled'
+      JBP_CONFIG_COMPONENTS: '{ "jres": ["com.sap.xs.java.buildpack.jdk.SAPMachineJDK"] }'
+      JBP_CONFIG_SAP_MACHINE_JDK: '{ "version": "17.+" }'
+    provides:
+      - name: xsac-plc-scheduler-api
+        properties:
+          url: ${default-url}
+    requires:
+      - name: xsac-plc-db-service
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-auditlog
+
+  - name: xsac-plc-web
+    type: html5
+    path: web
+    properties:
+      XS_APP_LOG_LEVEL: info
+      PRESERVE_FRAGMENT: "false"
+      httpHeaders: '[{"X-Frame-Options": "deny"}, {"Content-Security-Policy": "style-src ''self'' ''unsafe-inline'' https://sapui5.hana.ondemand.com; script-src ''self'' ''unsafe-eval'' https://sapui5.hana.ondemand.com; img-src ''self'';"}]'
+      SAP_PLC_EXTENSIONS: '[{"name": "xsjs", "strictSSL": false, "url": "~{xsac-plc-xs-api/url}/xs/rest/dispatcher.xsjs", "timeout": 30000}]'
+    requires:
+      - name: xsac-plc-uaa-service
+      - name: xsac-plc-xs-api
+        group: destinations
+        properties:
+          name: xsac-plc-xs-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-public-api
+        group: destinations
+        properties:
+          name: xsac-plc-api-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-map-api
+        group: destinations
+        properties:
+          name: xsac-plc-map-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-scheduler-api
+        group: destinations
+        properties:
+          name: xsac-plc-scheduler-destination
+          url: ~{url}
+          forwardAuthToken: true
+          timeout: 1200000
+      - name: xsac-plc-xsahaa-api
+        group: destinations
+        properties:
+          name: xsac-plc-xsahaa-destination
+          url: ~{url}
+          forwardAuthToken: true
+          strictSSL: false
+
+
+resources:
+  - name: xsac-plc-db-service
+    properties:
+      service-name: ${service-name}
+    type: com.sap.xs.hdi-container
+    parameters:
+      config:
+        schema: SAP_PLC
+        makeUniqueName: true
+
+  - name: xsac-plc-synonym-grantor-service
+    type: org.cloudfoundry.existing-service
+
+  - name: xsac-plc-uaa-service
+    properties:
+      service-name: ${service-name}
+    type: com.sap.xs.uaa-space
+    parameters:
+      path: servicesConfig/xsuaa/xs-security-xsa.json
+
+  - name: jobScheduler
+    type: com.sap.xs.job-scheduler
+
+  - name: xsac-plc-auditlog
+    type: com.sap.xs.auditlog
+    parameters:
+      service-plan: free

@@ -1,0 +1,199 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_TCURR" AFTER INSERT 
+OR UPDATE ON "sap.plc.db::repl.t_tcurr" REFERENCING NEW ROW NEWROW FOR EACH ROW
+BEGIN  
+DECLARE lv_current_utctimestamp	timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+DECLARE v_FCURR VARCHAR(5) := '''';                                  
+DECLARE v_TCURR VARCHAR(5) := '''';                                                      
+DECLARE v_ERP_DATE DATE ; 
+DECLARE v_TCURR_GDATU_C VARCHAR(27) := '''';
+DECLARE v_TCURF_GDATU_C VARCHAR(27) := '''';
+DECLARE v_DATE VARCHAR(27) := '''';
+DECLARE v_FFACT DECIMAL(9,0) := 1;
+DECLARE v_TFACT DECIMAL(9,0) := 1;
+DECLARE v_ukurs_final DECIMAL(28,7) := 1;
+DECLARE v_fcurr_factor varchar(5) ;
+DECLARE v_tcurr_factor varchar(5) ;
+DECLARE v_ffact_final DECIMAL(9,	0) := 1;
+DECLARE v_tfact_final DECIMAL(9,	0) := 1;
+
+if :NEWROW."UKURS" < 0 
+then v_ukurs_final = 1/ ( :NEWROW."UKURS" * ( -1 ) );
+v_fcurr = :NEWROW."FCURR";
+v_tcurr = :NEWROW."TCURR";
+v_tcurr_factor = :NEWROW."FCURR";
+v_fcurr_factor = :NEWROW."TCURR";
+
+else v_ukurs_final = :NEWROW."UKURS";
+v_fcurr = :NEWROW."FCURR";
+v_tcurr = :NEWROW."TCURR";
+v_fcurr_factor = :NEWROW."FCURR";
+v_tcurr_factor = :NEWROW."TCURR";
+
+end if;
+
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+SELECT COUNT(FROM_CURRENCY_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_currency_conversion"
+    WHERE "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" = :NEWROW."FCURR"
+    AND "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" = :NEWROW."TCURR"
+    AND "sap.plc.db::basis.t_currency_conversion"."RATE" = :v_ukurs_final
+    AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = :NEWROW."GDATU_C"
+    AND "sap.plc.db::basis.t_currency_conversion"."_SOURCE" = :lv_source
+		  AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+		  AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+v_ERP_DATE = TO_DATS(:NEWROW."GDATU_C");
+
+v_TCURR_GDATU_C = :NEWROW."GDATU_C";
+select
+  MAX(GDATU_C) 
+INTO v_DATE 
+from "sap.plc.db::repl.t_tcurr" 
+WHERE FCURR = :NEWROW."FCURR" 
+AND TCURR = :NEWROW."TCURR"
+AND GDATU_C <= :NEWROW."GDATU_C";
+
+IF v_DATE IS NOT NULL
+THEN
+    v_TCURR_GDATU_C = v_DATE;
+END IF;
+
+select
+  MAX(GDATU_C)
+INTO v_TCURF_GDATU_C
+from "sap.plc.db::repl.t_tcurf" 
+WHERE FCURR = :v_fcurr_factor  
+AND TCURR = :v_tcurr_factor  
+AND GDATU_C <= v_TCURR_GDATU_C; 
+
+IF ( v_TCURF_GDATU_C IS NOT NULL )
+THEN 
+
+    SELECT TCURF.FFACT, TCURF.TFACT into v_FFACT, v_TFACT
+            FROM "sap.plc.db::repl.t_tcurf" AS TCURF 
+            WHERE TCURF.TCURR = :v_tcurr_factor 
+            AND TCURF.FCURR = :v_fcurr_factor 
+            AND TCURF.GDATU_C = v_TCURF_GDATU_C;
+    
+    if :NEWROW."UKURS" < 0 then
+      v_ffact_final = :v_TFACT;
+      v_tfact_final = :v_FFACT;
+    else 
+      v_ffact_final = :v_FFACT;
+      v_tfact_final = :v_TFACT;
+    end if;
+
+    SELECT COUNT(FROM_CURRENCY_ID) into lv_identical_rows_count
+        FROM "sap.plc.db::basis.t_currency_conversion"
+        WHERE "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" = :NEWROW."FCURR"
+            AND "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" = :NEWROW."TCURR"
+            AND "sap.plc.db::basis.t_currency_conversion"."FROM_FACTOR" = :v_ffact_final
+            AND "sap.plc.db::basis.t_currency_conversion"."TO_FACTOR" = :v_tfact_final
+            AND "sap.plc.db::basis.t_currency_conversion"."RATE" = :v_ukurs_final
+            AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = :v_ERP_DATE
+            AND "sap.plc.db::basis.t_currency_conversion"."_SOURCE" = :lv_source
+            AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+
+IF(:lv_identical_rows_count = 0) THEN
+UPDATE "sap.plc.db::basis.t_currency_conversion" 
+SET _VALID_TO = :lv_current_utctimestamp ,
+  _CREATED_BY = user() 
+WHERE ( "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" ,
+  "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" ) IN ( select
+  TCURF.FCURR,
+  TCURF.TCURR 
+  from "sap.plc.db::repl.t_tcurf" AS TCURF 
+  inner join "sap.plc.db::repl.t_tcurr" AS TCURR on TCURF.FCURR = TCURR.FCURR  
+  AND TCURF.TCURR = TCURR.TCURR 
+  WHERE TCURR.TCURR = :NEWROW."TCURR" 
+  AND TCURR.FCURR = :NEWROW."FCURR" 
+  AND TCURR.GDATU_C = v_TCURR_GDATU_C 
+  AND TCURF.GDATU_C = v_TCURF_GDATU_C ) 
+AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = v_ERP_DATE 
+AND "sap.plc.db::basis.t_currency_conversion"."EXCHANGE_RATE_TYPE_ID" = 'STANDARD'
+AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+
+insert into "sap.plc.db::basis.t_currency_conversion" (FROM_CURRENCY_ID,
+  TO_CURRENCY_ID,
+  FROM_FACTOR ,
+  TO_FACTOR ,
+  RATE ,
+  VALID_FROM ,
+  _VALID_FROM ,
+  _VALID_TO,
+  _SOURCE,
+  _CREATED_BY) SELECT
+  :NEWROW."FCURR",
+  :NEWROW."TCURR",
+  :v_ffact_final,
+  :v_tfact_final,
+  :v_ukurs_final,
+  V_ERP_DATE,
+  :lv_current_utctimestamp,
+  null,
+  :lv_source,
+  user() 
+FROM "sap.plc.db::repl.t_tcurf" AS TCURF 
+WHERE TCURF.TCURR = :NEWROW."TCURR" 
+AND TCURF.FCURR = :NEWROW."FCURR" 
+AND TCURF.GDATU_C = v_TCURF_GDATU_C;
+END IF;
+ELSE
+        
+    SELECT COUNT(FROM_CURRENCY_ID) into lv_identical_rows_count
+        FROM "sap.plc.db::basis.t_currency_conversion"
+        WHERE "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" = :NEWROW."FCURR"
+            AND "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" = :NEWROW."TCURR"
+            AND "sap.plc.db::basis.t_currency_conversion"."FROM_FACTOR" = :v_ffact_final
+            AND "sap.plc.db::basis.t_currency_conversion"."TO_FACTOR" = :v_tfact_final
+            AND "sap.plc.db::basis.t_currency_conversion"."RATE" = :v_ukurs_final
+            AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = :v_ERP_DATE
+            AND "sap.plc.db::basis.t_currency_conversion"."_SOURCE" = :lv_source
+            AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+            AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+
+IF(:lv_identical_rows_count = 0) THEN    		  
+    UPDATE "sap.plc.db::basis.t_currency_conversion" 
+    SET _VALID_TO = :lv_current_utctimestamp ,
+    _CREATED_BY = user() 
+    WHERE ( "sap.plc.db::basis.t_currency_conversion"."FROM_CURRENCY_ID" ,
+    "sap.plc.db::basis.t_currency_conversion"."TO_CURRENCY_ID" ) IN ( select
+    TCURR.FCURR,
+    TCURR.TCURR 
+    from  "sap.plc.db::repl.t_tcurr" AS TCURR 
+    WHERE TCURR.TCURR = :NEWROW."TCURR" 
+    AND TCURR.FCURR = :NEWROW."FCURR" 
+    AND TCURR.GDATU_C = v_TCURR_GDATU_C 
+    ) 
+    AND "sap.plc.db::basis.t_currency_conversion"."VALID_FROM" = v_ERP_DATE 
+    AND "sap.plc.db::basis.t_currency_conversion"."EXCHANGE_RATE_TYPE_ID" = 'STANDARD'
+    AND "sap.plc.db::basis.t_currency_conversion"."_VALID_FROM" < :lv_current_utctimestamp 
+    AND "sap.plc.db::basis.t_currency_conversion"."_VALID_TO" IS NULL;
+    insert 
+    into "sap.plc.db::basis.t_currency_conversion" (FROM_CURRENCY_ID,
+    TO_CURRENCY_ID,
+    FROM_FACTOR ,
+    TO_FACTOR ,
+    RATE ,
+    VALID_FROM ,
+    _VALID_FROM ,
+    _VALID_TO,
+    _SOURCE,
+    _CREATED_BY) 
+    VALUES( :NEWROW."FCURR",
+    :NEWROW."TCURR",
+    1,
+    1,
+    :v_ukurs_final,
+    v_ERP_DATE,
+    :lv_current_utctimestamp,
+    null,
+    :lv_source,
+    user() );
+  END IF;
+END IF;
+end 
+;

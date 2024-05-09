@@ -1,0 +1,160 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_work_center_read" ( 
+        IN iv_logon_language         NVARCHAR(11),
+		IN iv_master_data_timestamp  TIMESTAMP,
+		IN iv_text_from_autocomplete NVARCHAR(250),
+		IN iv_filter_string	         NVARCHAR(5000),
+		IN iv_no_max_records         INTEGER,
+		IN iv_no_skip_records        INTEGER,
+		OUT ot_work_center          "sap.plc.db.administration::masterdata.tt_work_center" default empty,
+		OUT ot_controlling_area     "sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_cost_center          "sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_plant 				"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_company_code 		"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_process   			"sap.plc.db.administration::masterdata.tt_process"  default empty,
+		OUT ot_work_center_process	"sap.plc.db::basis.t_work_center_process" default empty,
+		OUT ot_work_center_text     "sap.plc.db::basis.t_work_center__text" default empty,
+		OUT ot_activity_type        "sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+		OUT ot_work_center_activity "sap.plc.db.administration::masterdata.tt_work_center_activity_type" default empty
+    )
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+lt_work_center_union =
+			select  
+			    plcTable.WORK_CENTER_ID,
+			    plcTable.PLANT_ID, 
+			    plcTable.WORK_CENTER_CATEGORY,
+			    plcTable.CONTROLLING_AREA_ID,
+			    plcTable.COST_CENTER_ID,
+			    plcTable.WORK_CENTER_RESPONSIBLE,
+			    plcTable.EFFICIENCY, 
+			    plcTable._VALID_FROM, 
+			    plcTable._VALID_TO,
+			    plcTable._SOURCE, 
+			    plcTable._CREATED_BY,
+		        minValues._VALID_FROM as _VALID_FROM_FIRST_VERSION,
+		        minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION,
+			    plcTextTable.WORK_CENTER_DESCRIPTION,
+			    plant.COMPANY_CODE_ID,
+				plcWorkCenterProcessTable.PROCESS_ID
+				{{customFieldsWithTablePrefix Work_Center}}
+			from "sap.plc.db::basis.t_work_center" as plcTable
+			inner join 
+    				(   select A._VALID_FROM, A.WORK_CENTER_ID, A._CREATED_BY 
+    					from "sap.plc.db::basis.t_work_center" AS A 
+    						inner join 
+    						( select MIN(_VALID_FROM) AS _VALID_FROM, WORK_CENTER_ID
+    							from "sap.plc.db::basis.t_work_center" 
+    							group by WORK_CENTER_ID
+    						) AS B
+    						ON A._VALID_FROM = B._VALID_FROM AND A.WORK_CENTER_ID = B.WORK_CENTER_ID
+    				) AS minValues
+    			 	on  plcTable.WORK_CENTER_ID = minValues.WORK_CENTER_ID
+                left outer join "sap.plc.db::basis.t_work_center__text" as plcTextTable 
+                    on  plcTable.WORK_CENTER_ID = plcTextTable.WORK_CENTER_ID
+                    and plcTable.PLANT_ID = plcTextTable.PLANT_ID 
+                    and plcTextTable.LANGUAGE = :iv_logon_language 
+                    and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+                    and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+                inner join "sap.plc.db::basis.t_plant" as plant on plant.PLANT_ID = plcTable.PLANT_ID 
+				left outer join {{t_extensionTable Work_Center}} as plcExtTable ON
+						plcTable.WORK_CENTER_ID = plcExtTable.WORK_CENTER_ID and plcTable.PLANT_ID = plcExtTable.PLANT_ID
+					    and plcTable._VALID_FROM = plcExtTable._VALID_FROM 
+				left outer join "sap.plc.db::basis.t_work_center_process" as plcWorkCenterProcessTable
+						on  plcTable.WORK_CENTER_ID = plcWorkCenterProcessTable.WORK_CENTER_ID
+                    	and plcTable.PLANT_ID = plcWorkCenterProcessTable.PLANT_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcWorkCenterProcessTable.CONTROLLING_AREA_ID
+						and (plcWorkCenterProcessTable._VALID_TO > :iv_master_data_timestamp or plcWorkCenterProcessTable._VALID_TO is null)
+                where  plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                    and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+                    and (LOWER(plcTable.WORK_CENTER_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+    				or LOWER(plcTextTable.WORK_CENTER_DESCRIPTION) LIKE LOWER(:iv_text_from_autocomplete||'%') )
+            order by plcTable.WORK_CENTER_ID;
+
+lt_work_center_filter = APPLY_FILTER(:lt_work_center_union, :iv_filter_string) ; 
+
+ot_work_center =	 
+		select WORK_CENTER_ID, PLANT_ID, WORK_CENTER_CATEGORY, CONTROLLING_AREA_ID, COST_CENTER_ID, WORK_CENTER_RESPONSIBLE, EFFICIENCY, _VALID_FROM,
+						_VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, WORK_CENTER_DESCRIPTION
+						{{customFields Work_Center}}
+		  	   from :lt_work_center_filter limit :iv_no_max_records offset :iv_no_skip_records; 
+          
+ot_work_center_text =
+				select  
+					plcTextTable.WORK_CENTER_ID,
+					plcTextTable.PLANT_ID,
+					plcTextTable.LANGUAGE,
+					plcTextTable.WORK_CENTER_DESCRIPTION, 
+					plcTextTable._VALID_FROM, 
+					plcTextTable._VALID_TO,
+					plcTextTable._SOURCE,
+					plcTextTable._CREATED_BY
+				from "sap.plc.db::basis.t_work_center__text" as plcTextTable 
+				where ( plcTextTable.WORK_CENTER_ID, plcTextTable.PLANT_ID) in ( select WORK_CENTER_ID, PLANT_ID from :ot_work_center ) 
+				 	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+				 	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+				 	
+ot_work_center_process =
+				select  
+					plcWorkCenterProcessTable.WORK_CENTER_ID,
+					plcWorkCenterProcessTable.PLANT_ID,
+					plcWorkCenterProcessTable.CONTROLLING_AREA_ID,
+					plcWorkCenterProcessTable.PROCESS_ID, 
+					plcWorkCenterProcessTable._VALID_FROM, 
+					plcWorkCenterProcessTable._VALID_TO,
+					plcWorkCenterProcessTable._SOURCE,
+					plcWorkCenterProcessTable._CREATED_BY
+				from "sap.plc.db::basis.t_work_center_process" as plcWorkCenterProcessTable 
+				where ( plcWorkCenterProcessTable.WORK_CENTER_ID, plcWorkCenterProcessTable.PLANT_ID) in ( select WORK_CENTER_ID, PLANT_ID from :ot_work_center ) 
+				 	and plcWorkCenterProcessTable._VALID_FROM <= :iv_master_data_timestamp 
+				 	and (plcWorkCenterProcessTable._VALID_TO > :iv_master_data_timestamp or plcWorkCenterProcessTable._VALID_TO is null);
+		
+ot_work_center_activity =
+				select 
+					plcWorkCenterActivityTable.WORK_CENTER_ID,
+					plcWorkCenterActivityTable.PLANT_ID,
+					plcWorkCenterActivityTable.CONTROLLING_AREA_ID,
+					plcWorkCenterActivityTable.ACTIVITY_TYPE_ID,
+					plcWorkCenterActivityTable.PROCESS_ID,
+			        plcWorkCenterActivityTable.QUANTITY,
+			        plcWorkCenterActivityTable.QUANTITY_UOM_ID,
+			        plcWorkCenterActivityTable.TOTAL_QUANTITY_DEPENDS_ON,
+			        plcWorkCenterActivityTable.LOT_SIZE,  
+					plcWorkCenterActivityTable._VALID_FROM, 
+					plcWorkCenterActivityTable._VALID_TO,
+					plcWorkCenterActivityTable._SOURCE,
+					plcWorkCenterActivityTable._CREATED_BY
+				from "sap.plc.db::basis.t_work_center_activity_type" as plcWorkCenterActivityTable
+				where ( plcWorkCenterActivityTable.WORK_CENTER_ID, plcWorkCenterActivityTable.PLANT_ID ) in ( select WORK_CENTER_ID, PLANT_ID from :ot_work_center )
+					and plcWorkCenterActivityTable._VALID_FROM <= :iv_master_data_timestamp
+					and (plcWorkCenterActivityTable._VALID_TO > :iv_master_data_timestamp or plcWorkCenterActivityTable._VALID_TO is null);
+					
+--select controlling area	
+tt_controlling_area_key = select distinct CONTROLLING_AREA_ID from :ot_work_center;
+call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_key, ot_controlling_area);	
+ 
+--select cost center 
+tt_cost_center_key = select distinct COST_CENTER_ID, CONTROLLING_AREA_ID from :ot_work_center;
+call "sap.plc.db.administration.procedures::p_ref_cost_center_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_cost_center_key, ot_cost_center);
+
+ --select plant  
+ tt_plant_id = select distinct PLANT_ID from :ot_work_center;      
+ call "sap.plc.db.administration.procedures::p_ref_plant_read"(:iv_logon_language,:iv_master_data_timestamp,'','',:tt_plant_id,:ot_plant);       
+  
+--select company code
+tt_company_code_key = select distinct COMPANY_CODE_ID from :ot_plant;
+call "sap.plc.db.administration.procedures::p_ref_company_code_read"(:iv_logon_language,:iv_master_data_timestamp,'',:tt_company_code_key,ot_company_code);	
+
+--select process 
+tt_process_key = select distinct PROCESS_ID, CONTROLLING_AREA_ID from :ot_work_center_process;
+call "sap.plc.db.administration.procedures::p_ref_process_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_process_key, ot_process);
+ 
+--select activity type
+tt_activity_type_key = select distinct ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID from :ot_work_center_activity;
+call "sap.plc.db.administration.procedures::p_ref_activity_type_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_activity_type_key, ot_activity_type);
+ 
+END;
+
+

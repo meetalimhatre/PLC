@@ -1,0 +1,56 @@
+{
+    "sap.plc.db::DUMMY": {
+        "target": {
+            "schema": "SYS",
+            "object": "DUMMY"
+        }
+    },
+    "sap.plc.db::PLC_AREA_CHECK_FORMULAS_PROC": {
+        "target": {
+            "schema": "_SYS_AFL",
+            "object": "PLC_AREA_CHECK_FORMULAS_PROC"
+        }
+    },
+    "sap.plc.db::PLC_AREA_CHECK_FORMULAS_COSTING_SHEET_OVERHEAD_ROW_PROC": {
+        "target": {
+            "schema": "_SYS_AFL",
+            "object": "PLC_AREA_CHECK_FORMULAS_COSTING_SHEET_OVERHEAD_ROW_PROC"
+        }
+    },
+    "sap.plc.db::PLC_AREA_CONVERT_UOM_PROC": {
+        "target": {
+            "schema": "_SYS_AFL",
+            "object": "PLC_AREA_CONVERT_UOM_PROC"
+        }
+    },
+    "sap.plc.db::TRIGGERS": {
+        "target": {
+            "schema": "SYS",
+            "object": "TRIGGERS"
+        }
+    },
+    "sap.plc.db::M_INIFILE_CONTENTS": {
+        "target": {
+            "schema": "SYS",
+            "object": "M_INIFILE_CONTENTS"
+        }
+    },
+    "sap.plc.db::EFFECTIVE_ROLE_GRANTEES": {
+        "target": {
+            "object": "EFFECTIVE_ROLE_GRANTEES",
+            "schema": "SYS"
+        }
+    },
+    "sap.plc.db::USERS": {
+        "target": {
+            "object": "USERS",
+            "schema": "SYS"
+        }
+    },
+    "sap.plc.db::BIMC_CUBES": {
+        "target": {
+            "object": "BIMC_CUBES",
+            "schema": "_SYS_BI"
+        }
+    }
+}

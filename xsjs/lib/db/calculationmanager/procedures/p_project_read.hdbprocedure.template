@@ -1,0 +1,206 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_project_read" ( 
+	    IN iv_logon_language                    NVARCHAR(11),
+	    IN iv_user_id							NVARCHAR(256),
+		IN iv_master_data_timestamp   	        TIMESTAMP,
+		IN iv_project_id                    	NVARCHAR(35),	
+		IN iv_text_from_autocomplete			NVARCHAR(250),
+		IN iv_no_max_records           			INTEGER,
+		IN iv_filter_string	        			NVARCHAR(5000),
+		IN iv_folder_id  						INTEGER default null,
+		OUT ot_projects						    "sap.plc.db.calculationmanager.procedures::ts_project" default empty,
+		OUT ot_customer                         "sap.plc.db.administration::masterdata.tt_customer" default empty,
+		OUT ot_controlling_area          		"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_company_code              		"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_plant                     		"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_business_area             		"sap.plc.db.administration::masterdata.tt_business_area" default empty,
+		OUT ot_profit_center             		"sap.plc.db.administration::masterdata.tt_profit_center" default empty,
+		OUT ot_costing_sheet			 		"sap.plc.db.administration::masterdata.tt_costing_sheet" default empty,
+		OUT ot_component_split           		"sap.plc.db.administration::masterdata.tt_component_split" default empty,
+		OUT ot_exchange_rate_type	            "sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*****************************************************************************************************************************  
+	Reads the properties and corresponding master data for projects:
+	- if iv_project_id = '' - returns properties and master data (only for customers) for all projects
+	- if iv_project_id <> '' - returns properties and master data (only project-relevant ones) for given project_id
+ *****************************************************************************************************************************/
+
+DECLARE lt_component_split              "sap.plc.db.administration::masterdata.tt_component_split_input";
+DECLARE lt_costing_sheet                "sap.plc.db.administration::masterdata.tt_costing_sheet_input";
+DECLARE lt_account_groups               "sap.plc.db.administration::masterdata.tt_account_groups_input";
+DECLARE lt_price_components             "sap.plc.db.administration::masterdata.tt_price_component_input";
+DECLARE lt_work_center                  "sap.plc.db.administration::masterdata.tt_work_center_input";
+DECLARE lt_process                      "sap.plc.db.administration::masterdata.tt_process_input";
+DECLARE lt_activity_type                "sap.plc.db.administration::masterdata.tt_activity_type_input";
+DECLARE lt_cost_center                  "sap.plc.db.administration::masterdata.tt_cost_center_input";
+DECLARE lt_profit_center                "sap.plc.db.administration::masterdata.tt_profit_center_input";
+DECLARE lt_account                      "sap.plc.db.administration::masterdata.tt_accounts_input";
+DECLARE lt_material_plant               "sap.plc.db.administration::masterdata.tt_material_plant_input";
+DECLARE lt_overhead_group               "sap.plc.db.administration::masterdata.tt_overhead_group_input";
+DECLARE lt_plant                        "sap.plc.db.administration::masterdata.tt_plant_input";
+DECLARE lt_company_code                 "sap.plc.db.administration::masterdata.tt_company_code_input";
+DECLARE lt_controlling_area             "sap.plc.db.administration::masterdata.tt_controlling_area_input";
+DECLARE lt_business_area                "sap.plc.db.administration::masterdata.tt_business_area_input";
+DECLARE lt_material                     "sap.plc.db.administration::masterdata.tt_material_input";
+DECLARE lt_material_group               "sap.plc.db.administration::masterdata.tt_material_group_input";
+DECLARE lt_material_type                "sap.plc.db.administration::masterdata.tt_material_type_input";
+DECLARE lt_document                     "sap.plc.db.administration::masterdata.tt_document_input";
+DECLARE lt_document_type                "sap.plc.db.administration::masterdata.tt_document_type_input";
+DECLARE lt_document_status              "sap.plc.db.administration::masterdata.tt_document_status_input";
+DECLARE lt_design_office                "sap.plc.db.administration::masterdata.tt_design_office_input";
+DECLARE lt_vendor                       "sap.plc.db.administration::masterdata.tt_vendor_input";
+DECLARE lt_customer                     "sap.plc.db.administration::masterdata.tt_customer_input";
+DECLARE lt_valuation_class              "sap.plc.db.administration::masterdata.tt_valuation_class_input";
+DECLARE lt_uom                          "sap.plc.db.administration::masterdata.tt_uom_input";
+DECLARE lt_currency                     "sap.plc.db.administration::masterdata.tt_currency_input";
+DECLARE lt_exchange_rate_type           "sap.plc.db.administration::masterdata.tt_exchange_rate_type_key";
+-- select project properties and count of underlying calculations. 
+ot_all_projects = 
+		SELECT proj.PROJECT_ID, proj.ENTITY_ID, entity_relation.PATH, proj.REFERENCE_PROJECT_ID, proj.PROJECT_NAME, proj.PROJECT_RESPONSIBLE, proj.CONTROLLING_AREA_ID, proj.CUSTOMER_ID, proj.SALES_DOCUMENT,
+				proj.SALES_PRICE, proj.SALES_PRICE_CURRENCY_ID, proj.COMMENT, proj.COMPANY_CODE_ID, proj.PLANT_ID, proj.BUSINESS_AREA_ID, proj.PROFIT_CENTER_ID, proj.REPORT_CURRENCY_ID,
+				proj.COSTING_SHEET_ID, proj.COMPONENT_SPLIT_ID, proj.START_OF_PROJECT, proj.END_OF_PROJECT, proj.START_OF_PRODUCTION, proj.END_OF_PRODUCTION, proj.VALUATION_DATE,
+				proj.LIFECYCLE_VALUATION_DATE, proj.LIFECYCLE_PERIOD_INTERVAL, proj.CREATED_ON, proj.CREATED_BY, proj.LAST_MODIFIED_ON, proj.LAST_MODIFIED_BY, 
+				proj.EXCHANGE_RATE_TYPE_ID, proj.MATERIAL_PRICE_STRATEGY_ID, proj.ACTIVITY_PRICE_STRATEGY_ID, 
+				ifnull(countCalculations.CALCULATION_NO,0) as CALCULATION_NO
+			FROM "sap.plc.db.authorization::privileges.v_project_read" AS proj
+		INNER JOIN	"sap.plc.db.views::v_entity_relation" as entity_relation
+			on entity_relation.RESULT_NODE = proj.ENTITY_ID
+		LEFT OUTER JOIN 
+		( SELECT TO_INT(COUNT(CALCULATION_ID)) AS CALCULATION_NO, PROJECT_ID 
+			FROM "sap.plc.db::basis.t_calculation" 
+				WHERE CALCULATION_ID in (SELECT DISTINCT CALCULATION_ID FROM "sap.plc.db::basis.t_calculation_version")
+			GROUP BY PROJECT_ID) AS countCalculations
+		ON proj.PROJECT_ID = countCalculations.PROJECT_ID
+		WHERE (proj.PROJECT_ID = :iv_project_id  -- properties for one project if iv_project_id is set
+				OR :iv_project_id = '')				-- properties for one project if iv_project_id is not set
+			AND (:iv_folder_id is null or
+					(entity_relation.PRED_NODE is null and :iv_folder_id = 0) or entity_relation.PRED_NODE = :iv_folder_id)
+			AND proj.USER_ID = :iv_user_id	--the user has the authorization to read the project
+			AND (LOWER(proj.PROJECT_ID) LIKE LOWER(:iv_text_from_autocomplete||'%')
+				OR LOWER(proj.PROJECT_NAME) LIKE LOWER(:iv_text_from_autocomplete||'%') )
+		ORDER BY proj.PROJECT_NAME;			
+
+ot_projects_filter = APPLY_FILTER(:ot_all_projects, :iv_filter_string) ; 
+
+ot_projects = SELECT PROJECT_ID, ENTITY_ID, PATH, REFERENCE_PROJECT_ID, PROJECT_NAME, PROJECT_RESPONSIBLE, CONTROLLING_AREA_ID, CUSTOMER_ID, SALES_DOCUMENT,
+				SALES_PRICE, SALES_PRICE_CURRENCY_ID, COMMENT, COMPANY_CODE_ID, PLANT_ID, BUSINESS_AREA_ID, PROFIT_CENTER_ID, REPORT_CURRENCY_ID,
+				COSTING_SHEET_ID, COMPONENT_SPLIT_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, END_OF_PRODUCTION, VALUATION_DATE,
+				LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, 
+				EXCHANGE_RATE_TYPE_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID, CALCULATION_NO
+			  FROM :ot_projects_filter limit :iv_no_max_records;
+
+if :iv_project_id = '' then
+	-- deliver only master data for controlling areas & customers for all projects
+	lt_controlling_area = select controlling_area_id, :iv_master_data_timestamp as master_data_timestamp 
+			  	from :ot_projects
+			  	where controlling_area_id is not null;
+	
+	lt_customer = select distinct customer_id, :iv_master_data_timestamp as master_data_timestamp
+			  from :ot_projects
+			  where customer_id is not null;
+else
+
+	-- deliver project-relevant master data for given iv_project_id
+	lt_controlling_area = select controlling_area_id, :iv_master_data_timestamp as master_data_timestamp 
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;
+	lt_customer = select distinct customer_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;
+	lt_company_code = select company_code_id, :iv_master_data_timestamp as master_data_timestamp
+				from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_plant = select plant_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_business_area = select business_area_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_profit_center = select profit_center_id, controlling_area_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_costing_sheet = select costing_sheet_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_component_split = select component_split_id, :iv_master_data_timestamp as master_data_timestamp
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;	
+	lt_exchange_rate_type = select exchange_rate_type_id
+			  	from :ot_projects
+			  	where project_id = :iv_project_id;
+end if;
+
+call "sap.plc.db.administration.procedures::p_masterdata_read"( 
+    :iv_logon_language,
+    :lt_component_split,
+    :lt_costing_sheet,
+    :lt_account_groups,
+	:lt_price_components,
+    :lt_work_center,
+    :lt_process,
+    :lt_activity_type,
+    :lt_cost_center,
+    :lt_profit_center,
+    :lt_account,
+    :lt_material_plant,
+    :lt_overhead_group,
+	:lt_plant,
+	:lt_company_code,
+	:lt_controlling_area,
+	:lt_business_area,
+    :lt_material,
+    :lt_material_group,
+    :lt_material_type,
+    :lt_document,
+    :lt_document_type,
+    :lt_document_status,
+    :lt_design_office,
+    :lt_vendor,
+    :lt_customer,
+    :lt_valuation_class,
+    :lt_uom,
+    :lt_currency,
+    :lt_exchange_rate_type,
+    ot_component_split,
+    ot_selected_account_group,
+    ot_costing_sheet,
+    ot_costing_sheet_row,
+    ot_costing_sheet_base,
+    ot_costing_sheet_base_row,
+    ot_costing_sheet_overhead,
+    ot_costing_sheet_overhead_row,
+    ot_costing_sheet_row_dependencies,
+    ot_account_groups,
+	ot_price_components,
+    ot_work_center,
+    ot_process,
+    ot_activity_type,
+    ot_cost_center,
+	ot_profit_center,
+	ot_accounts,
+	ot_overhead_group,
+	ot_material_plant,
+	ot_plant,
+	ot_company_code,
+	ot_controlling_area,
+	ot_business_area,
+    ot_material,
+    ot_material_group,
+    ot_material_type,
+    ot_document,
+    ot_document_type,
+    ot_document_status,
+    ot_design_office,
+    ot_vendor,
+    ot_customer,
+    ot_valuation_class,
+    ot_uom,
+    ot_currency,
+    ot_exchange_rate_type
+);
+
+END;

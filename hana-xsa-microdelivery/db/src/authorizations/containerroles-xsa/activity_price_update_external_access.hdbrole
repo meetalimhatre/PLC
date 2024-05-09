@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::activity_price_update_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_activity_price", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_price_component", 
+			"type":"TABLE", 
+ 			"privileges":[ "UPDATE" ] 
+		}
+		]
+	}
+}

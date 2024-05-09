@@ -1,0 +1,37 @@
+PROCEDURE "sap.plc.db.calcengine.procedures::p_check_formulas" (
+            OUT errors "sap.plc.db.calcengine::calcengine_types.ts_formula_errors" default empty
+      )
+      LANGUAGE SQLSCRIPT
+      SQL SECURITY INVOKER
+      READS SQL DATA AS
+BEGIN
+
+	lt_metadata = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			IS_CUSTOM,
+			ROLLUP_TYPE_ID,
+			REF_UOM_CURRENCY_PATH,
+			REF_UOM_CURRENCY_BUSINESS_OBJECT,
+			REF_UOM_CURRENCY_COLUMN_ID,
+			UOM_CURRENCY_FLAG,
+			SEMANTIC_DATA_TYPE,
+			SEMANTIC_DATA_TYPE_ATTRIBUTES,
+			PROPERTY_TYPE,
+			IS_USABLE_IN_FORMULA
+		FROM "sap.plc.db::basis.t_metadata";
+
+	lt_metadata_item_attributes = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			ITEM_CATEGORY_ID,
+			DEFAULT_VALUE
+      FROM "sap.plc.db::basis.t_metadata_item_attributes";
+      
+    lt_formula = SELECT * from "sap.plc.db::basis.t_formula";
+	
+	CALL "sap.plc.db::PLC_AREA_CHECK_FORMULAS_PROC"(:lt_formula, :lt_metadata, :lt_metadata_item_attributes, errors);
+      
+END;

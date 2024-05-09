@@ -1,0 +1,48 @@
+VIEW "sap.plc.analytics.views.base::v_sql_meas_costing_sheet_rows" ( "CALCULATION_VERSION_ID", "COSTING_SHEET_ROW_ID", "COSTING_SHEET_ROW_TYPE" ) AS SELECT
+	calcVersion.calculation_version_id,
+	csrows.costing_sheet_row_id,
+	csrows.costing_sheet_row_type
+FROM "sap.plc.db::basis.t_calculation_version" calcVersion
+	INNER JOIN (
+				-- create a unioned result set including all costing sheets enriched by the default rows 'Total Cost' and 'Other Costs'
+				-- In addition, add default rows to result set without linkage to a costing sheet to enrich calculation versions
+				-- without any costing sheet being actively assigned
+				(
+					SELECT
+							costing_sheet_row_id,
+							costing_sheet_id,
+							CASE
+							WHEN costing_sheet_row_type = 1 THEN 'Base'
+							WHEN costing_sheet_row_type = 3 THEN 'Overhead'
+							WHEN costing_sheet_row_type = 4 THEN 'Sum'
+							ELSE null
+							END as costing_sheet_row_type,
+							_valid_from,
+							_valid_to
+						FROM "sap.plc.db::basis.t_costing_sheet_row" csrow
+					UNION ALL
+					SELECT DISTINCT 'Other Costs', costing_sheet_id, null, null, null
+						FROM "sap.plc.db::basis.t_costing_sheet_row"
+					UNION ALL
+					SELECT DISTINCT 'Total Cost', costing_sheet_id, null, null, null
+						FROM "sap.plc.db::basis.t_costing_sheet_row"
+				)
+				UNION ALL
+				(
+					SELECT 'Other Costs', null, null, null, null
+						FROM "sap.plc.db::DUMMY"
+					UNION ALL
+					SELECT 'Total Cost', null, null, null, null
+						FROM "sap.plc.db::DUMMY"
+				)
+			) csrows
+				-- regular join condition (e.g. calcVersion.costing_sheet_id = csrows.costing_sheet_id) would not work here as standalone condition
+				-- since costing_sheet_id can be NULL (in case no costing sheet is assigned to the calculation). NULL is not value and
+				-- therefore, cannot be used as a join condition without considering NULL or standard rows as special case
+				ON (calcVersion.costing_sheet_id = csrows.costing_sheet_id OR (csrows.costing_sheet_id IS NULL AND calcVersion.costing_sheet_id IS NULL))
+				AND (
+					-- check validity for each costing sheet row based on date ranges - except for 'Total Cost' and
+					-- 'Other Costs' since they are defined as default rows for every item
+					(calcVersion.master_data_timestamp >= csrows._valid_from AND (csrows._valid_to IS NULL OR calcVersion.master_data_timestamp < csrows._valid_to))
+					OR (csrows.costing_sheet_row_id = 'Total Cost' OR csrows.costing_sheet_row_id = 'Other Costs')
+				) WITH READ ONLY

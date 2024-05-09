@@ -1,0 +1,160 @@
+{
+    "xsac-plc-synonym-grantor-service": {
+        "object_owner": {
+            "system_privileges": ["CATALOG READ"],
+            "roles": [
+                "AFLPM_CREATOR_ERASER_EXECUTE",
+                "AFL__SYS_AFL_PLC_AREA_EXECUTE_WITH_GRANT_OPTION"
+            ],
+            "object_privileges": [
+                {
+                    "schema": "SYS",
+                    "name": "DUMMY",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "schema": "SYS",
+                    "name": "TRIGGERS",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "schema": "SYS",
+                    "name": "M_INIFILE_CONTENTS",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "schema": "SYS",
+                    "name": "EFFECTIVE_ROLES",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "name": "EFFECTIVE_ROLE_GRANTEES",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "name": "USER_PARAMETERS",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "name": "USERS",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "name": "BIMC_CUBES",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "_SYS_BI"
+                }
+            ],
+            "schema_privileges": [
+                {
+                    "reference": "_SYS_BI",
+                    "privileges_with_grant_option": [
+                        "EXECUTE",
+                        "SELECT"
+                    ]
+                },
+                {
+                    "reference": "_SYS_BIC",
+                    "privileges_with_grant_option": [
+                        "EXECUTE",
+                        "SELECT"
+                    ]
+                }
+            ]
+        },
+        "application_user": {
+            "system_privileges": ["CATALOG READ"],
+            "roles": [
+                "AFLPM_CREATOR_ERASER_EXECUTE",
+                "AFL__SYS_AFL_PLC_AREA_EXECUTE_WITH_GRANT_OPTION"
+            ],
+            "object_privileges": [
+                {
+                    "schema": "SYS",
+                    "name": "DUMMY",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "schema": "SYS",
+                    "name": "TRIGGERS",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "schema": "SYS",
+                    "name": "EFFECTIVE_ROLES",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "name": "USER_PARAMETERS",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "schema": "SYS",
+                    "name": "M_INIFILE_CONTENTS",
+                    "privileges": [
+                        "SELECT"
+                    ]
+                },
+                {
+                    "name": "EFFECTIVE_ROLE_GRANTEES",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "name": "USERS",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "SYS"
+                },
+                {
+                    "name": "BIMC_CUBES",
+                    "privileges": [
+                        "SELECT"
+                    ],
+                    "schema": "_SYS_BI"
+                }
+            ],
+            "schema_privileges": [
+                {
+                    "reference": "_SYS_BI",
+                    "privileges" : [ "SELECT" ]
+                },
+                {
+                    "reference": "_SYS_BIC",
+                    "privileges" : [ "CREATE ANY" ]
+                }
+            ]
+        }
+    }
+}

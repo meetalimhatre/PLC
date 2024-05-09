@@ -1,0 +1,30 @@
+{
+   "d":{
+      "results":[
+         {
+            "__metadata":{
+               "uri":"https://t02.plc.only.sap:51275/analytics/services.xsodata/versionsearch(1)",
+               "type":"default.versionsearchType"
+            },
+            "calculation_version_id":1,
+            "calculation_version_name":"#Version 1",
+            "calculation_id":1,
+            "calculation_name":"#SAP Example: Pump P-100",
+            "project_id":"#P1",
+            "project_name":"#SAP Example: Pump Project"
+         },
+         {
+            "__metadata":{
+               "uri":"https://t02.plc.only.sap:51275/analytics/services.xsodata/versionsearch(2)",
+               "type":"default.versionsearchType"
+            },
+            "calculation_version_id":2,
+            "calculation_version_name":"#Version 1",
+            "calculation_id":2,
+            "calculation_name":"#SAP-Beispiel: Pumpe P-100",
+            "project_id":"#P2",
+            "project_name":"#SAP Example: Pumpenprojekt"
+         }
+      ]
+   }
+}

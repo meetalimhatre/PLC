@@ -1,0 +1,12 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::session_update_external_access_g#",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_session", 
+			"type":"TABLE", 
+ 			"privileges_with_grant_option":[ "UPDATE" ] 
+		}
+		]
+	}
+}

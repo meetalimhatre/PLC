@@ -1,0 +1,359 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations::masterdata_replication_tool",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_language", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_currency", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_uom", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_regex", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::map.t_dimension_mapping", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::map.t_uom_mapping", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_kna1", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_lfa1", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t023", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t023t", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t134", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t134t", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_mara", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_makt", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_marc", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_mbew", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t030", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_draw", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_drat", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tdws", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tdwst", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tdwa", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tdwat", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cskb", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_csku", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t025", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t025t", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cepc", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cepct", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tka01", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tgsb", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tka02", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tgsbt", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t001", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t001w", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t001k", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_csks", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cskt", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tck14", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tck15", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t006", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_t006a", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tcurx", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tcurf", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tcurr", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_csla", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cslt", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cbpr", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cbpt", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_drad", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db.masterdata_replication.functions::f_is_numeric", 
+			"type":"FUNCTION", 
+ 			"privileges":[ "EXECUTE"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cssl", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_cost", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_crhd", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_crco", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_tc31a", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::repl_st.t_crtx", 
+			"type":"TABLE", 
+ 			"privileges":[ "SELECT", "UPDATE", "INSERT", "DELETE", "ALTER"] 
+		}
+		,
+		{
+			"name":"sap.plc.db::DUMMY",
+			"type":"TABLE",
+			"privileges":[ "SELECT"]
+		}
+		],
+	"schema_privileges": [
+             {
+             "privileges": [ "CREATE ANY" ]
+             }
+        ]
+	}
+}

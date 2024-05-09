@@ -1,0 +1,1011 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "WARNING! The SAP Product Lifecycle Costing Backend API is used by the SAP Product Lifecycle Costing Frontend for all communication. The API is not yet released for public consumption. You may use the API at your own risk if you are aware of and agree to the fact that the API will likely change with every release or hotfix which may require adaptations for your custom integration scenarios.",
+        "version": "4.2.4",
+        "title": "SAP Product Lifecycle Costing – Backend API",
+        "termsOfService": "",
+        "contact": {
+            "email": "SAPProductLifecycleCosting@sap.com"
+        },
+        "license": {
+            "name": ""
+        }
+    },
+    "basePath": "",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/sap/plc/xs/rest/dispatcher.xsjs/init-session": {
+            "$ref": "paths/init-session.json#/init-session"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/addins": {
+            "$ref": "paths/addins.json#/addins"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/addin-configurations": {
+            "$ref": "paths/addin-configurations.json#/addin-configurations"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/applicationdata/currentuser": {
+            "$ref": "paths/applicationdata.json#/applicationdata~1currentuser"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/applicationdata/languages": {
+            "$ref": "paths/applicationdata.json#/applicationdata~1languages"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculations": {
+            "$ref": "paths/calculations.json#/calculations"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions": {
+            "$ref": "paths/calculation-versions.json#/calculation-versions"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}": {
+            "$ref": "paths/calculation-versions.json#/calculation-versions~1:calculation_version_id"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/lifecycles": {
+            "$ref": "paths/calculation-versions.json#/calculation-versions~1:calculation_version_id~1lifecycles"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/variants": {
+            "$ref": "paths/variants.json#/calculation-versions~1:calculation_version_id~1variants"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/variants/{variant_id}": {
+            "$ref": "paths/variants.json#/calculation-versions~1:calculation_version_id~1variants~1:variant_id"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/variant-calculator": {
+            "$ref": "paths/variants.json#/calculation-versions~1:calculation_version_id~1variant-calculator"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/variant-calculator/{variant_id}": {
+            "$ref": "paths/variants.json#/calculation-versions~1:calculation_version_id~1variant-calculator~1:variant_id"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculation-versions/{calculation_version_id}/variant-generator/{variant_id}": {
+            "$ref": "paths/variants.json#/calculation-versions~1:calculation_version_id~1variant-generator~1:variant_id"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/recover-calculation-versions": {
+            "$ref": "paths/recover-calculation-versions.json#/recover-calculation-versions"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/calculated-results": {
+            "$ref": "paths/calculated-results.json#/calculated-results"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/customfieldsformula": {
+            "$ref": "paths/customfieldsformula.json#/customfieldsformula"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/default-settings": {
+            "$ref": "paths/default-settings.json#/default-settings"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/global-search": {
+            "$ref": "paths/global-search.json#/global-search"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/items": {
+            "$ref": "paths/items.json#/items"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/lock": {
+            "$ref": "paths/lock.json#/lock"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/logout": {
+            "$ref": "paths/logout.json#/logout"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/ping": {
+            "$ref": "paths/ping.json#/ping"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/projects": {
+            "$ref": "paths/projects.json#/projects"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/projects?id={id}&action=calculate_lifecycle_versions": {
+            "$ref": "paths/projects.json#/projects?id={id}&action=calculate_lifecycle_versions&overwriteManualVersions={overwriteManualVersions}"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/projects/activity-price-surcharges?id={id}": {
+            "$ref": "paths/projects.json#/projects~1activity-price-surcharges?id={id}"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/projects/material-price-surcharges?id={id}": {
+            "$ref": "paths/projects.json#/projects~1material-price-surcharges?id={id}"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/transportation": {
+            "$ref": "paths/transportation.json#/transportation"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/tasks": {
+            "$ref": "paths/tasks.json#/tasks"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/tasks?id={id}": {
+            "$ref": "paths/tasks.json#/tasks?id={id}"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/layouts": {
+            "$ref": "paths/layouts.json#/layouts"
+        },
+        "/analytics/services.xsodata/BOM_COMPARE(versionId1={id1},versionId2={id2},languageId={langId})/Execute": {
+            "$ref": "paths/bom-calculations.json#/bom-calculations"
+        },
+        "/analytics/services.xsodata/versionsearch": {
+            "$ref": "paths/versionsearch.json#/versionsearch"
+        },
+        "/analytics/services.xsodata/$metadata": {
+            "$ref": "paths/xs-metadata.json#/xs-metadata"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/privileges": {
+            "$ref": "paths/privileges.json#/privileges"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/plc-users": {
+            "$ref": "paths/plc-users.json#/plc-users"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/retention-periods": {
+            "$ref": "paths/data-protection.json#/retention-periods"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/data-protection": {
+            "$ref": "paths/data-protection.json#/data-protection"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/groups": {
+            "$ref": "paths/groups.json#/groups"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/frontend-settings": {
+            "$ref": "paths/frontend-settings.json#/frontend-settings"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/masterdata": {
+            "$ref": "paths/masterdata.json#/masterdata"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Account": {
+            "$ref": "paths/administration.json#/administration?business_object=Account"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Account_Group": {
+            "$ref": "paths/administration.json#/administration?business_object=Account_Group"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Activity_Price": {
+            "$ref": "paths/administration.json#/administration?business_object=Activity_Price"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Activity_Type": {
+            "$ref": "paths/administration.json#/administration?business_object=Activity_Type"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Business_Area": {
+            "$ref": "paths/administration.json#/administration?business_object=Business_Area"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Process": {
+            "$ref": "paths/administration.json#/administration?business_object=Process"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Company_Code": {
+            "$ref": "paths/administration.json#/administration?business_object=Company_Code"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Component_Split": {
+            "$ref": "paths/administration.json#/administration?business_object=Component_Split"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Confidence_Level": {
+            "$ref": "paths/administration.json#/administration?business_object=Confidence_Level"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Controlling_Area": {
+            "$ref": "paths/administration.json#/administration?business_object=Controlling_Area"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Costing_Sheet": {
+            "$ref": "paths/administration.json#/administration?business_object=Costing_Sheet"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Costing_Sheet_Row": {
+            "$ref": "paths/administration.json#/administration?business_object=Costing_Sheet_Row"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Cost_Center": {
+            "$ref": "paths/administration.json#/administration?business_object=Cost_Center"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Currency_Conversion": {
+            "$ref": "paths/administration.json#/administration?business_object=Currency_Conversion"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Currency": {
+            "$ref": "paths/administration.json#/administration?business_object=Currency"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Customer": {
+            "$ref": "paths/administration.json#/administration?business_object=Customer"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Dimension": {
+            "$ref": "paths/administration.json#/administration?business_object=Dimension"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Document": {
+            "$ref": "paths/administration.json#/administration?business_object=Document"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Document_Status": {
+            "$ref": "paths/administration.json#/administration?business_object=Document_Status"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Document_Type": {
+            "$ref": "paths/administration.json#/administration?business_object=Document_Type"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Exchange_Rate_Type": {
+            "$ref": "paths/administration.json#/administration?business_object=Exchange_Rate_Type"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Design_Office": {
+            "$ref": "paths/administration.json#/administration?business_object=Design_Office"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Language": {
+            "$ref": "paths/administration.json#/administration?business_object=Language"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material": {
+            "$ref": "paths/administration.json#/administration?business_object=Material"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material_Account_Determination": {
+            "$ref": "paths/administration.json#/administration?business_object=Material_Account_Determination"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material_Group": {
+            "$ref": "paths/administration.json#/administration?business_object=Material_Group"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material_Plant": {
+            "$ref": "paths/administration.json#/administration?business_object=Material_Plant"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material_Price": {
+            "$ref": "paths/administration.json#/administration?business_object=Material_Price"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Material_Type": {
+            "$ref": "paths/administration.json#/administration?business_object=Material_Type"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Overhead_Group": {
+            "$ref": "paths/administration.json#/administration?business_object=Overhead_Group"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Plant": {
+            "$ref": "paths/administration.json#/administration?business_object=Plant"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Profit_Center": {
+            "$ref": "paths/administration.json#/administration?business_object=Profit_Center"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Unit_Of_Measure": {
+            "$ref": "paths/administration.json#/administration?business_object=Unit_Of_Measure"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Valuation_Class": {
+            "$ref": "paths/administration.json#/administration?business_object=Valuation_Class"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Vendor": {
+            "$ref": "paths/administration.json#/administration?business_object=Vendor"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/administration?business_object=Work_Center": {
+            "$ref": "paths/administration.json#/administration?business_object=Work_Center"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/similar-parts-search": {
+            "$ref": "paths/similar-parts-search.json#/similar-parts-search"
+        },
+        "/sap/plc/xs/rest/dispatcher.xsjs/plugin": {
+            "$ref": "paths/plugin.json#/plugin"
+        }  
+    },
+    "securityDefinitions": {
+        "Privileges.BASE_ACCESS": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:init-session": "uses Privileges.BASE_ACCESS",
+                "logout": "uses Privileges.BASE_ACCESS",
+                "lock": "uses Privileges.BASE_ACCESS",
+                "ping": "uses Privileges.BASE_ACCESS",
+                "read:defaultSettings": "uses Privileges.BASE_ACCESS",
+                "read:customFieldsFormula": "uses Privileges.BASE_ACCESS",
+                "read:layouts": "uses Privileges.BASE_ACCESS",
+                "read:bom-calculations": "uses Privileges.CalcVerOpen",
+                "read:versionsearch": "uses Privileges.CalcVerOpen",
+                "read:xs-metadata": "uses Privileges.BASE_ACCESS",
+                "edit:layouts_is_corporate:false": "uses Privileges.BASE_ACCESS"
+            }
+        },
+        "Privileges.ADDIN_READ_ALL": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:addinAll": "uses Privileges.ADDIN_READ_ALL"
+            }
+        },
+        "Privileges.ADDIN_READ_ACTIVATED": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:addinActivated": "uses Privileges.ADDIN_READ_ACTIVATED"
+            }
+        },
+        "Privileges.ADDIN_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:addin": "uses Privileges.ADDIN_EDIT"
+            }
+        },
+        "Privileges.CALCULATIONS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:calculations": "uses Privileges.CALCULATIONS_READ"
+            }
+        },
+        "Privileges.CALCULATIONS_CREATE_UPDATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:calculations": "uses Privileges.CALCULATIONS_CREATE_UPDATE",
+                "update:calculations": "uses Privileges.CALCULATIONS_CREATE_UPDATE"
+            }
+        },
+        "Privileges.CALCULATIONS_DELETE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "delete:calculations": "uses Privileges.CALCULATIONS_DELETE"
+            }
+        },
+        "Privileges.CALCULATION_VERSIONS_OPEN": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:calculation-versions": "uses Privileges.CALCULATION_VERSIONS_OPEN"
+            }
+        },
+        "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:calculationVersions": "uses Privileges.CALCULATION_VERSIONS_CREATE_UPDATE"
+            }
+        },
+        "Privileges.CALCULATION_VERSIONS_DELETE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "delete:calculation-versions": "uses Privileges.CALCULATION_VERSIONS_DELETE"
+            }
+        },
+        "Privileges.CALCULATION_VERSIONS_FREEZE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "freeze:calculation-versions": "uses Privileges.CALCULATION_VERSIONS_FREEZE"
+            }
+        },
+        "Privileges.PROJECTS_OPEN": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "open:projects": "uses Privileges.PROJECTS_OPEN"
+            }
+        },
+        "Privileges.PROJECTS_CREATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:projects": "uses Privileges.PROJECTS_CREATE"
+            }
+        },
+        "Privileges.PROJECTS_UPDATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:projects": "uses Privileges.PROJECTS_UPDATE"
+            }
+        },
+        "Privileges.PROJECTS_DELETE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "delete:projects": "uses Privileges.PROJECTS_DELETE"
+            }
+        },
+        "Privileges.TASKS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:tasks": "uses Privileges.TASKS_READ"
+            }
+        },
+        "Privileges.CORPORATE_LAYOUT_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "edit:layouts_is_corporate:true": "uses Privileges.CORPORATE_LAYOUT_EDIT"
+            }
+        },
+        "Privileges.GROUPS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documentStatus": "uses Privileges.GROUPS_READ"
+            }
+        },
+        "Privileges.GROUPS_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documentStatus": "uses Privileges.GROUPS_EDIT"
+            }
+        },
+        "Privileges.ACCOUNT_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:account": "uses Privileges.ACCOUNT_READ"
+            }
+        },
+        "Privileges.ACCOUNT_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:account": "uses Privileges.ACCOUNT_EDIT"
+            }
+        },
+        "Privileges.ACCOUNT_GROUP_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:accountGroup": "uses Privileges.ACCOUNT_GROUP_READ"
+            }
+        },
+        "Privileges.ACCOUNT_GROUP_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:accountGroup": "uses Privileges.ACCOUNT_GROUP_EDIT"
+            }
+        },
+        "Privileges.ACTIVITY_PRICE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:activityPrice": "uses Privileges.ACTIVITY_PRICE_READ"
+            }
+        },
+        "Privileges.ACTIVITY_PRICE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:activityPrice": "uses Privileges.ACTIVITY_PRICE_EDIT"
+            }
+        },
+        "Privileges.ACTIVITY_TYPE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:activityType": "uses Privileges.ACTIVITY_TYPE_READ"
+            }
+        },
+        "Privileges.ACTIVITY_TYPE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:activityType": "uses Privileges.ACTIVITY_TYPE_EDIT"
+            }
+        },
+        "Privileges.BUSINESS_AREA_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:businessArea": "uses Privileges.BUSINESS_AREA_READ"
+            }
+        },
+        "Privileges.BUSINESS_AREA_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:businessArea": "uses Privileges.BUSINESS_AREA_EDIT"
+            }
+        },
+        "Privileges.PROCESS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:process": "uses Privileges.PROCESS_READ"
+            }
+        },
+        "Privileges.PROCESS_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:process": "uses Privileges.PROCESS_EDIT"
+            }
+        },
+        "Privileges.COMPANY_CODE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:companyCode": "uses Privileges.COMPANY_CODE_READ"
+            }
+        },
+        "Privileges.COMPANY_CODE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:companyCode": "uses Privileges.COMPANY_CODE_EDIT"
+            }
+        },
+        "Privileges.COMPONENT_SPLIT_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:componentSplit": "uses Privileges.COMPONENT_SPLIT_READ"
+            }
+        },
+        "Privileges.COMPONENT_SPLIT_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:componentSplit": "uses Privileges.COMPONENT_SPLIT_EDIT"
+            }
+        },
+        "Privileges.CONFIDENCE_LEVEL_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:confidenceLevel": "uses Privileges.CONFIDENCE_LEVEL_READ"
+            }
+        },
+        "Privileges.CONTROLLING_AREA_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:controllingArea": "uses Privileges.CONTROLLING_AREA_EDIT"
+            }
+        },
+        "Privileges.CONTROLLING_AREA_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:controllingArea": "uses Privileges.CONTROLLING_AREA_READ"
+            }
+        },
+        "Privileges.COSTING_SHEET_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:costingSheet": "uses Privileges.COSTING_SHEET_EDIT"
+            }
+        },
+        "Privileges.COSTING_SHEET_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:costingSheet": "uses Privileges.COSTING_SHEET_READ"
+            }
+        },
+        "Privileges.COSTING_SHEET_ROW_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:costingSheetRow": "uses Privileges.COSTING_SHEET_ROW_READ"
+            }
+        },
+        "Privileges.COST_CENTER_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:costCenter": "uses Privileges.COST_CENTER_EDIT"
+            }
+        },
+        "Privileges.COST_CENTER_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:costCenter": "uses Privileges.COST_CENTER_READ"
+            }
+        },
+        "Privileges.CURRENCY_CONVERSION_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:currencyConversion": "uses Privileges.CURRENCY_CONVERSION_EDIT"
+            }
+        },
+        "Privileges.CURRENCY_CONVERSION_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:currencyConversion": "uses Privileges.CURRENCY_CONVERSION_READ"
+            }
+        },
+        "Privileges.DIMENSION_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:dimension": "uses Privileges.DIMENSION_READ"
+            }
+        },
+        "Privileges.DOCUMENT_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:document": "uses Privileges.DOCUMENT_READ",
+                "read:designOffice": "uses Privileges.DOCUMENT_READ"
+            }
+        },
+        "Privileges.DOCUMENT_TYPE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documenttype": "uses Privileges.DOCUMENT_TYPE_READ"
+            }
+        },
+        "Privileges.CURRENCY_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:currency": "uses Privileges.CURRENCY_READ"
+            }
+        },
+        "Privileges.CURRENCY_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:currency": "uses Privileges.CURRENCY_EDIT"
+            }
+        },
+        "Privileges.CUSTOMER_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:customer": "uses Privileges.CUSTOMER_READ"
+            }
+        },
+        "Privileges.CUSTOMER_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:customer": "uses Privileges.CUSTOMER_EDIT"
+            }
+        },
+        "Privileges.DOCUMENT_STATUS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documentStatus": "uses Privileges.DOCUMENT_STATUS_READ"
+            }
+        },
+        "Privileges.EXCHANGE_RATE_TYPE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documentStatus": "uses Privileges.EXCHANGE_RATE_TYPE_READ"
+            }
+        },
+        "Privileges.EXCHANGE_RATE_TYPE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:documentStatus": "uses Privileges.EXCHANGE_RATE_TYPE_EDIT"
+            }
+        },
+        "Privileges.LANGUAGE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:language": "uses Privileges.LANGUAGE_READ"
+            }
+        },
+        "Privileges.LANGUAGE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:language": "uses Privileges.LANGUAGE_EDIT"
+            }
+        },
+        "Privileges.MATERIAL_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:material": "uses Privileges.MATERIAL_READ"
+            }
+        },
+        "Privileges.MATERIAL_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:material": "uses Privileges.MATERIAL_EDIT"
+            }
+        },
+        "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:materialAccountDetermination": "uses Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ"
+            }
+        },
+        "Privileges.MATERIAL_ACCOUNT_DETERMINATION_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:materialAccountDetermination": "uses Privileges.MATERIAL_ACCOUNT_DETERMINATION_EDIT"
+            }
+        },
+        "Privileges.MATERIAL_GROUP_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:materialGroup": "uses Privileges.MATERIAL_GROUP_READ"
+            }
+        },
+        "Privileges.MATERIAL_GROUP_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:materialGroup": "uses Privileges.MATERIAL_GROUP_EDIT"
+            }
+        },
+        "Privileges.MATERIAL_PLANT_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:materialPlant": "uses Privileges.MATERIAL_PLANT_READ"
+            }
+        },
+        "Privileges.MATERIAL_PLANT_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:materialPlant": "uses Privileges.MATERIAL_PLANT_EDIT"
+            }
+        },
+        "Privileges.MATERIAL_PRICE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:materialPrice": "uses Privileges.MATERIAL_PRICE_READ"
+            }
+        },
+        "Privileges.MATERIAL_PRICE_CREATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:materialPrice": "uses Privileges.MATERIAL_PRICE_CREATE"
+            }
+        },
+        "Privileges.MATERIAL_PRICE_UPDATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:materialPrice": "uses Privileges.MATERIAL_PRICE_UPDATE"
+            }
+        },
+        "Privileges.MATERIAL_PRICE_DELETE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "delete:materialPrice": "uses Privileges.MATERIAL_PRICE_DELETE"
+            }
+        },
+        "Privileges.MATERIAL_TYPE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:materialType": "uses Privileges.MATERIAL_TYPE_READ"
+            }
+        },
+        "Privileges.MATERIAL_TYPE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:materialType": "uses Privileges.MATERIAL_TYPE_EDIT"
+            }
+        },
+        "Privileges.OVERHEAD_GROUP_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:overheadGroup": "uses Privileges.OVERHEAD_GROUP_READ"
+            }
+        },
+        "Privileges.OVERHEAD_GROUP_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:overheadGroup": "uses Privileges.OVERHEAD_GROUP_EDIT"
+            }
+        },
+        "Privileges.PLANT_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:plant": "uses Privileges.PLANT_READ"
+            }
+        },
+        "Privileges.PLANT_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:plant": "uses Privileges.PLANT_EDIT"
+            }
+        },
+        "Privileges.PROFIT_CENTER_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:profitCenter": "uses Privileges.PROFIT_CENTER_READ"
+            }
+        },
+        "Privileges.PROFIT_CENTER_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:profitCenter": "uses Privileges.PROFIT_CENTER_EDIT"
+            }
+        },
+        "Privileges.UNIT_OF_MEASURE_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:unitOfMeasure": "uses Privileges.UNIT_OF_MEASURE_READ"
+            }
+        },
+        "Privileges.UNIT_OF_MEASURE_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:unitOfMeasure": "uses Privileges.UNIT_OF_MEASURE_EDIT"
+            }
+        },
+        "Privileges.VALUATION_CLASS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:valuationClass": "uses Privileges.VALUATION_CLASS_READ"
+            }
+        },
+        "Privileges.VALUATION_CLASS_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:valuationClass": "uses Privileges.VALUATION_CLASS_EDIT"
+            }
+        },
+        "Privileges.VENDOR_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:vendor": "uses Privileges.VENDOR_READ"
+            }
+        },
+        "Privileges.VENDOR_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:vendor": "uses Privileges.VENDOR_EDIT"
+            }
+        },        
+        "Privileges.PROJECTS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:projects": "uses Privileges.PROJECTS_READ"
+            }
+        },
+        "Privileges.WORK_CENTER_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:workCenter": "uses Privileges.WORK_CENTER_READ"
+            }
+        },
+        "Privileges.WORK_CENTER_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:workCenter": "uses Privileges.WORK_CENTER_EDIT"
+            }
+        },
+        "Privileges.CUSTOM_FIELDS_FORMULA_CREATE_UPDATE": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:customFieldsFormula": "uses Privileges.CUSTOM_FIELDS_FORMULA_CREATE_UPDATE"
+            }
+        },
+        "Privileges.GLOBAL_DEFAULT_SETTINGS_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:globalDefaultSettings": "uses Privileges.GLOBAL_DEFAULT_SETTINGS_EDIT"
+            }
+        },
+        "Privileges.USER_DEFAULT_SETTINGS_EDIT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "update:userDefaultSettings": "uses Privileges.USER_DEFAULT_SETTINGS_EDIT"
+            }
+        },
+        "Privileges.TRANSPORTATION_EXPORT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "read:transportation": "uses Privileges.TRANSPORTATION_EXPORT"
+            }
+        },
+        "Privileges.TRANSPORTATION_IMPORT": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "create:transportation": "uses Privileges.TRANSPORTATION_IMPORT"
+            }
+        },
+        "Privileges.USERS_READ": {
+            "type": "oauth2",
+            "authorizationUrl": "",
+            "flow": "implicit",
+            "scopes": {
+                "get:plcUsers": "uses Privileges.USERS_READ"
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "You need to run init-session before making any calls to services. If you have questions, please contact:"
+    }
+}

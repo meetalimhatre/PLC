@@ -1,0 +1,524 @@
+namespace sap.plc.db.calcengine;
+
+context calcengine_types {
+	table type ts_calculate_calculation_header {
+		CALCULATION_VERSION_ID : Integer;
+		CALCULATION_ID : Integer;
+		CALCULATION_VERSION_NAME : String(500);
+		CALCULATION_VERSION_TYPE : Integer;
+		ROOT_ITEM_ID : Integer;
+		CUSTOMER_ID : String(10);
+		SALES_DOCUMENT : String(100);
+		SALES_PRICE : Decimal(28, 7);
+		SALES_PRICE_CURRENCY_ID : String(3);
+		REPORT_CURRENCY_ID : String(3);
+		COSTING_SHEET_ID : String(15);
+		COMPONENT_SPLIT_ID : String(35);
+		START_OF_PRODUCTION : LocalDate;
+		END_OF_PRODUCTION : LocalDate;
+		VALUATION_DATE : LocalDate;
+		LAST_MODIFIED_ON :UTCTimestamp;
+		LAST_MODIFIED_BY : String(256);
+		MASTER_DATA_TIMESTAMP : UTCTimestamp;
+		LIFECYCLE_PERIOD_FROM : Integer;
+		BASE_VERSION_ID : Integer;
+		IS_FROZEN : Integer;
+		EXCHANGE_RATE_TYPE_ID : String(20);
+		MATERIAL_PRICE_STRATEGY_ID: String(20);
+		ACTIVITY_PRICE_STRATEGY_ID: String(20);
+
+		CALCULATION_NAME : String(500);
+		CURRENT_CALCULATION_VERSION_ID : Integer;
+		CALCULATION_CREATED_ON : UTCTimestamp;
+		CALCULATION_CREATED_BY : String(256);
+		CALCULATION_LAST_MODIFIED_ON : UTCTimestamp;
+		CALCULATION_LAST_MODIFIED_BY : String(256);
+
+		CONTROLLING_AREA_ID : String(4);
+		PROJECT_ID : String(35);
+		PROJECT_REFERENCE_ID : String(24);
+		PROJECT_NAME : String(100);
+		PROJECT_RESPONSIBLE : String(256);
+		PROJECT_CUSTOMER_ID : String(10);
+		PROJECT_SALES_DOCUMENT : String(100);
+		PROJECT_SALES_PRICE : Decimal(28,7);
+		PROJECT_SALES_PRICE_CURRENCY_ID : String(3);
+		PROJECT_COMMENT : String(5000);
+		PROJECT_COMPANY_CODE_ID : String(4);
+		PROJECT_PLANT_ID : String(8);
+		PROJECT_BUSINESS_AREA_ID : String(15);
+		PROJECT_PROFIT_CENTER_ID : String(10);
+		PROJECT_REPORT_CURRENCY_ID : String(3);
+		PROJECT_COSTING_SHEET_ID : String(15);
+		PROJECT_COMPONENT_SPLIT_ID : String(35);
+		PROJECT_START : LocalDate;
+		PROJECT_END : LocalDate;
+		PROJECT_START_OF_PRODUCTION : LocalDate;
+		PROJECT_END_OF_PRODUCTION : LocalDate;
+		PROJECT_VALUATION_DATE : LocalDate;
+		PROJECT_CREATED_ON : UTCTimestamp;
+		PROJECT_CREATED_BY : String(256);
+		PROJECT_LAST_MODIFIED_ON : UTCTimestamp;
+		PROJECT_LAST_MODIFIED_BY : String(256);
+		PROJECT_EXCHANGE_RATE_TYPE_ID : String(20);
+		PROJECT_MATERIAL_PRICE_STRATEGY_ID : String(20);
+		PROJECT_ACTIVITY_PRICE_STRATEGY_ID : String(20);
+	}
+
+	table type ts_calculate_formula {
+		FORMULA_ID : Integer;
+		PATH : String(127);
+		BUSINESS_OBJECT : String(127);
+		COLUMN_ID : String(127);
+		ITEM_CATEGORY_ID : Integer;
+		IS_FORMULA_USED : Integer;
+		FORMULA_STRING : LargeString;
+		FORMULA_DESCRIPTION : String(5000);
+	}
+
+	table type ts_calculate_metadata {
+		PATH : String(127);
+		BUSINESS_OBJECT : String(127);
+		COLUMN_ID : String(127);
+		IS_CUSTOM : Integer;
+		ROLLUP_TYPE_ID : Integer;
+		REF_UOM_CURRENCY_PATH : String(127);
+		REF_UOM_CURRENCY_BUSINESS_OBJECT : String(127);
+		REF_UOM_CURRENCY_COLUMN_ID : String(127);
+		UOM_CURRENCY_FLAG : Integer;
+		SEMANTIC_DATA_TYPE : String(35);
+		SEMANTIC_DATA_TYPE_ATTRIBUTES : String(250);
+		PROPERTY_TYPE : Integer;
+		IS_USABLE_IN_FORMULA : Integer;
+	}
+
+	table type ts_calculate_metadata_item_attributes {
+		PATH : String(127);
+		BUSINESS_OBJECT : String(127);
+		COLUMN_ID : String(127);
+		ITEM_CATEGORY_ID : Integer;
+		DEFAULT_VALUE : String(5000);
+	}
+
+	table type ts_calculate_item {
+		ITEM_ID : Integer;
+		CALCULATION_VERSION_ID : Integer;
+		PARENT_ITEM_ID : Integer;
+		IS_ACTIVE : Integer;
+		HIGHLIGHT_GREEN : Integer;
+		HIGHLIGHT_ORANGE : Integer;
+		HIGHLIGHT_YELLOW : Integer;
+		ITEM_CATEGORY_ID : Integer;
+		CHILD_ITEM_CATEGORY_ID : Integer;
+		ITEM_DESCRIPTION : String(250);
+		REFERENCED_CALCULATION_VERSION_ID : Integer;
+		COMMENT : String(5000);
+		ACCOUNT_ID : String(10);
+		DOCUMENT_TYPE_ID : String(3);
+		DOCUMENT_ID : String(40);
+		DOCUMENT_VERSION : String(2);
+		DOCUMENT_PART : String(3);
+		DOCUMENT_STATUS_ID : String(2);
+		DESIGN_OFFICE_ID : String(3);
+		MATERIAL_ID : String(40);
+		MATERIAL_TYPE_ID : String(4);
+		MATERIAL_GROUP_ID : String(9);
+		IS_PHANTOM_MATERIAL: Integer;
+		IS_CONFIGURABLE_MATERIAL: Integer;
+		MATERIAL_SOURCE: Integer;
+		OVERHEAD_GROUP_ID : String(10);
+		VALUATION_CLASS_ID : String(4);
+		PURCHASING_GROUP : String(20);
+		PURCHASING_DOCUMENT : String(10);
+		LOCAL_CONTENT : Decimal(28,7);
+		ACTIVITY_TYPE_ID : String(12);
+		PROCESS_ID : String(12);
+		LOT_SIZE : Decimal(28, 7);
+		LOT_SIZE_IS_MANUAL : Integer;
+		ENGINEERING_CHANGE_NUMBER_ID : String(250);
+		COMPANY_CODE_ID : String(4);
+		COST_CENTER_ID : String(10);
+		PLANT_ID : String(8);
+		WORK_CENTER_ID : String(15);
+		WORK_CENTER_CATEGORY: String(50);
+		EFFICIENCY: Decimal(28, 7);		
+		BUSINESS_AREA_ID : String(15);
+		PROFIT_CENTER_ID : String(10);
+		QUANTITY : Decimal(28, 7);
+		QUANTITY_IS_MANUAL : Integer;
+		QUANTITY_UOM_ID : String(3);
+		TOTAL_QUANTITY : Decimal(28, 7);
+		TOTAL_QUANTITY_UOM_ID : String(3);
+		TOTAL_QUANTITY_DEPENDS_ON : Integer;
+		TOTAL_QUANTITY_OF_VARIANTS : Decimal(28, 7);
+		IS_RELEVANT_TO_COSTING_IN_ERP : Integer;
+		BASE_QUANTITY : Decimal(28,7);
+		BASE_QUANTITY_IS_MANUAL : Integer;
+		PRICE_FIXED_PORTION : Decimal(28, 7);
+		PRICE_FIXED_PORTION_IS_MANUAL : Integer;
+		PRICE_VARIABLE_PORTION : Decimal(28, 7);
+		PRICE_VARIABLE_PORTION_IS_MANUAL : Integer;
+		TRANSACTION_CURRENCY_ID : String(3);
+		PRICE_UNIT : Decimal(28, 7);
+		PRICE_UNIT_IS_MANUAL : Integer;
+		PRICE_UNIT_UOM_ID : String(3);
+		IS_PRICE_SPLIT_ACTIVE : Integer;
+	    PRICE_ID : String(32);
+		CONFIDENCE_LEVEL_ID : Integer;
+		PRICE_SOURCE_ID : String(20);
+		PRICE_SOURCE_TYPE_ID : Integer;
+		SURCHARGE: Decimal(28,7);		
+		IS_DISABLING_PRICE_DETERMINATION : Integer;
+		VENDOR_ID : String(10);
+		TARGET_COST : Decimal(28, 7);
+		TARGET_COST_IS_MANUAL : Integer;
+		TARGET_COST_CURRENCY_ID : String(3);
+		CREATED_ON : UTCTimestamp;
+		CREATED_BY : String(256);
+		LAST_MODIFIED_ON : UTCTimestamp;
+		LAST_MODIFIED_BY : String(256);
+		PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION : Decimal(28, 7);
+		PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION : Decimal(28, 7);
+		PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION : Decimal(28, 7);
+		PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION : Decimal(28, 7);
+		PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION : Decimal(28, 7);
+		PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_calculate_saved_costing_sheet {
+		CALCULATION_VERSION_ID : Integer;
+		ITEM_ID : Integer;
+		COSTING_SHEET_ROW_ID : String(5);
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		ACCOUNT_ID : String(10);
+		COST_FIXED_PORTION : Decimal(28,7);
+		COST_VARIABLE_PORTION : Decimal(28,7);
+		COST2_FIXED_PORTION : Decimal(28,7);
+		COST2_VARIABLE_PORTION : Decimal(28,7);
+		COST3_FIXED_PORTION : Decimal(28,7);
+		COST3_VARIABLE_PORTION : Decimal(28,7);
+	}
+
+	table type ts_calculate_saved_component_split {
+		MASTER_CALCULATION_VERSION_ID : Integer;
+		REFERENCED_CALCULATION_VERSION_ID : Integer;
+		COST_COMPONENT_ID : Integer;
+		ACCOUNT_ID : String(10);
+		COST_FIXED_PORTION : Decimal(28,7);
+		COST_VARIABLE_PORTION : Decimal(28,7);
+		COST2_FIXED_PORTION : Decimal(28,7);
+		COST2_VARIABLE_PORTION : Decimal(28,7);
+		COST3_FIXED_PORTION : Decimal(28,7);
+		COST3_VARIABLE_PORTION : Decimal(28,7);
+	}
+
+	table type ts_calculate_account {
+		ACCOUNT_ID : String(10);
+	}
+
+	table type ts_calculate_account_group {
+		ACCOUNT_GROUP_ID : Integer;
+		CONTROLLING_AREA_ID : String(4);
+		COST_PORTION : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_account_account_group {
+		FROM_ACCOUNT_ID : String(10);
+		TO_ACCOUNT_ID : String(10);
+		ACCOUNT_GROUP_ID : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_costing_sheet {
+		COSTING_SHEET_ID : String(15);
+		CONTROLLING_AREA_ID : String(4);
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+		IS_TOTAL_COST2_ENABLED: Integer;
+		IS_TOTAL_COST3_ENABLED: Integer;
+	}
+
+	table type ts_calculate_costing_sheet_row {
+		COSTING_SHEET_ROW_ID : String(5);
+		COSTING_SHEET_ID : String(15);
+		COSTING_SHEET_ROW_TYPE : Integer;
+		COSTING_SHEET_BASE_ID : Integer;
+		ACCOUNT_GROUP_AS_BASE_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		CALCULATION_ORDER : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+		IS_RELEVANT_FOR_TOTAL : Integer;
+		IS_RELEVANT_FOR_TOTAL2 : Integer;
+		IS_RELEVANT_FOR_TOTAL3 : Integer;
+	}
+
+	table type ts_calculate_costing_sheet_row_dependencies {
+		SOURCE_ROW_ID : String(5);
+		TARGET_ROW_ID : String(5);
+		COSTING_SHEET_ID : String(15);
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_costing_sheet_base {
+		COSTING_SHEET_BASE_ID : Integer;
+		COST_PORTION : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_costing_sheet_base_row {
+		COSTING_SHEET_BASE_ID : Integer;
+		ITEM_CATEGORY_ID : Integer;
+		SUBITEM_STATE : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_costing_sheet_overhead {
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		CREDIT_ACCOUNT_ID : String(10);
+		CREDIT_FIXED_COST_PORTION : Integer;
+		IS_ROLLED_UP : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+		USE_DEFAULT_FIXED_COST_PORTION : Integer;
+	}
+
+	table type ts_calculate_costing_sheet_overhead_row {
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		VALID_FROM : LocalDate;
+		VALID_TO : LocalDate;
+		CONTROLLING_AREA_ID : String(4);
+		COMPANY_CODE_ID : String(4);
+		BUSINESS_AREA_ID : String(15);
+		PROFIT_CENTER_ID : String(10);
+		PLANT_ID : String(8);
+		OVERHEAD_GROUP_ID : String(10);
+		OVERHEAD_PERCENTAGE : Decimal(28, 7);
+		PROJECT_ID : String(35);
+		ACTIVITY_TYPE_ID : String(12);
+		COST_CENTER_ID : String(10);
+		WORK_CENTER_ID : String(15);
+		OVERHEAD_QUANTITY_BASED : Decimal(28, 7);
+		OVERHEAD_CURRENCY_ID : String(5);
+		OVERHEAD_PRICE_UNIT : Decimal(28, 7);
+		OVERHEAD_PRICE_UNIT_UOM_ID : String(5);
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+		FIXED_COST_OVERHEAD_PERCENTAGE : Decimal(28, 7);
+		FORMULA_ID : Integer;
+	}
+
+	table type ts_calculate_costing_sheet_overhead_row_formula{
+		FORMULA_ID : Integer;
+		FORMULA_STRING : LargeString;
+		FORMULA_DESCRIPTION : String(5000);
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		OVERHEAD_CUSTOM: String(127);
+	}
+
+	table type ts_calculate_component_split {
+		COMPONENT_SPLIT_ID : String(35);
+		CONTROLLING_AREA_ID : String(4);
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_component_split_account_group {
+		ACCOUNT_GROUP_ID : Integer;
+		COMPONENT_SPLIT_ID : String(35);
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_uom {
+		UOM_ID : String(3);
+		DIMENSION_ID : String(6);
+		NUMERATOR : Integer;
+		DENOMINATOR : Integer;
+		EXPONENT_BASE10 : Integer;
+		SI_CONSTANT : Integer;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_currency_conversion {
+		EXCHANGE_RATE_TYPE_ID : String(20);
+		FROM_CURRENCY_ID : String(5);
+		TO_CURRENCY_ID : String(5);
+		RATE : Decimal(28, 7);
+		FROM_FACTOR : Integer;
+		TO_FACTOR : Integer;
+		VALID_FROM : LocalDate;
+		_VALID_FROM : UTCTimestamp;
+		_VALID_TO : UTCTimestamp;
+	}
+
+	table type ts_calculate_item_price_components {
+		PRICE_FIXED : Decimal(28, 7);
+		PRICE_VARIABLE : Decimal(28, 7);
+		ITEM_ID :  Integer;
+		CALCULATION_VERSION_ID: Integer;
+		ACCOUNT_ID : String(10);
+	}
+
+	table type ts_calculate_item_calculated_values_costing_sheet {
+		ITEM_ID : Integer;
+		COSTING_SHEET_ROW_ID : String(5);
+		IS_ROLLED_UP_VALUE : Integer;
+		HAS_SUBITEMS : Integer;
+		COST_FIXED_PORTION : Decimal(28, 7);
+		COST_VARIABLE_PORTION : Decimal(28, 7);
+		COST2_FIXED_PORTION : Decimal(28, 7);
+		COST2_VARIABLE_PORTION : Decimal(28, 7);
+		COST3_FIXED_PORTION : Decimal(28, 7);
+		COST3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_calculate_item_calculated_values_costing_sheet_save {
+		CALCULATION_VERSION_ID : Integer;
+		ITEM_ID : Integer;
+		COSTING_SHEET_ROW_ID : String(5);
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		ACCOUNT_ID : String(10);
+		IS_ROLLED_UP_VALUE : Integer;
+		HAS_SUBITEMS : Integer;
+		COST : Decimal(28, 7);
+		COST_FIXED_PORTION : Decimal(28, 7);
+		COST_VARIABLE_PORTION : Decimal(28, 7);
+		COST2 : Decimal(28, 7);
+		COST2_FIXED_PORTION : Decimal(28, 7);
+		COST2_VARIABLE_PORTION : Decimal(28, 7);
+		COST3 : Decimal(28, 7);
+		COST3_FIXED_PORTION : Decimal(28, 7);
+		COST3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_calculate_item_calculated_values_component_split {
+		ITEM_ID : Integer;
+		COMPONENT_SPLIT_ID : String(35);
+		COST_COMPONENT_ID : Integer;
+		COST_FIXED_PORTION : Decimal(28, 7);
+		COST_VARIABLE_PORTION : Decimal(28, 7);
+		COST2_FIXED_PORTION : Decimal(28, 7);
+		COST2_VARIABLE_PORTION : Decimal(28, 7);
+		COST3_FIXED_PORTION : Decimal(28, 7);
+		COST3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_calculate_item_calculated_values_component_split_save {
+		CALCULATION_VERSION_ID : Integer;
+		ITEM_ID : Integer;
+		COMPONENT_SPLIT_ID : String(35);
+		COST_COMPONENT_ID : Integer;
+		ACCOUNT_ID : String(10);
+		COST : Decimal(28, 7);
+		COST_FIXED_PORTION : Decimal(28, 7);
+		COST_VARIABLE_PORTION : Decimal(28, 7);
+		COST2 : Decimal(28, 7);
+		COST2_FIXED_PORTION : Decimal(28, 7);
+		COST2_VARIABLE_PORTION : Decimal(28, 7);
+		COST3 : Decimal(28, 7);
+		COST3_FIXED_PORTION : Decimal(28, 7);
+		COST3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_referenced_versions_results_component_split {
+		MASTER_CALCULATION_VERSION_ID : Integer;
+		REFERENCED_CALCULATION_VERSION_ID : Integer;
+		COST_COMPONENT_ID : Integer;
+		ACCOUNT_ID : String(10);
+		COST_FIXED_PORTION : Decimal(28, 7);
+		COST_VARIABLE_PORTION : Decimal(28, 7);
+		COST2_FIXED_PORTION : Decimal(28, 7);
+		COST2_VARIABLE_PORTION : Decimal(28, 7);
+		COST3_FIXED_PORTION : Decimal(28, 7);
+		COST3_VARIABLE_PORTION : Decimal(28, 7);
+	}
+
+	table type ts_calculate_errors {
+		CALCULATION_VERSION_ID : Integer;
+		ITEM_ID : Integer;
+		ERROR_CODE : Integer;
+		ERROR_DETAILS : String(1000);
+	}
+
+	table type ts_calculate_changed_items {
+		ITEM_ID : Integer;
+		FIELD_NAME : String(50);
+	}
+
+	table type ts_formula_errors {
+		ITEM_ID : Integer;
+		ERROR_CODE : Integer;
+		ERROR_DETAILS : String(1000);
+	}
+
+	table type ts_costing_sheet_row_formula_errors {
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		ERROR_CODE : Integer;
+		ERROR_DETAILS : String(1000);
+	}
+	table type ts_calculate_variant_header {
+		VARIANT_ID : Integer;
+		CALCULATION_VERSION_ID : Integer;
+		VARIANT_NAME : String(250);
+		COMMENT : String(5000);
+		EXCHANGE_RATE_TYPE_ID : String(20);
+		REPORT_CURRENCY_ID: String(3);
+		SALES_PRICE: Decimal(28,7);
+		SALES_PRICE_CURRENCY_ID: String(3);
+		VARIANT_ORDER: Integer;
+		IS_SELECTED: Integer;
+		VARIANT_TYPE: Integer;
+		LAST_REMOVED_MARKINGS_ON: UTCTimestamp;
+		LAST_REMOVED_MARKINGS_BY: String(256);
+		LAST_MODIFIED_ON: UTCTimestamp;
+		LAST_MODIFIED_BY: String(256);
+		LAST_CALCULATED_ON: UTCTimestamp;
+		LAST_CALCULATED_BY: String(256);
+	}
+
+	table type ts_calculate_variant_items {
+		VARIANT_ID : Integer;
+		ITEM_ID: Integer;
+		IS_INCLUDED: Integer;
+		QUANTITY: Decimal(28,7);
+		QUANTITY_STATE: Integer;
+		QUANTITY_UOM_ID: String(3);
+	}
+
+	table type ts_variant_header_calculated {
+		VARIANT_ID : Integer;
+		VARIANT_TYPE : Integer;
+		SALES_PRICE: Decimal(28,7);
+		TOTAL_COST: Decimal(28,7);
+	}
+
+	table type ts_variant_header_key {
+		VARIANT_ID : Integer;
+	}
+
+	table type ts_variant_items_calculated {
+		VARIANT_ID : Integer;
+		ITEM_ID: Integer;
+		TOTAL_QUANTITY: Decimal(28,7);
+		TOTAL_COST: Decimal(28,7);
+		QUANTITY_CALCULATED: Decimal(28,7);
+	}
+
+	table type ts_variant_errors {
+		VARIANT_ID : Integer;
+		ITEM_ID : Integer;
+		ERROR_CODE : Integer;
+		ERROR_DETAILS : String(1000);
+	}
+};

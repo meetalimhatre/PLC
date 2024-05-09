@@ -1,0 +1,806 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_lifecycle_calculation_version_price_determination" (                
+        IN  iv_cv_id                    integer
+    )
+    LANGUAGE SQLSCRIPT
+    SQL SECURITY INVOKER
+    AS
+BEGIN
+
+-- ************************************************************************************************************************************
+--  Price Determination and Surcharges for Lifecyle Calculation Versions
+-- ************************************************************************************************************************************
+-- This procedure is executing a price determination and/or applying surcharges to leaf items of a lifecycle calculation version. The execution of the price determination and the application of 
+-- surcharges depend on the selection surcharge strategy in t_project_lifecycle_configuration.
+-- The procedure is directly working on the persistent table t_item (and t_item_ext) so that is it not required that the calculation version is opened for the price determination, the version 
+-- needs to exist in t_calculation_version and t_item, though. The determined prices are not only set for the current version, but also copied to all future Lifecyle versions (versions with 
+-- greater lifecycle_period_from values). By this, a lifecycle version contains the last valid prices. Otherwise the prices of the base version would remain (since no prices can be found for 
+-- the lifecycle), which is not desired.
+--
+-- Procedure Steps:
+--#############################################################################################################################################################################################
+--      1. Selection of dependent (scalar) data such as masterdata timestamp, valuation data, surcharge strategies, ...
+--      2. Determination of leaf items in the given lifecycle version
+--      3. Price determination (MUST only be executed for items with strategy <> WITHOUT_PRICE_DETERMINATION)
+--      4. Prepare input for surcharge logic
+--      5. Determination of applicable surcharge rules
+--      6. Calculation of surcharge amounts (as sum, since due to account group overlaps, multiple rule could be applied to an item)
+--      7. Calculation of surcharged prices
+--      8. Determination of future lifecycle versions
+--      9. Update current and all future versions with surcharged/price determination prices
+--     10. Update custom fields, if any
+--
+-- Prerequisites:
+--#############################################################################################################################################################################################
+--     1. :iv_cv_id must point to a lifecycle version
+--     2. The procedures must be called in order of ascending lifecycle_period_from value of the Lifecyle version in a project; otherwise the push of prices to future version would maybe override valid prices 
+
+-- contants used in the procedure
+    declare lc_any_placeholder_string                      NVARCHAR(1)     = '*';
+    declare lc_any_placeholder_int                         INTEGER         = -2;
+    declare lc_null_placeholder_string                     NVARCHAR(1)     = '';
+    declare lc_null_placeholder_int                        INTEGER         = -1;
+    
+    declare lc_strategy_with_price_determination           NVARCHAR(24)    = 'WITH_PRICE_DETERMINATION';
+    declare lc_strategy_without_price_determination        NVARCHAR(27)    = 'WITHOUT_PRICE_DETERMINATION';
+    declare lc_strategy_if_no_price_found                  NVARCHAR(17)    = 'IF_NO_PRICE_FOUND';
+    
+    declare lc_surcharged_price_price_source_id            NVARCHAR(20)    = 'PLC_SURCHARGED_PRICE';
+    declare lc_surcharged_price_price_source_type          INTEGER         = 5;
+
+--#################################
+-- Selection of dependent data
+--#################################
+    
+    declare lv_controlling_area_id          NVARCHAR(4);
+    declare lv_project_id                   NVARCHAR(35);
+    declare lv_master_data_timestamp        TIMESTAMP;
+    declare lv_material_surcharge_strategy  NVARCHAR(50);
+    declare lv_activity_surcharge_strategy  NVARCHAR(50);
+    declare lv_lifecycle_period_from        INTEGER;
+    declare lv_valuation_date               TIMESTAMP;
+    declare lv_first_month_of_year          INTEGER;
+    declare lv_period_type                  NVARCHAR(50);
+
+    lt_calc_vers = select  cv.master_data_timestamp,
+            cv.report_currency_id, 
+            cv.valuation_date, 
+            p.controlling_area_id,
+            p.project_id, 
+            total_quantities.material_price_surcharge_strategy, 
+            total_quantities.activity_price_surcharge_strategy, 
+            cv.lifecycle_period_from, 
+            cv.customer_id,
+            cv.material_price_strategy_id,
+            cv.activity_price_strategy_id
+    from "sap.plc.db::basis.t_calculation_version" as cv
+        inner join "sap.plc.db::basis.t_calculation" as c
+            on cv.calculation_id = c.calculation_id
+        inner join "sap.plc.db::basis.t_project" as p
+            on c.project_id = p.project_id
+        inner join "sap.plc.db::basis.t_project_lifecycle_configuration" as total_quantities
+            on      cv.calculation_id = total_quantities.calculation_id
+                and cv.base_version_id = total_quantities.calculation_version_id
+    where       cv.calculation_version_id = :iv_cv_id
+    limit 1;
+    lv_master_data_timestamp = :lt_calc_vers.master_data_timestamp[1]; 
+    lv_controlling_area_id = :lt_calc_vers.controlling_area_id[1]; 
+    lv_project_id = :lt_calc_vers.project_id[1];
+    lv_material_surcharge_strategy = :lt_calc_vers.material_price_surcharge_strategy[1];
+    lv_activity_surcharge_strategy = :lt_calc_vers.activity_price_surcharge_strategy[1];
+    -- if we have 1440 (year 2020, 1st month) => 1440 - 1440%12 = 1440
+    -- if we have 1441 (year 2020, 2nd month) => 1441 - 1441%12 = 1440
+    lv_lifecycle_period_from = :lt_calc_vers.lifecycle_period_from[1] - MOD(:lt_calc_vers.lifecycle_period_from[1], 12);
+    lv_valuation_date = :lt_calc_vers.valuation_date[1];
+
+    lt_periods = select selected_month
+                    from "sap.plc.db::basis.t_project_monthly_lifecycle_period"
+                    where project_id = lv_project_id and year = year(lv_valuation_date)
+                    order by selected_month
+                    limit 1;
+    lt_period_type = select period_type
+                        from "sap.plc.db::basis.t_project_lifecycle_period_type"
+                        where project_id = lv_project_id and year = year(lv_valuation_date)
+                        limit 1;
+    lv_first_month_of_year = :lt_periods.selected_month[1];
+    lv_period_type = upper(:lt_period_type.period_type[1]);
+  
+--#################################
+-- Determine applicable leaf items 
+--#################################
+-- This statement selects all the items the price determination and/or the surcharges are appliable: those are leaf items of the categories 0, 1, 2, 3, 4, 5, 6 and 8
+-- Note: It is important to not to select any categories, since even though might be not affected by price determination or surcharges the copy of values to future versions
+--       is harmful. 
+--       Potentially defined Material_Price custom fields must be considered as well 
+    lt_applicable_leaf_items = 
+        select  items.item_id,
+                items.parent_item_id, 
+                items.item_category_id,
+                items.account_id,
+                items.material_id,
+                items.material_group_id,
+                items.material_type_id,
+                items.plant_id,
+                items.vendor_id,
+                items.activity_type_id,
+                items.cost_center_id,
+                items.price_source_id,
+                items.price_source_type_id,
+                items.is_price_split_active,
+                items.price_id,
+                items.confidence_level_id,
+                items.price_fixed_portion, 
+                items.price_variable_portion,
+                items.transaction_currency_id,
+                items.price_unit,
+                items.price_unit_uom_id,
+                items.is_disabling_price_determination,
+                items.purchasing_group,
+                items.purchasing_document,
+                items.local_content
+{{#if Material_Price.customFields}}
+                {{masterdataCustomFieldsWithPrefix Material_Price "items_ext"}}
+{{/if}} 
+{{#if Activity_Price.customFields}}
+                {{masterdataCustomFieldsWithPrefix Activity_Price "items_ext"}}
+{{/if}} 
+     from "sap.plc.db::basis.t_item" as items
+{{#if (or Material_Price.customFields Activity_Price.customFields)}}
+        inner join {{t_extensionTable Item}} as items_ext
+            on      items.item_id = items_ext.item_id
+                and items.calculation_version_id = items_ext.calculation_version_id
+{{/if}} 
+     where      items.calculation_version_id = :iv_cv_id
+            and items.item_id not in (
+                select distinct parent_item_id                                      -- this selects all parent items in the calculation version; an item is an leaf item if is not a parent of any other
+                from "sap.plc.db::basis.t_item"                                     -- item; this condition is checked with "not in"
+                where       calculation_version_id = :iv_cv_id
+                        and parent_item_id is not null                              -- null must be filtered for root items, since "not in" is not working correctly otherwise
+            )
+            and items.item_category_id in (
+                0, -- calculation version (surcharges apply if version only consists of root item)
+                1, -- document
+                2, -- material
+                3, -- internal activity
+                4, -- external activity
+                5,  -- process
+                6, -- subcontracting
+                8  -- variable item
+            );
+
+--###################################################################################################
+-- Determine leaf items applicable for price determination & execute price determination procedure
+--###################################################################################################
+-- Price determination MUST only be executed for material or activity price items, if the selected strategy for those items are NO_SURCHARGES, WITH_PRICE_DETERMINATION or IF_NO_PRICE_FOUND
+-- (hence =! WITHOUT_PRICE_DETERMINATION)
+-- Note: Material and activity price items can have different price determination strategies 
+
+    lt_material_price_items = 
+            select * 
+            from :lt_applicable_leaf_items
+            where item_category_id in (
+                0, -- calculation version (surcharges apply if version only consists of root item)
+                1, -- document
+                2, -- material
+                4, -- external activity
+                6, -- subcontracting
+                8  -- variable item
+            )
+            and :lv_material_surcharge_strategy <> :lc_strategy_without_price_determination;
+            
+    lt_activity_price_items = 
+            select * 
+            from :lt_applicable_leaf_items
+            where item_category_id in (
+                3, -- internal activity
+                5  -- process
+            )
+            and :lv_activity_surcharge_strategy <> :lc_strategy_without_price_determination;
+    
+    lt_price_determination_input = 
+            select * from :lt_material_price_items
+            union all
+            select * from :lt_activity_price_items;
+    
+    -- structure needed in order to call: p_item_price_determination_all
+    lt_calculation_version = select master_data_timestamp, valuation_date, report_currency_id, controlling_area_id,
+                                    project_id, customer_id, material_price_strategy_id, activity_price_strategy_id 
+                                from :lt_calc_vers;
+ 
+    call    "sap.plc.db.calculationmanager.procedures::p_item_price_determination_all"
+            (
+                iv_cv_id                 => :iv_cv_id,
+                it_items                 => :lt_price_determination_input,
+                it_calculation_version   => :lt_calculation_version, 
+                ot_determined_prices     => :lt_determined_prices,
+                ot_messages              => :lt_messages
+            );
+--###################################################################################################
+-- Prepare surcharge input
+--###################################################################################################
+-- If a price determination is executed, the determined prices serve as base value for the surcharges; in the select stmts below, the output values of the price determination override 
+-- the values from :lt_applicable_leaf_items for each item in the result set of the price determination (:lt_determined_prices)
+-- Depending on the selected price surcharges for activity and material items, surcharges may be applied:
+--      - NO_SURCHARGES: no surcharges MUST be applied
+--      - WITH_PRICE_DETERMINATION: surcharges shall be applied
+--      - WITHOUT_PRICE_DETERMINATION: surcharges shall be applied (note: in this case a price determination wouldn't be executed in this case)
+--      - IF_NO_PRICE_FOUND: surcharges only shall be applied if no valid price is found
+-- => to leave this logic out of the subsequent logic, the flag apply_surcharges is introduced, which indicated if surcharges apply for an item or not
+
+    lt_surcharge_input = 
+        -- the first select stmt selects all values from :lt_applicable_leaf_items for which no price is found (an left outer join + where constraint is used for that)
+        select  items.item_id,
+                items.item_category_id,
+                -- override values from :lt_applicable_leaf_items with output of price determination if there are any values for an item
+                items.vendor_id,
+                items.price_fixed_portion,
+                items.price_variable_portion,
+                items.transaction_currency_id,
+                items.price_unit,
+                items.price_unit_uom_id,
+                items.is_price_split_active,
+                items.price_id,
+                items.confidence_level_id,
+                items.price_source_id,
+                items.price_source_type_id,
+                items.purchasing_group,
+                items.purchasing_document,
+                items.local_content,
+                -- needed to apply surcharges surcharge
+                items.account_id,
+                items.plant_id,
+                items.material_id,
+                items.material_group_id,
+                items.material_type_id,
+                items.activity_type_id,
+                items.cost_center_id,
+                -- calculate apply_surcharges flag in dependence of the selected price surcharge strategy
+                case
+                    when items.item_category_id in (0, 1, 2, 4, 6, 8) and (lv_material_surcharge_strategy = :lc_strategy_with_price_determination or (lv_material_surcharge_strategy = :lc_strategy_without_price_determination and (lv_first_month_of_year = month(lv_valuation_date) or lv_period_type = 'YEARLY')))
+                        then true
+                    when items.item_category_id in (0, 1, 2, 4, 6, 8) and (lv_material_surcharge_strategy = :lc_strategy_if_no_price_found and (prices.item_id is null or prices.price_source_id='PLC_MANUAL_PRICE'))
+                        then true
+                    when items.item_category_id in (3,5) and (lv_activity_surcharge_strategy = :lc_strategy_with_price_determination or (lv_activity_surcharge_strategy = :lc_strategy_without_price_determination and (lv_first_month_of_year = month(lv_valuation_date) or lv_period_type = 'YEARLY')))
+                        then true
+                    when items.item_category_id in (3,5) and (lv_activity_surcharge_strategy = :lc_strategy_if_no_price_found and (prices.item_id is null or prices.price_source_id='PLC_MANUAL_PRICE'))
+                        then true
+                    else false
+                end as apply_surcharges
+        from :lt_applicable_leaf_items as items
+            left outer join :lt_determined_prices as prices
+                on items.item_id = prices.item_id
+        where prices.item_id is null
+        
+        union all
+        
+        -- the second select stmt selects all values :lt_determined_prices and add them to the result lt_surcharge_input (for this an inner join is used)
+        select  items.item_id,
+                items.item_category_id,
+                -- override values from :lt_applicable_leaf_items with output of price determination if there are any values for an item
+                prices.vendor_id as vendor_id,
+                prices.price_fixed_portion as price_fixed_portion,
+                prices.price_variable_portion as price_variable_portion,
+                prices.transaction_currency_id as transaction_currency_id,
+                prices.price_unit as price_unit,
+                prices.price_unit_uom_id as price_unit_uom_id,
+                prices.is_price_split_active as is_price_split_active,
+                prices.price_id as price_id,
+                prices.confidence_level_id as confidence_level_id,
+                prices.price_source_id as price_source_id,
+                prices.price_source_type_id as price_source_type_id,
+                prices.purchasing_group as purchasing_group,
+                prices.purchasing_document as purchasing_document,
+                prices.local_content as local_content,
+                -- needed to apply surcharges surcharge
+                items.account_id,
+                items.plant_id,
+                items.material_id,
+                items.material_group_id,
+                items.material_type_id,
+                items.activity_type_id,
+                items.cost_center_id,
+                -- calculate apply_surcharges flag in dependence of the selected price surcharge strategy
+                case
+                    when items.item_category_id in (0, 1, 2, 4, 6, 8) and (lv_material_surcharge_strategy = :lc_strategy_with_price_determination or (lv_material_surcharge_strategy = :lc_strategy_without_price_determination and (lv_first_month_of_year = month(lv_valuation_date) or lv_period_type = 'YEARLY')))
+                        then true
+                    when items.item_category_id in (0, 1, 2, 4, 6, 8) and (lv_material_surcharge_strategy = :lc_strategy_if_no_price_found and (prices.item_id is null or prices.price_source_id='PLC_MANUAL_PRICE'))
+                        then true
+                    when items.item_category_id in (3,5) and (lv_activity_surcharge_strategy = :lc_strategy_with_price_determination or (lv_activity_surcharge_strategy = :lc_strategy_without_price_determination and (lv_first_month_of_year = month(lv_valuation_date) or lv_period_type = 'YEARLY')))
+                        then true
+                    when items.item_category_id in (3,5) and (lv_activity_surcharge_strategy = :lc_strategy_if_no_price_found and (prices.item_id is null or prices.price_source_id='PLC_MANUAL_PRICE'))
+                        then true
+                    else false
+                end as apply_surcharges
+        from :lt_applicable_leaf_items as items
+            inner join :lt_determined_prices as prices
+                on items.item_id = prices.item_id;
+
+--###################################################################################################
+-- Determine surcharge rules to apply
+--###################################################################################################
+-- Material price surcharge rules have a priority and are defined for the following combinations: 
+--      1. MATERIAL_ID + PLANT_ID
+--      2. MATERIAL_ID 
+--      3. PLANT_ID + ACCOUNT_GROUP_ID
+--      4. PLANT_ID + MATERIAL_GROUP_ID
+--      5. PLANT_ID + MATERIAL_TYPE_ID
+--      6. ACCOUNT_GROUP_ID
+--      7. MATERIAL_GROUP_ID
+--      8. MATERIAL_TYPE_ID
+--      9. PLANT_ID
+-- Account group overlaps: 
+--    - An account can be multiple account groups; hence the join with t_account_account_group on ACCOUNT_ID produces results in multiple rows for each containing group; 
+--    - This could lead to the fact that multiple rules match for on item; in order not to be (too) confusing for the user those multiple rules should only be applied if the rules have the same priority
+--    => for this reason the select also captures the priority of the selected rule, which is evaluated in a later select
+
+-- gather all account groups valid for the Lifecyle version (right controlling area and valid from/to) as preperation to determine account group based rules
+    lt_account_account_groups =
+        select  account_account_group.account_group_id,
+                account_account_group.from_account_id,
+                account_account_group.to_account_id
+        from "sap.plc.db::basis.t_account_account_group" as account_account_group
+            inner join "sap.plc.db::basis.t_account_group" as account_group
+                on account_account_group.account_group_id = account_group.account_group_id
+        where   account_group.controlling_area_id = :lv_controlling_area_id
+                and account_account_group._valid_from <= :lv_master_data_timestamp
+                and (account_account_group._valid_to > :lv_master_data_timestamp or account_account_group._valid_to is null)
+                and account_group._valid_from <= :lv_master_data_timestamp
+                and (account_group._valid_to > :lv_master_data_timestamp or account_group._valid_to is null);
+
+-- => for each rule a different join is created which is then combined into a single result set using "union all"; "union" is not used since all possible rules shall be delivered to later stages of then
+--    procedure to decide which rule to take; inner joins are used in order to only create row in the result set for matching rules
+    lt_material_price_surcharge_rules  = 
+        select
+            items.item_id,
+            material_plant_rules.rule_id as rule_id,
+            1 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as material_plant_rules
+                on  ifnull(items.material_id, :lc_null_placeholder_string) = material_plant_rules.material_id
+                and ifnull(items.plant_id,:lc_null_placeholder_string) = material_plant_rules.plant_id
+                and material_plant_rules.account_group_id = :lc_any_placeholder_int
+                and material_plant_rules.material_group_id = :lc_any_placeholder_string
+                and material_plant_rules.material_type_id = :lc_any_placeholder_string
+                and material_plant_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+        
+        union all
+
+        select
+            items.item_id,
+            material_rules.rule_id rule_id,
+            2 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as material_rules
+                on  ifnull(items.material_id, :lc_null_placeholder_string) = material_rules.material_id
+                and material_rules.account_group_id = :lc_any_placeholder_int
+                and material_rules.material_group_id = :lc_any_placeholder_string
+                and material_rules.material_type_id = :lc_any_placeholder_string
+                and material_rules.plant_id = :lc_any_placeholder_string
+                and material_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+        
+        union all
+        
+        select
+            items.item_id,
+            plant_account_group_rules.rule_id as rule_id,
+            3 as rule_priority
+        from :lt_surcharge_input as items
+            left outer join :lt_account_account_groups as account_account_group
+                on  items.account_id >= account_account_group.from_account_id
+                and (items.account_id <= ifnull(account_account_group.to_account_id, account_account_group.from_account_id))
+            
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as plant_account_group_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_account_group_rules.plant_id
+                and (case                                                                                                   -- needed because rules with account_group_id = :lc_null_placeholder_int should only be applied if item has no account set
+                        when items.account_id is null then :lc_null_placeholder_int                                         -- and not if the item has an account which does not belong to an group
+                        when account_account_group.account_group_id is null then -3                                         -- in case the item has an account not belonging to a group -3 is used as placeholder, since the 
+                        else account_account_group.account_group_id                                                         -- the compare null = plant_account_group_rules.account_group_id would always yield true
+                     end) = plant_account_group_rules.account_group_id
+                and plant_account_group_rules.material_group_id = :lc_any_placeholder_string
+                and plant_account_group_rules.material_type_id = :lc_any_placeholder_string
+                and plant_account_group_rules.project_id = :lv_project_id
+                and plant_account_group_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+        
+        union all
+        
+        select
+            items.item_id,
+            plant_material_group_rules.rule_id as rule_id,
+            4 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as plant_material_group_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_material_group_rules.plant_id
+                and ifnull(items.material_group_id,:lc_null_placeholder_string) = plant_material_group_rules.material_group_id
+                and plant_material_group_rules.account_group_id = :lc_any_placeholder_int
+                and plant_material_group_rules.material_type_id = :lc_any_placeholder_string
+                and plant_material_group_rules.project_id = :lv_project_id
+                and plant_material_group_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+            
+        union all
+        
+        select
+            items.item_id,
+            plant_material_type_rules.rule_id as rule_id,
+            5 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as plant_material_type_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_material_type_rules.plant_id
+                and ifnull(items.material_type_id, :lc_null_placeholder_string) = plant_material_type_rules.material_type_id
+                and plant_material_type_rules.account_group_id = :lc_any_placeholder_int
+                and plant_material_type_rules.material_group_id = :lc_any_placeholder_string
+                and plant_material_type_rules.project_id = :lv_project_id
+                and plant_material_type_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+            
+        union all
+    
+        select
+            items.item_id,
+            account_group_rules.rule_id as rule_id,
+            6 as rule_priority
+        from :lt_surcharge_input as items
+            left outer join :lt_account_account_groups as account_account_group
+                on  items.account_id >= account_account_group.from_account_id
+                and (items.account_id <= ifnull(account_account_group.to_account_id, account_account_group.from_account_id))
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as account_group_rules
+                on  (case                                                                                                    -- needed because rules with account_group_id = :lc_null_placeholder_int should only be applied if item has no account set
+                        when items.account_id is null then :lc_null_placeholder_int                                          -- and not if the item has an account which does not belong to an group
+                        when account_account_group.account_group_id is null then -3                                          -- in case the item has an account not belonging to a group -3 is used as placeholder, since the 
+                        else account_account_group.account_group_id                                                          -- the compare null = account_group_rules.account_group_id would always yield true
+                     end) = account_group_rules.account_group_id
+                and account_group_rules.material_group_id = :lc_any_placeholder_string
+                and account_group_rules.material_type_id = :lc_any_placeholder_string
+                and account_group_rules.plant_id = :lc_any_placeholder_string
+                and account_group_rules.project_id = :lv_project_id
+                and account_group_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+        
+        union all 
+        
+        select
+            items.item_id,
+            material_group_rules.rule_id as rule_id,
+            7 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as material_group_rules
+                on  ifnull(items.material_group_id, :lc_null_placeholder_string) = material_group_rules.material_group_id
+                and material_group_rules.account_group_id = :lc_any_placeholder_int
+                and material_group_rules.material_type_id = :lc_any_placeholder_string
+                and material_group_rules.plant_id = :lc_any_placeholder_string
+                and material_group_rules.project_id = :lv_project_id
+                and material_group_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+            
+        union all 
+        
+        select
+            items.item_id,
+            material_type_rules.rule_id as rule_id,
+            8  as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as material_type_rules
+                on  ifnull(items.material_type_id, :lc_null_placeholder_string) = material_type_rules.material_type_id
+                and material_type_rules.account_group_id = :lc_any_placeholder_int
+                and material_type_rules.material_group_id = :lc_any_placeholder_string
+                and material_type_rules.plant_id = :lc_any_placeholder_string
+                and material_type_rules.project_id = :lv_project_id
+                and material_type_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8)
+        
+        union all 
+        
+        select
+            items.item_id,
+            plant_rules.rule_id as rule_id,
+            9 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_material_price_surcharges" as plant_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_rules.plant_id
+                and plant_rules.account_group_id = :lc_any_placeholder_int
+                and plant_rules.material_group_id = :lc_any_placeholder_string
+                and plant_rules.material_type_id = :lc_any_placeholder_string
+                and plant_rules.project_id = :lv_project_id
+                and plant_rules.material_id = :lc_any_placeholder_string
+        where   items.apply_surcharges = true
+            and items.item_category_id in (0, 1, 2, 4, 6, 8);
+
+-- Activity price surcharge rules have a priority and are defined for the following combinations: 
+--      1. PLANT_ID + ACCOUNT_GROUP_ID
+--      2. ACTIVITY_TYPE_ID + COST_CENTER_ID
+--      3. ACCOUNT_GROUP_ID
+--      4. ACTIVITY_TYPE_ID
+--      5. COST_CENTER_ID
+--      6. PLANT_ID
+-- => for each rule a different join is created which is then combined into a single result set using "union all"; "union" is not used since all possible rules shall be delivered to later stages of then
+--    procedure to decide which rule to take; inner joins are used in order to only create row in the result set for matching rules
+    
+    lt_activity_price_surcharge_rules = 
+        select
+            items.item_id,
+            plant_account_group_rules.rule_id as rule_id,
+            1 as rule_priority
+        from :lt_surcharge_input as items
+            left outer join :lt_account_account_groups as account_account_group
+                on  items.account_id >= account_account_group.from_account_id
+                and (items.account_id <= ifnull(account_account_group.to_account_id, account_account_group.from_account_id))
+            
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as plant_account_group_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_account_group_rules.plant_id
+                and (case                                                                                                   -- needed because rules with account_group_id = :lc_null_placeholder_int should only be applied if item has no account set
+                        when items.account_id is null then :lc_null_placeholder_int                                         -- and not if the item has an account which does not belong to an group
+                        when account_account_group.account_group_id is null then -3                                         -- in case the item has an account not belonging to a group -3 is used as placeholder, since the 
+                        else account_account_group.account_group_id                                                         -- the compare null = plant_account_group_rules.account_group_id would always yield true
+                     end) = plant_account_group_rules.account_group_id
+                and plant_account_group_rules.cost_center_id = :lc_any_placeholder_string
+                and plant_account_group_rules.activity_type_id = :lc_any_placeholder_string
+                and plant_account_group_rules.project_id = :lv_project_id                
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5)
+        
+        union all
+    
+        select
+            items.item_id,
+            activity_type_cost_center_rules.rule_id as rule_id,
+            2 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as activity_type_cost_center_rules
+                on  ifnull(items.cost_center_id, :lc_null_placeholder_string) = activity_type_cost_center_rules.cost_center_id
+                and ifnull(items.activity_type_id,:lc_null_placeholder_string) = activity_type_cost_center_rules.activity_type_id
+                and activity_type_cost_center_rules.account_group_id = :lc_any_placeholder_int
+                and activity_type_cost_center_rules.plant_id = :lc_any_placeholder_string
+                and activity_type_cost_center_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5)
+
+        union all 
+        
+        select
+            items.item_id,
+            account_group_rules.rule_id as rule_id,
+            3 as rule_priority
+        from :lt_surcharge_input as items
+            left outer join :lt_account_account_groups as account_account_group
+                on  items.account_id >= account_account_group.from_account_id
+                and (items.account_id <= ifnull(account_account_group.to_account_id, account_account_group.from_account_id))
+            
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as account_group_rules
+                on  (case                                                                                                    -- needed because rules with account_group_id = :lc_null_placeholder_int should only be applied if item has no account set
+                        when items.account_id is null then :lc_null_placeholder_int                                                                -- and not if the item has an account which does not belong to an group
+                        when account_account_group.account_group_id is null then -3                                          -- in case the item has an account not belonging to a group -3 is used as placeholder, since the 
+                        else account_account_group.account_group_id                                                          -- the compare null = account_group_rules.account_group_id would always yield true
+                     end) = account_group_rules.account_group_id
+                and account_group_rules.cost_center_id = :lc_any_placeholder_string
+                and account_group_rules.activity_type_id = :lc_any_placeholder_string
+                and account_group_rules.plant_id = :lc_any_placeholder_string
+                and account_group_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5)
+ 
+        union all
+        
+        select
+            items.item_id,
+            activity_type_rules.rule_id as rule_id,
+            4 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as activity_type_rules
+                on  ifnull(items.activity_type_id, :lc_null_placeholder_string) = activity_type_rules.activity_type_id
+                and activity_type_rules.account_group_id = :lc_any_placeholder_int
+                and activity_type_rules.cost_center_id = :lc_any_placeholder_string
+                and activity_type_rules.plant_id = :lc_any_placeholder_string
+                and activity_type_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5)
+        
+        union all
+        
+        select
+            items.item_id,
+            cost_center_rules.rule_id as rule_id,
+            5 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as cost_center_rules
+                on  ifnull(items.cost_center_id, :lc_null_placeholder_string) = cost_center_rules.cost_center_id
+                and cost_center_rules.account_group_id = :lc_any_placeholder_int
+                and cost_center_rules.activity_type_id = :lc_any_placeholder_string
+                and cost_center_rules.plant_id = :lc_any_placeholder_string
+                and cost_center_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5)
+        
+        union all 
+        
+        select
+            items.item_id,
+            plant_rules.rule_id as rule_id,
+            6 as rule_priority
+        from :lt_surcharge_input as items
+            inner join "sap.plc.db::basis.t_project_activity_price_surcharges" as plant_rules
+                on  ifnull(items.plant_id, :lc_null_placeholder_string) = plant_rules.plant_id
+                and plant_rules.account_group_id = :lc_any_placeholder_int
+                and plant_rules.cost_center_id = :lc_any_placeholder_string
+                and plant_rules.activity_type_id = :lc_any_placeholder_string
+                and plant_rules.project_id = :lv_project_id
+        where   items.apply_surcharges = true
+            and items.item_category_id in (3,5);
+ 
+--###################################################################################################
+-- Calculate the surcharge values per item
+--###################################################################################################
+-- For surcharge rules different values can be maintained for different lifecycle periods in t_project_material_price_surcharge_values/t_project_activity_price_surcharge_values
+-- This select stmts calculates the surcharge value for the period of the calculated lifecycle version
+-- This must be done as sum, since due to account group overlaps multiple surcharge rules can be applied to one item
+
+    lt_surcharge_per_item = 
+        select  rules.item_id, 
+                sum(surcharge_values.value) as value
+        from :lt_material_price_surcharge_rules as rules
+            inner join (
+                select  item_id,                                                                                     -- determine the rule with the highest priority and filter it (with the inner join)
+                        min(rule_priority) as highest_priority                                                       -- this makes sure that only rule of the same priority level are applied, which is important
+                from :lt_material_price_surcharge_rules                                                              -- for account group overlaps (multiple rules could apply); so if an account is in multiple 
+                where rule_priority is not null                                                                      -- groups, multiple rules would only be applied if the are defined on the same priority level 
+                group by item_id                                                                                     -- for the different groups
+            ) as priority
+                on  rules.item_id =  priority.item_id
+                and rules.rule_priority = priority.highest_priority
+            left outer join "sap.plc.db::basis.t_project_material_price_surcharge_values" as surcharge_values
+                on rules.rule_id = surcharge_values.rule_id
+                and surcharge_values.lifecycle_period_from = :lv_lifecycle_period_from
+        group by rules.item_id
+        
+        union all
+        
+        select  rules.item_id, 
+                sum(surcharge_values.value) as value
+        from :lt_activity_price_surcharge_rules as rules
+            inner join (
+                select  item_id,
+                        min(rule_priority) as highest_priority
+                from :lt_activity_price_surcharge_rules 
+                where rule_priority is not null
+                group by item_id
+            ) as priority
+                on  rules.item_id =  priority.item_id
+                and rules.rule_priority = priority.highest_priority
+            left outer join "sap.plc.db::basis.t_project_activity_price_surcharge_values" as surcharge_values
+                on rules.rule_id = surcharge_values.rule_id
+                and surcharge_values.lifecycle_period_from = :lv_lifecycle_period_from
+        group by rules.item_id;
+ 
+
+--###################################################################################################
+-- Calculate Surcharged Prices
+--###################################################################################################
+-- Multiply the price of the items from :lt_surcharge_input (must be that result set, since in :lt_applicable_leaf_items the price determination values are not incorporated) for all items which are affected by the surcharges
+    lt_surcharged_items = 
+        select  
+                items.item_id,
+                items.purchasing_group,
+                items.purchasing_document,
+                items.local_content,
+                case                                                                        -- only calculate a surcharge price, if the item is affected by a surcharge (left outer join with :lt_surcharge_per_item 
+                    when surcharges.item_id is not null                                     -- is not null for the item); otherwise leave the price as it is
+                        then items.price_fixed_portion * (1 + (surcharges.value / 100))
+                    else items.price_fixed_portion
+                end as price_fixed_portion,
+                case 
+                    when surcharges.item_id is not null 
+                        then items.price_variable_portion * (1 + (surcharges.value / 100))
+                    else items.price_variable_portion
+                end as price_variable_portion,
+                items.transaction_currency_id,
+                items.price_unit,
+                items.price_unit_uom_id,
+                items.is_price_split_active,
+                items.price_id,
+                items.confidence_level_id,
+                case                                                                        -- in case a price is surcharged, the price source PLC_SURCHARGED_PRICE must be SET; otherwise don't change it
+                    when surcharges.item_id is not null 
+                        then :lc_surcharged_price_price_source_id
+                    else items.price_source_id
+                end as price_source_id,
+                case                                                                        -- in case a price is surcharged, the price source type 5 must be SET; otherwise don't change it
+                    when surcharges.item_id is not null 
+                        then :lc_surcharged_price_price_source_type
+                    else items.price_source_type_id
+                end as price_source_type_id,
+                items.vendor_id,
+                surcharges.value as surcharge
+        from :lt_surcharge_input as items
+            left outer join :lt_surcharge_per_item as surcharges
+                on items.item_id = surcharges.item_id
+                and surcharges.value <> 0;
+
+--###################################################################################################
+-- Determine future versions to update
+--###################################################################################################
+    lt_versions_to_update =                                                                                      -- The found prices are not only applied to the version with the id of :iv_cv_id, but also to all future lifecycle versions
+        select                                                                                                   -- (versions with greater lifecycle_period_from values); by this lifecycle versions will always contain the last valid price
+                future_versions.calculation_version_id, future_versions.base_version_id,                         -- even though no price can be found anymore (due to the valuation date); otherwise the price of the base version would remain
+                future_versions.root_item_id                                                                     -- what is not desired
+        from "sap.plc.db::basis.t_calculation_version" as versions                                               -- this statement determines all the future lifecycle version by using a self-join of t_calculation_version  
+            inner join "sap.plc.db::basis.t_calculation_version" as future_versions                              
+                on  versions.base_version_id = future_versions.base_version_id
+        where       versions.calculation_version_id = :iv_cv_id
+                and versions.lifecycle_period_from <= future_versions.lifecycle_period_from;
+
+--###################################################################################################
+-- Update current and all future versions (finally! :))
+--###################################################################################################
+
+-- we do not have to update the prices for one-time-costs items
+    lt_items_not_to_update =
+		select
+			item_id,item.calculation_version_id
+		from "sap.plc.db::basis.t_item" item
+		inner join :lt_versions_to_update as future_versions
+			on item.calculation_version_id = future_versions.calculation_version_id
+		inner join "sap.plc.db::basis.t_project_lifecycle_configuration"  project_lifecycle_configuration
+			on project_lifecycle_configuration.calculation_version_id = future_versions.base_version_id
+			and project_lifecycle_configuration.is_one_time_cost_assigned = 1
+		where predecessor_item_id is null and parent_item_id = future_versions.root_item_id;
+
+    update "sap.plc.db::basis.t_item" items
+        set purchasing_group              = prices.purchasing_group,
+            purchasing_document           = prices.purchasing_document, 
+            local_content                 = prices.local_content, 
+            price_fixed_portion           = prices.price_fixed_portion, 
+            price_variable_portion        = prices.price_variable_portion ,
+            surcharge       = prices.surcharge,
+            transaction_currency_id = prices.transaction_currency_id,
+            price_unit                    = prices.price_unit,
+            price_unit_uom_id             = prices.price_unit_uom_id,
+            is_price_split_active         = prices.is_price_split_active,
+            price_id                      = prices.price_id,
+            confidence_level_id           = prices.confidence_level_id,
+            price_source_id               = prices.price_source_id,
+            price_source_type_id             = prices.price_source_type_id,
+            vendor_id                     = prices.vendor_id
+        from "sap.plc.db::basis.t_item" as items                                 -- the price determination does not affect all items in a calculation; in order to preseve price information, which shall not be 
+                inner join :lt_surcharged_items as prices                       -- overriden, other procedures ues case/when or ifnull; in this case this is not necessary since the inner join guarantees that
+                    on items.item_id = prices.item_id                           -- only items are affected for which prices have been determined  
+                inner join :lt_versions_to_update as future_versions
+                    on items.calculation_version_id  = future_versions.calculation_version_id
+                left outer join :lt_items_not_to_update as items_not_to_update
+                	on items.calculation_version_id = items_not_to_update.calculation_version_id
+        where (items_not_to_update.item_id is null or items.parent_item_id <> items_not_to_update.item_id); 
+
+--###################################################################################################
+-- Update customs fields, if any
+--###################################################################################################   
+-- Custom fields are only returned from price determination, so lt_determined_prices must be used for that
+{{#if Material_Price.customFields}}
+    update {{t_extensionTable Item}} items_ext
+    set
+        {{setMasterdataCustomFieldsWithPrefixes Material_Price "items_ext" "prices"}}
+    from {{t_extensionTable Item}} as items_ext
+        inner join :lt_determined_prices as prices
+            on items_ext.item_id = prices.item_id
+    where items_ext.calculation_version_id in (select calculation_version_id from :lt_versions_to_update);
+{{/if}} 
+{{#if Activity_Price.customFields}}
+    update {{t_extensionTable Item}} items_ext
+    set
+        {{setMasterdataCustomFieldsWithPrefixes Activity_Price "items_ext" "prices"}}
+    from {{t_extensionTable Item}} as items_ext
+        inner join :lt_determined_prices as prices
+            on items_ext.item_id = prices.item_id
+    where items_ext.calculation_version_id in (select calculation_version_id from :lt_versions_to_update);
+{{/if}} 
+
+END;
+
+

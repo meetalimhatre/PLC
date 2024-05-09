@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "dependencies": {
+    "mbt": "1.0.14"
+  },
+  "scripts": {
+    "build": "node node_modules/mbt/bin/mbt build -p xsa --mtar target/xsac-plc-client-xsa.mtar -t ."
+  }
+}

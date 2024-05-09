@@ -1,0 +1,4860 @@
+{
+    "administration?business_object=Account": {
+        "get": {
+            "tags": [
+                "administration-account"
+            ],
+            "summary": "Administration of the Account entity",
+            "description": "Administration of the Account entity",
+            "operationId": "administrationAccountGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: ACCOUNT_ID=#AC02 will get only accounts with the ACCOUNT_ID=#AC02",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Account. If this field is set, the response will contain only the ACCOUNT_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-account"
+            ],
+            "summary": "Administration of the Account entity",
+            "description": "Administration of the Account entity",
+            "operationId": "administrationAccountPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "account",
+                    "in": "body",
+                    "description": "Account that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACCOUNT_EDIT": [
+                        "update:account"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Account_Group": {
+        "get": {
+            "tags": [
+                "administration-account-group"
+            ],
+            "summary": "Administration of the Account Group entity",
+            "description": "Administration of the Account Group entity",
+            "operationId": "administrationAccountGroupGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: ACCOUNT_GROUP_ID=110 will get only accounts with the ACCOUNT_GROUP_ID=110",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Account Group",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Set the lock on masterdata business object",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountGroupGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-account-group"
+            ],
+            "summary": "Administration of the Account Group entity",
+            "description": "Administration of the Account Group entity",
+            "operationId": "administrationAccountGroupPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "accountGroup",
+                    "in": "body",
+                    "description": "Account Group that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountGroupToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountGroupPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACCOUNT_GROUP_EDIT": [
+                        "update:accountGroup"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Activity_Price": {
+        "get": {
+            "tags": [
+                "administration-activity-price"
+            ],
+            "summary": "Administration of the Activity Price entity",
+            "description": "Administration of the Activity Price entity",
+            "operationId": "administrationActivityPriceGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: CONTROLLING_AREA_ID=#CA2 will get only objects with the CONTROLLING_AREA_ID=#CA2",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityPriceGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-activity-price"
+            ],
+            "summary": "Administration of the Activity Price entity",
+            "description": "Administration of the Activity Price entity",
+            "operationId": "administrationActivityPricePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "activityPrice",
+                    "in": "body",
+                    "description": "Activity Price that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityPriceToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityPricePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACTIVITY_PRICE_EDIT": [
+                        "update:activityPrice"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Activity_Type": {
+        "get": {
+            "tags": [
+                "administration-activity-type"
+            ],
+            "summary": "Administration of the Activity Type entity",
+            "description": "Administration of the Activity Type entity",
+            "operationId": "administrationActivityTypeGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: ACTIVITY_TYPE_ID=#AT1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Setup. If this field is set, the response will contain only the ACTIVITY_TYPE_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityTypeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-activity-type"
+            ],
+            "summary": "Administration of the Activity Type entity",
+            "description": "Administration of the Activity Type entity",
+            "operationId": "administrationActivityTypePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "actvityType",
+                    "in": "body",
+                    "description": "Activity Type that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityTypeToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationActivityTypePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ACTIVITY_TYPE_EDIT": [
+                        "update:activityType"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Business_Area": {
+        "get": {
+            "tags": [
+                "administration-business-area"
+            ],
+            "summary": "Administration of the Business Area entity",
+            "description": "Administration of the Business Area entity",
+            "operationId": "administrationBusinessAreaGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: BUSINESS_AREA_ID=#BA1 will get only accounts with the BUSINESS_AREA_ID=#BA1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Business. If this field is set, the response will contain only the BUSINESS_AREA_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationBusinessAreaGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-business-area"
+            ],
+            "summary": "Administration of the Business Area entity",
+            "description": "Administration of the Business Area entity",
+            "operationId": "administrationBusinessAreaPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "businessArea",
+                    "in": "body",
+                    "description": "Business Area that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationBusinessAreaToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationBusinessAreaPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BUSINESS_AREA_EDIT": [
+                        "update:businessArea"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Process": {
+        "get": {
+            "tags": [
+                "administration-process"
+            ],
+            "summary": "Administration of the Process entity",
+            "description": "Administration of the Process entity",
+            "operationId": "administrationProcessGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: PROCESS_ID=#BP1 will get only processes with the given PROCESS_ID",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Sales. If this field is set, the response will contain only the PROCESS_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProcessGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-process"
+            ],
+            "summary": "Administration of the Process entity",
+            "description": "Administration of the Process entity",
+            "operationId": "administrationProcessPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "process",
+                    "in": "body",
+                    "description": "Process that will be created, updated, upserted or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProcessToBeCreatedUpdatedDeleted"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProcessPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROCESS_EDIT": [
+                        "update:process"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Company_Code": {
+        "get": {
+            "tags": [
+                "administration-company-code"
+            ],
+            "summary": "Administration of the Company Code entity",
+            "description": "Administration of the Company Code entity",
+            "operationId": "administrationCompanyCodeGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: COMPANY_CODE_ID=#CC1 will get only accounts with the COMPANY_CODE_ID=#CC1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Company. If this field is set, the response will contain only the COMPANY_CODE_ENTITIES and CONTROLLING_AREA_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCompanyCodeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-company-code"
+            ],
+            "summary": "Administration of the Company Code entity",
+            "description": "Administration of the Company Code entity",
+            "operationId": "administrationCompanyCodePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "companyCode",
+                    "in": "body",
+                    "description": "Company Code that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCompanyCodeToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCompanyCodePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COMPANY_CODE_EDIT": [
+                        "update:companyCode"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Component_Split": {
+        "get": {
+            "tags": [
+                "administration-component-split"
+            ],
+            "summary": "Administration of the Component Split entity",
+            "description": "Administration of the Component Split entity",
+            "operationId": "administrationComponentSplitGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects to retrieve",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: COMPONENT_SPLIT_ID=#SPLIT_ACTIVITIES",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Cost.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If it is not set then its default value is current date",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Set the lock on masterdata business object",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationComponentSplitGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-component-split"
+            ],
+            "summary": "Administration of the Component Split entity",
+            "description": "Administration of the Component Split entity",
+            "operationId": "administrationComponentSplitPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "componentSplit",
+                    "in": "body",
+                    "description": "Component Split that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationComponentSplitToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationComponentSplitPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COMPONENT_SPLIT_EDIT": [
+                        "update:componentSplit"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Confidence_Level": {
+        "get": {
+            "tags": [
+                "administration-confidence-level"
+            ],
+            "summary": "Administration of the Confidence Level entity",
+            "description": "Administration of the Confidence Level entity",
+            "operationId": "administrationConfidenceLevelGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Low",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationConfidenceLevelGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CONFIDENCE_LEVEL_READ": [
+                        "read:confidenceLevel"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Controlling_Area": {
+        "get": {
+            "tags": [
+                "administration-controlling-area"
+            ],
+            "summary": "Administration of the Controlling Area entity",
+            "description": "Administration of the Controlling Area entity",
+            "operationId": "administrationControllingAreaGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: CONTROLLING_AREA_ID=1000 will get only accounts with the CONTROLLING_AREA_ID=1000",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Controlling. If this field is set, the response will contain only the CONTROLLING_AREA_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationControllingAreaGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CONTROLLING_AREA_READ": [
+                        "read:controllingArea"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-controlling-area"
+            ],
+            "summary": "Administration of the Controlling Area entity",
+            "description": "Administration of the Controlling Area entity",
+            "operationId": "administrationControllingAreaPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "controllingArea",
+                    "in": "body",
+                    "description": "Controlling Area that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationControllingAreaToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationControllingAreaPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CONTROLLING_AREA_EDIT": [
+                        "update:controllingArea"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Costing_Sheet": {
+        "get": {
+            "tags": [
+                "administration-costing-sheet"
+            ],
+            "summary": "Administration of the Costing Sheet entity",
+            "description": "Administration of the Costing Sheet entity",
+            "operationId": "administrationCostingSheetGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: COSTING_SHEET_ID=#COGSL will get only accounts with the COSTING_SHEET_ID=#COGSL",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Inspection",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Set the lock on masterdata business object",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-costing-sheet"
+            ],
+            "summary": "Administration of the Costing Sheet entity",
+            "description": "Administration of the Costing Sheet entity",
+            "operationId": "administrationCostingSheetPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "costingSheet",
+                    "in": "body",
+                    "description": "Costing Sheet that will be created, updated or deleted. When creating do not send COSTING_SHEET_ROW_ENTITIES. Must be sent on CREATE when adding a new costing sheet row to an existing costing sheet.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COSTING_SHEET_EDIT": [
+                        "update:costingSheet"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Costing_Sheet_Row": {
+        "get": {
+            "tags": [
+                "administration-costing-sheet-row"
+            ],
+            "summary": "Administration of the Costing Sheet Row entity",
+            "description": "Administration of the Costing Sheet Row entity",
+            "operationId": "administrationCostingSheetRowGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: COSTING_SHEET_ID=#COGSL will get only costing sheet rows with the COSTING_SHEET_ID=#COGSL",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Inspection",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Set the lock on masterdata business object",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COSTING_SHEET_ROW_READ": [
+                        "read:costingSheetRow"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Cost_Center": {
+        "get": {
+            "tags": [
+                "administration-cost-center"
+            ],
+            "summary": "Administration of the Cost Center entity",
+            "description": "Administration of the Cost Center entity",
+            "operationId": "administrationCostCenterGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: COST_CENTER_ID=1000 will get only cost centers with the COST_CENTER_ID=1000",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Cost. If this field is set, the response will contain only the COST_CENTER_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostCenterGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-cost-center"
+            ],
+            "summary": "Administration of the Cost Center entity",
+            "description": "Administration of the Cost Center entity",
+            "operationId": "administrationCostCenterPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "costCenter",
+                    "in": "body",
+                    "description": "Cost Center that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostCenterToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostCenterPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.COST_CENTER_EDIT": [
+                        "update:costCenter"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Currency_Conversion": {
+        "get": {
+            "tags": [
+                "administration-currency-conversion"
+            ],
+            "summary": "Administration of the Currency Conversion entity",
+            "description": "Administration of the Currency Conversion entity",
+            "operationId": "administrationCurrencyConversionGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "filter that will be used to filter returned data, Ex. FROM_CURRENCY_ID=BRL",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyConversionGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CURRENCY_CONVERSION_READ": [
+                        "read:currencyConversion"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-currency-conversion"
+            ],
+            "summary": "Administration of the Currency Conversion entity",
+            "description": "Administration of the Currency Conversion entity",
+            "operationId": "administrationCurrencyConversionPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "currencyConversion",
+                    "in": "body",
+                    "description": "Currency Conversion that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyConversionToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyConversionPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CURRENCY_CONVERSION_EDIT": [
+                        "update:currencyConversion"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Currency": {
+        "get": {
+            "tags": [
+                "administration-currency"
+            ],
+            "summary": "Administration of the Currency entity",
+            "description": "Administration of the Currency entity",
+            "operationId": "administrationCurrencyGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: CURRENCY_ID=EUR will get only currency with the CURRENCY_ID=EUR",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CURRENCY_READ": [
+                        "read:currency"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-currency"
+            ],
+            "summary": "Administration of the Currency entity",
+            "description": "Administration of the Currency entity",
+            "operationId": "administrationCurrencyPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "currency",
+                    "in": "body",
+                    "description": "Currency that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CURRENCY_EDIT": [
+                        "update:currency"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Customer": {
+        "get": {
+            "tags": [
+                "administration-customer"
+            ],
+            "summary": "Administration of the Customer entity",
+            "description": "Administration of the Customer entity",
+            "operationId": "administrationCustomerGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: CUSTOMER_ID=#CU1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex:  #CU1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-customer"
+            ],
+            "summary": "Administration of the Customer entity",
+            "description": "Administration of the Customer entity",
+            "operationId": "administrationCustomerPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "customer",
+                    "in": "body",
+                    "description": "Customer that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CUSTOMER_EDIT": [
+                        "update:customer"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Dimension": {
+        "get": {
+            "tags": [
+                "administration-dimension"
+            ],
+            "summary": "Administration of the Dimension entity",
+            "description": "Administration of the Dimension entity",
+            "operationId": "administrationDimensionGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Area",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDimensionGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DIMENSION_READ": [
+                        "read:dimension"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Document": {
+        "get": {
+            "tags": [
+                "administration-document"
+            ],
+            "summary": "Administration of the Document entity",
+            "description": "Administration of the Document entity",
+            "operationId": "administrationDocumentGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter that will be used to filter returned data, Ex. DOCUMENT_ID=AREA",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Drawing. If this field is set, the response will contain only the DOCUMENT_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-document"
+            ],
+            "summary": "Administration of the Document entity",
+            "description": "Administration of the Document entity",
+            "operationId": "administrationDocumentPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "document",
+                    "in": "body",
+                    "description": "Document that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DOCUMENT_EDIT": [
+                        "update:document"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Document_Status": {
+        "get": {
+            "tags": [
+                "administration-document-status"
+            ],
+            "summary": "Administration of the Document Status entity",
+            "description": "Administration of the Document Status entity",
+            "operationId": "administrationDocumentStatusGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: DOCUMENT_STATUS_ID=#R will get only customer with the DOCUMENT_STATUS_ID=#R",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: #R.If this field is set, the response will not contain the DOCUMENT_STATUS_TEXT_ENTITIES. ",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentStatusGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Document_Type": {
+        "get": {
+            "tags": [
+                "administration-document-type"
+            ],
+            "summary": "Administration of the Document type entity",
+            "description": "Administration of the Document type entity",
+            "operationId": "administrationDocumentTypeGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter that will be used to filter returned data, Ex. DOCUMENT_TYPE_ID=#PL",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Planning. If this field is set, the response will contain only the DOCUMENT_TYPE_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documenttype"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-document-type"
+            ],
+            "summary": "Administration of the Document type entity",
+            "description": "Administration of the Document type entity",
+            "operationId": "administrationDocumentTypePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "document",
+                    "in": "body",
+                    "description": "Document Type that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DOCUMENT_TYPE_EDIT": [
+                        "update:documenttype"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Exchange_Rate_Type": {
+        "get": {
+            "tags": [
+                "administration-exchange-rate-type"
+            ],
+            "summary": "Get Exchange Rate Type entities",
+            "description": "Get Exchange Rate Type entities",
+            "operationId": "administrationExchangeRateGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter that will be used to filter returned data, Ex. EXCHANGE_RATE_TYPE_ID=AVC",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: AVC. If this field is set, the response will contain only the EXCHANGE_RATE_TYPE_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.EXCHANGE_RATE_TYPE_READ": []
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-exchange-rate-type"
+            ],
+            "summary": "Administration of the Exchange Rate Type entity",
+            "description": "Administration of the Exchange Rate Type entity",
+            "operationId": "administrationExchangeRateTypePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "Exchange Rate Type",
+                    "in": "body",
+                    "description": "Exchange Rate Type that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.EXCHANGE_RATE_TYPE_EDIT": []
+                }
+            ]
+        }
+    },
+    "administration?business_object=Design_Office": {
+        "get": {
+            "tags": [
+                "administration-design-office"
+            ],
+            "summary": "Administration of the Design Office entity",
+            "description": "Administration of the Design Office entity",
+            "operationId": "administrationDesignOfficeGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data.Ex: DESIGN_OFFICE_ID = #L2",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string, Ex. Design. If this field is set, the response will contain only the DESIGN_OFFICE_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If it is not entered then its default value is current date",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDesignOfficeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.DESIGN_OFFICE_READ": [
+                        "read:designOffice"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Language": {
+        "get": {
+            "tags": [
+                "administration-language"
+            ],
+            "summary": "Administration of the Language entity",
+            "description": "Administration of the Language entity",
+            "operationId": "administrationLanguageGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: LANGUAGE=EN will get only the language with the LANGUAGE=EN",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationLanguageGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.LANGUAGE_READ": [
+                        "read:language"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-language"
+            ],
+            "summary": "Administration of the Language entity",
+            "description": "Administration of the Language entity",
+            "operationId": "administrationLanguagePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "language",
+                    "in": "body",
+                    "description": "Language that will be updated ",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationLanguageToBeUpdated"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationLanguagePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.LANGUAGE_EDIT": [
+                        "update:language"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material": {
+        "get": {
+            "tags": [
+                "administration-material"
+            ],
+            "summary": "Administration of the Material entity",
+            "description": "Administration of the Material entity",
+            "operationId": "administrationMaterialGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: MATERIAL_ID=#100-100",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Casing. If this field is set, the response will contain only the MATERIAL_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material"
+            ],
+            "summary": "Administration of the Material entity",
+            "description": "Administration of the Material entity",
+            "operationId": "administrationMaterialPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "material",
+                    "in": "body",
+                    "description": "Material that will be created, updated or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_EDIT": [
+                        "update:material"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material_Account_Determination": {
+        "get": {
+            "tags": [
+                "administration-material-account"
+            ],
+            "summary": "Administration of the Material Account Determination entity",
+            "description": "Administration of the Material Account Determination entity",
+            "operationId": "administrationMaterialAccountDeterminationGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: CONTROLLING_AREA_ID=1000 will get only data with the CONTROLLING_AREA_ID=1000",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialAccountDeterminationGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material-account"
+            ],
+            "summary": "Administration of the Material Account Determination entity",
+            "description": "Administration of the Material Account Determination entity",
+            "operationId": "administrationMaterialAccountDeterminationPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "materialAccountDetermination",
+                    "in": "body",
+                    "description": "Material account determination that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialAccountDeterminationToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialAccountDeterminationPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_EDIT": [
+                        "update:materialAccountDetermination"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material_Group": {
+        "get": {
+            "tags": [
+                "administration-material-group"
+            ],
+            "summary": "Administration of the Material Group entity",
+            "description": "Administration of the Material Group entity",
+            "operationId": "administrationMaterialGroupGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: MATERIAL_GROUP_ID=#MECH",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Mechanical. If this field is set, the response will contain only the MATERIAL_GROUP_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date.",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material-group"
+            ],
+            "summary": "Administration of the Material Group entity",
+            "description": "Administration of the Material Group entity",
+            "operationId": "administrationMaterialGroupPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "materialGroup",
+                    "in": "body",
+                    "description": "Material Group that will be created, updated or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_GROUP_EDIT": [
+                        "update:materialGroup"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material_Plant": {
+        "get": {
+            "tags": [
+                "administration-material-plant"
+            ],
+            "summary": "Administration of the Material Plant entity",
+            "description": "Administration of the Material Plant entity",
+            "operationId": "administrationMaterialPlantGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: MATERIAL_ID=#100-100",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex: 2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material-plant"
+            ],
+            "summary": "Administration of the Material Plant entity",
+            "description": "Administration of the Material Plant entity",
+            "operationId": "administrationMaterialPlantPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "materialPlant",
+                    "in": "body",
+                    "description": "Material Plant that will be created, updated or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_PLANT_EDIT": [
+                        "update:materialPlant"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material_Price": {
+        "get": {
+            "tags": [
+                "administration-material-price"
+            ],
+            "summary": "Administration of the Material Price entity",
+            "description": "Administration of the Material Price entity",
+            "operationId": "administrationMaterialPriceGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: PRICE_SOURCE_ID=101 will get only data with the PRICE_SOURCE_ID=101",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex:  2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPriceGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material-price"
+            ],
+            "summary": "Administration of the Material Price entity",
+            "description": "Administration of the Material Price entity",
+            "operationId": "administrationMaterialPricePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "Material Price",
+                    "in": "body",
+                    "description": "Material Price that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPriceToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPricePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_PRICE_CREATE": [
+                        "create:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_UPDATE": [
+                        "update:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_DELETE": [
+                        "delete:materialPrice"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Material_Type": {
+        "get": {
+            "tags": [
+                "administration-material-type"
+            ],
+            "summary": "Administration of the Material Type entity",
+            "description": "Administration of the Material Type entity",
+            "operationId": "administrationMaterialTypeGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: MATERIAL_TYPE_ID=ABF",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: waste. If this field is set, the response will contain only the MATERIAL_TYPE_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex: 2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-material-type"
+            ],
+            "summary": "Administration of the Material Type entity",
+            "description": "Administration of the Material Type entity",
+            "operationId": "administrationMaterialTypePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "materialType",
+                    "in": "body",
+                    "description": "Material Type that will be created, updated or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.MATERIAL_TYPE_EDIT": [
+                        "update:materialType"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Overhead_Group": {
+        "get": {
+            "tags": [
+                "administration-overhead-group"
+            ],
+            "summary": "Administration of the Overhead_Group entity",
+            "description": "Administration of the Overhead_Group entity",
+            "operationId": "administrationOverheadGroupGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: OVERHEAD_GROUP_ID=SAP1 will get only data with the OVERHEAD_GROUP_ID=SAP1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: #OG1.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex:  2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.OVERHEAD_GROUP_READ": [
+                        "read:overheadGroup"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-overhead-group"
+            ],
+            "summary": "Administration of the Overhead_Group entity",
+            "description": "Administration of the Overhead_Group entity",
+            "operationId": "administrationOverheadGroupPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "overheadgroup",
+                    "in": "body",
+                    "description": "Overhead Group that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.OVERHEAD_GROUP_EDIT": [
+                        "update:overheadGroup"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Plant": {
+        "get": {
+            "tags": [
+                "administration-plant"
+            ],
+            "summary": "Administration of the Plant entity",
+            "description": "Administration of the Plant entity",
+            "operationId": "administrationPlantGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: PLANT_ID=#PT1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: werk. If this field is set, the response will not contain the PLANT_TEXT_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex: 2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-plant"
+            ],
+            "summary": "Administration of the Plant entity",
+            "description": "Administration of the Plant entity",
+            "operationId": "administrationPlantPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "plant",
+                    "in": "body",
+                    "description": "Plant that will be created, updated or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PLANT_EDIT": [
+                        "update:plant"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Profit_Center": {
+        "get": {
+            "tags": [
+                "administration-profit-center"
+            ],
+            "summary": "Administration of the Profit_Center entity",
+            "description": "Administration of the Profit_Center entity",
+            "operationId": "administrationProfitCenterGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: PROFIT_CENTER_ID=#PC1 will get only data with the PROFIT_CENTER_ID=#PC1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: Profit. If this field is set, the response will contain only the PROFIT_CENTER_ENTITIES.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex:  2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-profit-center"
+            ],
+            "summary": "Administration of the Profit_Center entity",
+            "description": "Administration of the Profit_Center entity",
+            "operationId": "administrationProfitCenterPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "profitCenter",
+                    "in": "body",
+                    "description": "Profit center that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.PROFIT_CENTER_EDIT": [
+                        "update:profitCenter"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Unit_Of_Measure": {
+        "get": {
+            "tags": [
+                "administration-unit-of-measure"
+            ],
+            "summary": "Administration of the Unit_Of_Measure entity",
+            "description": "Administration of the Unit_Of_Measure entity",
+            "operationId": "administrationUnitOfMeasureGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: DIMENSION_ID=LENGTH will get only data with the Ex: DIMENSION_ID=LENGTH",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex:  2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.UNIT_OF_MEASURE_READ": [
+                        "read:unitOfMeasure"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-unit-of-measure"
+            ],
+            "summary": "Administration of the Unit_Of_Measure entity",
+            "description": "Administration of the Unit_Of_Measure entity",
+            "operationId": "administrationUnitOfMeasurePost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "unitOfMeasure",
+                    "in": "body",
+                    "description": "Unit of Measure that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasurePostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.UNIT_OF_MEASURE_EDIT": [
+                        "update:unitOfMeasure"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Valuation_Class": {
+        "get": {
+            "tags": [
+                "administration-valuation-class"
+            ],
+            "summary": "Administration of the Valuation_Class entity",
+            "description": "Administration of the Valuation_Class entity",
+            "operationId": "administrationValuationClassGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: VALUATION_CLASS_ID=3000 will get only data with the Ex.=VALUATION_CLASS_ID=3000",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: 10.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex:  2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-valuation-class"
+            ],
+            "summary": "Administration of the Valuation_Class entity",
+            "description": "Administration of the Valuation_Class entity",
+            "operationId": "administrationValuationClassPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "valuationClass",
+                    "in": "body",
+                    "description": "Valuation class that will be created, updated  or deleted.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.VALUATION_CLASS_EDIT": [
+                        "update:valuationClass"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Vendor": {
+        "get": {
+            "tags": [
+                "administration-vendor"
+            ],
+            "summary": "Administration of the Vendor entity",
+            "description": "Administration of the Vendor entity",
+            "operationId": "administrationVendorGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: VENDOR_NAME=Vendor",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: 101",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex: 2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-vendor"
+            ],
+            "summary": "Administration of the Vendor entity",
+            "description": "Administration of the Vendor entity",
+            "operationId": "administrationVendorPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "vendor",
+                    "in": "body",
+                    "description": "Vendor that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.VENDOR_EDIT": [
+                        "update:vendor"
+                    ]
+                }
+            ]
+        }
+    },
+    "administration?business_object=Work_Center": {
+        "get": {
+            "tags": [
+                "administration-work-center"
+            ],
+            "summary": "Administration of the Work Center entity",
+            "description": "Administration of the Work Center entity",
+            "operationId": "administrationWorkCenterGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Select how many objects will be retrieved",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "skip",
+                    "in": "query",
+                    "description": "Select how many objects will be skiped",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter",
+                    "in": "query",
+                    "description": "Filter string to filter data. Ex: WORK_CENTER_ID=#WC1 or CONTROLLING_AREA_ID=#CA1",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string. Ex: #WC",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "masterdataTimestamp",
+                    "in": "query",
+                    "description": "If this is not setted then its default value is current date. Ex: 2000-01-01T00:00:00.000Z",
+                    "required": false,
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationWorkCenterGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:work_center"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "administration-work-center"
+            ],
+            "summary": "Administration of the Work Center entity",
+            "description": "Administration of the Work Center entity",
+            "operationId": "administrationWorkCenterPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "workCenter",
+                    "in": "body",
+                    "description": "Work Center that will be created, updated or deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationWorkCenterToBeCreatedUpdatedDeleted"
+                    }
+                },
+                {
+                    "name": "ignoreBadData",
+                    "in": "query",
+                    "description": "Choose if you want to ignore the bad data",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationWorkCenterPostResponse"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.WORK_CENTER_EDIT": [
+                        "update:workCenter"
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,45 @@
+<core:FragmentDefinition xmlns="sap.ui.table" xmlns:m="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+    <m:Dialog  id="DeleteRetentionPeriod"  title="{i18n>XTIT_DeleteRetentionPeriod}" busy="{view>/deleteDialogBusy}">
+        <m:content> 
+            <m:VBox class="sapUiSmallMargin">
+                <m:Text text="{i18n>XFLD_areYouSureDeleteText}" />
+
+                    <Table id="SelectedForDeletionRetentionPeriods" selectionMode="None"
+                    rows="{path:'view>/SelectedForDeletionRetentionPeriods'}" visibleRowCount="{view>/deleteDialogVisibleRowCount}">
+                        <columns>
+                            <Column>
+                                <m:Label text="{i18n>XFLD_ENTITY}"  tooltip="{i18n>XTOL_ENTITY_Tooltip}"/>
+                                <template>
+                                    <m:Text text="{view>ENTITY}" wrapping="false" />
+                                </template>
+                            </Column>
+                            <Column>
+                                <m:Label text="{i18n>XFLD_ENTITY_ID}"  tooltip="{i18n>XTOL_ENTITY_ID_Tooltip}"/>
+                                <template>
+                                    <m:Text text="{view>SUBJECT}"  wrapping="false" />
+                                </template>
+                            </Column>
+                            <Column>
+                                <m:Label text="{i18n>XFLD_VALID_TO}"  tooltip="{i18n>XTOL_VALID_TO_Tooltip}"/>
+                                <template>
+                                    <m:Text text="{path: 'view>VALID_TO', formatter:'.formatValidTo'}"  wrapping="false" />
+                                </template>
+                            </Column>
+                            <Column>
+                                <m:Label text="{i18n>XFLD_VALID_FOR}"  tooltip="{i18n>XTOL_VALID_FOR_Tooltip}"/>
+                                <template>
+                                    <m:Text text="{view>VALID_FOR}"  wrapping="false" />
+                                </template>
+                            </Column>
+                        </columns>
+                    </Table>
+            </m:VBox>
+        </m:content>
+        <m:beginButton>
+            <m:Button id="deleteButton" text="{i18n>XBUT_btnDeleteRententionPeriod}" tooltip="{i18n>XTOL_Delete_Tooltip}" press=".deleteRetentionPeriod" />
+        </m:beginButton>
+        <m:endButton>
+            <m:Button text="{i18n>XBUT_cancel}"  tooltip="{i18n>XTOL_cancel}"  press=".onClose('DeleteRetentionPeriod')"/>
+        </m:endButton>
+      </m:Dialog>  
+</core:FragmentDefinition>

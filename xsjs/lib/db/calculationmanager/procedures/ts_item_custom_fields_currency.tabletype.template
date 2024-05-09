@@ -1,0 +1,7 @@
+TYPE "sap.plc.db.calculationmanager.procedures::ts_item_custom_fields_currency" AS TABLE (
+	"ITEM_ID" INTEGER NOT NULL,
+	"CALCULATION_VERSION_ID" INTEGER
+	{{#if Item.customFields}}
+		{{ddl_customFieldsCurrency Item}}
+	{{/if}}
+)

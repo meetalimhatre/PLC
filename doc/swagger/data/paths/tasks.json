@@ -1,0 +1,79 @@
+{
+    "tasks": {
+        "get": {
+            "tags": [
+                "tasks"
+            ],
+            "summary": "Gets all currently running tasks",
+            "description": "",
+            "operationId": "taskGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/tasks_definitions.json#/definitions/TaskResponse"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.TASKS_READ": [
+                        "read:tasks"
+                    ]
+                }
+            ]
+        }
+    },
+    "tasks?id={id}": {
+        "get": {
+            "tags": [
+                "tasks"
+            ],
+            "summary": "Gets a specific task by its id",
+            "description": "Remark: Modeled as extra resource since swagger is currently not able to express different response types depending on the parameter set. If possible fix this if a new swagger version is used, or streamline the responses to make it possible be expressed in a single resource definition",
+            "operationId": "taskGetId",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "task id",
+                    "type": "integer",
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/tasks_definitions.json#/definitions/TaskModel"
+                    }
+                },
+                "404": {
+                    "description": "If no task exists for the id, or the task does not belong to the requesting user",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.TASKS_READ": [
+                        "read:tasks"
+                    ]
+                }
+            ]
+        }
+    }
+}

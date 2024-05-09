@@ -1,0 +1,94 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_get_bom_compare_items" ( 
+		IN it_items 					"sap.plc.db.calculationmanager::calculationmanager_types.tt_bom_compare_items_input",
+		IN versionId1 					INTEGER,
+		IN versionId2 					INTEGER,
+		OUT ot_items_result 			"sap.plc.db.calculationmanager.procedures::ts_bom_compare_items" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+	
+BEGIN
+
+
+/***************************** 
+	Get item details 
+ *****************************/
+lt_item_details_for_first_version = select bomCompare.rank, bomCompare.level, bomCompare.item_id, bomCompare.calculation_version_id, ifnull(bomCompare.bom_compare_key, bomCompare.bom_compare_key_BOMC2) as ITEM_KEY, ifnull(bomCompare.bom_compare_parent_key,bomCompare.bom_compare_parent_key_BOMC2) as PARENT_KEY,
+						bomCompare.node_id, bomCompare.parent_id, bomCompare.rank_BOMC2, bomCompare.level_BOMC2, bomCompare.item_id_BOMC2, bomCompare.calculation_version_id_BOMC2, bomCompare.node_id_BOMC2, bomCompare.parent_id_BOMC2,
+						ifnull(bomCompare.ITEM_ORDER, bomCompare.ITEM_ORDER_BOMC2) as ITEM_ORDER, itemcosts.IS_LEAF, 
+						items.parent_item_id, items.predecessor_item_id, items.is_active, items.highlight_green, items.highlight_orange, items.highlight_yellow, items.item_category_id,items.child_item_category_id, items.referenced_calculation_version_id, items.account_id, items.determined_account_id,
+						items.document_type_id, items.document_id, items.document_version,  items.document_part, items.document_status_id,
+						items.design_office_id, items.material_id, items.material_type_id, 
+						items.material_group_id, 
+						items.is_phantom_material,  
+						items.is_configurable_material, 
+						items.material_source, items.overhead_group_id, 
+						items.valuation_class_id, items.purchasing_group, items.purchasing_document, items.local_content, items.activity_type_id, items.process_id, items.lot_size, items.lot_size_calculated, items.lot_size_is_manual,
+						items.engineering_change_number_id, items.company_code_id, items.cost_center_id, items.plant_id, items.work_center_id, items.work_center_category, items.efficiency, items.business_area_id, items.profit_center_id,
+						items.quantity, items.quantity_calculated, items.quantity_is_manual, items.quantity_uom_id,
+						items.total_quantity, items.total_quantity_uom_id, items.total_quantity_depends_on, items.is_relevant_to_costing_in_erp,
+						items.base_quantity, items.base_quantity_calculated, items.base_quantity_is_manual, items.quantity_per_base_unit, items.quantity_per_base_unit_uom_id,
+						itemcosts.price_fixed_portion, items.price_fixed_portion_is_manual, itemcosts.price_variable_portion,
+						items.price_variable_portion_is_manual, itemcosts.price, items.transaction_currency_id, items.price_unit, items.price_unit_calculated,
+						items.price_unit_is_manual, items.price_unit_uom_id, items.is_price_split_active, items.is_disabling_account_determination,
+						items.price_id, items.confidence_level_id, items.price_source_id, items.price_source_type_id, items.surcharge, items.is_disabling_price_determination, items.vendor_id, itemcosts.target_cost, items.target_cost_is_manual, items.target_cost_currency_id,
+						items.created_on, items.created_by, items.last_modified_on, items.last_modified_by,
+						items.price_for_total_quantity, items.price_for_total_quantity_fixed_portion, items.price_for_total_quantity_variable_portion,
+						items.other_cost, items.other_cost_fixed_portion, items.other_cost_variable_portion,
+						items.total_cost, items.total_cost_fixed_portion, items.total_cost_variable_portion,
+						items.item_description, items.comment,
+						items.total_cost_per_unit_fixed_portion, items.total_cost_per_unit_variable_portion, items.total_cost_per_unit, items.total_quantity_of_variants
+						{{#if Item.customFields}}
+						{{cv_customFieldsTableSelectBomCompare Item}}
+						{{/if}}
+					from :it_items as bomCompare
+					left outer join "sap.plc.db::basis.t_item" as items
+					on bomCompare.ITEM_ID = items.ITEM_ID and bomCompare.CALCULATION_VERSION_ID = items.CALCULATION_VERSION_ID
+					left outer join (select * from "sap.plc.analytics.views.base::f_sql_meas_item_costs"(:versionId1)) itemcosts
+					on itemcosts.ITEM_ID = bomCompare.ITEM_ID and itemcosts.CALCULATION_VERSION_ID = bomCompare.CALCULATION_VERSION_ID
+					{{#if Item.customFields}}
+					left outer join {{t_extensionTable Item}} as plcExtTable on 
+					bomCompare.ITEM_ID = plcExtTable.item_id AND bomCompare.CALCULATION_VERSION_ID = plcExtTable.calculation_version_id
+					{{/if}};
+
+
+ot_items_result = select bomCompare.* , itemcosts.IS_LEAF as is_leaf_BOMC2,
+						items.parent_item_id as parent_item_id_BOMC2, items.predecessor_item_id as predecessor_item_id_BOMC2, items.is_active as is_active_BOMC2, items.highlight_green as highlight_green_BOMC2, items.highlight_orange as highlight_orange_BOMC2, items.highlight_yellow as highlight_yellow_BOMC2, items.item_category_id as item_category_id_BOMC2, items.child_item_category_id as child_item_category_id_BOMC2, items.referenced_calculation_version_id as referenced_calculation_version_id_BOMC2, items.account_id as account_id_BOMC2, items.determined_account_id as determined_account_id_BOMC2,
+						items.document_type_id as document_type_id_BOMC2, items.document_id as document_id_BOMC2, items.document_version as document_version_BOMC2,  items.document_part as document_part_BOMC2, items.document_status_id as document_status_id_BOMC2,
+						items.design_office_id as design_office_id_BOMC2, items.material_id as material_id_BOMC2, items.material_type_id as material_type_id_BOMC2, 
+						items.material_group_id as material_group_id_BOMC2, 
+						items.is_phantom_material as is_phantom_material_BOMC2,  
+						items.is_configurable_material as is_configurable_material_BOMC2, 
+						items.material_source as material_source_BOMC2, items.overhead_group_id as overhead_group_id_BOMC2, 
+						items.valuation_class_id as valuation_class_id_BOMC2, items.purchasing_group as purchasing_group_BOMC2, items.purchasing_document as purchasing_document_BOMC2, items.local_content as local_content_BOMC2, items.activity_type_id as activity_type_id_BOMC2, items.process_id as process_id_BOMC2, items.lot_size as lot_size_BOMC2, items.lot_size_calculated as lot_size_calculated_BOMC2, items.lot_size_is_manual as lot_size_is_manual_BOMC2,
+						items.engineering_change_number_id as engineering_change_number_id_BOMC2, items.company_code_id as company_code_id_BOMC2, items.cost_center_id as cost_center_id_BOMC2, items.plant_id as plant_id_BOMC2, items.work_center_id as work_center_id_BOMC2, items.work_center_category as work_center_category_BOMC2, items.efficiency as efficiency_BOMC2, items.business_area_id as business_area_id_BOMC2, items.profit_center_id as profit_center_id_BOMC2, 
+						items.quantity as quantity_BOMC2, items.quantity_calculated as quantity_calculated_BOMC2, items.quantity_is_manual as quantity_is_manual_BOMC2, items.quantity_uom_id as quantity_uom_id_BOMC2,
+						items.total_quantity as total_quantity_BOMC2, items.total_quantity_uom_id as total_quantity_uom_id_BOMC2, items.total_quantity_depends_on as total_quantity_depends_on_BOMC2, items.is_relevant_to_costing_in_erp as is_relevant_to_costing_in_erp_BOMC2,
+						items.base_quantity as base_quantity_BOMC2, items.base_quantity_calculated as base_quantity_calculated_BOMC2, items.base_quantity_is_manual as base_quantity_is_manual_BOMC2, items.quantity_per_base_unit as quantity_per_base_unit_BOMC2, items.quantity_per_base_unit_uom_id as quantity_per_base_unit_uom_id_BOMC2,
+						itemcosts.price_fixed_portion as price_fixed_portion_BOMC2, items.price_fixed_portion_is_manual as price_fixed_portion_is_manual_BOMC2, itemcosts.price_variable_portion as price_variable_portion_BOMC2,
+						items.price_variable_portion_is_manual as price_variable_portion_is_manual_BOMC2, itemcosts.price as price_BOMC2, items.transaction_currency_id as transaction_currency_id_BOMC2, items.price_unit as price_unit_BOMC2, items.price_unit_calculated as price_unit_calculated_BOMC2,
+						items.price_unit_is_manual as price_unit_is_manual_BOMC2, items.price_unit_uom_id as price_unit_uom_id_BOMC2, items.is_price_split_active as is_price_split_active_BOMC2,items.is_disabling_account_determination as is_disabling_account_determination_BOMC2,
+						items.price_id as price_id_BOMC2, items.confidence_level_id as confidence_level_id_BOMC2, items.price_source_id as price_source_id_BOMC2, items.price_source_type_id as price_source_type_id_BOMC2, items.surcharge as surcharge_BOMC2, items.is_disabling_price_determination as is_disabling_price_determination_BOMC2, items.vendor_id as vendor_id_BOMC2, itemcosts.target_cost as target_cost_BOMC2, items.target_cost_is_manual as target_cost_is_manual_BOMC2, items.target_cost_currency_id as target_cost_currency_id_BOMC2,
+						items.created_on as created_on_BOMC2, items.created_by as created_by_BOMC2, items.last_modified_on as last_modified_on_BOMC2, items.last_modified_by as last_modified_by_BOMC2,
+						items.price_for_total_quantity as price_for_total_quantity_BOMC2, items.price_for_total_quantity_fixed_portion as price_for_total_quantity_fixed_portion_BOMC2, items.price_for_total_quantity_variable_portion as price_for_total_quantity_variable_portion_BOMC2,
+						items.other_cost as other_cost_BOMC2, items.other_cost_fixed_portion as other_cost_fixed_portion_BOMC2, items.other_cost_variable_portion as other_cost_variable_portion_BOMC2,
+						items.total_cost as total_cost_BOMC2, items.total_cost_fixed_portion as total_cost_fixed_portion_BOMC2, items.total_cost_variable_portion as total_cost_variable_portion_BOMC2,
+						items.item_description as item_description_BOMC2, items.comment as comment_BOMC2,
+						items.total_cost_per_unit_fixed_portion as total_cost_per_unit_fixed_portion_BOMC2, items.total_cost_per_unit_variable_portion as total_cost_per_unit_variable_portion_BOMC2, items.total_cost_per_unit as total_cost_per_unit_BOMC2, items.total_quantity_of_variants as total_quantity_of_variants_BOMC2
+						{{#if Item.customFields}}
+						{{cv_customFieldsTableSelectBomCompareSecondVersion Item}}
+						{{/if}}
+					from :lt_item_details_for_first_version as bomCompare
+					left outer join "sap.plc.db::basis.t_item" as items
+					on bomCompare.ITEM_ID_BOMC2 = items.ITEM_ID and bomCompare.CALCULATION_VERSION_ID_BOMC2 = items.CALCULATION_VERSION_ID
+					left outer join (select * from "sap.plc.analytics.views.base::f_sql_meas_item_costs"(:versionId2)) itemcosts
+					on itemcosts.ITEM_ID = bomCompare.ITEM_ID_BOMC2 and itemcosts.CALCULATION_VERSION_ID = bomCompare.CALCULATION_VERSION_ID_BOMC2
+					{{#if Item.customFields}}
+					left outer join {{t_extensionTable Item}} as plcExtTable on
+					bomCompare.ITEM_ID_BOMC2 = plcExtTable.item_id AND bomCompare.CALCULATION_VERSION_ID_BOMC2 = plcExtTable.calculation_version_id
+					{{/if}};
+
+END;
+
+

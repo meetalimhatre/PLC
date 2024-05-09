@@ -1,0 +1,123 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_calculation_delete" ( 
+		IN calculationId INTEGER,
+		OUT affectedRows INTEGER
+	) 
+	LANGUAGE SQLSCRIPT 
+	SQL SECURITY INVOKER 
+	AS
+	
+	rowCountCalc INTEGER;
+	
+BEGIN
+
+--------------------------------------------------------------------------------------------
+---Deletes one calculation and all assigned calculation versions and potentially defined total quantities. 
+---It is assumed that the calculation and all assigned calculation versions are closed. This is checked in xs business logic.
+--------------------------------------------------------------------------------------------
+
+lt_versions_to_delete = 
+	select calculation_version_id 
+		from "sap.plc.db::basis.t_calculation_version" 
+		where calculation_id= :calculationId;
+		
+---------------------------------------------------
+-- Delete items of associated calculation versions of calculation and their calculated values
+---------------------------------------------------
+{{#if Item.customFields}}
+--delete from extension table
+delete from {{t_extensionTable Item}}
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+{{/if}}
+
+delete from "sap.plc.db::basis.t_item"  
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+	
+delete from "sap.plc.db::basis.t_item_calculated_values_component_split" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_calculated_values_costing_sheet" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_referenced_version_component_split" 
+	where master_calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);	
+	
+---------------------------------------------------
+-- Delete associated calculation versions of calculation
+---------------------------------------------------
+
+-- Set row locks for the versions of calculation
+select calculation_version_id 
+	from "sap.plc.db::basis.t_calculation_version" 
+	where calculation_id= :calculationId for update;
+
+delete from "sap.plc.db::basis.t_calculation_version" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+-- Count how much versions are referencing the versions of the calculation. If any is referenced, then the calculation should not be deleted.
+--  The check is done here and in xs logic since this is potentially a long-running task and we have to ensure that nothing changed in-between. 
+--  This check is done at the end of procedure to minimize the duration of locking. 
+select count(distinct calcVers.CALCULATION_ID) into rowCountCalc from "sap.plc.db::basis.t_calculation_version" calcVers  
+inner join (select REFERENCED_CALCULATION_VERSION_ID, CALCULATION_VERSION_ID 
+				from "sap.plc.db::basis.t_item"  
+			union 
+			select REFERENCED_CALCULATION_VERSION_ID, CALCULATION_VERSION_ID 
+				from "sap.plc.db::basis.t_item_temporary"
+			) item
+			on item.CALCULATION_VERSION_ID = calcVers.CALCULATION_VERSION_ID and calcVers.CALCULATION_ID != :calculationId  
+			where item.REFERENCED_CALCULATION_VERSION_ID in (select calculation_version_id FROM :lt_versions_to_delete); 	
+
+---------------------------------------------------
+-- Delete potentially defined total quantities in t_project_lifecycle_configuration and associated values in 
+-- t_project_lifecycle_period_quantity_value for the calculation
+---------------------------------------------------
+
+delete from "sap.plc.db::basis.t_project_lifecycle_configuration" 
+where calculation_id = :calculationId;
+
+delete from "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" t_project_lifecycle_period_quantity_value
+where calculation_id = :calculationId;
+---------------------------------------------------
+-- Delete tag assignment
+---------------------------------------------------
+delete from "sap.plc.db::basis.t_entity_tags" where
+	(entity_id = :calculationId and entity_type = 'C') or
+	(entity_id in (select calculation_version_id from :lt_versions_to_delete) and entity_type = 'V');
+
+---------------------------------------------------
+-- Delete potentially defined one time costs in t_one_time_product_cost and associated values in 
+-- t_one_time_cost_lifecycle_value for the calculation
+-- Update cost not distributed for t_one_time_product_cost for the remaining calculations
+---------------------------------------------------
+
+lt_deleted_product_costs_values = 
+	select cost_to_distribute, one_time_cost_id
+	from "sap.plc.db::basis.t_one_time_product_cost"
+	where calculation_id = :calculationId;
+
+if record_count(:lt_deleted_product_costs_values) > 0 then
+	delete from "sap.plc.db::basis.t_one_time_product_cost"
+	where calculation_id = :calculationId;
+
+	delete from "sap.plc.db::basis.t_one_time_cost_lifecycle_value"
+	where calculation_id = :calculationId;
+
+	update otpc
+	set cost_not_distributed = cost_not_distributed + dpcv.cost_to_distribute
+	from "sap.plc.db::basis.t_one_time_project_cost" otpc
+	inner join :lt_deleted_product_costs_values dpcv
+		on otpc.one_time_cost_id = dpcv.one_time_cost_id
+	where otpc.distribution_type = 2; --manual
+end if;
+---------------------------------------------------
+-- Delete calculation
+---------------------------------------------------
+-- delete calculation
+delete from "sap.plc.db::basis.t_calculation"
+	where calculation_id = :calculationId and :rowCountCalc = 0;
+
+-- Returns rows affected. If no rows are affected, the whole procedure is not committed in xs logic.
+select ::rowcount into affectedRows from "sap.plc.db::DUMMY";
+
+END
+
+

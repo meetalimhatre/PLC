@@ -1,0 +1,133 @@
+{
+    "groups": {
+        "get": {
+            "tags": [
+                "groups"
+            ],
+            "summary": "Gets groups from the system",
+            "description": "Gets all groups/ a group or the groups that start with a string from the system",
+            "operationId": "groupsGet",
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Filter data to start with a string",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Set the lock on groups",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "Get a group and group members by a specific id",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GroupModel"
+                    }
+                },
+                "405": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.GROUPS_READ": []
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "groups"
+            ],
+            "summary": "Batch to create, update and delete a group or, users and subgroups for a group",
+            "description": "Batch to create, update and delete a group or, users and subgroups for a group",
+            "operationId": "groupsEdit",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Groups, users and subgroups that will be created, updated, deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GroupsRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "head": {
+                                "type": "object"
+                            },
+                            "body": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "400": {
+                    "description": "Added subgroup creates cycle",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GroupCycleError"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.GROUPS_EDIT": []
+                }
+            ]
+        }
+    }
+}

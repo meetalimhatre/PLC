@@ -1,0 +1,15 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_TCK14" AFTER DELETE ON "sap.plc.db::repl.t_tck14_t001w"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_overhead_group"
+     SET _VALID_TO = :lv_current_utctimestamp 
+         WHERE "sap.plc.db::basis.t_overhead_group"."OVERHEAD_GROUP_ID" = :OLDROW."KOSGR"
+            AND "sap.plc.db::basis.t_overhead_group"."PLANT_ID" = :OLDROW."WERKS"  
+            AND "sap.plc.db::basis.t_overhead_group"."_VALID_FROM" < :lv_current_utctimestamp
+            AND "sap.plc.db::basis.t_overhead_group"."_VALID_TO" IS NULL;
+      
+end
+;

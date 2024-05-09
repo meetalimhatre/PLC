@@ -1,0 +1,1772 @@
+{ 
+	"definitions": {
+		"CalculationVersionsGetUomModel": {
+			"type": "object",
+			"properties": {
+				"UOM_ID": {
+					"type": "string",
+					"description": "ex: H"
+				},
+				"DIMENSION_ID": {
+					"type": "string",
+					"description": "ex: TIME"
+				},
+				"NUMERATOR": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 3600"
+				},
+				"DENOMINATOR": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"EXPONENT_BASE10": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"SI_CONSTANT": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"_VALID_FROM": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_VALID_TO": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_SOURCE": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"_CREATED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"_VALID_FROM_FIRST_VERSION": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_CREATED_BY_FIRST_VERSION": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"UOM_CODE": {
+					"type": "string",
+					"description": "ex: h"
+				},
+				"UOM_DESCRIPTION": {
+					"type": "string",
+					"description": "ex: Hour"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetUomModel"
+			}
+		},
+		"CalculationVersionsGetCurrencyModel": {
+			"type": "object",
+			"properties": {
+				"CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"_VALID_FROM": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_VALID_TO": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_SOURCE": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"_CREATED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"_VALID_FROM_FIRST_VERSION": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"_CREATED_BY_FIRST_VERSION": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"CURRENCY_CODE": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"CURRENCY_DESCRIPTION": {
+					"type": "string",
+					"description": "ex: Euro"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetCurrencyModel"
+			}
+		},
+		"CalculationVersionsGetCalculationVersionsModel": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_VERSION_NAME": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: #Version 1"
+				},
+				"STATUS_ID": {
+					"type": "string",
+					"description": "ex: active"
+				},
+				"CALCULATION_VERSION_TYPE": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"ROOT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 12"
+				},
+				"CUSTOMER_ID": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: Customer1"
+				},
+				"SALES_PRICE": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"SALES_PRICE_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "ex: #COGSL"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "ex: SPLIT_CONDENSED"
+				},
+				"SALES_DOCUMENT": {
+					"type": "string",
+					"description": "ex: Docu12"
+				},
+				"START_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"END_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"VALUATION_DATE": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"LAST_MODIFIED_ON": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"LAST_MODIFIED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"MASTER_DATA_TIMESTAMP": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"LIFECYCLE_PERIOD_FROM": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"BASE_VERSION_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 12"
+				},
+				"LAST_USED_ON": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"IS_FROZEN": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"EXCHANGE_RATE_TYPE_ID": {
+					"type": "string",
+					"description": "Ex: STANDARD"
+				},
+				"VARIANT_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"HAS_LIFECYCLES": {
+					"type": "boolean",
+					"description": "If the calculation version has lifecyles associated the this property will have the value 1. If not it will have the value 0."
+				},
+				"ITEMS": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/items-definitions.json#/definitions/ItemModel"
+					}
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetCalculationVersionsModel"
+			}
+		},
+		"CalculationVersionsGetCalculationModel": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 18"
+				},
+				"PROJECT_ID": {
+					"type": "string",
+					"description": "ex: 18"
+				},
+				"CALCULATION_NAME": {
+					"type": "string",
+					"description": "ex: Calculation Example 2"
+				},
+				"CURRENT_CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 2"
+				},
+				"CONTROLLING_AREA_ID": {
+					"type": "string",
+					"description": "ex: #CO1"
+				},
+				"CREATED_ON": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"CREATED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				},
+				"LAST_MODIFIED_ON": {
+					"type": "string",
+					"default": "date-time",
+					"description": "2015-09-01T09:00:00.000Z"
+				},
+				"LAST_MODIFIED_BY": {
+					"type": "string",
+					"description": "ex: DemoUser"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetCalculationModel"
+			}
+		},
+		"CalculationVersionsGetMasterdataModel": {
+			"type": "object",
+			"properties": {
+				"COMPONENT_SPLIT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/ComponentSplitModel"
+					}
+				},
+				"SELECTED_ACCOUNT_GROUPS_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationSelectedAccountGroupModel"
+					}
+				},
+				"PRICE_COMPONENT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPriceComponentModel"
+					}
+				},
+				"COSTING_SHEET_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetModel"
+					}
+				},
+				"COSTING_SHEET_ROW_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowModel"
+					}
+				},
+				"COSTING_SHEET_BASE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseModel"
+					}
+				},
+				"COSTING_SHEET_BASE_ROW_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseRowModel"
+					}
+				},
+				"COSTING_SHEET_OVERHEAD_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadModel"
+					}
+				},
+				"COSTING_SHEET_OVERHEAD_ROW_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadRowModel"
+					}
+				},
+				"COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowDependenciesModel"
+					}
+				},
+				"ACCOUNT_GROUP_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AccountGroupModel"
+					}
+				},
+				"WORK_CENTER_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/WorkCenterModel"
+					}
+				},
+				"WORK_CENTER_CATEGORY_ENTITIES": {
+					"type": "array",
+					"items": {}
+				},
+				"PROCESS_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/ProcessModel"
+					}
+				},
+				"OVERHEAD_GROUP_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupModel"
+					}
+				},
+				"PLANT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+					}
+				},
+				"COST_CENTER_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/CostCenterModel"
+					}
+				},
+				"PROFIT_CENTER_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterModel"
+					}
+				},
+				"ACTIVITY_TYPE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/ActivityTypeModel"
+					}
+				},
+				"ACCOUNT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountModel"
+					}
+				},
+				"COMPANY_CODE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+					}
+				},
+				"CONTROLLING_AREA_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+					}
+				},
+				"BUSINESS_AREA_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/BusinessAreaModel"
+					}
+				},
+				"MATERIAL_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialModel"
+					}
+				},
+				"MATERIAL_GROUP_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupModel"
+					}
+				},
+				"MATERIAL_PLANT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantModel"
+					}
+				},
+				"MATERIAL_TYPE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeModel"
+					}
+				},
+				"VALUATION_CLASS_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassModel"
+					}
+				},
+				"VENDOR_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorModel"
+					}
+				},
+				"CUSTOMER_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+					}
+				},
+				"DOCUMENT_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentModel"
+					}
+				},
+				"DOCUMENT_TYPE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeModel"
+					}
+				},
+				"DOCUMENT_STATUS_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentStatusModel"
+					}
+				},
+				"DESIGN_OFFICE_ENTITIES": {
+					"type": "array",
+					"items": {}
+				},
+				"UNIT_OF_MEASURE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureModel"
+					}
+				},
+				"CURRENCY_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+					}
+				},
+				"EXCHANGE_RATE_TYPE_ENTITIES": {
+					"type": "array",
+					"items": {
+						"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetModel"
+					}
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetProjectsModel"
+			}
+		},
+		"CalculationVersionsGetProjectsModel": {
+			"type": "object",
+			"properties": {
+				"PROJECT_ID": {
+					"type": "string",
+					"description": "ex: #P2"
+				},
+				"REFERENCE_PROJECT_ID": {
+					"type": "string",
+					"description": "ex: #P2"
+				},
+				"PROJECT_NAME": {
+					"type": "string",
+					"description": "ex: #SAP example Pumpenprojekt"
+				},
+				"PROJECT_RESPONSIBLE": {
+					"type": "string",
+					"description": "ex: SampleUser"
+				},
+				"CONTROLLING_AREA_ID": {
+					"type": "string",
+					"description": "ex: #CA1"
+				},
+				"CUSTOMER_ID": {
+					"type": "string",
+					"description": "ex: #CU1"
+				},
+				"SALES_DOCUMENT": {
+					"type": "string",
+					"description": "ex: 10000023"
+				},
+				"SALES_PRICE": {
+					"type": "number",
+					"format": "double",
+					"description": "ex: 18"
+				},
+				"SALES_PRICE_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COMMENT": {
+					"type": "string",
+					"description": "ex: linked to an SD inquiry"
+				},
+				"COMPANY_CODE_ID": {
+					"type": "string",
+					"description": "ex: #C1"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "ex: #PT1"
+				},
+				"BUSINESS_AREA_ID": {
+					"type": "string",
+					"description": "ex: #BA1"
+				},
+				"PROFIT_CENTER_ID": {
+					"type": "string",
+					"description": "ex: #PC1"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "ex: #COGSL"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "ex: #SPLIT_DETAILED"
+				},
+				"START_OF_PROJECT": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"END_OF_PROJECT": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"START_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"END_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"VALUATION_DATE": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"CREATED_ON": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"CREATED_BY": {
+					"type": "string",
+					"description": "ex: SampleUser"
+				},
+				"LAST_MODIFIED_ON": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"LAST_MODIFIED_BY": {
+					"type": "string",
+					"description": "ex: SampleUser"
+				},
+				"IS_FROZEN": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"EXCHANGE_RATE_TYPE_ID": {
+					"type": "string",
+					"description": "Ex: STANDARD"
+				},
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsGetProjectsModel"
+			}
+		},
+		"CalculationVersionsGetResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"CALCULATION_VERSIONS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetCalculationVersionsModel"
+										}
+									},
+									"CALCULATIONS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetCalculationModel"
+										}
+									},
+									"PROJECTS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetProjectsModel"
+										}
+									}
+								}
+							}
+						},
+						"masterdata": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"UNIT_OF_MEASURE_ENTITIES": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetUomModel"
+										}
+									},
+									"EXCHANGE_RATE_TYPE_ENTITIES": {
+										"type": "array",
+										"items": {
+											"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetModel"
+										}
+									},
+									"CURRENCY_ENTITIES": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetCurrencyModel"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"CalculationVersionsSingleGetResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/CalculationVersionsGetCalculationVersionsModel"
+							}
+						},
+						"referencesdata": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"CALCULATION_VERSIONS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetCalculationVersionsModel"
+										}
+									},
+									"CALCULATIONS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetCalculationModel"
+										}
+									},
+									"PROJECTS": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetProjectsModel"
+										}
+									},
+									"MASTERDATA": {
+										"type": "array",
+										"items": {
+											"$ref": "#/definitions/CalculationVersionsGetMasterdataModel"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"CalculationVersionsSinglePatchBody": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"LOCK": {
+							"type": "object",
+							"properties": {
+								"IS_WRITEABLE": {
+									"type": "integer",
+									"format": "int32",
+									"description": "0 = unlock; 1 = lock"
+								},
+								"CONTEXT" : {
+									"type": "string",
+									"enum": ["calculation_version", "variant_matrix"],
+									"description": "Lock context of a calculation version, ex: calculation_version"
+								}
+							}
+						}
+					}
+				}
+			}
+		},		
+		"CalculationVersionsTransactionaldataModel": {
+			"type": "object",
+			"properties": {
+				"SESSION_ID": {
+					"type": "string",
+					"description": "ex: Session1"
+				},
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_VERSION_NAME": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: #Version 1"
+				},
+				"STATUS_ID": {
+					"type": "string",
+					"description": "ex: active"
+				},
+				"ROOT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 12"
+				},
+				"CUSTOMER_ID": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: Customer1"
+				},
+				"SALES_PRICE_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "ex: #COGSL"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "ex: SPLIT_CONDENSED"
+				},
+				"END_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"IS_DIRTY": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"IS_WRITEABLE": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 1"
+				},
+				"SALES_DOCUMENT": {
+					"type": "string",
+					"description": "ex: Docu12"
+				},
+				"START_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"VALUATION_DATE": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"MASTER_DATA_TIMESTAMP": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"EXCHANGE_RATE_TYPE_ID": {
+					"type": "string",
+					"description": "Ex: STANDARD"
+				},
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ITEMS": {
+					"type": "array",
+					"items": {
+						"allOf": [
+							{
+								"$ref": "../definitions/items-definitions.json#/definitions/ItemModel"
+							},
+							{
+								"type": "object",
+								"required": [
+									"SESSION_ID"
+								],
+								"properties": {
+									"SESSION_ID": {
+										"type": "string",
+										"description": "ex: Session1"
+									}
+								}
+							}
+						]
+					}
+				},
+				"ITEMS_COMPRESSED": {
+					"$ref": "../definitions/items-definitions.json#/definitions/ItemModelCompressed"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsTransactionaldataModel"
+			}
+		},
+		"CalculationVersionsPutBody": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_VERSION_NAME": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: #Version 1"
+				},
+				"STATUS_ID": {
+					"type": "string",
+					"description": "ex: active"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "ex: SPLIT_CONDENSED"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "ex: #COGSL"
+				},
+				"CUSTOMER_ID": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: Customer1"
+				},
+				"END_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"IS_QUANTITY_PASSED_ON": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"PRICE_DETERMINATION_STRATEGY": {
+					"type": "string",
+					"description": "ex: Standard"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"ROOT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 12"
+				},
+				"SALES_PRICE_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"START_OF_PRODUCTION": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"VALUATION_DATE": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"EXCHANGE_RATE_TYPE_ID": {
+					"type": "string",
+					"description": "Ex: STANDARD"
+				},
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsPutBody"
+			}
+		},
+		"CalculationVersionsPostBody": {
+			"type": "object",
+			"properties": {
+				"CALCULATION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: 1"
+				},
+				"CALCULATION_VERSION_ID": {
+					"type": "integer",
+					"format": "int64",
+					"description": "ex: -1"
+				},
+				"CALCULATION_VERSION_NAME": {
+					"type": "string",
+					"format": "int64",
+					"description": "ex: #Version 1"
+				},
+				"STATUS_ID": {
+					"type": "string",
+					"description": "ex: active"
+				},
+				"IS_QUANTITY_PASSED_ON": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 0"
+				},
+				"PRICE_DETERMINATION_STRATEGY": {
+					"type": "string",
+					"description": "ex: Standard"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"ROOT_ITEM_ID": {
+					"type": "integer",
+					"format": "int32",
+					"description": "ex: 12"
+				},
+				"VALUATION_DATE": {
+					"type": "string",
+					"format": "date-time",
+					"description": "ex: 2015-01-01T00:00:00.000Z"
+				},
+				"MATERIAL_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ACTIVITY_PRICE_STRATEGY_ID": {
+					"type": "string",
+					"description": "Ex: PLC_STANDARD"
+				},
+				"ITEMS": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"CALCULATION_VERSION_ID": {
+								"type": "integer",
+								"format": "int64",
+								"description": "ex: -1"
+							},
+							"HIGHLIGHT_GREEN": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 0"
+							},
+							"HIGHLIGHT_ORANGE": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 0"
+							},
+							"HIGHLIGHT_YELLOW": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 0"
+							},
+							"IS_ACTIVE": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 1"
+							},
+							"ITEM_ID": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: -1"
+							},
+							"IS_PHANTOM_MATERIAL": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 0"
+							},
+							"IS_CONFIGURABLE_MATERIAL": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 0"
+							},
+							"IS_RELEVANT_TO_COSTING_IN_ERP": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"PRICE_FIXED_PORTION": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 18"
+							},
+							"PRICE_FIXED_PORTION_IS_MANUAL": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"TRANSACTION_CURRENCY_ID": {
+								"type": "string",
+								"description": "ex: EUR"
+							},
+							"PRICE_UNIT": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 1"
+							},
+							"PRICE_UNIT_IS_MANUAL": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"PRICE_UNIT_UOM_ID": {
+								"type": "string",
+								"description": "ex: PC"
+							},
+							"PRICE_VARIABLE_PORTION": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 18"
+							},
+							"PRICE_VARIABLE_PORTION_IS_MANUAL": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"TARGET_COST": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 120"
+							},
+							"TARGET_COST_CALCULATED": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 120"
+							},
+							"TARGET_COST_IS_MANUAL": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"TOTAL_QUANTITY": {
+								"type": "number",
+								"format": "double",
+								"description": "ex: 18"
+							},
+							"TOTAL_QUANTITY_UOM_ID": {
+								"type": "string",
+								"description": "ex: PC"
+							}
+						}
+					}
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsPostBody"
+			}
+		},
+		"CalculationVersionsDeleteBody": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"CALCULATION_VERSION_ID": {
+						"type": "integer",
+						"format": "int32",
+						"description": "ex: 1"
+					}
+				}
+			},
+			"xml": {
+				"name": "CalculationVersionsDeleteBody"
+			}
+		},
+		"CalculationVersionsPutResponse": {
+			"type": "object",
+			"properties": {
+				"body": {
+					"type": "object",
+					"properties": {
+						"masterdata": {
+							"type": "object",
+							"properties": {
+								"COMPONENT_SPLIT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ComponentSplitModel"
+									}
+								},
+								"SELECTED_ACCOUNT_GROUPS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationSelectedAccountGroupModel"
+									}
+								},
+								"COSTING_SHEET_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetModel"
+									}
+								},
+								"COSTING_SHEET_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseRowModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadRowModel"
+									}
+								},
+								"COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowDependenciesModel"
+									}
+								},
+								"ACCOUNT_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AccountGroupModel"
+									}
+								},
+								"WORK_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/WorkCenterModel"
+									}
+								},
+								"WORK_CENTER_CATEGORY_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"PROCESS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ProcessModel"
+									}
+								},
+								"OVERHEAD_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupModel"
+									}
+								},
+								"PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+									}
+								},
+								"COST_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CostCenterModel"
+									}
+								},
+								"PROFIT_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterModel"
+									}
+								},
+								"ACTIVITY_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ActivityTypeModel"
+									}
+								},
+								"ACCOUNT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountModel"
+									}
+								},
+								"COMPANY_CODE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+									}
+								},
+								"CONTROLLING_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+									}
+								},
+								"BUSINESS_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/BusinessAreaModel"
+									}
+								},
+								"MATERIAL_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialModel"
+									}
+								},
+								"MATERIAL_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupModel"
+									}
+								},
+								"MATERIAL_PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantModel"
+									}
+								},
+								"MATERIAL_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeModel"
+									}
+								},
+								"VALUATION_CLASS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassModel"
+									}
+								},
+								"VENDOR_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorModel"
+									}
+								},
+								"CUSTOMER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+									}
+								},
+								"DOCUMENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentModel"
+									}
+								},
+								"DOCUMENT_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeModel"
+									}
+								},
+								"DOCUMENT_STATUS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentStatusModel"
+									}
+								},
+								"DESIGN_OFFICE_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"UNIT_OF_MEASURE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureModel"
+									}
+								},
+								"CURRENCY_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+									}
+								},
+								"EXCHANGE_RATE_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationExchangeRateTypeGetModel"
+									}
+								},
+								"PRICE_COMPONENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPriceComponentModel"
+									}
+								}
+							}
+						},
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/CalculationVersionsTransactionaldataModel"
+							}
+						},
+						"calculated": {
+							"type": "object",
+							"properties": {
+								"ITEM_CALCULATED_FIELDS": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitModel"
+									}
+								},
+								"ITEM_CALCULATED_FIELDS_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT_COMPRESSED": {
+								    "$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitCompressedModel"
+								}
+							}
+						}
+					}
+				},
+				"head": {
+					"type": "object"
+				}
+			}
+		},
+		"CalculationVersionsPostResponse": {
+			"type": "object",
+			"properties": {
+				"body": {
+					"type": "object",
+					"properties": {
+						"masterdata": {
+							"type": "object",
+							"properties": {
+								"COMPONENT_SPLIT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ComponentSplitModel"
+									}
+								},
+								"SELECTED_ACCOUNT_GROUPS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationSelectedAccountGroupModel"
+									}
+								},
+								"COSTING_SHEET_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetModel"
+									}
+								},
+								"COSTING_SHEET_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseModel"
+									}
+								},
+								"COSTING_SHEET_BASE_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetBaseRowModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadModel"
+									}
+								},
+								"COSTING_SHEET_OVERHEAD_ROW_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetOverheadRowModel"
+									}
+								},
+								"COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCostingSheetRowDependenciesModel"
+									}
+								},
+								"ACCOUNT_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AccountGroupModel"
+									}
+								},
+								"WORK_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"WORK_CENTER_CATEGORY_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"PROCESS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ProcessModel"
+									}
+								},
+								"OVERHEAD_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationOverheadGroupModel"
+									}
+								},
+								"PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPlantModel"
+									}
+								},
+								"COST_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CostCenterModel"
+									}
+								},
+								"PROFIT_CENTER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationProfitCenterModel"
+									}
+								},
+								"ACTIVITY_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ActivityTypeModel"
+									}
+								},
+								"ACCOUNT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationAccountModel"
+									}
+								},
+								"COMPANY_CODE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/CompanyCodeModel"
+									}
+								},
+								"CONTROLLING_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+									}
+								},
+								"BUSINESS_AREA_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/BusinessAreaModel"
+									}
+								},
+								"MATERIAL_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialModel"
+									}
+								},
+								"MATERIAL_GROUP_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialGroupModel"
+									}
+								},
+								"MATERIAL_PLANT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialPlantModel"
+									}
+								},
+								"MATERIAL_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationMaterialTypeModel"
+									}
+								},
+								"VALUATION_CLASS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationValuationClassModel"
+									}
+								},
+								"VENDOR_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationVendorModel"
+									}
+								},
+								"CUSTOMER_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCustomerModel"
+									}
+								},
+								"DOCUMENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentModel"
+									}
+								},
+								"DOCUMENT_TYPE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentTypeModel"
+									}
+								},
+								"DOCUMENT_STATUS_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationDocumentStatusModel"
+									}
+								},
+								"DESIGN_OFFICE_ENTITIES": {
+									"type": "array",
+									"items": {}
+								},
+								"UNIT_OF_MEASURE_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureModel"
+									}
+								},
+								"CURRENCY_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+									}
+								},
+								"PRICE_COMPONENT_ENTITIES": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/administration-definitions.json#/definitions/AdministrationPriceComponentModel"
+									}
+								}
+							}
+						},
+						"transactionaldata": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/CalculationVersionsTransactionaldataModel"
+							}
+						},
+						"calculated": {
+							"type": "object",
+							"properties": {
+								"ITEM_CALCULATED_FIELDS": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetModel"
+									}
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT": {
+									"type": "array",
+									"items": {
+										"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitModel"
+									}
+								},
+								"ITEM_CALCULATED_FIELDS_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsItemCalculatedFieldsCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COSTING_SHEET_COMPRESSED": {
+									"$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesCostingSheetCompressedModel"
+								},
+								"ITEM_CALCULATED_VALUES_COMPONENT_SPLIT_COMPRESSED": {
+								    "$ref": "../definitions/calculated_results-definitions.json#/definitions/CalculationVersionsPutItemCalculatedValuesComponentSplitCompressedModel"
+								}
+							}
+						}
+					}
+				},
+				"head": {
+					"type": "object"
+				}
+			}
+		},
+		"CalculationVersionsDeleteResponse": {
+			"type": "object",
+			"properties": {
+				"body": {},
+				"head": {
+					"type": "object"
+				}
+			}
+		}
+	}
+}

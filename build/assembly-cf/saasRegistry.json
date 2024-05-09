@@ -1,0 +1,11 @@
+{
+  "xsappname": "xsac-plc-<your-space>",
+  "appName": "xsac-plc-<your-space>",
+  "appUrls": {
+    "getDependencies": "https://plc-mt-<your-space>.cfapps.sap.hana.ondemand.com/callback/v1.0/dependencies",
+    "onSubscription": "https://plc-mt-<your-space>.cfapps.sap.hana.ondemand.com/callback/v1.0/tenants/{tenantId}"
+  },
+  "displayName": "Product Lifecycle Costing <your-space>",
+  "description": "The Product Lifecycle Application Business Application",
+  "category": "Integration Suite"
+}

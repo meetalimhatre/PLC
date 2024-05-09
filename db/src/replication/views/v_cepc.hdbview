@@ -1,0 +1,7 @@
+VIEW "sap.plc.db.replication.views::v_cepc" ( "PRCTR", "KOKRS" ) AS select CEPC.PRCTR , CEPC.KOKRS 
+                from "sap.plc.db::repl.cepc" AS CEPC
+                	WHERE CEPC.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.cepc" AS CEPC1
+                								WHERE CEPC1.PRCTR = CEPC.PRCTR AND 
+                									  CEPC1.KOKRS = CEPC.KOKRS  )
+                	  AND CEPC.DATBI >= TO_DATS(CURRENT_DATE)

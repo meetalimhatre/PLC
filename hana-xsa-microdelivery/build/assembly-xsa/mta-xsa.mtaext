@@ -1,0 +1,15 @@
+_schema-version: '2.0'
+ID: com.sap.xsac.plc.dev
+extends: com.sap.xsac.plc
+description: SAP Product Lifecycle Costing - dev 
+
+modules:
+
+  - name: xsac-plc-publicapi
+    build-parameters:
+      builder: maven
+      maven-opts:
+        command: [ clean, verify ]
+        profiles:
+          - integration
+    

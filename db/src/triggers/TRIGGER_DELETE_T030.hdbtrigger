@@ -1,0 +1,43 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_T030" 
+AFTER DELETE ON "sap.plc.db::repl.t030"
+REFERENCING OLD ROW OLDROW FOR EACH ROW 
+BEGIN  
+ declare lv_current_utctimestamp    timestamp;
+ DECLARE v_KTOPL       VARCHAR(4) := '''';                                  
+ DECLARE v_BWMOD       VARCHAR(4) := '''';                                                      
+ DECLARE v_KOKRS       VARCHAR(4) := ''''; 
+ DECLARE v_WERKS       VARCHAR(4) := ''''; 
+
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+v_KTOPL = :OLDROW."KTOPL";
+v_BWMOD = :OLDROW."BWMOD";
+IF ( v_BWMOD <> '*' )  THEN                  
+    UPDATE "sap.plc.db::basis.t_material_account_determination"
+              SET _VALID_TO = :lv_current_utctimestamp 
+              WHERE "sap.plc.db::basis.t_material_account_determination"."MATERIAL_TYPE_ID" = :OLDROW."MTART"
+              AND ("sap.plc.db::basis.t_material_account_determination"."CONTROLLING_AREA_ID", "sap.plc.db::basis.t_material_account_determination"."PLANT_ID") 
+                      IN (SELECT    T001.KOKRS , 
+                                   T001W.WERKS
+                        FROM "sap.plc.db::repl.t_t001w_t001k" AS T001W
+                        INNER JOIN "sap.plc.db::repl.t_t001_tka02" AS T001
+                        ON T001W.BUKRS = T001.BUKRS
+                        WHERE T001.KTOPL = v_KTOPL
+                        AND    T001W.BWMOD = v_BWMOD)
+              AND "sap.plc.db::basis.t_material_account_determination"."VALUATION_CLASS_ID" = :OLDROW."BKLAS"  
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_TO" IS NULL;
+  ELSE
+    UPDATE "sap.plc.db::basis.t_material_account_determination"
+              SET _VALID_TO = :lv_current_utctimestamp 
+              WHERE "sap.plc.db::basis.t_material_account_determination"."MATERIAL_TYPE_ID" = :OLDROW."MTART"
+              AND ("sap.plc.db::basis.t_material_account_determination"."CONTROLLING_AREA_ID") 
+                      IN (SELECT    distinct T001.KOKRS                                 
+                        FROM  "sap.plc.db::repl.t_t001_tka02" AS T001
+                        WHERE T001.KTOPL = v_KTOPL
+                        )
+              AND "sap.plc.db::basis.t_material_account_determination"."PLANT_ID" = v_BWMOD   
+              AND "sap.plc.db::basis.t_material_account_determination"."VALUATION_CLASS_ID" = :OLDROW."BKLAS"  
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material_account_determination"."_VALID_TO" IS NULL;  
+              END IF;
+END;

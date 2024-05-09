@@ -1,0 +1,12 @@
+<ActionSheet id="actionSheet"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	showCancelButton="true"
+	placement="Bottom">
+	
+	<Button
+		text="{i18n>XBUT_btnSignOut}"
+		icon="sap-icon://log"
+		press=".onSignOut" />
+
+</ActionSheet>

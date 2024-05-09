@@ -1,0 +1,44 @@
+PROCEDURE "sap.plc_test.testtools.calculation::p_recalculate_all_versions_of_project_sequentially" (
+	IN iv_project_id NVARCHAR(35)
+) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+-- This is a helper script to recalculate all calculation versions of a given project.
+-- Referenced versions outside the project will also be recalculated. Existing calculation results will be deleted before.
+
+-- select all calculation versions of the given project
+lt_versions = select calculation_version_id from "sap.plc.db::basis.t_calculation_version" version 
+	INNER JOIN "sap.plc.db::basis.t_calculation" calculation ON version.calculation_id = calculation.calculation_id where project_id = :iv_project_id;
+
+-- get all referenced calculation versions of the list of calculation versions
+lt_referenced_calculation_versions = SELECT DISTINCT referenced_calculation_version_id
+		FROM "sap.plc.db::basis.t_item"
+		WHERE calculation_version_id IN (select calculation_version_id from :lt_versions) AND referenced_calculation_version_id IS NOT NULL;
+		
+lt_new_referenced_calculation_versions = SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions;
+
+-- iteratively get all other (indirectly) referenced calculation versions
+WHILE NOT IS_EMPTY(:lt_new_referenced_calculation_versions) DO
+	lt_new_referenced_calculation_versions = SELECT DISTINCT referenced_calculation_version_id
+			FROM "sap.plc.db::basis.t_item"
+			WHERE calculation_version_id in (SELECT referenced_calculation_version_id FROM :lt_new_referenced_calculation_versions) AND referenced_calculation_version_id IS NOT NULL;
+
+	lt_referenced_calculation_versions = SELECT referenced_calculation_version_id FROM :lt_new_referenced_calculation_versions
+		UNION SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions;
+	
+END WHILE;
+
+-- add all referenced versions outside the project to the list of calculated versions
+lt_versions = select calculation_version_id from :lt_versions UNION select referenced_calculation_version_id from :lt_referenced_calculation_versions;
+
+-- delete all stored calculation results for the list of versions
+delete from "sap.plc.db::basis.t_item_calculated_values_costing_sheet" where calculation_version_id in (select calculation_version_id from :lt_versions);
+delete from "sap.plc.db::basis.t_item_calculated_values_component_split" where calculation_version_id in (select calculation_version_id from :lt_versions);
+delete from "sap.plc.db::basis.t_item_referenced_version_component_split" where master_calculation_version_id in (select calculation_version_id from :lt_versions);
+
+-- do the actual recalculation of the given versions
+call "sap.plc_test.testtools.calculation::p_recalculate_calculation_versions_sequentially"(:lt_versions);
+
+END

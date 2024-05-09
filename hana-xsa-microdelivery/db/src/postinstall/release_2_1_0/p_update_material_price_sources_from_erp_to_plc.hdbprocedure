@@ -1,0 +1,66 @@
+PROCEDURE "sap.plc.xs.postinstall.release_2_1_0::p_update_material_price_sources_from_erp_to_plc" ( ) 
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+
+AS
+lv_timestamp 			TIMESTAMP DEFAULT current_utctimestamp;
+lv_user	                NVARCHAR(256) DEFAULT '#CONTROLLER';
+
+BEGIN
+
+-- update ERP_STANDARD_PRICE, ERP_MOVING_PRICE, ERP_PLANNED_PRICE_1, ERP_PLANNED_PRICE_2, ERP_PLANNED_PRICE_3 price_sources
+
+update "sap.plc.db::basis.t_price_source"
+set CREATED_ON = lv_timestamp,
+	CREATED_BY = lv_user,
+	LAST_MODIFIED_ON = lv_timestamp,
+	LAST_MODIFIED_BY = lv_user
+	where PRICE_SOURCE_ID in ('ERP_STANDARD_PRICE', 'ERP_MOVING_PRICE', 'ERP_PLANNED_PRICE_1', 'ERP_PLANNED_PRICE_2', 'ERP_PLANNED_PRICE_3') and
+			  CREATED_BY is null;
+
+update "sap.plc.db::basis.t_price_source" 
+set CREATED_ON = lv_timestamp,
+	LAST_MODIFIED_ON = lv_timestamp,
+	LAST_MODIFIED_BY = lv_user
+	where PRICE_SOURCE_ID in ('ERP_STANDARD_PRICE', 'ERP_MOVING_PRICE', 'ERP_PLANNED_PRICE_1', 'ERP_PLANNED_PRICE_2', 'ERP_PLANNED_PRICE_3') and 
+		  CREATED_ON is null and
+		  LAST_MODIFIED_ON is null and
+		  LAST_MODIFIED_BY is null and
+		  CREATED_BY is not null;
+
+--ERP_STANDARD_PRICE texts
+			
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_STANDARD_PRICE', 'EN') WITH PRIMARY KEY;
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_STANDARD_PRICE', 'DE') WITH PRIMARY KEY;
+
+--ERP_MOVING_PRICE  texts
+			
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_MOVING_PRICE', 'EN') WITH PRIMARY KEY;
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_MOVING_PRICE', 'DE') WITH PRIMARY KEY;
+
+--ERP_PLANNED_PRICE_1  texts
+			
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_1', 'EN') WITH PRIMARY KEY;
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_1', 'DE') WITH PRIMARY KEY;
+
+--ERP_PLANNED_PRICE_2
+			
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_2', 'EN') WITH PRIMARY KEY;
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_2', 'DE') WITH PRIMARY KEY;
+
+--ERP_PLANNED_PRICE_3
+			
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_3', 'EN') WITH PRIMARY KEY;
+UPSERT "sap.plc.db::basis.t_price_source__text" ("PRICE_SOURCE_ID", "LANGUAGE") 
+VALUES ('ERP_PLANNED_PRICE_3', 'DE') WITH PRIMARY KEY;
+
+END;

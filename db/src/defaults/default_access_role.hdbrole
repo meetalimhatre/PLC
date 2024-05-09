@@ -1,0 +1,23 @@
+{
+    "role": {
+        "name": "default_access_role",
+        "schema_privileges": [{
+            "privileges": [
+                "SELECT",
+                "INSERT",
+                "UPDATE",
+                "DELETE",
+                "EXECUTE",
+                "CREATE TEMPORARY TABLE",
+                "SELECT CDS METADATA",
+                "ALTER"
+            ]
+        }],
+        "schema_analytic_privileges": [{
+            "privileges": [
+                "sap.plc.analytics.views::ap_analytics_general",
+                "sap.plc.analytics.viewsCF::ap_analytics_general_cust"
+            ]
+        }]
+    }
+}

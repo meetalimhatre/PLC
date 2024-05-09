@@ -1,0 +1,51 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_work_center_read" (
+		IN iv_logon_language        NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,
+		IN it_work_center_key       "sap.plc.db.administration::masterdata.tt_work_center_key",
+		OUT ot_work_center          "sap.plc.db.administration::masterdata.tt_work_center" default empty
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/*****************************
+	select work center
+ *****************************/
+
+ot_work_center = select distinct
+				      plcTable.WORK_CENTER_ID,
+				      plcTable.PLANT_ID,
+				      plcTable.WORK_CENTER_CATEGORY,
+				      plcTable.CONTROLLING_AREA_ID,
+				      plcTable.COST_CENTER_ID,
+				      plcTable.WORK_CENTER_RESPONSIBLE,
+				      plcTable.EFFICIENCY,
+				      plcTable._VALID_FROM,
+				      plcTable._VALID_TO,
+				      plcTable._SOURCE,
+				      plcTable._CREATED_BY,
+			      	  null as _VALID_FROM_FIRST_VERSION,
+				      null as _CREATED_BY_FIRST_VERSION,
+				      plcTextTable.WORK_CENTER_DESCRIPTION
+				      {{customFieldsWithTablePrefix Work_Center}}
+				   from "sap.plc.db::basis.t_work_center" as plcTable
+				   inner join :it_work_center_key as ids
+				   	  on  plcTable.WORK_CENTER_ID = ids.WORK_CENTER_ID
+					  and plcTable.PLANT_ID = ids.PLANT_ID
+					  and plcTable._VALID_FROM <= :iv_master_data_timestamp
+					  and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null )
+				   	left outer join "sap.plc.db::basis.t_work_center__text" as plcTextTable
+						on  plcTable.WORK_CENTER_ID = plcTextTable.WORK_CENTER_ID
+						and plcTable.PLANT_ID = plcTextTable.PLANT_ID
+						and plcTextTable.LANGUAGE = :iv_logon_language
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp
+						and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )
+						left outer join {{t_extensionTable Work_Center}} as plcExtTable ON
+						plcTable.WORK_CENTER_ID = plcExtTable.WORK_CENTER_ID
+						and plcTable.PLANT_ID = plcExtTable.PLANT_ID
+				        and plcTable._VALID_FROM = plcExtTable._VALID_FROM;
+
+END;
+
+

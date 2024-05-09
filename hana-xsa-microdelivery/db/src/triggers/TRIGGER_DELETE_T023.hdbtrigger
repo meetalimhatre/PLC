@@ -1,0 +1,13 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_T023" AFTER DELETE ON "sap.plc.db::repl.t023"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_material_group"
+     SET _VALID_TO = :lv_current_utctimestamp
+     WHERE     "sap.plc.db::basis.t_material_group"."MATERIAL_GROUP_ID" = :OLDROW."MATKL"    
+        AND  "sap.plc.db::basis.t_material_group"."_VALID_FROM" < :lv_current_utctimestamp
+        AND  "sap.plc.db::basis.t_material_group"."_VALID_TO" IS NULL;
+end
+;

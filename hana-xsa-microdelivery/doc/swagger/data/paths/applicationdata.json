@@ -1,0 +1,76 @@
+{
+    "applicationdata/currentuser": {
+        "get": {
+            "tags": [
+                "applicationdata"
+            ],
+            "summary": "Get current user",
+            "description": "Get user, which is currently logged on in this session.",
+            "operationId": "currentuserGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/applicationdata_definitions.json#/definitions/CurrentUserGetResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors; GENERAL_METHOD_NOT_ALLOWED_ERROR in case other methods than GET are called...",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "get:base access"
+                    ]
+                }
+            ]
+        }
+    },
+    "applicationdata/languages": {
+        "get": {
+            "tags": [
+                "applicationdata"
+            ],
+            "summary": "Get languages",
+            "description": "Get languages, which are supported by the backend.",
+            "operationId": "languagesGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/applicationdata_definitions.json#/definitions/LanguagesGetResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors; GENERAL_METHOD_NOT_ALLOWED_ERROR in case other methods than GET are called...",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "get:base access"
+                    ]
+                }
+            ]
+        }  
+    } 
+}

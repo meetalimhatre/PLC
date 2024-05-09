@@ -1,0 +1,1 @@
+TYPE "sap.plc_test.xs.db.generation::tt_material" AS TABLE (id int)

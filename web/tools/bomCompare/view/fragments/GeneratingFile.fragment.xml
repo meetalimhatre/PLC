@@ -1,0 +1,16 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout" 
+    xmlns:core="sap.ui.core">
+    <Dialog  id="generating" type="Message" title="{i18n>XTIT_exportDialog}">
+        <content>
+            <Text id="genText" text="{i18n>XMSG_generatePleaseWait}" />
+            <ProgressIndicator id="progressIndicatorGF"
+				class="sapUiSmallMarginBottom"
+				percentValue= "{parts: [{path: 'view>/TotalNumberOfReceivedSpreadsheetRows'}, {path: 'view>/TotalNumberOfRows'}], formatter: '.Helpers.formatProgressIndicator' }"
+				displayValue="{parts: [{path: 'view>/TotalNumberOfReceivedSpreadsheetRows'}, {path: 'view>/TotalNumberOfRows'}], formatter: '.Helpers.formatProgressIndicator' } %" 
+                showValue="true" state="Information"/>
+        </content>
+      </Dialog>
+</core:FragmentDefinition>

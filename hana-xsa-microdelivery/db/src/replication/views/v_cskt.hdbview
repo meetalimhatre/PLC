@@ -1,0 +1,9 @@
+VIEW "sap.plc.db.replication.views::v_cskt" ( "KOKRS", "LANGU", "KOSTL", "KTEXT" ) AS select CSKT.KOKRS , CSKT.LANGU , 
+	   CSKT.KOSTL , CSKT.KTEXT 
+                 from "sap.plc.db::repl.t_cskt" AS CSKT
+                	WHERE CSKT.DATBI = ( select MAX(DATBI) 
+                								from "sap.plc.db::repl.t_cskt" AS CSKT1
+                								WHERE CSKT1.KOKRS = CSKT.KOKRS AND 
+                									  CSKT1.KOSTL = CSKT.KOSTL AND
+                									  CSKT1.LANGU = CSKT.LANGU )
+					  AND CSKT.DATBI >= TO_DATS(CURRENT_DATE)

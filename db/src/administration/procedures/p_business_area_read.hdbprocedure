@@ -1,0 +1,72 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_business_area_read" (
+		IN iv_logon_language              	NVARCHAR(11),
+		IN iv_master_data_timestamp         TIMESTAMP,
+		IN iv_filter_string	        		NVARCHAR(5000),
+		IN iv_no_max_records               	INTEGER,
+		IN iv_no_skip_records               INTEGER,
+        OUT ot_business_area              	"sap.plc.db.administration::masterdata.tt_business_area" default empty,
+        OUT ot_business_area_text        	"sap.plc.db::basis.t_business_area__text" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Select business area
+ *****************************/
+ 
+ tt_business_area_union = 
+ 					  select  
+		                    plcTable.BUSINESS_AREA_ID, 
+		                    plcTable._VALID_FROM, 
+		                    plcTable._VALID_TO,
+		                    plcTable._SOURCE, 
+		                    plcTable._CREATED_BY,
+		                    minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+		                    minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION,
+		                    plcTextTable.BUSINESS_AREA_DESCRIPTION 
+	                    from "sap.plc.db::basis.t_business_area" as plcTable 
+	                    inner join 
+							(   select A._VALID_FROM, A.BUSINESS_AREA_ID, A._CREATED_BY 
+								from "sap.plc.db::basis.t_business_area" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM, BUSINESS_AREA_ID
+										from "sap.plc.db::basis.t_business_area" 
+										group by BUSINESS_AREA_ID
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.BUSINESS_AREA_ID = B.BUSINESS_AREA_ID
+							) AS minValues
+						 	on  plcTable.BUSINESS_AREA_ID = minValues.BUSINESS_AREA_ID
+	                    left outer join "sap.plc.db::basis.t_business_area__text" as plcTextTable 
+	                        on  plcTable.BUSINESS_AREA_ID = plcTextTable.BUSINESS_AREA_ID 
+	                        and plcTextTable.LANGUAGE = :iv_logon_language 
+	                        and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+	                    where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+                 	order by plcTable.BUSINESS_AREA_ID;
+ 
+ 	tt_business_area_filter = APPLY_FILTER(:tt_business_area_union, :iv_filter_string) ;      
+	
+	ot_business_area =  
+			select  BUSINESS_AREA_ID,_VALID_FROM, _VALID_TO, _SOURCE, 
+				    _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION, BUSINESS_AREA_DESCRIPTION 
+				    from :tt_business_area_filter limit :iv_no_max_records offset :iv_no_skip_records;   
+ 
+ ot_business_area_text = 
+						
+							 select  
+								 plcTextTable.BUSINESS_AREA_ID, 
+								 plcTextTable.LANGUAGE, 
+								 plcTextTable.BUSINESS_AREA_DESCRIPTION, 
+								 plcTextTable._VALID_FROM, 
+								 plcTextTable._VALID_TO,
+								 plcTextTable._SOURCE,
+								 plcTextTable._CREATED_BY 
+							 from "sap.plc.db::basis.t_business_area__text" as plcTextTable 
+							 where ( plcTextTable.BUSINESS_AREA_ID) in ( select BUSINESS_AREA_ID from :ot_business_area ) 
+							 	and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+							 	and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null);
+ 
+END;

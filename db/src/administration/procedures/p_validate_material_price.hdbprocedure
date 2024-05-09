@@ -1,0 +1,73 @@
+PROCEDURE  "sap.plc.db.administration.procedures::p_validate_material_price" ()
+       LANGUAGE SQLSCRIPT
+       SQL SECURITY INVOKER
+       AS
+BEGIN
+
+-- The procedure generates the primary key with a SYSUUID call in varchar(32) format,
+-- validates the foreign keys (invalid foreign key rows will be populated as comma separated values
+-- in the fk_issue column, for logging purposes) and also validates the logical unique key of: PRICE_SOURCE_ID,
+-- MATERIAL_ID, PLANT_ID, VENDOR_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM,
+-- VALID_FROM_QUANTITY (invalid unique key rows will have a value greater than 0 in the uk_issue column).
+-- The data is processed in a global temporary table:
+-- sap.plc.db.administration::maintemporarytables.gtt_validate_material_price
+
+UPDATE "sap.plc.db.administration::maintemporarytables.gtt_validate_material_price" MPV
+SET
+    MPV.PRICE_ID = CAST(SYSUUID AS NVARCHAR(32)),
+    MPV.FK_ISSUE = (
+        SELECT STRING_AGG(FAILING_FK, ', ' ORDER BY FORDER)
+        FROM (
+           SELECT 'price_source_id' FAILING_FK, 0 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_price_source" FKPS
+               WHERE FKPS.PRICE_SOURCE_TYPE_ID = 1 AND MPV.PRICE_SOURCE_ID = FKPS.PRICE_SOURCE_ID)
+           UNION
+           SELECT 'material_id' FAILING_FK, 1 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE NOT EXISTS (
+               SELECT 1 from "sap.plc.db::basis.t_material" FKMT
+               WHERE MPV.MATERIAL_ID = FKMT.MATERIAL_ID AND FKMT._VALID_TO IS NULL)
+           UNION
+           SELECT 'plant_id' FAILING_FK, 2 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE MPV.PLANT_ID <> '*' AND NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_plant" FKPL
+               WHERE MPV.PLANT_ID = FKPL.PLANT_ID AND FKPL._VALID_TO IS NULL)
+           UNION
+           SELECT 'vendor_id' FAILING_FK, 3 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE MPV.VENDOR_ID <> '*' AND NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_vendor" FKVN
+               WHERE MPV.VENDOR_ID = FKVN.VENDOR_ID AND FKVN._VALID_TO IS NULL)
+           UNION
+           SELECT 'project_id' FAILING_FK, 4 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE MPV.PROJECT_ID <> '*' AND NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_project" FKPR
+               WHERE MPV.PROJECT_ID = FKPR.PROJECT_ID)
+           UNION
+           SELECT 'customer_id' FAILING_FK, 5 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE MPV.CUSTOMER_ID <> '*' AND NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_customer" FKCS
+               WHERE MPV.CUSTOMER_ID = FKCS.CUSTOMER_ID AND FKCS._VALID_TO IS NULL)
+           UNION
+           SELECT 'transaction_currency_id' FAILING_FK, 6 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_currency" FKCR
+               WHERE MPV.TRANSACTION_CURRENCY_ID = FKCR.CURRENCY_ID AND FKCR._VALID_TO IS NULL)
+           UNION
+           SELECT 'price_unit_uom_id' FAILING_FK, 7 FORDER FROM "sap.plc.db::DUMMY"
+           WHERE NOT EXISTS (
+               SELECT 1 FROM "sap.plc.db::basis.t_uom" FKUM
+               WHERE MPV.PRICE_UNIT_UOM_ID = FKUM.UOM_ID AND FKUM._VALID_TO IS NULL)
+           )
+        ),
+    MPV.UK_ISSUE = (SELECT COUNT(0)
+                      FROM "sap.plc.db::basis.t_material_price" MP
+                      WHERE MP.PRICE_SOURCE_ID = MPV.PRICE_SOURCE_ID AND
+                            MP.MATERIAL_ID = MPV.MATERIAL_ID AND
+                            MP.PLANT_ID = MPV.PLANT_ID AND
+                            MP.VENDOR_ID = MPV.VENDOR_ID AND
+                            MP.PROJECT_ID = MPV.PROJECT_ID AND
+                            MP.CUSTOMER_ID = MPV.CUSTOMER_ID AND
+                            MP.VALID_FROM = MPV.VALID_FROM AND
+                            MP.VALID_FROM_QUANTITY = MPV.VALID_FROM_QUANTITY AND
+                            MP._VALID_TO is null);
+END;

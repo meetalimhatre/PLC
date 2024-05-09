@@ -1,0 +1,14 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_TDWS" AFTER DELETE ON "sap.plc.db::repl.tdws"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_document_status"
+       SET _VALID_TO = :lv_current_utctimestamp 
+       WHERE "sap.plc.db::basis.t_document_status"."DOCUMENT_TYPE_ID" = :OLDROW."DOKAR"
+                  AND "sap.plc.db::basis.t_document_status"."DOCUMENT_STATUS_ID" = :OLDROW."DOKST"
+                  AND "sap.plc.db::basis.t_document_status"."_VALID_FROM" < :lv_current_utctimestamp 
+                  AND "sap.plc.db::basis.t_document_status"."_VALID_TO" IS NULL;
+end
+;

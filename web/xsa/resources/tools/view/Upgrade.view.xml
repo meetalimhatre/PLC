@@ -1,0 +1,113 @@
+<mvc:View
+    xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    class='display-view upgrade-view'
+    xmlns:core="sap.ui.core"
+    xmlns:mvc='sap.ui.core.mvc' height='100%'
+    controllerName="ui.controller.Upgrade">
+    <ScrollContainer vertical='true' horizontal='true' class='sapUiMediumMarginTop sapUiMediumMarginBottom' height="85%" width='45%'>
+        <VBox width='90%'>
+            <items>
+                <VBox height="3rem" class="page-title-wrapper" alignItems="Center" justifyContent="Center">
+                    <items>
+                        <Title class="title page-title" level="H1" text="SAP Product Lifecycle Costing: Installation Upgrade Steps"/>
+                    </items>
+                </VBox>
+                <VBox>
+                    <items>
+                        <HBox width="100%" height="2.5rem" alignItems="Center">
+                            <items>
+                                <core:Icon src="sap-icon://product" size="1.5rem" />
+                                <Text text="Version Information" class="title" />
+                            </items>
+                        </HBox>
+                        <VBox width="100%" height="4rem" justifyContent="Center" alignItems="FlexStart" class="version-wrapper">
+                            <items>
+                                <Text text="Current Version: {info>/version}" />
+                                <Text text="Target Version: {info>/target}" />
+                            </items>
+                        </VBox>
+                    </items>
+                </VBox>
+
+                <VBox>
+                    <items>
+                        <HBox  width="100%" height="2.5rem" alignItems="Center">
+                            <items>
+                                <core:Icon src="sap-icon://action-settings" size="1.5rem" />
+                                <Text text="Configuration" class="title"  />
+                            </items>
+                        </HBox>
+                        <VBox class="steps-wrapper">
+                            <items>
+                                <Text text="Required" class="step-wrapper-title"/>
+                                <List 
+                                    id="required-step-list"
+                                    items="{info>/required_steps}">
+                                    <CustomListItem>
+                                        <HBox alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
+                                            <items>
+                                                <CheckBox
+                                                    class="step-checkbox required-step-checkbox"
+                                                    name="{info>description}"
+                                                    selected="true"
+                                                    editable="false"
+                                                    text="{info>description}" 
+                                                    select="checkBoxSelect">
+                                                    <layoutData>
+                                                        <FlexItemData growFactor="0" />
+                                                    </layoutData>
+                                                </CheckBox>
+                                                <core:Icon size="1.5rem">
+                                                    <core:layoutData>
+                                                        <FlexItemData order="1" />
+                                                    </core:layoutData>
+                                                </core:Icon>
+                                            </items>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                                <Text text="Optional" class="step-wrapper-title" />
+                                <List 
+                                    id="optional-step-list"
+                                    items="{info>/optional_steps}">
+                                    <CustomListItem>
+                                        <HBox alignItems="Center" justifyContent="SpaceBetween">
+                                            <items>
+                                                <CheckBox
+                                                    class="step-checkbox"
+                                                    name="{info>id}"
+                                                    text="{info>description}" 
+                                                    select="checkBoxSelect" />
+                                                <core:Icon size="1.5rem" />
+                                            </items>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </items>
+                        </VBox>
+                    </items>
+                </VBox>
+                <VBox>
+                    <items>
+                        <HBox width="100%" height="2.5rem" alignItems="Center">
+                            <core:Icon src="sap-icon://form" size="1.5rem" />
+                            <Text text="Messages"   class="title" />
+                        </HBox>
+                        <VBox  width="100%" class="messages-wrapper"  id="log-message">
+                        </VBox>
+                    </items>
+                </VBox>
+                <HBox height="2rem">
+                    <items>
+                        <Title class="title warning-message-title" text="Warning! "></Title>
+                    </items>
+                    <items>
+                        <Title class="title warning-message" level="H1" text="Do not close this page until the installation is complete."></Title>
+                    </items>
+                </HBox>
+                <Button text="Start" press="startClick" id="start-button" class="start-button" />
+            </items>
+        </VBox>
+    </ScrollContainer>
+</mvc:View>

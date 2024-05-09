@@ -1,0 +1,57 @@
+CREATE PROCEDURE "sap.plc_test.testtools::p_fake_template_to_test" (
+		IN iv_session 					NVARCHAR(50),
+		IN iv_calculation_version_id 	INTEGER,
+		IN iv_id 						INTEGER,
+		IN iv_session_language 			NVARCHAR(11),
+		OUT ot_all_prices_activity 		"sap.plc.db.administration::masterdata.tt_activity_price" default empty,
+		OUT ot_all_prices_material 		"sap.plc.db.administration::masterdata.tt_material_price" default empty,
+		OUT ot_material 				"sap.plc.db.administration::masterdata.tt_material" default empty,
+		OUT ot_material_group 			"sap.plc.db.administration::masterdata.tt_material_group" default empty,
+		OUT ot_material_type 			"sap.plc.db.administration::masterdata.tt_material_type" default empty,
+		OUT ot_activity_type 			"sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+		OUT ot_cost_center 				"sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+		OUT ot_plant 					"sap.plc.db.administration::masterdata.tt_plant" default empty,
+		OUT ot_company_code 			"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+		OUT ot_controlling_area 		"sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+		OUT ot_vendor 					"sap.plc.db.administration::masterdata.tt_vendor" default empty,
+		OUT ot_project					"sap.plc.db::basis.t_project" default empty           
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA SAP_PLC
+    READS SQL DATA AS
+    lc_material_type1  INTEGER DEFAULT 1;
+    lc_material_type2  INTEGER DEFAULT 2;
+    lc_material_type3  INTEGER DEFAULT 6;
+    lc_material_type4  INTEGER DEFAULT 4;
+    lc_activity        INTEGER DEFAULT 3;
+    lc_use_multiple_plants  NVARCHAR(1) DEFAULT 'X';
+    lc_wildcard 	  NVARCHAR(1) DEFAULT '*';
+BEGIN
+/****************************************************************** 
+	This is a fake template procedure in order to test mockstar_facade's ability to 
+	 create test doubles for those kind of procedure (and substitute sub-procedures)
+ ******************************************************************/
+
+--select projects
+ot_project = select PROJECT_ID, REFERENCE_PROJECT_ID, PROJECT_NAME, PROJECT_RESPONSIBLE, CONTROLLING_AREA_ID, CUSTOMER_ID, SALES_DOCUMENT,
+				SALES_PRICE, SALES_PRICE_CURRENCY_ID, COMMENT, COMPANY_CODE_ID, PLANT_ID, BUSINESS_AREA_ID, PROFIT_CENTER_ID, REPORT_CURRENCY_ID,
+				COSTING_SHEET_ID, COMPONENT_SPLIT_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, END_OF_PRODUCTION, VALUATION_DATE,
+				LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY
+			from "sap.plc.db::basis.t_project" 
+			where PROJECT_ID in (select distinct PROJECT_ID from (select PROJECT_ID from :ot_all_prices_activity union all select PROJECT_ID from :ot_all_prices_material));
+	
+	CALL "sap.plc_testtesttools::proc_to_substitude"(
+		   	 :lt_calculation_header,
+		   	 :lt_formula, :lt_metadata, :lt_metadata_item_attributes,
+		   	 :lt_item, :lt_item_ext, :lt_saved_costing_sheets_results, :lt_referenced_version_component_split,
+		   	 :lt_account_group, :lt_account_account_group,
+		   	 :lt_costing_sheet, :lt_costing_sheet_row, :lt_costing_sheet_row_dependencies, :lt_costing_sheet_base, :lt_costing_sheet_base_row,
+		   	 :lt_costing_sheet_overhead, :lt_costing_sheet_overhead_row,
+		   	 :lt_component_split, :lt_component_split_account_group,
+		   	 :lt_uom,
+		   	 :lt_currency,
+		   	 lt_partial_item_calculated_prices, item_calculated_values_costing_sheet, item_calculated_values_component_split, lt_result_component_split, errors,
+		   	 :lt_changed_items);
+ 
+END;

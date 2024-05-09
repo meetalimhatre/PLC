@@ -1,0 +1,45 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_delete_vendor" (
+    IN INPUT_TABLE TABLE (
+    	VENDOR_ID   NVARCHAR(10)
+    )
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+	lv_current_user nvarchar(256);
+	lv_current_utctimestamp	timestamp;
+
+BEGIN
+
+	SELECT current_utctimestamp
+		INTO lv_current_utctimestamp
+		FROM "sap.plc.db::DUMMY";
+		
+	SELECT SESSION_CONTEXT('APPLICATIONUSER')
+		INTO lv_current_user
+		FROM "sap.plc.db::DUMMY";
+
+	DELETE FROM "sap.plc.db::basis.t_vendor" WHERE VENDOR_ID IN (SELECT VENDOR_ID FROM :INPUT_TABLE);
+
+    {{#if Material_Price.customFields}}
+        DELETE FROM "sap.plc.db::basis.t_material_price_ext" WHERE (PRICE_ID, _VALID_FROM) IN (
+                                                                                    SELECT PRICE_ID, _VALID_FROM
+                                                                                    FROM "sap.plc.db::basis.t_material_price"
+                                                                                    WHERE VENDOR_ID IN (SELECT VENDOR_ID FROM :INPUT_TABLE)
+                                                                                );
+    {{/if}}
+
+    DELETE FROM "sap.plc.db::basis.t_material_price" WHERE VENDOR_ID IN (SELECT VENDOR_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::basis.t_item"
+    SET VENDOR_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = :lv_current_user
+    WHERE VENDOR_ID IN (SELECT VENDOR_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::basis.t_item_temporary"
+    SET VENDOR_ID = 'DELETED', LAST_MODIFIED_ON = :lv_current_utctimestamp, LAST_MODIFIED_BY = :lv_current_user 
+    WHERE VENDOR_ID IN (SELECT VENDOR_ID FROM :INPUT_TABLE);
+
+    UPDATE "sap.plc.db::map.t_replication_log" SET FIELD_VALUE = 'DELETED' WHERE FIELD_NAME = 'VENDOR_ID' AND FIELD_VALUE IN (SELECT VENDOR_ID FROM :INPUT_TABLE);
+	
+END;

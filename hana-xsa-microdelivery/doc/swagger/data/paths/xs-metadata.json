@@ -1,0 +1,46 @@
+{
+    "xs-metadata": {
+        "get": {
+            "tags": [
+                "xs-metadata"
+            ],
+            "summary": "Gets the metadata for the xs services",
+            "description": "",
+            "operationId": "xsMetadataGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/xml"
+            ],
+            "parameters": [],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/xsMetadataResponse"
+                    }
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "read:xs-metadata"
+                    ]
+                }
+            ]
+        }
+    }
+}

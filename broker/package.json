@@ -1,0 +1,15 @@
+{
+  "name": "broker-app",
+  "version": "4.4.16",
+  "description": "The broker application",
+  "main": "server.js",
+  "scripts": {
+    "start": "start-broker"
+  },
+  "dependencies": {
+    "@sap/sbf": "^6.5.8"
+  },
+  "engines": {
+    "node": "^14.x"
+  }
+}

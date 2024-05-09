@@ -1,0 +1,4 @@
+FORMULA_ID,FORMULA_STRING,FORMULA_DESCRIPTION
+1,AND($PLANT_ID=''#PT2'';$COMPANY_CODE_ID=''#C2''),Overhead will be applied if plant_id is #PT2 and company_code is #C2
+2,AND(AND($PLANT_ID=''#PT1'';$COMPANY_CODE_ID=''#C1'');$OVERHEAD_GROUP_ID=''#OG3''),Overhead will be applied if plant_id is #PT1 and company_code is #C1 and overhead group is #OG3
+3,AND(IS_CALCULATION_VERSION()<>1;PARENT($PLANT_ID;'''')<>$PLANT_ID),Overhead will be applied if the plant of the child and the plant of the parent are different

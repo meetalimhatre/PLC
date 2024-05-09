@@ -1,0 +1,100 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_material_plant_read" ( 
+		IN iv_logon_language 		NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,
+--		IN material_id 				NVARCHAR(40),
+--		IN plant_id 				NVARCHAR(4),
+        IN iv_filter_string 		NVARCHAR(5000),
+		IN iv_no_max_records 		INTEGER,
+		IN iv_no_skip_records       INTEGER,
+        OUT ot_material_plant 		"sap.plc.db.administration::masterdata.tt_material_plant" default empty,
+        OUT ot_material 			"sap.plc.db.administration::masterdata.tt_material" default empty,
+        OUT ot_plant 				"sap.plc.db.administration::masterdata.tt_plant" default empty,
+        OUT ot_overhead_group 		"sap.plc.db.administration::masterdata.tt_overhead_group" default empty,
+        OUT ot_valuation_class 		"sap.plc.db.administration::masterdata.tt_valuation_class" default empty,
+        OUT ot_company_code 		"sap.plc.db.administration::masterdata.tt_company_code" default empty,
+        OUT ot_controlling_area 	"sap.plc.db.administration::masterdata.tt_controlling_area" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Select material plant 
+ *****************************/
+ tt_material_plant_union = 
+ 		     	select 
+ 		     		plcTable.MATERIAL_ID,
+ 		     		plcMaterialTextTable.MATERIAL_DESCRIPTION,
+					plcTable.PLANT_ID,
+					plcTable.OVERHEAD_GROUP_ID,
+					plcTable.VALUATION_CLASS_ID,
+					plcTable.MATERIAL_LOT_SIZE,
+					plcTable.MATERIAL_LOT_SIZE_UOM_ID,
+					plcTable._VALID_FROM,
+					plcTable._VALID_TO,
+					plcTable._SOURCE,
+					plcTable._CREATED_BY,
+					minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+                	minValues._CREATED_BY AS _CREATED_BY_FIRST_VERSION
+                	{{customFieldsWithTablePrefix Material_Plant}}
+                from "sap.plc.db::basis.t_material_plant" as plcTable
+ 		     		inner join 
+							(   select A._VALID_FROM, A.MATERIAL_ID, A.PLANT_ID, A._CREATED_BY 
+								from "sap.plc.db::basis.t_material_plant" AS A 
+									inner join 
+									( select MIN(_VALID_FROM) AS _VALID_FROM, MATERIAL_ID, PLANT_ID
+										from "sap.plc.db::basis.t_material_plant" 
+										group by MATERIAL_ID, PLANT_ID
+									) AS B
+									ON A._VALID_FROM = B._VALID_FROM AND A.MATERIAL_ID = B.MATERIAL_ID AND A.PLANT_ID = B.PLANT_ID
+							) AS minValues
+						 	on  plcTable.MATERIAL_ID = minValues.MATERIAL_ID AND plcTable.PLANT_ID = minValues.PLANT_ID	 
+					  left outer join "sap.plc.db::basis.t_material__text" as plcMaterialTextTable 
+		                  on  plcTable.MATERIAL_ID = plcMaterialTextTable.MATERIAL_ID 
+		                  and plcMaterialTextTable.LANGUAGE = :iv_logon_language 
+		                  and plcMaterialTextTable._VALID_FROM <= :iv_master_data_timestamp 
+		                  and (plcMaterialTextTable._VALID_TO > :iv_master_data_timestamp or plcMaterialTextTable._VALID_TO is null)    
+		              LEFT OUTER JOIN {{t_extensionTable Material_Plant}} as plcExtTable ON
+							plcTable.MATERIAL_ID = plcExtTable.MATERIAL_ID 
+							and plcTable.PLANT_ID = plcExtTable.PLANT_ID
+                			and plcTable._VALID_FROM = plcExtTable._VALID_FROM 
+	                  where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+	                  and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)
+                      order by plcTable.MATERIAL_ID, plcTable.PLANT_ID; 
+
+tt_material_plant_filter = APPLY_FILTER(:tt_material_plant_union, :iv_filter_string) ; 
+
+ot_material_plant = 
+		select MATERIAL_ID, MATERIAL_DESCRIPTION, PLANT_ID, OVERHEAD_GROUP_ID, VALUATION_CLASS_ID, MATERIAL_LOT_SIZE, MATERIAL_LOT_SIZE_UOM_ID, _VALID_FROM,
+ 			   _VALID_TO, _SOURCE, _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION 
+ 			   {{customFields Material_Plant}}
+ 			   from :tt_material_plant_filter limit :iv_no_max_records offset :iv_no_skip_records;  
+
+ --select material
+ tt_material_id = select distinct MATERIAL_ID from :ot_material_plant;      
+ call "sap.plc.db.administration.procedures::p_ref_material_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_material_id,:ot_material);  
+
+ --select plant  
+ tt_plant_id = select distinct PLANT_ID from :ot_material_plant;      
+ call "sap.plc.db.administration.procedures::p_ref_plant_read"(:iv_logon_language,:iv_master_data_timestamp,'','',:tt_plant_id,:ot_plant);       
+ 
+ --select overhead group
+ tt_overhead_group_id = select distinct OVERHEAD_GROUP_ID, PLANT_ID from :ot_material_plant;      
+ call "sap.plc.db.administration.procedures::p_ref_overhead_group_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_overhead_group_id,:ot_overhead_group);  
+ 
+ --select valuation class    
+ tt_valuation_class_id = select distinct VALUATION_CLASS_ID from :ot_material_plant;      
+ call "sap.plc.db.administration.procedures::p_ref_valuation_class_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_valuation_class_id,:ot_valuation_class);  
+                    
+ --select company_code							 	
+ tt_company_code_id = 	select distinct COMPANY_CODE_ID from :ot_plant; 
+ call "sap.plc.db.administration.procedures::p_ref_company_code_read"(:iv_logon_language,:iv_master_data_timestamp,'',:tt_company_code_id,:ot_company_code); 
+ 
+--select controlling_area	
+ tt_controlling_area_id = select distinct CONTROLLING_AREA_ID from :ot_company_code;
+ call "sap.plc.db.administration.procedures::p_ref_controlling_area_read"(:iv_logon_language,:iv_master_data_timestamp,:tt_controlling_area_id,:ot_controlling_area);
+
+END;
+
+

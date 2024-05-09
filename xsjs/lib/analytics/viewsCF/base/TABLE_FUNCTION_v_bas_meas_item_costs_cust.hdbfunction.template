@@ -1,0 +1,141 @@
+FUNCTION "sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_item_costs_cust" (
+projectId NVARCHAR(5000) default '',
+versionId NVARCHAR(5000)
+)
+RETURNS TABLE (
+	"PROJECT_ID" NVARCHAR (35),
+	"CALCULATION_VERSION_ID" INTEGER,
+	"ITEM_ID" NVARCHAR (22),
+	"IS_LEAF" TINYINT,
+	"ITEM_CATEGORY_ID" INTEGER,
+	"IS_ROLLED_UP_VALUE" TINYINT,
+	"IS_OVERHEAD_ROLLED_UP" TINYINT,
+	"COSTING_SHEET_ROW_ID" NVARCHAR (5),
+	"COSTING_SHEET_OVERHEAD_ROW_ID" INTEGER,
+	"ACCOUNT_ID" NVARCHAR (10),
+	"PRICE_FOR_TOTAL_QUANTITY" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST" DECIMAL (28, 7),
+	"TOTAL_COST_PER_UNIT" DECIMAL (28, 7),
+	"TOTAL_COST_FIXED_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST_VARIABLE_PORTION" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY2" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST2" DECIMAL (28, 7),
+	"TOTAL_COST2_PER_UNIT" DECIMAL (28, 7),
+	"TOTAL_COST2_FIXED_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST2_VARIABLE_PORTION" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY3" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION" DECIMAL (28, 7),
+	"PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST3" DECIMAL (28, 7),
+	"TOTAL_COST3_PER_UNIT" DECIMAL (28, 7),
+	"TOTAL_COST3_FIXED_PORTION" DECIMAL (28, 7),
+	"TOTAL_COST3_VARIABLE_PORTION" DECIMAL (28, 7),
+	"OTHER_COST" DECIMAL (28, 7),
+	"OTHER_COST_FIXED_PORTION" DECIMAL (28, 7),
+	"OTHER_COST_VARIABLE_PORTION" DECIMAL (28, 7),
+	"REPORT_CURRENCY_ID" NVARCHAR (3),
+	"TOTAL_QUANTITY" DECIMAL (28, 7),
+	"TOTAL_QUANTITY_UOM_ID" NVARCHAR (3),
+	"TARGET_COST" DECIMAL (28, 7),
+	"TARGET_COST_CURRENCY_ID" NVARCHAR (3),
+	"PRICE" DECIMAL (28, 7),
+	"PRICE_FIXED_PORTION" DECIMAL (28, 7),
+	"PRICE_VARIABLE_PORTION" DECIMAL (28, 7),
+	"PRICE_UNIT" DECIMAL (28, 7),
+	"TRANSACTION_CURRENCY_ID" NVARCHAR (3),
+	"PRICE_SOURCE_ID" NVARCHAR(20),
+	"PRICE_UNIT_UOM_ID" NVARCHAR (3),
+	"SURCHARGE" DECIMAL (28, 7),
+	"LOCAL_CONTENT" DECIMAL (28, 7),
+	"BASE_QUANTITY" DECIMAL (28, 7),
+	"BASE_QUANTITY_UOM_ID" NVARCHAR (3),
+	"QUANTITY_PER_BASE_UNIT" DECIMAL (28, 7),
+	"QUANTITY_PER_BASE_UNIT_UOM_ID" NVARCHAR (3),
+	"SALES_PRICE"  DECIMAL (28, 7),
+	"SALES_PRICE_CURRENCY_ID" NVARCHAR (3),
+	"PROJECT_SALES_PRICE" DECIMAL (28, 7),
+	"PROJECT_SALES_PRICE_CURRENCY_ID" NVARCHAR (3),
+	"TOTAL_QUANTITY_OF_VARIANTS" DECIMAL (28, 7)
+	{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctList Item}}
+	{{/if}}
+)
+
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS
+
+BEGIN
+
+var_out = SELECT 
+		item.project_id,
+		item.calculation_version_id,
+		concat(item.calculation_version_id, concat('-', item.item_id)) as item_id,
+		item.is_leaf,
+		item.item_category_id,
+		item.is_rolled_up_value,
+		item.is_overhead_rolled_up,
+		item.costing_sheet_row_id,
+		item.costing_sheet_overhead_row_id,
+		item.account_id,
+		item.price_for_total_quantity,
+		item.price_for_total_quantity_fixed_portion,
+		item.price_for_total_quantity_variable_portion,
+		item.total_cost,
+		item.total_cost_per_unit,
+		item.total_cost_fixed_portion,
+		item.total_cost_variable_portion,
+		item.price_for_total_quantity2,
+		item.price_for_total_quantity2_fixed_portion,
+		item.price_for_total_quantity2_variable_portion,
+		item.total_cost2,
+		item.total_cost2_per_unit,
+		item.total_cost2_fixed_portion,
+		item.total_cost2_variable_portion,
+		item.price_for_total_quantity3,
+		item.price_for_total_quantity3_fixed_portion,
+		item.price_for_total_quantity3_variable_portion,
+		item.total_cost3,
+		item.total_cost3_per_unit,
+		item.total_cost3_fixed_portion,
+		item.total_cost3_variable_portion,
+		item.other_cost,
+		item.other_cost_fixed_portion,
+		item.other_cost_variable_portion,
+		item.report_currency_id,
+		item.total_quantity,
+		item.total_quantity_uom_id,
+		item.target_cost,
+		item.target_cost_currency_id,
+		item.price,
+		item.price_fixed_portion,
+		item.price_variable_portion,
+		item.price_unit,
+		item.transaction_currency_id,
+		item.price_source_id,
+		item.price_unit_uom_id,
+		item.surcharge,
+		item.local_content,
+		item.base_quantity,
+		item.base_quantity_uom_id,
+		item.quantity_per_base_unit,
+		item.quantity_per_base_unit_uom_id,
+		item.sales_price,
+		item.sales_price_currency_id,
+		item.project_sales_price,
+		item.project_sales_price_currency_id,
+		item.total_quantity_of_variants
+		{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctSelect Item}}
+		{{/if}}
+	FROM (SELECT * FROM "sap.plc.analytics.views.base::f_sql_meas_item_costs_view"(:projectId, :versionId)) item
+	{{#if Item.customFields}}
+		LEFT OUTER JOIN {{t_extensionTable Item}} plcExtTable ON plcExtTable.item_id = item.item_id AND plcExtTable.calculation_version_id = item.calculation_version_id
+	{{/if}}
+;
+
+return :var_out;
+END;

@@ -1,0 +1,69 @@
+// This is a generated file. DO NOT EDIT!
+// Generator: /SAP_Product_Costing/Tools/PowerDesignerConverter
+//
+// Generation date: 22.02.2017
+// Model name:      PLC_DataModel_Auth_Version_v2_1
+// Model version:   33
+
+namespace sap.plc.db;
+
+context auth {
+
+   /* stores instance based privileges for accessing projects,
+       * used to check who can access a project,
+       * contains all privileges of a user for a specific project, which he/she has via direct assignment (user to project) or which he has via indirect assignment (usergroup to project, user belongs to usergroup) */
+   entity t_auth_project {
+      key PROJECT_ID: String(35) not null;
+      key USER_ID: String(256) not null;
+      PRIVILEGE: String(20) not null; // Enumeration with allowed values: READ, CREATE_EDIT, FULL_EDIT, ADMINISTRATE
+   } technical configuration {
+      column store;
+   };
+
+   // stores what privileges are directly assigned to a user, e.g. for accessing a specific project in the Project view
+   entity t_auth_user {
+      key OBJECT_TYPE: String(127) not null; // Enumeration with allowed value: PROJECT
+      key OBJECT_ID: String(35) not null;
+      key USER_ID: String(256) not null;
+      PRIVILEGE: String(20) not null; // Enumeration with allowed values: READ, CREATE_EDIT, FULL_EDIT, ADMINISTRATE
+   } technical configuration {
+      column store;
+   };
+
+   // stores what privileges are directly assigned to a usergroup, e.g. for accessing a specific project in the Project view
+   entity t_auth_usergroup {
+      key OBJECT_TYPE: String(127) not null; // Enumeration with allowed value: PROJECT
+      key OBJECT_ID: String(35) not null;
+      key USERGROUP_ID: String(256) not null;
+      PRIVILEGE: String(20) not null; // Enumeration with allowed values: READ, CREATE_EDIT, FULL_EDIT, ADMINISTRATE
+   } technical configuration {
+      column store;
+   };
+
+   /* contains all usergroups,
+       * usergroups can get privileges for projects via table t_auth_usergroup,
+       * usergroups contain users or other usergroups (assignments in tables t_usergroup_user, t_usergroup_usergroup) */
+   entity t_usergroup {
+      key USERGROUP_ID: String(256) not null;
+      DESCRIPTION: String(256);
+   } technical configuration {
+      column store;
+   };
+
+   // contains all direct assginments of users to usergroups
+   entity t_usergroup_user {
+      key USERGROUP_ID: String(256) not null;
+      key USER_ID: String(256) not null;
+   } technical configuration {
+      column store;
+   };
+
+   // contains all direct assginments of usergroups to usergroups
+   entity t_usergroup_usergroup {
+      key CHILD_USERGROUP_ID: String(256) not null;
+      key PARENT_USERGROUP_ID: String(256) not null;
+   } technical configuration {
+      column store;
+   };
+
+};

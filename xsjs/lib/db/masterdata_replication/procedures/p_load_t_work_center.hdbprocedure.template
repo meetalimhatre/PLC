@@ -1,0 +1,181 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_load_t_work_center"
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+	lv_current_utctimestamp timestamp; 
+	lv_start_utctimestamp timestamp; 
+	lv_run_id nvarchar(50); 
+	lv_updated_rows integer; 
+	lv_deleted_rows integer; 
+	lv_count integer; 
+	lv_batch_size integer; 
+	lv_offset integer; 
+	lv_total_updated_rows integer; 
+	lv_current_user nvarchar(256);
+	lv_count_deleted_rows integer; 
+BEGIN 
+	select current_utctimestamp 
+		into lv_current_utctimestamp 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+		into lv_run_id 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('BATCH_SIZE') 
+		into lv_batch_size 
+		from "sap.plc.db::DUMMY";   
+
+	select SESSION_CONTEXT('APPLICATIONUSER') 
+		into lv_current_user 
+		from "sap.plc.db::DUMMY";   	
+
+	if exists(select id from "sap.plc.db::map.t_destination_entity" where table_name = 't_work_center' and repl_status = 'ENABLED') 
+	then 
+		
+		lv_start_utctimestamp=:lv_current_utctimestamp; 
+		lv_offset = 0; 
+		lv_total_updated_rows = 0;
+
+		--we mark every work center coming from outside plc as 255
+		update "sap.plc.db::basis.t_work_center" 
+		set _source = 255
+		where _VALID_FROM < :lv_current_utctimestamp
+			AND _VALID_TO IS NULL
+			AND _SOURCE = 2; -- for the moment we keep only source 2
+
+		while (1=1) do 
+			ltMasterdataEntities=select * from "sap.plc.db.masterdata_replication.functions::f_select_t_work_center"(:lv_offset, :lv_batch_size); 
+
+			update "sap.plc.db::basis.t_work_center" as tbl
+			set tbl._source = 2
+			where ( tbl.WORK_CENTER_ID,tbl.PLANT_ID) in (select WORK_CENTER_ID,PLANT_ID  from :ltMasterdataEntities where _source = 2)	
+			and tbl._source = 255;
+
+			call "sap.plc.db.masterdata_replication.procedures::p_update_t_work_center"(:ltMasterdataEntities,lv_updated_rows); 
+			lv_total_updated_rows = :lv_total_updated_rows + :lv_updated_rows;
+			select count(*) into lv_count from :ltMasterdataEntities;
+			if (:lv_count < :lv_batch_size) or (:lv_batch_size is null) THEN  
+				lv_count = :lv_count + lv_offset;
+				break; 
+			else  
+				lv_offset = :lv_offset + :lv_batch_size; 
+			end if; 
+		end while;  
+
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY";
+
+		lv_offset = 0;	
+
+		while (1=1) do
+
+		lt_deleted_rows =
+				select it.WORK_CENTER_ID, it.PLANT_ID, it.WORK_CENTER_CATEGORY, it.COST_CENTER_ID, it.CONTROLLING_AREA_ID,
+					it.WORK_CENTER_RESPONSIBLE, it.EFFICIENCY, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, 
+					1 as _SOURCE, :lv_current_user as _CREATED_BY, 1 as DELETED_FROM_SOURCE
+					{{masterdataCustomFieldsWithPrefix Work_Center 'it'}} 
+				from
+				(select tbl.WORK_CENTER_ID, tbl.PLANT_ID, tbl.WORK_CENTER_CATEGORY, tbl.COST_CENTER_ID, tbl.CONTROLLING_AREA_ID,
+					tbl.WORK_CENTER_RESPONSIBLE, tbl.EFFICIENCY,
+					Count(tbl.WORK_CENTER_ID) OVER (PARTITION BY tbl.WORK_CENTER_ID,tbl.PLANT_ID) AS DUPLICATE_KEY_COUNT
+					{{masterdataCustomFieldsWithPrefix Work_Center 'plcExtTable'}} 
+					from "sap.plc.db::basis.t_work_center" tbl
+					{{#if Work_Center.customFields}}	
+					left outer join {{t_extensionTable Work_Center}} as plcExtTable
+                            on  tbl.WORK_CENTER_ID  = plcExtTable.WORK_CENTER_ID
+							and tbl.PLANT_ID = plcExtTable.PLANT_ID
+                            and tbl._VALID_FROM  = plcExtTable._VALID_FROM
+					{{/if}}
+					where tbl._source = 255 
+				) as it
+				where it.DUPLICATE_KEY_COUNT = 1
+				-- ignore not existing Controlling area, cost center and plants
+				and it.CONTROLLING_AREA_ID in (select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_controlling_area" where _VALID_TO is null)
+				and it.COST_CENTER_ID in (select COST_CENTER_ID from "sap.plc.db::basis.t_cost_center" where _VALID_TO is null)
+				and (it.PLANT_ID = '*' or it.PLANT_ID in (select PLANT_ID from "sap.plc.db::basis.t_plant" where _VALID_TO is null))	 
+		   order by WORK_CENTER_ID, PLANT_ID, _VALID_FROM asc
+		   limit :lv_batch_size offset :lv_offset;
+
+		INSERT INTO "sap.plc.db::basis.t_work_center"
+					( WORK_CENTER_ID, PLANT_ID, WORK_CENTER_CATEGORY, COST_CENTER_ID, CONTROLLING_AREA_ID,
+					WORK_CENTER_RESPONSIBLE, EFFICIENCY, _VALID_FROM, _VALID_TO, 
+					_SOURCE,  _CREATED_BY,  DELETED_FROM_SOURCE )
+				select WORK_CENTER_ID, PLANT_ID, WORK_CENTER_CATEGORY, COST_CENTER_ID, CONTROLLING_AREA_ID,
+						WORK_CENTER_RESPONSIBLE, EFFICIENCY, _VALID_FROM, _VALID_TO, _SOURCE,  _CREATED_BY,  DELETED_FROM_SOURCE
+				from :lt_deleted_rows;
+
+		{{#if Work_Center.customFields}}
+				-- also do Custom Fields
+				INSERT INTO {{t_extensionTable Work_Center}} 
+					(
+						WORK_CENTER_ID, PLANT_ID, _VALID_FROM 
+						{{masterdataCustomFields Work_Center}} 
+					)
+					select 
+					WORK_CENTER_ID, PLANT_ID, _VALID_FROM 
+						{{masterdataCustomFields Work_Center}}          
+					from (
+						select
+							plcExtTable.WORK_CENTER_ID,
+							plcExtTable.PLANT_ID,
+							:lv_current_utctimestamp as _VALID_FROM
+							{{masterdataCustomFieldsWithPrefix Work_Center 'plcExtTable'}} 
+						from {{t_extensionTable Work_Center}} as plcExtTable
+						inner join :lt_deleted_rows as tbl
+							on plcExtTable.WORK_CENTER_ID = tbl.WORK_CENTER_ID
+							and plcExtTable.PLANT_ID = tbl.PLANT_ID
+							and plcExtTable._VALID_FROM = tbl._VALID_FROM
+					);
+		{{/if}}	
+			
+		--insert log info			
+		INSERT INTO "sap.plc.db::map.t_replication_log" (
+			FIELD_NAME ,
+			FIELD_VALUE,
+			MESSAGE_TEXT ,
+			MESSAGE_TIME ,
+			MESSAGE_TYPE ,
+			TABLE_NAME,
+			OPERATION,
+			RUN_ID
+			)
+				select 'WORK_CENTER_ID'				as FIELD_NAME,
+						WORK_CENTER_ID				as FIELD_VALUE,
+						'Changed to PLC source'		as MESSAGE_TEXT,
+						:lv_current_utctimestamp	as MESSAGE_TIME,
+						'INFO'						as MESSAGE_TYPE,
+						't_work_center'				as TABLE_NAME,
+						'Replication_Delete'		as OPERATION,
+						:lv_run_id					as RUN_ID
+				from :lt_deleted_rows;
+
+		select count(*) into lv_count_deleted_rows from :lt_deleted_rows;
+			if (:lv_count_deleted_rows < :lv_batch_size) or (:lv_batch_size is null) THEN  
+				break; 
+			else  
+				lv_offset = :lv_offset + :lv_batch_size; 
+			end if; 	
+		end while;	
+
+		--we remove those values that remained with source 255
+		update "sap.plc.db::basis.t_work_center" 
+		set _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user, _SOURCE = 2
+		where _SOURCE = 255;
+
+		lv_deleted_rows = ::ROWCOUNT;
+
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+
+		insert into "sap.plc.db::map.t_statistics"(table_name,full_count,updated_count,deleted_count,start_time,end_time,run_time_seconds,run_id) 
+			values('t_work_center',:lv_count,:lv_total_updated_rows,:lv_deleted_rows,:lv_start_utctimestamp,:lv_current_utctimestamp,SECONDS_BETWEEN(:lv_start_utctimestamp,:lv_current_utctimestamp),:lv_run_id);  
+
+		update "sap.plc.db::map.t_replication_run" 
+			set last_update_time = :lv_current_utctimestamp 
+			where run_id=:lv_run_id; 
+
+	end if; 
+END

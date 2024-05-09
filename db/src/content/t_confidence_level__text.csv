@@ -1,0 +1,11 @@
+CONFIDENCE_LEVEL_ID,LANGUAGE,CONFIDENCE_LEVEL_DESCRIPTION
+1,EN,Very Low
+2,EN,Low
+3,EN,Medium
+4,EN,High
+5,EN,Very High
+1,DE,Sehr niedrig
+2,DE,Niedrig
+3,DE,Mittel
+4,DE,Hoch
+5,DE,Sehr hoch

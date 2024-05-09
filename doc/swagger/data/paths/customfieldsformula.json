@@ -1,0 +1,135 @@
+{
+    "customfieldsformula": {
+        "get": {
+            "tags": [
+                "customfieldsformula"
+            ],
+            "summary": "Gets custom fields formula",
+            "description": "Gets custom fields formula",
+            "operationId": "customFieldsFormulaGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "path",
+                    "in": "query",
+                    "description": "Describes what path is used to navigate through the client side models.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "business_object",
+                    "in": "query",
+                    "description": "Defines for which BUSINESS_OBJECT the data are filtered. Ex: Item, Project, Calculation, Calculation_Version, Masterdata.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "column",
+                    "in": "query",
+                    "description": "Defines for which column from base table or from extensions the data are returned, e.g. t_item, t_item_ext, t_material, t_material_ext.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "is_custom",
+                    "in": "query",
+                    "description": "Specifies if the field is standard or custom.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "lock",
+                    "in": "query",
+                    "description": "Sets the lock on metadata business object.",
+                    "required": false,
+                    "type": "boolean"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/CustomFieldsFormulaGetResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "read:customFieldsFormula"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "customfieldsformula"
+            ],
+            "summary": "Manipulate (create, update, delete) custom fields formulas",
+            "description": "Manipulate (create, update, delete) custom fields formulas for Item and the following Masterdata business objects: Material Price, Material (General data), Material (Plant-specific data), Cost Center, Work Center, Activity Price. If a masterdata custom field is added, 2 new fields will appear: <masterdata_custom_field_name>_MANUAL and <masterdata_custom_field_name>_UNIT(if it's the case). The masterdata services that will contain these custom fields are: administration-cost-center[Get,Post], administration-material[Get,Post], administration-material-plant [Get,Post], administration-material-price [Get,Post]. Also all the services that are having items on their request/response will contain these new masterdata custom fields.",
+            "operationId": "customfieldsformulaPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "checkCanExecute",
+                    "in": "query",
+                    "description": "If true, the service checks if the operations can be executed. If false or missing, then the operations are executed immediately.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "customfieldsformula",
+                    "in": "body",
+                    "description": "Custom fields formula",
+                    "required": false,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/CustomFieldsFormulaToBeCreatedUpdatedDeleted"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/CustomFieldsFormulaPostResponse"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CUSTOM_FIELDS_FORMULA_CREATE_UPDATE": [
+                        "update:customFieldsFormula"
+                    ]
+                }
+            ]
+        }
+    }
+}

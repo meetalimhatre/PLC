@@ -1,0 +1,87 @@
+<mvc:View controllerName="mdr.ui.controller.ConfigViewDetails"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:u="sap.ui.unified"
+	xmlns="sap.m"
+	xmlns:codeeditor="sap.ui.codeeditor"
+	xmlns:c="sap.ui.core"
+	xmlns:t="sap.ui.table"
+	xmlns:l="sap.ui.layout"
+	xmlns:smartTable="sap.ui.comp.smarttable" displayBlock="true" height="100%">
+	<Page title="{i18n>XTIT_configViewDetailsTitle}">
+		<headerContent>
+			<Button id="previewBtn" text="{i18n>XBUT_previewBtn}" tooltip="{i18n>XTOL_previewDataBtnTooltip}" type="Emphasized" press=".onPreview" icon="sap-icon://begin"/>
+			<Button id ="getFieldsForMappingBtn" text="{i18n>XBUT_getFieldsForMappingBtn}" tooltip="{i18n>XTOL_getFieldsForMappingBtnTooltip}" type="Ghost" press=".onGetFieldsForMapping" icon="sap-icon://filter-fields"/>
+			<Button id="saveBtn" text="{i18n>XBUT_btnSave}" type="Ghost" press=".onSave" icon="sap-icon://save" enabled="{view>/EnableSave}"/>
+			<Button text="{i18n>XBUT_back}" type="Back" press=".Router.onNavBack"/>
+		</headerContent>
+		<content>
+			<VBox id="vboxMenu" class="sapUiNoMargin">
+				<items>
+					<Label id="__label4-text" text="{i18n>XGRP_replicationRule}" tooltip="{i18n>XTOL_replicationRuleTooltip}" labelFor="" class="sapUiTinyMargin sapUiSmallMarginBegin titleLabel"/>
+					<codeeditor:CodeEditor id="replicationRuleStmt" type="sql" class="resizeableCodeEditor sapUiTinyMargin" value="{view>/ReplicationRuleStatement}" height="400px" width="98%" liveChange=".onLiveChange"/>
+					<Panel id="previewItems" visible="false" expandable="true" width="auto" class="sapUiResponsiveMargin sapUiNoMargin" expanded="false">
+						<headerToolbar>
+							<OverflowToolbar active="true" press=".onPanelOverflowToolbarPress('previewItems')" tooltip="{i18n>XTOL_previewDataTooltip}">
+								<Title text="{i18n>XGRP_previewData}"/>
+							</OverflowToolbar>
+						</headerToolbar>
+						<t:Table id="dataPreviewTable" rows="{/DataPreview/rows}" selectionMode="Single" selectionBehavior="Row">
+						</t:Table>
+					</Panel>
+					<Panel id="pnlMapping" expandable="true" width="auto" class="sapUiResponsiveMargin sapUiNoMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar active="true" press=".onPanelOverflowToolbarPress('pnlMapping')" tooltip="{i18n>XTOL_mapSourceDestinationTooltip}">
+								<Title text="{i18n>XGRP_mappingSDtoDD}"/>
+							</OverflowToolbar>
+						</headerToolbar>
+						<t:Table id="entityMappingTable" rows="{/DataMapping/mappings}" selectionMode="Single" selectionBehavior="Row">
+							<t:columns>
+								<t:Column width="auto">
+									<Label text="{i18n>XFLD_PlcFieldName}"/>
+									<t:template>
+										<Text text="{destinationField/id}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column width="auto">
+									<Label text="{i18n>XFLD_Type}"/>
+									<t:template>
+										<Text text="{destinationField/type/label}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column width="auto">
+									<Label text="{i18n>XFLD_PrimaryKey}"/>
+									<t:template>
+										<Text text="{destinationField/pk}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column width="auto" tooltip="{i18n>XTOL_mandatoryColumnTooltip}">
+									<Label text="{i18n>XFLD_Mandatory}"/>
+									<t:template>
+										<Text text="{destinationField/mandatory}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column width="auto" tooltip="{i18n>XTOL_fieldAttributesColumnTooltip}">
+									<Label text="{i18n>XFLD_Attributes}"/>
+									<t:template>
+										<Text text="{destinationField/attributes}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column width="auto" tooltip="{i18n>XTOL_sourceFieldsColumnTooltip}">
+									<Label text="{i18n>XFLD_ErpFieldName}"/>
+									<t:template>
+										<Select width="10rem" forceSelection="false" selectedKey="{sourceColumnName}" items="{ path: '/ERPFieldNames', sorter: { path: 'key' } }" change=".onItemChange">
+											<c:Item key="{key}" text="{text}" />
+										</Select>									
+									</t:template>
+								</t:Column>
+							</t:columns>
+						</t:Table>
+					</Panel>
+				</items>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

@@ -1,0 +1,36 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_activity_type_read" (  
+		IN iv_logon_language         NVARCHAR(11),
+		IN iv_master_data_timestamp  TIMESTAMP,	
+        IN ot_activity_type_key  	"sap.plc.db.administration::masterdata.tt_activity_type_key",
+        OUT ot_activity_type     	"sap.plc.db.administration::masterdata.tt_activity_type" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+--select activity types	
+ ot_activity_type = 				
+					select  
+						plcTable.ACTIVITY_TYPE_ID,
+						plcTable.CONTROLLING_AREA_ID,
+						plcTable.ACCOUNT_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE, 
+						plcTable._CREATED_BY,
+		                null AS _VALID_FROM_FIRST_VERSION,
+		                null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.ACTIVITY_TYPE_DESCRIPTION 
+					from "sap.plc.db::basis.t_activity_type" as plcTable 					
+					left outer join "sap.plc.db::basis.t_activity_type__text" as plcTextTable 
+						on  plcTable.ACTIVITY_TYPE_ID = plcTextTable.ACTIVITY_TYPE_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+						and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )  
+					where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+						and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null ) 
+						and ( plcTable.ACTIVITY_TYPE_ID, plcTable.CONTROLLING_AREA_ID ) in ( select ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID from :ot_activity_type_key );
+
+END;

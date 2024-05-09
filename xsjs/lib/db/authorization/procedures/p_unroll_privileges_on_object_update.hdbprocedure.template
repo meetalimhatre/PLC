@@ -1,0 +1,18 @@
+PROCEDURE "sap.plc.db.authorization.procedures::p_unroll_privileges_on_object_update" ( 
+	IN i_object_type nvarchar(127),
+	IN i_object_id nvarchar(35)
+) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+DECLARE lt_privilege_object_filter "sap.plc.db.authorization.procedures::ts_privilege_object_filter"; 
+
+lt_privilege_object_filter = SELECT i_object_type AS OBJECT_TYPE, i_object_id AS OBJECT_ID FROM "sap.plc.db::DUMMY";
+
+CALL "sap.plc.db.authorization.procedures::p_unroll_privileges" (:lt_privilege_object_filter); 
+
+END
+
+

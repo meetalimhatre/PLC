@@ -1,0 +1,40 @@
+{
+  "services": [
+    {
+      "id": "56577D4F-E40E-46A3-9460-94951516573B",
+      "name": "plc-api-service",
+      "description": "API Service for SAP Product Lifecycle Costing",
+      "bindable": true,
+      "plan_updateable": false,
+      "tags": ["plc", "costing"],
+      "metadata": {
+        "imageUrl": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgaWQ9InN2ZzQiIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDcwLjcgMTA4LjciIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDcwLjcgMTA4Ljc7IiB4bWw6c3BhY2U9InByZXNlcnZlIj48c3R5bGUgdHlwZT0idGV4dC9jc3MiPiAuc3Qwe2ZpbGw6IzQyN0NBQzt9PC9zdHlsZT48cGF0aCBpZD0icGF0aDIiIGNsYXNzPSJzdDAiIGQ9Ik01Ni44LDgzLjR2MTIuNGMxLjctMC40LDMuMS0xLjIsNC4yLTIuNGMwLjktMSwxLjQtMi4zLDEuNC00YzAtMS43LTAuNC0zLTEuMi0zLjggQzYwLjUsODQuNyw1OSw4NCw1Ni44LDgzLjR6IE0yNC4xLDYzLjFoNS41bC0wLjEsMC41Yy0wLjMsMS41LTAuNSwzLjEtMC41LDQuOGMwLDEsMC4xLDIsMC4yLDNsMCwwLjFoLTUuMUwyNC4xLDYzLjF6IE0xMi4yLDYzLjEgaDguOXY4LjRoLTguOVY2My4xeiBNNTIsNjEuOWMtMS40LDAuNC0yLjUsMS4xLTMuMywyLjJjLTAuNiwxLjItMSwyLjMtMSwzLjNzMC4zLDIuMSwxLDMuM2MwLjMsMC41LDAuNywwLjksMS4zLDEuMiBjMC42LDAuMywxLjMsMC42LDIsMVY2MS45eiBNNTIsNTEuN2g0LjhWNTVjMy42LDAuNCw2LjQsMS41LDguNSwzLjVjMi4yLDEuNywzLjYsNC4yLDQuMiw3LjVMNjEuMSw2N2MtMC42LTIuNS0yLjEtNC4yLTQuMi01LjEgdjEyLjRjNS4zLDEuMyw5LDMuMiwxMS4yLDUuNWMxLjgsMi4zLDIuNyw1LjEsMi43LDguNGMwLDMuOS0xLjIsNy4yLTMuNSw5LjhjLTIuNiwyLjUtNiw0LjItMTAuNCw0Ljl2NS44SDUydi01LjggYy0zLjktMC40LTcuMS0xLjgtOS42LTQuMmMtMi4zLTIuMS0zLjgtNS4yLTQuNC05LjVsOC43LTAuOWMwLjQsMS41LDEsMi45LDEuOSw0LjJsMS43LDEuNmwxLjcsMS4xVjgxLjljLTQuNC0xLjItNy43LTMtOS44LTUuMyBjLTEuOS0yLjUtMi45LTUuNS0yLjktOC45YzAtMy40LDEuMS02LjMsMy4zLTguN2MyLjQtMi4zLDUuNi0zLjYsOS41LTRWNTEuN3ogTTI0LjEsNTEuN2g5LjF2My42bC0wLjYsMC45IGMtMC43LDEuMS0xLjQsMi4zLTEuOSwzLjZsLTAuMiwwLjVoLTYuNFY1MS43eiBNMTIuMiw1MS43aDguOXY4LjZoLTguOVY1MS43eiBNMzYuNCw0MC4zaDguOXY2bC0wLjUsMC4yYy0xLjMsMC41LTIuNiwxLjEtMy44LDEuOCBsLTAuOSwwLjVoLTMuOFY0MC4zeiBNMjQuMSw0MC4zaDkuMXY4LjRoLTkuMUwyNC4xLDQwLjN6IE0xMi4yLDQwLjNoOC45djguNGgtOC45VjQwLjN6IE0xMi4yLDIxLjFoMzIuOXYxMS40SDEyLjJWMjEuMXogTTkuMSw2LjEgaDM5LjJjMi4zLDAsNC4xLDAuNCw1LjMsMS4yYzEuMiwwLjgsMi4xLDEuOCwyLjYsMi44czAuOSwyLDEsM2MwLjEsMC45LDAuMiwxLjUsMC4yLDEuNlY0NWwtMC4yLDBjLTEtMC4xLTIuMS0wLjItMy4yLTAuMiBjLTAuOSwwLTEuNywwLTIuNiwwLjFsLTAuMiwwVjE0LjljMC0wLjMtMC4yLTAuOS0wLjctMS43Yy0wLjQtMC44LTEuMy0xLjItMi42LTEuMkg5LjZjLTEuMiwwLTIuMSwwLjItMi43LDAuNyBjLTAuNiwwLjUtMC45LDEtMC45LDEuNnY2MS4yYzAsMy4yLDEuMyw0LjgsMy44LDQuOGgyMi42bDAuMiwwLjRjMS4zLDEuOSwyLjgsMy43LDQuNiw1LjJsMC4yLDAuMkg5LjFjLTAuNiwwLTEuNC0wLjEtMi40LTAuNCBzLTIuMS0wLjctMy4xLTEuNHMtMS44LTEuNi0yLjYtMi43QzAuNCw4MC41LDAsNzksMCw3Ny4zVjE0LjRjMC0wLjcsMC4yLTEuNiwwLjYtMi42YzAuNC0xLDEtMS45LDEuNy0yLjdDMy4xLDguMyw0LDcuNSw1LjEsNyBDNi4yLDYuNCw3LjYsNi4xLDkuMSw2LjF6Ii8+PC9zdmc+",
+        "sap": {
+          "tenant_aware": true,
+          "instance_isolation": false,
+          "support_btp_brand": true
+        }
+      },
+      "plans": [
+        {
+          "id": "6C98D50C-118B-4CAC-9B78-A6B22FFBEB95",
+          "name": "public-api",
+          "description": "The SAP Product Lifecycle Costing Public API",
+          "metadata": {
+            "supportedMinOSBVersion": "2.10",
+            "supportedMaxOSBVersion": "2.15"
+          }
+        },
+        {
+          "id": "A7163763-6D83-47BB-A1DC-D509BA5DA6A5",
+          "name": "xs-api",
+          "description": "The SAP Product Lifecycle Costing Extended Services API",
+          "metadata": {
+            "supportedMinOSBVersion": "2.10",
+            "supportedMaxOSBVersion": "2.15"
+          }
+        }
+      ]
+    }
+  ]
+}

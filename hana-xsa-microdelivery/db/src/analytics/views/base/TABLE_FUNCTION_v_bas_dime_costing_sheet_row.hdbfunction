@@ -1,0 +1,51 @@
+FUNCTION "sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_costing_sheet_row" (VAR_LANGUAGE NVARCHAR (11))
+RETURNS TABLE ("CALCULATION_VERSION_ID" INTEGER, "LANGUAGE" NVARCHAR (11), "COSTING_SHEET_ROW_ID" NVARCHAR (5), "COSTING_SHEET_ROW_DESCRIPTION" NVARCHAR (250)
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS 
+
+BEGIN 
+
+var_out = 
+	SELECT
+	   calcVersion.calculation_version_id,
+       csrowtext.language,  
+       csrowtext.costing_sheet_row_id,
+       csrowtext.costing_sheet_row_description
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+		LEFT JOIN "sap.plc.db::basis.t_costing_sheet_row__text" csrowtext
+        	ON csrowtext.costing_sheet_id = calcVersion.costing_sheet_id 
+        	AND calcVersion.master_data_timestamp >= csrowtext._valid_from 
+        	AND (csrowtext._valid_to IS NULL OR calcVersion.master_data_timestamp < csrowtext._valid_to)
+        	AND csrowtext.language = VAR_LANGUAGE
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))        	
+        
+-- 'Total Costs' and 'Other Costs' always can be unioned per calculation version id since - per definition - every calculation version has
+-- included both rows - even if no costing sheet is assigned explicitly
+UNION ALL
+	SELECT
+		   calcVersion.calculation_version_id,
+	       :VAR_LANGUAGE,
+	       'Total Cost',
+	       CASE
+	         WHEN :VAR_LANGUAGE = 'DE' THEN 'Gesamtkosten'
+	         ELSE 'Total Cost'
+	       END AS costing_sheet_row_description
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+UNION ALL
+	SELECT
+		   calcVersion.calculation_version_id,
+	       :VAR_LANGUAGE,
+	       'Other Costs',
+	       CASE
+	         WHEN :VAR_LANGUAGE = 'DE' THEN 'Sonstige Kosten'
+	         ELSE 'Other Costs'
+	       END AS costing_sheet_row_description
+	FROM "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+	WHERE upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+;
+
+
+return :var_out;
+END;

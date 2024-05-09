@@ -1,0 +1,65 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_currency_conversion_read" ( 
+		IN iv_logon_language    	NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP, 
+		IN iv_filter_string	        NVARCHAR(5000),
+		IN iv_no_max_records        INTEGER,
+		IN iv_no_skip_records       INTEGER,
+	 	OUT ot_currency_conversions "sap.plc.db.administration::masterdata.tt_currency_conversion" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Procedure logic 
+ *****************************/
+ 
+ -- select currency 
+ 
+ tt_currency_conversions_union = 
+ 		select  EXCHANGE_RATE_TYPE_ID,FROM_CURRENCY_ID,TO_CURRENCY_ID,FROM_FACTOR,TO_FACTOR,RATE,VALID_FROM,_VALID_FROM, _VALID_TO, _SOURCE, 
+		   _CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION from (
+ 					
+ 				select
+ 					plcTable.EXCHANGE_RATE_TYPE_ID,
+ 					plcTable.FROM_CURRENCY_ID,
+					plcTable.TO_CURRENCY_ID,
+					plcTable.FROM_FACTOR,
+					plcTable.TO_FACTOR,
+					plcTable.RATE,
+					plcTable.VALID_FROM, 					
+ 					plcTable._VALID_FROM,
+ 					plcTable._VALID_TO,
+ 					plcTable._SOURCE,
+ 					plcTable._CREATED_BY,
+ 					minValues._VALID_FROM AS _VALID_FROM_FIRST_VERSION,
+					minValues._CREATED_BY as _CREATED_BY_FIRST_VERSION
+ 				from "sap.plc.db::basis.t_currency_conversion" as plcTable
+				inner join 
+				( 	select A._VALID_FROM, A.FROM_CURRENCY_ID, A.TO_CURRENCY_ID, A._CREATED_BY, A.VALID_FROM
+					from "sap.plc.db::basis.t_currency_conversion" as A
+					inner join 
+					(	select MIN(_VALID_FROM) as _VALID_FROM, FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM
+						from "sap.plc.db::basis.t_currency_conversion"
+							group by FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM
+					) as B
+						on A._VALID_FROM = B._VALID_FROM
+						and A.FROM_CURRENCY_ID = B.FROM_CURRENCY_ID and A.TO_CURRENCY_ID = B.TO_CURRENCY_ID
+						and A.VALID_FROM = B.VALID_FROM
+				) as minValues
+					on plcTable.FROM_CURRENCY_ID = minValues.FROM_CURRENCY_ID and plcTable.TO_CURRENCY_ID = minValues.TO_CURRENCY_ID  
+					and plcTable.VALID_FROM = minValues.VALID_FROM
+                where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+                and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+              ) 
+
+            order by FROM_CURRENCY_ID, TO_CURRENCY_ID;
+
+tt_currency_conversions_filter = APPLY_FILTER(:tt_currency_conversions_union, :iv_filter_string) ;      
+	
+ot_currency_conversions =  
+		select  EXCHANGE_RATE_TYPE_ID,FROM_CURRENCY_ID,TO_CURRENCY_ID,FROM_FACTOR,TO_FACTOR,RATE,VALID_FROM,_VALID_FROM, _VALID_TO, _SOURCE, 
+		   		_CREATED_BY, _VALID_FROM_FIRST_VERSION, _CREATED_BY_FIRST_VERSION 
+		   		from :tt_currency_conversions_filter limit :iv_no_max_records offset :iv_no_skip_records;
+END;

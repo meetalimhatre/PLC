@@ -1,0 +1,17 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_DELETE_DRAD" AFTER DELETE ON "sap.plc.db::repl.drad"
+REFERENCING OLD ROW OLDROW FOR EACH ROW
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+UPDATE "sap.plc.db::basis.t_document_material"
+     SET _VALID_TO = :lv_current_utctimestamp 
+     WHERE "sap.plc.db::basis.t_document_material"."DOCUMENT_TYPE_ID" = :OLDROW."DOKAR"
+        AND "sap.plc.db::basis.t_document_material"."DOCUMENT_ID" = :OLDROW."DOKNR"
+        AND "sap.plc.db::basis.t_document_material"."DOCUMENT_VERSION" = :OLDROW."DOKVR"
+        AND "sap.plc.db::basis.t_document_material"."DOCUMENT_PART" = :OLDROW."DOKTL"
+        AND "sap.plc.db::basis.t_document_material"."MATERIAL_ID" = :OLDROW."OBJKY"
+        AND "sap.plc.db::basis.t_document_material"."_VALID_FROM" < :lv_current_utctimestamp
+        AND "sap.plc.db::basis.t_document_material"."_VALID_TO" IS NULL;
+end
+;

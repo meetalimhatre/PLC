@@ -1,0 +1,11 @@
+PROCEDURE "sap.plc.db.management.procedures::p_unlock_masterdata" ( 
+		IN userId NVARCHAR(256)
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+delete from "sap.plc.db::basis.t_lock" where UCASE(user_id) = UCASE(:userId);
+
+END;

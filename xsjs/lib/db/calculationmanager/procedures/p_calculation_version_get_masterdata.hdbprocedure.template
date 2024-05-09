@@ -1,0 +1,309 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_calculation_version_get_masterdata" ( 
+        IN iv_logon_language                    NVARCHAR(11),
+        IN iv_calculation_version_ids 		    "sap.plc.db.calculationmanager::calculationmanager_types.tt_calculation_version_ids",
+        IN iv_user_id                           NVARCHAR(50),
+        --entries required for component split
+        OUT ot_component_split                  "sap.plc.db.administration::masterdata.tt_component_split" default empty,
+        OUT ot_component_split_account_group    "sap.plc.db::basis.t_component_split_account_group" default empty,
+        --entries required for costing sheet
+        OUT ot_costing_sheet                    "sap.plc.db.administration::masterdata.tt_costing_sheet" default empty,
+        OUT ot_costing_sheet_row                "sap.plc.db.administration::masterdata.tt_costing_sheet_row" default empty,
+        OUT ot_costing_sheet_base               "sap.plc.db::basis.t_costing_sheet_base" default empty,
+        OUT ot_costing_sheet_base_row           "sap.plc.db::basis.t_costing_sheet_base_row" default empty,
+        OUT ot_costing_sheet_overhead           "sap.plc.db::basis.t_costing_sheet_overhead" default empty,
+        OUT ot_costing_sheet_overhead_row       "sap.plc.db.administration::masterdata.tt_costing_sheet_overhead_row" default empty,
+        OUT ot_costing_sheet_row_dependencies   "sap.plc.db::basis.t_costing_sheet_row_dependencies" default empty,
+        OUT ot_account_groups                   "sap.plc.db.administration::masterdata.tt_account_groups" default empty,
+		--entries required for price components
+		OUT ot_price_components					"sap.plc.db.administration::masterdata.tt_price_component" default empty,
+        --other masterdata entries
+        OUT ot_work_center                      "sap.plc.db.administration::masterdata.tt_work_center" default empty,
+        OUT ot_process                          "sap.plc.db.administration::masterdata.tt_process" default empty,
+        OUT ot_overhead_group                   "sap.plc.db.administration::masterdata.tt_overhead_group" default empty,
+        OUT ot_plant                            "sap.plc.db.administration::masterdata.tt_plant" default empty,
+        OUT ot_cost_center                      "sap.plc.db.administration::masterdata.tt_cost_center" default empty,
+        OUT ot_profit_center                    "sap.plc.db.administration::masterdata.tt_profit_center" default empty,
+        OUT ot_activity_type                    "sap.plc.db.administration::masterdata.tt_activity_type" default empty,
+        OUT ot_accounts                         "sap.plc.db.administration::masterdata.tt_accounts" default empty,
+        OUT ot_company_code                     "sap.plc.db.administration::masterdata.tt_company_code" default empty,
+        OUT ot_controlling_area                 "sap.plc.db.administration::masterdata.tt_controlling_area" default empty,
+        OUT ot_business_area                    "sap.plc.db.administration::masterdata.tt_business_area" default empty,
+        OUT ot_material                         "sap.plc.db.administration::masterdata.tt_material" default empty,
+        OUT ot_material_group                   "sap.plc.db.administration::masterdata.tt_material_group" default empty,
+        OUT ot_material_plant                   "sap.plc.db.administration::masterdata.tt_material_plant" default empty,
+        OUT ot_material_type                    "sap.plc.db.administration::masterdata.tt_material_type" default empty,
+        OUT ot_valuation_class                  "sap.plc.db.administration::masterdata.tt_valuation_class" default empty,
+        OUT ot_vendor                           "sap.plc.db.administration::masterdata.tt_vendor" default empty,
+        OUT ot_customer                         "sap.plc.db.administration::masterdata.tt_customer" default empty,
+        OUT ot_document                         "sap.plc.db.administration::masterdata.tt_document" default empty,
+        OUT ot_document_type                    "sap.plc.db.administration::masterdata.tt_document_type" default empty,
+        OUT ot_document_status                  "sap.plc.db.administration::masterdata.tt_document_status" default empty,
+        OUT ot_design_office                    "sap.plc.db.administration::masterdata.tt_design_office",
+        --unit of measures and currencies
+        OUT ot_uom                              "sap.plc.db.administration::masterdata.tt_uom" default empty,
+        OUT ot_currency                         "sap.plc.db.administration::masterdata.tt_currency" default empty,
+        OUT ot_exchange_rate_type               "sap.plc.db.administration::masterdata.tt_exchange_rate_type" default empty
+    )
+    LANGUAGE SQLSCRIPT
+    SQL SECURITY INVOKER
+    READS SQL DATA 
+    AS
+    
+    lv_total_valid_ids INTEGER;
+    master_data_timestamp TIMESTAMP;
+    
+BEGIN
+
+/**
+ * Handles MASTERDATA GET request.
+ * will return all masterdata entities from a calculation version when parameter calculation_version_id is used
+ */
+
+DECLARE lt_account_groups               "sap.plc.db.administration::masterdata.tt_account_groups_input";
+ lt_calculation_versions = SELECT cv.calculation_version_id, cv.calculation_id, cv.component_split_id, 
+                            cv.costing_sheet_id, cv.customer_id, cv.sales_price_currency_id,
+                            cv.report_currency_id, cv.exchange_rate_type_id,  cv.master_data_timestamp, cv.valuation_date,
+                            cv.selected_total_costing_sheet, cv.selected_total_component_split,
+                            project.controlling_area_id as controlling_area_id
+                             FROM "sap.plc.db::basis.t_calculation_version" as cv
+                             INNER join :iv_calculation_version_ids as ids
+                             ON   cv.calculation_version_id = ids.calculation_version_id
+                             INNER JOIN "sap.plc.db::basis.t_calculation" as calculation
+                                ON cv.calculation_id = calculation.calculation_id
+                            INNER JOIN "sap.plc.db.authorization::privileges.v_project_read" as project
+                                ON calculation.project_id = project.project_id AND project.user_id = :iv_user_id;
+
+lt_items =  SELECT 
+            item.item_id, item.calculation_version_id, item.parent_item_id, item.predecessor_item_id, 
+            item.is_active, item.highlight_green, item.highlight_orange, item.highlight_yellow, item.item_category_id, item.CHILD_ITEM_CATEGORY_ID,
+            item.referenced_calculation_version_id, item.account_id, item.document_type_id, item.document_id, 
+            item.document_version, item.document_part, item.document_status_id, item.design_office_id,
+            item.material_id, item.material_type_id, item.material_group_id, item.is_phantom_material, 
+            item.is_configurable_material, item.material_source, item.overhead_group_id, item.valuation_class_id, 
+            item.purchasing_group, item.purchasing_document, item.local_content, item.activity_type_id, 
+            item.process_id, item.lot_size, item.lot_size_calculated, item.lot_size_is_manual,
+            item.engineering_change_number_id, item.company_code_id, item.cost_center_id, 
+            item.plant_id, item.work_center_id, item.work_center_category, item.efficiency, item.business_area_id, 
+            item.profit_center_id, item.quantity, item.quantity_calculated,
+            item.quantity_is_manual, item.quantity_uom_id, item.total_quantity, item.total_quantity_uom_id, 
+            item.total_quantity_depends_on, item.is_relevant_to_costing_in_erp, item.base_quantity, item.base_quantity_calculated, 
+            item.base_quantity_is_manual, item.quantity_per_base_unit, 
+            item.quantity_per_base_unit_uom_id, item.price_fixed_portion, item.price_fixed_portion_calculated, item.price_fixed_portion_is_manual, 
+            item.price_variable_portion, item.price_variable_portion_calculated, item.price_variable_portion_is_manual,
+            item.price, item.transaction_currency_id, item.price_unit, item.price_unit_calculated, item.price_unit_is_manual,
+            item.price_unit_uom_id, item.is_price_split_active, item.is_disabling_account_determination, 
+            item.price_id, item.confidence_level_id, item.price_source_id, item.price_source_type_id,
+            item.is_disabling_price_determination, item.vendor_id, item.target_cost, item.target_cost_calculated,
+            item.target_cost_is_manual, item.target_cost_currency_id, item.created_on, 
+            item.created_by, item.last_modified_on, item.last_modified_by, 
+            item.price_for_total_quantity, item.price_for_total_quantity_fixed_portion, item.price_for_total_quantity_variable_portion, 
+            item.price_for_total_quantity2, item.price_for_total_quantity2_fixed_portion, item.price_for_total_quantity2_variable_portion, 
+            item.price_for_total_quantity3, item.price_for_total_quantity3_fixed_portion, item.price_for_total_quantity3_variable_portion, 
+            item.other_cost, item.other_cost_fixed_portion, item.other_cost_variable_portion, 
+            item.total_cost, item.total_cost_fixed_portion, item.total_cost_variable_portion, 
+            item.total_cost2, item.total_cost2_fixed_portion, item.total_cost2_variable_portion, 
+            item.total_cost3, item.total_cost3_fixed_portion, item.total_cost3_variable_portion, 
+            item.item_description, item.comment,
+            item.TOTAL_COST_PER_UNIT_FIXED_PORTION, item.TOTAL_COST_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST_PER_UNIT,
+            item.TOTAL_COST2_PER_UNIT_FIXED_PORTION, item.TOTAL_COST2_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST2_PER_UNIT,
+            item.TOTAL_COST3_PER_UNIT_FIXED_PORTION, item.TOTAL_COST3_PER_UNIT_VARIABLE_PORTION, item.TOTAL_COST3_PER_UNIT,
+            calculation_versions.controlling_area_id, calculation_versions.master_data_timestamp, calculation_versions.valuation_date
+            {{customFieldsWithTablePrefix Item}}
+         FROM "sap.plc.db::basis.t_item" as item
+        LEFT OUTER JOIN {{t_extensionTable Item}} as plcExtTable ON 
+            item.item_id = plcExtTable.item_id AND item.calculation_version_id = plcExtTable.calculation_version_id
+        INNER JOIN :lt_calculation_versions as calculation_versions on 
+            item.calculation_version_id = calculation_versions.calculation_version_id;
+
+lt_component_split = select distinct component_split_id, master_data_timestamp
+                        from :lt_calculation_versions
+                     where component_split_id is not null;
+lt_costing_sheet = select distinct costing_sheet_id, master_data_timestamp
+                      from :lt_calculation_versions
+                   where costing_sheet_id is not null;
+
+lt_price_components = select distinct price_id, master_data_timestamp, valuation_date
+						from :lt_items
+					where price_id is not null;
+
+lt_work_center = select distinct work_center_id, plant_id, master_data_timestamp
+                    from :lt_items
+                 where work_center_id is not null and plant_id is not null;
+
+lt_process = select distinct process_id, controlling_area_id, master_data_timestamp
+                        from :lt_items
+                       where process_id is not null and controlling_area_id is not null;
+
+lt_activity_type = select distinct activity_type_id, controlling_area_id, master_data_timestamp
+                    from :lt_items
+                 where activity_type_id is not null and controlling_area_id is not null;
+                 
+lt_cost_center = select distinct cost_center_id, controlling_area_id, master_data_timestamp
+                    from :lt_items
+                 where cost_center_id is not null and controlling_area_id is not null;
+                 
+lt_profit_center = select distinct profit_center_id, controlling_area_id, master_data_timestamp
+                    from :lt_items
+                 where profit_center_id is not null and controlling_area_id is not null;
+                 
+lt_account = select distinct account_id, controlling_area_id, master_data_timestamp
+                    from :lt_items
+                 where account_id is not null and controlling_area_id is not null;
+                 
+lt_material_plant = select distinct material_id, plant_id, master_data_timestamp
+                    from :lt_items
+                 where material_id is not null and plant_id is not null;
+                 
+lt_overhead_group = select distinct overhead_group_id, plant_id, master_data_timestamp
+                        from :lt_items
+                     where overhead_group_id is not null and plant_id is not null;
+                 
+lt_plant = select distinct plant_id, master_data_timestamp
+             from :lt_items
+            where plant_id is not null;
+            
+lt_company_code = select distinct company_code_id, master_data_timestamp
+                     from :lt_items
+                    where company_code_id is not null;
+                    
+lt_controlling_area = select distinct controlling_area_id, master_data_timestamp
+                     from :lt_items
+                    where controlling_area_id is not null;
+                    
+lt_business_area = select distinct business_area_id, master_data_timestamp
+                     from :lt_items
+                    where business_area_id is not null;
+                    
+lt_material = select distinct material_id, master_data_timestamp
+                     from :lt_items
+                    where material_id is not null;
+                    
+lt_material_group = select distinct material_group_id, master_data_timestamp
+                     from :lt_items
+                    where material_group_id is not null;
+                                    
+lt_material_type = select distinct material_type_id, master_data_timestamp
+                     from :lt_items
+                     where material_type_id is not null;
+
+lt_document = select distinct document_type_id, document_id, document_version, document_part, master_data_timestamp
+                 from :lt_items
+              where document_type_id is not null and document_id is not null and document_version is not null and document_part is not null;
+                     
+lt_document_type = select distinct document_type_id, master_data_timestamp
+                     from :lt_items
+                   where document_type_id is not null;
+                   
+lt_document_status = select distinct document_type_id, document_status_id, master_data_timestamp
+                         from :lt_items
+                     where document_type_id is not null and document_status_id is not null;
+
+lt_design_office =  select distinct design_office_id, master_data_timestamp
+                         from :lt_items
+                         where design_office_id is not null;
+
+lt_vendor = select distinct vendor_id, master_data_timestamp
+              from :lt_items
+            where vendor_id is not null;
+            
+lt_customer = select distinct customer_id, master_data_timestamp
+              from :lt_calculation_versions
+            where customer_id is not null;
+                    
+lt_valuation_class = select distinct valuation_class_id, master_data_timestamp
+                        from :lt_items
+                     where valuation_class_id is not null;
+
+-- used if as a precaution because the SQL would fail if the calculation version would not exist
+if is_empty(:lt_calculation_versions) then
+	return;
+end if;
+
+--This procedure is used to retrieve masterdata for a specific calculation version.
+--In contrast to other masterdata, for which only referenced entities are returned, for currencies, unit of measures and exchange rates all valid entities are returned. 
+--This shall allow the selection from those entities (for a combo box - it's bad design, but this is how the client is expecting it currently)
+
+select master_data_timestamp into master_data_timestamp
+	from "sap.plc.db::basis.t_calculation_version"
+	where calculation_version_id in (select calculation_version_id from :lt_calculation_versions);
+					 
+lt_uom = select distinct uom_id, :master_data_timestamp as master_data_timestamp
+			from "sap.plc.db::basis.t_uom"
+		where _valid_from <= :master_data_timestamp and ( _valid_to > :master_data_timestamp or _valid_to is null );
+		
+lt_currency = select distinct currency_id, :master_data_timestamp as master_data_timestamp
+				from "sap.plc.db::basis.t_currency"
+			where _valid_from <= :master_data_timestamp and ( _valid_to > :master_data_timestamp or _valid_to is null );
+			
+lt_exchange_rate_type = select exchange_rate_type_id
+				from "sap.plc.db::basis.t_exchange_rate_type";
+
+call "sap.plc.db.administration.procedures::p_masterdata_read"( :iv_logon_language,
+    :lt_component_split,
+    :lt_costing_sheet,
+    :lt_account_groups,
+	:lt_price_components,
+    :lt_work_center,
+    :lt_process,
+    :lt_activity_type,
+    :lt_cost_center,
+    :lt_profit_center,
+    :lt_account,
+    :lt_material_plant,
+    :lt_overhead_group,
+    :lt_plant,
+    :lt_company_code,
+    :lt_controlling_area,
+    :lt_business_area,
+    :lt_material,
+    :lt_material_group,
+    :lt_material_type,
+    :lt_document,
+    :lt_document_type,
+    :lt_document_status,
+    :lt_design_office,
+    :lt_vendor,
+    :lt_customer,
+    :lt_valuation_class,
+    :lt_uom,
+    :lt_currency,
+    :lt_exchange_rate_type,
+    ot_component_split,
+    ot_component_split_account_group,
+    ot_costing_sheet,
+    ot_costing_sheet_row,
+    ot_costing_sheet_base,
+    ot_costing_sheet_base_row,
+    ot_costing_sheet_overhead,
+    ot_costing_sheet_overhead_row,
+    ot_costing_sheet_row_dependencies,
+    ot_account_groups,
+	ot_price_components,
+    ot_work_center,
+    ot_process,
+    ot_activity_type,
+    ot_cost_center,
+    ot_profit_center,
+    ot_accounts,
+    ot_overhead_group,
+    ot_material_plant,
+    ot_plant,
+    ot_company_code,
+    ot_controlling_area,
+    ot_business_area,
+    ot_material,
+    ot_material_group,
+    ot_material_type,
+    ot_document,
+    ot_document_type,
+    ot_document_status,
+    ot_design_office,
+    ot_vendor,
+    ot_customer,
+    ot_valuation_class,
+    ot_uom,
+    ot_currency,
+    ot_exchange_rate_type
+);
+
+END;

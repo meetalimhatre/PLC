@@ -1,0 +1,59 @@
+<mvc:View controllerName="mdr.ui.controller.ConfigViewOverview" xmlns:mvc="sap.ui.core.mvc" xmlns:c="sap.ui.core"
+	xmlns:u="sap.ui.unified" xmlns="sap.m" xmlns:t="sap.ui.table" xmlns:layout="sap.ui.layout" height="100%">
+	<Page title="{i18n>XTIT_configOverviewPageTitle}" id="configViewOverviewPage">
+		<headerContent>
+			<Button id="detailsBtn" visible="false" icon="sap-icon://action-settings" text="{i18n>XBUT_btnConfigure}" press=".onNavToDetails" type="Emphasized"/>
+			<Button id="resetBtn" visible="false" icon="sap-icon://reset" text="{i18n>XBUT_btnResetToDefault}" press=".onResetToDefault" type="Ghost"/>
+		</headerContent>
+		<content>
+			<VBox id="vboxMenuConfig" height="100%" direction="Row">
+				<items>
+					<t:Table id="configTable" visibleRowCountMode="Auto" rowHeight="50" alternateRowColors="true" rows="{/ConfigurationTable}" selectionMode="Single" selectionBehavior="RowOnly" noData="{i18n>XMSG_noConfigurationData}" sort="sortColumn">
+						<t:extension>
+							<OverflowToolbar>
+								<ToolbarSpacer/>
+								<ToggleButton
+									id="sortBtn"
+									visible="false"
+									icon="sap-icon://sort"
+									pressed="false"
+									press="onSortPress"/>
+							</OverflowToolbar>
+						</t:extension>
+						<t:columns>
+							<t:Column width="18%" id="destinationsCol" sortProperty="label" tooltip="{i18n>XTOL_columnDestinationTooltip}">
+								<Label text="{i18n>XCOL_columnDestination}"/>
+								<t:template>
+									<Text text="{label}" tooltip="{description}" wrapping="false" renderWhitespace="false"/>
+								</t:template>
+							</t:Column>
+							<t:Column hAlign="Center" width="18%" tooltip="{i18n>XTOL_columnAvailableTooltip}">
+								<Label text="{i18n>XCOL_columnAvailable}"/>
+								<t:template>
+									<Text text="{configured}" wrapping="false" renderWhitespace="false"/>
+								</t:template>
+							</t:Column>
+							<t:Column hAlign="Center" width="18%" tooltip="{i18n>XTOL_columnStateTooltip}">
+								<Label text="{i18n>XCOL_columnState}"/>
+								<t:template>
+									<ComboBox width="10rem" selectedKey="{replicationStatus}" items="{ path: '/ReplState', sorter: { path: 'key' } }" selectionChange=".handleStateChange">
+										<c:Item key="{key}" text="{text}" />
+									</ComboBox>
+								</t:template>
+							</t:Column>
+							<t:Column width="46%" tooltip="{i18n>XTOL_columnRemarksTooltip}">
+								<Label text="{i18n>XCOL_columnRemarks}"/>
+								<t:template>
+									<Text text="{replChangeDisabledMessage}" wrapping="true" renderWhitespace="false"/>
+								</t:template>
+							</t:Column>
+						</t:columns>
+					</t:Table>
+				</items>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

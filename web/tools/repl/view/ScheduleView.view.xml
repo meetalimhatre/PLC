@@ -1,0 +1,186 @@
+<mvc:View controllerName="mdr.ui.controller.ScheduleView"
+	xmlns="sap.m" displayBlock="true"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt"
+	xmlns:c="sap.ui.core"
+	xmlns:sf="sap.ui.layout.form"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:layout="sap.ui.layout"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable" height="100%">
+	<Page title="{i18n>XTIT_scheduleTitle}">
+		<headerContent>
+			<Button id="btnSave" text="{i18n>XBUT_btnSave}" type="Ghost" press=".actionSave" tooltip="{i18n>XTOL_tolBtnSave}" icon="sap-icon://save"/>
+			<Button id="btnRun" text="{i18n>XBUT_btnRunNow}" type="Emphasized" press=".actionRunNow" tooltip="{i18n>XTOL_tolBtnRunNow}" icon="sap-icon://begin"/>
+		</headerContent>
+		<content>
+			<VBox id="vboxMenu" class="sapUiNoMargin">
+				<items>
+					<VBox id="vboxError">
+					</VBox>
+					<Panel id="pnlPatterns" expandable="true" width="auto" class="sapUiNoMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar active="true" press=".onPanelOverflowToolbarPress('pnlPatterns')" tooltip="{i18n>XTOL_jobSetupTooltip}">
+								<Title text="{i18n>XTIT_jobSetup}"/>
+							</OverflowToolbar>
+						</headerToolbar>
+						<VBox id="vboxSelector" class="sapUiNoMargin">
+							<Label id="labelRecPatterns" text="{i18n>XTIT_schedulePattern}" labelFor="schPattern"/>
+							<ComboBox id="schPattern" items="{
+									path: '/SchedulePatterns',
+									sorter: { path: 'key' }
+								}" change=".handleScheduleChange">
+								<c:Item id="recPatternsItems" key="{key}" text="{text}" />
+							</ComboBox>
+							<VBox id="vboxDaily" class="sapUiNoMargin" visible="false">
+								<items>
+									<VBox id="vboxDailySecond">
+										<Text id="runEveryLabe" text="{i18n>XTIT_runEvery}"/>
+										<HBox id="weekDaysHbox" class="sapUiNoMargin">
+											<items>
+												<CheckBox id="chbmonday" text="{i18n>XCKL_monday}"/>
+												<CheckBox id="chbtuesday" text="{i18n>XCKL_tuesday}"/>
+												<CheckBox id="chbwednesday" text="{i18n>XCKL_wednesday}"/>
+												<CheckBox id="chbthursday" text="{i18n>XCKL_thursday}"/>
+												<CheckBox id="chbfriday" text="{i18n>XCKL_friday}"/>
+												<CheckBox id="chbsaturday" text="{i18n>XCKL_saturday}"/>
+												<CheckBox id="chbsunday" text="{i18n>XCKL_sunday}"/>
+											</items>
+										</HBox>
+										<HBox id="weekTimePicker" class="sapUiNoMargin">
+											<items>
+												<TimePicker id="timeDaily" valueFormat="HH:mm" displayFormat="HH:mm" change="handleChange" placeholder="Time"/>
+											</items>
+										</HBox>
+									</VBox>
+								</items>
+							</VBox>
+							<VBox id="vboxWeekly" class="sapUiNoMargin" visible="false">
+								<items>
+									<VBox id="vboxWeeklyDays" class="sapUiNoMargin">
+										<Label id="labelDayWeekly" text="{i18n>XTIT_weeklyDay}" labelFor="weekDays"/>
+										<ComboBox id="weekDays" items="{
+												path: '/WeekDays',
+												sorter: { path: 'key' }
+											}">
+											<c:Item id="itemsWeeklyDropdown" key="{key}" text="{text}" />
+										</ComboBox>
+										<HBox id="hboxWeeklyTimeP" class="sapUiNoMargin">
+											<items>
+												<TimePicker id="timeWeekly" valueFormat="HH:mm" displayFormat="HH:mm" change="handleChange" placeholder="Time"/>
+											</items>
+										</HBox>
+									</VBox>
+								</items>
+							</VBox>
+							<VBox id="vboxMonthly" class="sapUiNoMargin" visible="false">
+								<items>
+									<VBox id="vboxMonthlySecond" class="sapUiNoMargin">
+										<Label id="labelMonthlyWeekDays" text="{i18n>XTIT_weeklyDay}" labelFor="weekDays"/>
+										<ComboBox id="dayMonth" items="{
+												path: '/DaysMonth',
+												sorter: { path: 'key' }
+											}">
+											<c:Item id="itemsMonthlyDropdown" key="{key}" text="{key}" />
+										</ComboBox>
+										<HBox id="hboxTimePickerMonthly" class="sapUiNoMargin">
+											<items>
+												<TimePicker id="timeMonthly" valueFormat="HH:mm" displayFormat="HH:mm" change="handleChange" placeholder="Time"/>
+											</items>
+										</HBox>
+									</VBox>
+								</items>
+							</VBox>
+						</VBox>
+					</Panel>
+					<Panel id="jobStatus" expandable="true" width="auto" class="sapUiResponsiveMargin sapUiNoMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar active="true" press=".onPanelOverflowToolbarPress('jobStatus')" tooltip="{i18n>XTOL_jobsRunTooltip}">
+								<Title text="{i18n>XTIT_jobsRun}"/>
+							</OverflowToolbar>
+						</headerToolbar>
+						<VBox id="vboxMenuLogs" class="sapUiNoMargin">
+							<items>
+								<VBox id="vboxJobs" fitContainer="true">
+									<smartFilterBar:SmartFilterBar id="sfbJobs" initialized=".onSmartFilterBarInitialized('stJobs')" useToolbar="false" considerSelectionVariants="false">
+										<smartFilterBar:groupConfiguration>
+											<smartFilterBar:GroupConfiguration key="SchedulerOdata" label="{i18n>XTOL_schedulerOdataText}"/>
+										</smartFilterBar:groupConfiguration>
+										<smartFilterBar:controlConfiguration >
+											<smartFilterBar:ControlConfiguration key="FINISHED_TIME" visibleInAdvancedArea="true" conditionType="sap.ui.comp.config.condition.DateRangeType" label="{i18n>XFLD_endTime}"/>
+											<smartFilterBar:ControlConfiguration key="RUN_ID" visibleInAdvancedArea="false" label="{i18n>XFLD_jobId}"/>
+											<smartFilterBar:ControlConfiguration key="FIRED_TIME" visibleInAdvancedArea="false" label="{i18n>XFLD_startTime}"/>
+											<smartFilterBar:ControlConfiguration key="STATE" visibleInAdvancedArea="false" label="{i18n>XTIT_jobStatus}"/>
+											<smartFilterBar:ControlConfiguration key="SCHED_NAME" visible="false" />
+										</smartFilterBar:controlConfiguration>
+										<smartFilterBar:layoutData>
+											<FlexItemData shrinkFactor="0"/>
+										</smartFilterBar:layoutData>
+									</smartFilterBar:SmartFilterBar>
+									<smartTable:SmartTable id="stJobs" smartFilterId="sfbJobs" tableType="ResponsiveTable" useTablePersonalisation="true" showTablePersonalisation="true" useVariantManagement="false" header="{i18n>XTIT_numberOfEntries}" showRowCount="false" useExportToExcel="true" ignoreFromPersonalisation="SCHED_NAME" noData="{i18n>XMSG_noSchedulerData}" beforeRebindTable="onBeforeRebindSmartTable">
+										<smartTable:layoutData>
+											<FlexItemData growFactor="1" baseSize="0%"/>
+										</smartTable:layoutData>
+										<smartTable:customToolbar>
+											<OverflowToolbar design="Transparent">
+												<ToolbarSpacer/>
+												<Button id="btnSeeAllEntries" icon="sap-icon://reset" text="{i18n>XBUT_btnSeeAllEntries}" visible="false" press=".onSeeAllEntries('Jobs')"/>
+											</OverflowToolbar>
+										</smartTable:customToolbar>
+										<Table id="tJobs" growing="true">
+											<columns>
+												<Column>
+													<customData>
+														<c:CustomData key="p13nData" value='\{"columnKey": "RUN_ID", "columnIndex": "1", "leadingProperty": "RUN_ID", "sortProperty": "RUN_ID", "filterProperty" : "RUN_ID", "type" : "string"}'/>
+													</customData>
+													<Text text="{i18n>XFLD_jobId}" tooltip="{i18n>XTOL_jobIdColumnTooltip}"/>
+												</Column>
+												<Column>
+													<customData>
+														<c:CustomData key="p13nData" value='\{"columnKey": "STATE", "columnIndex": "2", "leadingProperty": "STATE", "sortProperty": "STATE", "filterProperty" : "STATE", "type" : "string"}'/>
+													</customData>
+													<Text text="{i18n>XFLD_state}"/>
+												</Column>
+												<Column>
+													<customData>
+														<c:CustomData key="p13nData" value='\{"columnKey": "FIRED_TIME", "columnIndex": "3", "leadingProperty": "FIRED_TIME", "sortProperty": "FIRED_TIME", "filterProperty" : "FIRED_TIME", "type" : "date"}'/>
+													</customData>
+													<Text text="{i18n>XFLD_startTime}"/>
+												</Column>
+												<Column>
+													<customData>
+														<c:CustomData key="p13nData" value='\{"columnKey": "FINISHED_TIME", "columnIndex": "4", "leadingProperty": "FINISHED_TIME", "sortProperty": "FINISHED_TIME", "filterProperty" : "FINISHED_TIME", "type" : "date"}'/>
+													</customData>
+													<Text text="{i18n>XFLD_endTime}"/>
+												</Column>
+												<Column>
+													<customData>
+														<c:CustomData key="p13nData" value='\{"columnKey":"CUSTOM","columnIndex": "5"}'/>
+													</customData>
+													<Text text="{i18n>XFLD_goToLog}"/>
+												</Column>
+											</columns>
+											<ColumnListItem highlight="{path:'STATE',formatter:'.formatStatusToObjectState'}">
+												<cells>
+													<Text text="{RUN_ID}"/>
+													<Text text="{STATE}"/>
+													<Text text="{FIRED_TIME}"/>
+													<Text text="{FINISHED_TIME}"/>
+													<Button text="{i18n>XBUT_btnGoToLog}" tooltip="{i18n>XTOL_btnGoToLog}" type="Transparent" press=".handleJobAction(${RUN_ID})" />
+												</cells>
+											</ColumnListItem>
+										</Table>
+									</smartTable:SmartTable>
+								</VBox>
+							</items>
+						</VBox>
+					</Panel>
+				</items>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

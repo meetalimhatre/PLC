@@ -1,0 +1,406 @@
+{
+    "calculations": {
+        "get": {
+            "tags": [
+                "calculations"
+            ],
+            "summary": "Get calculations. If no parameter is defined, all existing calculations are retrieved.",
+            "description": "",
+            "operationId": "calculationsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "project_id",
+                    "in": "query",
+                    "description": "Get calculations for given project ids (comma separated list)",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "calculation_id",
+                    "in": "query",
+                    "description": "Get calculations for given calculation ids (comma separated list)",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Get calculations whose id or name contain with the given string",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "topPerProject",
+                    "in": "query",
+                    "description": "Specify the number of calculations that must be retrieved per project. Default value is 100.",
+                    "required": false,
+                    "type": "integer"
+                },
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Specify the total number of calculations that must be retrieved. Default value is 100.",
+                    "required": false,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationGetResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATIONS_READ": [
+                        "read:calculations"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "calculations"
+            ],
+            "summary": "Updates a calculation.",
+            "description": "The implementation updates the database entry in t_calculation based on JSON data in the request body. This update uses a opt-in approach, which means only properties that are contained in the request are updated. Properties that shall be set to <code>NULL</code> must be explicitly set to to <code>null</code> in the request data. last_modified_on/by fields are set automatically. Update will use an optimistic locking, i.e. data is only updated if no changes have been done by others, based on comparison of timestamps. @return: {object} the updated version or the more current version from the database",
+            "operationId": "calculationPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Calculation version that needs to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationPutBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationPutResponse"
+                    }
+                },
+                "400": {
+                    "description": "2 different PLC error codes are possible: GENERAL_VALIDATION_ERROR in case of invalid request content or CALCULATIONVERSION_IS_LIFECYCLE_VERSION_ERROR in case the current calculation version shall be set to a lifecycle version, which is not possible"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATIONS_CREATE_UPDATE": [
+                        "update:calculations"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "calculations"
+            ],
+            "summary": "Creates a new calculation.",
+            "description": "Creates a new calculation with an initial calculation version and root item. The client POSTs a serialized calculation, calculation version and root item to the server, where all ted ids are set to -1 (undefined) and the server responds with a calculation, calculation version and root item with generated ids and all other server-generated values.",
+            "operationId": "calculationsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "action",
+                    "in": "query",
+                    "description": "Specifies which action is performed: create a calculation or copy a version.",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "create",
+                        "copy-version"
+                    ]
+                },
+                {
+                    "name": "calculate",
+                    "in": "query",
+                    "description": "Indicates if the result calculation should be triggered for this calculation.",
+                    "required": false,
+                    "type": "boolean"
+                },
+                {
+                    "name": "id",
+                    "in": "query",
+                    "description": "Specifies the id of calculation version to be copied.",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "compressedResult",
+                    "in": "query",
+                    "description": "Indicates if the calculated results should be return as compressed (=true) or uncompressed (=false). Default value is false.",
+                    "required": false,
+                    "type": "boolean"
+                },                
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Calculation that needs to be created. For copy-version the request body contains only PROJECT_ID.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationPostResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+                    "Privileges.CALCULATIONS_CREATE_UPDATE": [
+                        "create:calculations",
+                        "update:calculations"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PRICE_READ": [
+                        "read:materialPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_PRICE_READ": [
+                        "read:activityPrice"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_READ": [
+                        "read:account"
+                    ]
+                },
+                {
+                    "Privileges.ACCOUNT_GROUP_READ": [
+                        "read:accountGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_ACCOUNT_DETERMINATION_READ": [
+                        "read:materialAccountDetermination"
+                    ]
+                },
+                {
+                    "Privileges.VALUATION_CLASS_READ": [
+                        "read:valuationClass"
+                    ]
+                },
+                {
+                    "Privileges.PROCESS_READ": [
+                        "read:process"
+                    ]
+                },
+                {
+                    "Privileges.COSTING_SHEET_READ": [
+                        "read:costingSheet"
+                    ]
+                },
+                {
+                    "Privileges.COMPONENT_SPLIT_READ": [
+                        "read:componentSplit"
+                    ]
+                },
+                {
+                    "Privileges.PLANT_READ": [
+                        "read:plant"
+                    ]
+                },
+                {
+                    "Privileges.WORK_CENTER_READ": [
+                        "read:workCenter"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_TYPE_READ": [
+                        "read:materialType"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_GROUP_READ": [
+                        "read:materialGroup"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_READ": [
+                        "read:material"
+                    ]
+                },
+                {
+                    "Privileges.MATERIAL_PLANT_READ": [
+                        "read:materialPlant"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_READ": [
+                        "read:document"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_TYPE_READ": [
+                        "read:documentType"
+                    ]
+                },
+                {
+                    "Privileges.CUSTOMER_READ": [
+                        "read:customer"
+                    ]
+                },
+                {
+                    "Privileges.VENDOR_READ": [
+                        "read:vendor"
+                    ]
+                },
+                {
+                    "Privileges.COMPANY_CODE_READ": [
+                        "read:companyCode"
+                    ]
+                },
+                {
+                    "Privileges.PROFIT_CENTER_READ": [
+                        "read:profitCenter"
+                    ]
+                },
+                {
+                    "Privileges.BUSINESS_AREA_READ": [
+                        "read:businessArea"
+                    ]
+                },
+                {
+                    "Privileges.COST_CENTER_READ": [
+                        "read:costCenter"
+                    ]
+                },
+                {
+                    "Privileges.ACTIVITY_TYPE_READ": [
+                        "read:activityType"
+                    ]
+                },
+                {
+                    "Privileges.SALES_ORGANIZATION_READ": [
+                        "read:salesOrganization"
+                    ]
+                },
+                {
+                    "Privileges.DOCUMENT_STATUS_READ": [
+                        "read:documentStatus"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "calculations"
+            ],
+            "summary": "Delete calculations",
+            "description": "Delete calculations with given ids.",
+            "operationId": "calculationsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Ids of calculations to be deleted",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/calculations_definitions.json#/definitions/CalculationDeleteBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input. Following PLC error codes are possible: GENERAL_VALIDATION_ERROR if request content is invalid; CALCULATIONVERSION_IS_FROZEN_ERROR if any of calculation versions of calculation if frozen; CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR if any of calculation versions of calculation is referenced in another calculation; GENERAL_ENTITY_PART_OF_CALCULATION_ERROR if any of calculation version is under calculation;"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATIONS_DELETE": [
+                        "delete:calculations"
+                    ]
+                }
+            ]
+        }
+    }
+}

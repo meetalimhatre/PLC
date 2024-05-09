@@ -1,0 +1,197 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+
+    <!-- Include this pom as a parent to install node/npm during a maven build                  -->
+    <!-- Please pay attention to the eirslett installDirectory and workingDirectory variables   -->
+    <!-- they are reflected in maven-dependency-plugin and maven-antrun-plugin configs          -->
+    <!-- Syntax:                                                                                -->
+    <!--    <parent>                                                                            -->
+    <!--        <groupId>com.sap.plc.xsa</groupId>                                              -->
+    <!--        <artifactId>node-npm-parent</artifactId>                                        -->
+    <!--        <version>1.0.0</version>                                                        -->
+    <!--        <relativePath>./node-parent-pom.xml</relativePath>                              -->
+    <!--    </parent>                                                                           -->
+
+    <parent>
+        <groupId>com.sap.ldi</groupId>
+        <artifactId>ldi-parent</artifactId>
+        <version>8.3.0</version>
+    </parent>
+
+    <groupId>com.sap.plc.xsa</groupId>
+    <artifactId>node-npm-parent</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <node.version>14.21.0</node.version>
+        <npm.version>6.14.18</npm.version>
+        <filter.node.package.version>2.0.0</filter.node.package.version>
+        <!-- <npm.registry>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.releases.npm/</npm.registry> -->
+        <npm.registry>https://int.repositories.cloud.sap/artifactory/api/npm/build-releases-npm/</npm.registry>
+        <download.node.phase>none</download.node.phase>
+        <npm.install.phase>none</npm.install.phase>
+        <filter.node.package.phase>none</filter.node.package.phase>
+        <com.github.eirslett.frontend-maven-plugin.version>1.9.1</com.github.eirslett.frontend-maven-plugin.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>npm.install</id>
+            <activation>
+                <property>
+                    <name>!skip.npm.install</name>
+                </property>
+            </activation>
+            <properties>
+                <download.node.phase>generate-resources</download.node.phase>
+                <npm.install.phase>generate-resources</npm.install.phase>
+                <filter.node.package.phase>process-resources</filter.node.package.phase>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <node.download.goal>unpack</node.download.goal>
+                <node.type>zip</node.type>
+                <node.classifier>win-x64</node.classifier>
+                <node.exe.source>node-v${node.version}-win-x64/node.exe</node.exe.source>
+                <node.exe.target>node.exe</node.exe.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <node.download.goal>unpack</node.download.goal>
+                <node.type>tar.gz</node.type>
+                <node.classifier>linux-x64</node.classifier>
+                <node.exe.source>node-v${node.version}-linux-x64/bin/node</node.exe.source>
+                <node.exe.target>node</node.exe.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <node.download.goal>unpack</node.download.goal>
+                <node.type>tar.gz</node.type>
+                <node.classifier>darwin-x64</node.classifier>
+                <node.exe.source>node-v${node.version}-darwin-x64/bin/node</node.exe.source>
+                <node.exe.target>node</node.exe.target>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-node</id>
+                        <phase>${download.node.phase}</phase>
+                        <goals>
+                            <goal>${node.download.goal}</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.nodejs.download.node</groupId>
+                                    <artifactId>node</artifactId>
+                                    <version>${node.version}</version>
+                                    <type>${node.type}</type>
+                                    <classifier>${node.classifier}</classifier>
+                                    <overWrite>true</overWrite>
+                                    <includes>node-v${node.version}-${node.classifier}/**</includes>
+                                    <outputDirectory>${project.build.directory}/node</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>move-node-executable</id>
+                        <phase>${download.node.phase}</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy file="${project.build.directory}/node/${node.exe.source}" tofile="${project.build.directory}/node/${node.exe.target}"/>
+                                <chmod file="${project.build.directory}/node/${node.exe.target}" perm="ugo+rx"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${com.github.eirslett.frontend-maven-plugin.version}</version>
+                <configuration>
+                    <installDirectory>${project.build.directory}</installDirectory>
+                    <workingDirectory>${project.build.directory}</workingDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <phase>${npm.install.phase}</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v${node.version}</nodeVersion>
+                            <npmVersion>${npm.version}</npmVersion>
+                            <npmDownloadRoot>${npm.registry}/npm/-/</npmDownloadRoot>
+                        </configuration>
+                    </execution>
+                     <execution>
+                        <id>npm-set-sap-repo</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>config set registry ${npm.registry}</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-install</id>
+                        <phase>${npm.install.phase}</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install --no-proxy --registry=${npm.registry}</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </pluginManagement>
+    </build>
+
+</project>

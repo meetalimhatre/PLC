@@ -1,0 +1,421 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0" id="sap.plc.analytics.viewsCF::V_EXT_MATERIAL_LIST_CUST" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="CUBE" enforceSqlExecution="false" executionSemantic="UNDEFINED" xscCompatibilityMode="true" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore">
+  <descriptions defaultDescription="V_EXT_MATERIAL_LIST_CUST" />
+  <localVariables>
+    <variable id="VAR_LANGUAGE" parameter="true">
+      <descriptions defaultDescription="VAR_LANGUAGE" />
+      <variableProperties datatype="NVARCHAR" defaultValue="EN" length="11" mandatory="true" scale="0">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_language</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>LANGUAGE</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue" />
+      </variableProperties>
+    </variable>
+  
+    <variable id="VAR_PROJECT" parameter="true">
+      <descriptions defaultDescription="PROJECT" />
+      <variableProperties datatype="NVARCHAR" length="35" scale="NaN" mandatory="true">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue" />
+      </variableProperties>
+    </variable>
+    <variable id="VAR_CALCULATION_VERSION" parameter="true">
+      <descriptions defaultDescription="CALCULATION VERSION" />
+      <variableProperties datatype="INTEGER" length="10" scale="0" mandatory="false">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>calculation_version_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue" />
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="v_bas_meas_item_costs_cust">
+      <targetVariable name="projectId" resourceUri="sap.plc.analytics.viewsCF.base::v_bas_meas_item_costs_cust" />
+      <localVariable>VAR_PROJECT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="v_bas_meas_item_costs_cust">
+      <targetVariable name="versionId" resourceUri="sap.plc.analytics.viewsCF.base::v_bas_meas_item_costs_cust" />
+      <localVariable>VAR_CALCULATION_VERSION</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::v_bas_dime_item" />
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="projectId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_item" />
+      <localVariable>VAR_PROJECT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="versionId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_item" />
+      <localVariable>VAR_CALCULATION_VERSION</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::v_bas_dime_account" />
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="projectId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_account" />
+      <localVariable>VAR_PROJECT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="versionId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_account" />
+      <localVariable>VAR_CALCULATION_VERSION</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::v_bas_dime_project" />
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="projectId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_project" />
+      <localVariable>VAR_PROJECT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::v_bas_dime_calcversion" />
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="projectId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_calcversion" />
+      <localVariable>VAR_PROJECT</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" forStarJoin="true">
+      <targetVariable name="versionId" resourceUri="sap.plc.analytics.views.base::v_bas_dime_calcversion" />
+      <localVariable>VAR_CALCULATION_VERSION</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="18" />
+  <dataSources>
+    <DataSource id="v_bas_meas_item_costs_cust">
+      <resourceUri>sap.plc.analytics.viewsCF.base::v_bas_meas_item_costs_cust</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews>
+  <calculationView xsi:type="Calculation:AggregationView" id="Fact_table">
+    <descriptions />
+    <viewAttributes>
+        <viewAttribute id="CALCULATION_VERSION_ID" />
+        <viewAttribute id="ITEM_ID" />
+        <viewAttribute id="IS_ROLLED_UP_VALUE" />
+        <viewAttribute id="IS_OVERHEAD_ROLLED_UP" />
+        <viewAttribute id="COSTING_SHEET_ROW_ID" />
+        <viewAttribute id="COSTING_SHEET_OVERHEAD_ROW_ID" />
+        <viewAttribute id="ACCOUNT_ID" />
+        <viewAttribute id="TOTAL_COST" />
+        <viewAttribute id="TOTAL_COST_FIXED_PORTION" />
+        <viewAttribute id="TOTAL_COST_VARIABLE_PORTION" />
+        <viewAttribute id="TOTAL_COST2" />
+        <viewAttribute id="TOTAL_COST2_FIXED_PORTION" />
+        <viewAttribute id="TOTAL_COST2_VARIABLE_PORTION" />
+        <viewAttribute id="TOTAL_COST3" />
+        <viewAttribute id="TOTAL_COST3_FIXED_PORTION" />
+        <viewAttribute id="TOTAL_COST3_VARIABLE_PORTION" />
+        <viewAttribute id="REPORT_CURRENCY_ID" />
+        <viewAttribute id="TOTAL_QUANTITY" />
+        <viewAttribute id="TOTAL_QUANTITY_UOM_ID" />
+        <viewAttribute id="PRICE" />
+        <viewAttribute id="PRICE_FIXED_PORTION" />
+        <viewAttribute id="PRICE_VARIABLE_PORTION" />
+        <viewAttribute id="PRICE_UNIT" />
+        <viewAttribute id="TRANSACTION_CURRENCY_ID" />
+        <viewAttribute id="PRICE_SOURCE_ID" />
+        <viewAttribute id="PRICE_UNIT_UOM_ID" />
+        <viewAttribute id="ITEM_CATEGORY_ID" />
+        <viewAttribute id="IS_LEAF" />
+        <viewAttribute id="PROJECT_ID" />
+        <viewAttribute id="TARGET_COST" />
+        <viewAttribute id="TARGET_COST_CURRENCY_ID" />
+        <viewAttribute id="SALES_PRICE" />
+        <viewAttribute id="SALES_PRICE_CURRENCY_ID" />
+        <viewAttribute id="PROJECT_SALES_PRICE" />
+        <viewAttribute id="PROJECT_SALES_PRICE_CURRENCY_ID" />
+        <viewAttribute id="LOCAL_CONTENT" />
+        <viewAttribute id="BASE_QUANTITY" />
+        <viewAttribute id="BASE_QUANTITY_UOM_ID" />
+        <viewAttribute id="QUANTITY_PER_BASE_UNIT" />
+        <viewAttribute id="QUANTITY_PER_BASE_UNIT_UOM_ID" />
+        <viewAttribute id="SURCHARGE" />
+      
+        <viewAttribute id="TOTAL_COST_PER_UNIT" aggregationType="sum" />
+        <viewAttribute id="TOTAL_COST2_PER_UNIT" aggregationType="sum" />
+        <viewAttribute id="TOTAL_COST3_PER_UNIT" aggregationType="sum" />
+      
+      <viewAttribute id="TOTAL_QUANTITY_OF_VARIANTS" aggregationType="sum" />
+    {{#if Item.customFields}}
+	{{cv_customFieldsViewAttrXml Item}}
+{{/if}}
+</viewAttributes>
+    <calculatedViewAttributes />
+    <restrictedViewAttributes />
+      <input node="v_bas_meas_item_costs_cust">{{#if Item.customFields}}
+	{{cv_customFieldsMappingXml Item}}
+{{/if}}
+</input>
+    <filter>"ITEM_CATEGORY_ID" = 0 OR "ITEM_CATEGORY_ID" = 1 OR "ITEM_CATEGORY_ID" = 2</filter>
+  </calculationView>
+</calculationViews>
+  <logicalModel id="Fact_table">
+    <descriptions />
+    <attributes>
+      <attribute id="IS_ROLLED_UP_VALUE" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions />
+        <keyMapping columnObjectName="Fact_table" columnName="IS_ROLLED_UP_VALUE" />
+      </attribute>
+      <attribute id="IS_OVERHEAD_ROLLED_UP" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="IS_OVERHEAD_ROLLED_UP" />
+        <keyMapping columnObjectName="Fact_table" columnName="IS_OVERHEAD_ROLLED_UP" />
+      </attribute>
+      <attribute id="COSTING_SHEET_ROW_ID" order="3" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_ROW" />
+        <keyMapping columnObjectName="Fact_table" columnName="COSTING_SHEET_ROW_ID" />
+      </attribute>
+      <attribute id="COSTING_SHEET_OVERHEAD_ROW_ID" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_OVERHEAD_ROW" />
+        <keyMapping columnObjectName="Fact_table" columnName="COSTING_SHEET_OVERHEAD_ROW_ID" />
+      </attribute>
+      <attribute id="PRICE_UNIT_UOM_ID" order="15" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PRICE_UNIT_UOM_ID" />
+        <keyMapping columnObjectName="Fact_table" columnName="PRICE_UNIT_UOM_ID" />
+      </attribute>
+      <attribute id="SALES_PRICE_CURRENCY_ID" order="20" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="SALES_PRICE_CURRENCY_ID" />
+        <keyMapping columnObjectName="Fact_table" columnName="SALES_PRICE_CURRENCY_ID" />
+      </attribute>
+      <attribute id="CALCULATION_VERSION_ID$local">
+        <keyMapping columnObjectName="Fact_table" columnName="CALCULATION_VERSION_ID" />
+      </attribute>
+      <attribute id="ITEM_ID$local">
+        <keyMapping columnObjectName="Fact_table" columnName="ITEM_ID" />
+      </attribute>
+      <attribute id="ACCOUNT_ID$local">
+        <keyMapping columnObjectName="Fact_table" columnName="ACCOUNT_ID" />
+      </attribute>
+      <attribute id="PROJECT_ID$local">
+        <keyMapping columnObjectName="Fact_table" columnName="PROJECT_ID" />
+      </attribute>
+    {{#if Item.customFields}}
+	{{cv_customFieldsAttrVXml Item}}
+{{/if}}
+</attributes>
+    <calculatedAttributes />
+    <privateDataFoundation>
+      <tableProxies />
+      <joins />
+      <layout>
+        <shapes />
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures>
+      <measure id="TOTAL_COST" order="5" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST" />
+      </measure>
+      <measure id="TOTAL_COST_FIXED_PORTION" order="6" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST_FIXED_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_FIXED_PORTION" />
+      </measure>
+      <measure id="TOTAL_COST_VARIABLE_PORTION" order="7" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST_VARIABLE_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_VARIABLE_PORTION" />
+      </measure>
+      <measure id="TOTAL_COST2" order="8" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST2" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST2" />
+      </measure>
+      <measure id="TOTAL_COST2_FIXED_PORTION" order="9" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST2_FIXED_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST2_FIXED_PORTION" />
+      </measure>
+      <measure id="TOTAL_COST2_VARIABLE_PORTION" order="10" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST2_VARIABLE_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST2_VARIABLE_PORTION" />
+      </measure>
+      <measure id="TOTAL_COST3" order="11" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST3" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST3" />
+      </measure>
+      <measure id="TOTAL_COST3_FIXED_PORTION" order="12" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST3_FIXED_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST3_FIXED_PORTION" />
+      </measure>
+      <measure id="TOTAL_COST3_VARIABLE_PORTION" order="13" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="TOTAL_COST3_VARIABLE_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST3_VARIABLE_PORTION" />
+      </measure>
+      <measure id="TOTAL_QUANTITY" order="14" semanticType="quantity" aggregationType="min" measureType="quantity">
+        <descriptions defaultDescription="TOTAL_QUANTITY " />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY" />
+      </measure>
+      <measure id="PRICE" order="16" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE" />
+        <measureMapping columnObjectName="Fact_table" columnName="PRICE" />
+      </measure>
+      <measure id="PRICE_FIXED_PORTION" order="17" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE_FIXED_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="PRICE_FIXED_PORTION" />
+      </measure>
+      <measure id="PRICE_VARIABLE_PORTION" order="18" semanticType="amount" aggregationType="sum" measureType="amount">
+        <descriptions defaultDescription="PRICE_VARIABLE_PORTION" />
+        <measureMapping columnObjectName="Fact_table" columnName="PRICE_VARIABLE_PORTION" />
+      </measure>
+      <measure id="PRICE_UNIT" order="19" semanticType="quantity" aggregationType="sum" measureType="quantity">
+        <descriptions defaultDescription="PRICE_UNIT" />
+        <unitCurrencyAttribute attributeName="PRICE_UNIT_UOM_ID" />
+        <measureMapping columnObjectName="Fact_table" columnName="PRICE_UNIT" />
+      </measure>
+      <measure id="SURCHARGE" order="21" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="SURCHARGE" />
+        <measureMapping columnObjectName="Fact_table" columnName="SURCHARGE" />
+      </measure>
+      <measure id="TARGET_COST" order="22" semanticType="amount" aggregationType="min" measureType="amount">
+        <descriptions defaultDescription="TARGET_COST" />
+        <measureMapping columnObjectName="Fact_table" columnName="TARGET_COST" />
+      </measure>
+      <measure id="SALES_PRICE" order="23" semanticType="amount" aggregationType="min" measureType="amount">
+        <descriptions defaultDescription="SALES_PRICE" />
+        <unitCurrencyAttribute attributeName="SALES_PRICE_CURRENCY_ID" />
+        <measureMapping columnObjectName="Fact_table" columnName="SALES_PRICE" />
+      </measure>
+      <measure id="PROJECT_SALES_PRICE" order="24" semanticType="amount" aggregationType="min" measureType="amount">
+        <descriptions defaultDescription="PROJECT_SALES_PRICE" />
+        <measureMapping columnObjectName="Fact_table" columnName="PROJECT_SALES_PRICE" />
+      </measure>
+      <measure id="LOCAL_CONTENT" order="25" aggregationType="min" measureType="simple">
+        <descriptions defaultDescription="LOCAL_CONTENT" />
+        <measureMapping columnObjectName="Fact_table" columnName="LOCAL_CONTENT" />
+      </measure>
+      <measure id="BASE_QUANTITY" order="26" semanticType="quantity" aggregationType="min" measureType="quantity">
+        <descriptions defaultDescription="BASE_QUANTITY" />
+        <measureMapping columnObjectName="Fact_table" columnName="BASE_QUANTITY" />
+      </measure>
+      <measure id="QUANTITY_PER_BASE_UNIT" order="27" semanticType="quantity" aggregationType="min" measureType="quantity">
+        <descriptions defaultDescription="QUANTITY_PER_BASE_UNIT" />
+        <measureMapping columnObjectName="Fact_table" columnName="QUANTITY_PER_BASE_UNIT" />
+      </measure>
+    
+      <measure id="TOTAL_COST_PER_UNIT" order="28" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST_PER_UNIT" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST_PER_UNIT" />
+      </measure>
+      <measure id="TOTAL_COST2_PER_UNIT" order="29" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST2_PER_UNIT" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST2_PER_UNIT" />
+      </measure>
+      <measure id="TOTAL_COST3_PER_UNIT" order="30" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_COST3_PER_UNIT" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_COST3_PER_UNIT" />
+      </measure>
+    
+      <measure id="TOTAL_QUANTITY_OF_VARIANTS" order="31" aggregationType="sum" measureType="simple">
+        <descriptions defaultDescription="TOTAL_QUANTITY_OF_VARIANTS" />
+        <measureMapping columnObjectName="Fact_table" columnName="TOTAL_QUANTITY_OF_VARIANTS" />
+      </measure>{{#if Item.customFields}}
+	{{cv_customFieldsMeasureVXml Item}}
+{{/if}}
+</baseMeasures>
+    <calculatedMeasures />
+    <restrictedMeasures />
+    <localDimensions />
+    <sharedDimensions>
+      <logicalJoin associatedObjectUri="sap.plc.analytics.views.base::v_bas_dime_item">
+        <attributes>
+          <attributeRef>CALCULATION_VERSION_ID$local</attributeRef>
+          <attributeRef>ITEM_ID$local</attributeRef>
+        </attributes>
+        <associatedAttributeNames>
+          <attributeName>CALCULATION_VERSION_ID</attributeName>
+          <attributeName>ITEM_ID</attributeName>
+        </associatedAttributeNames>
+        <properties joinType="referential" joinOperator="Equal" />
+        <associatedAttributeFeatures>
+          <attributeReference alias="v_bas_dime_item_CALCULATION_VERSION_NAME" attributeName="CALCULATION_VERSION_NAME" hidden="true" />
+          <attributeReference alias="v_bas_dime_item_CALCULATION_VERSION_ID" attributeName="CALCULATION_VERSION_ID" hidden="true" />
+        </associatedAttributeFeatures>
+      </logicalJoin>
+      <logicalJoin associatedObjectUri="sap.plc.analytics.views.base::v_bas_dime_account">
+        <attributes>
+          <attributeRef>CALCULATION_VERSION_ID$local</attributeRef>
+          <attributeRef>ACCOUNT_ID$local</attributeRef>
+        </attributes>
+        <associatedAttributeNames>
+          <attributeName>CALCULATION_VERSION_ID</attributeName>
+          <attributeName>ACCOUNT_ID</attributeName>
+        </associatedAttributeNames>
+        <properties joinType="leftOuter" joinOperator="Equal" />
+        <associatedAttributeFeatures>
+          <attributeReference alias="v_bas_dime_account_CALCULATION_VERSION_ID" attributeName="CALCULATION_VERSION_ID" hidden="true" />
+          <attributeReference alias="v_bas_dime_account_LANGUAGE" attributeName="LANGUAGE" hidden="true" />
+        </associatedAttributeFeatures>
+      </logicalJoin>
+      <logicalJoin associatedObjectUri="sap.plc.analytics.views.base::v_bas_dime_project">
+        <attributes>
+          <attributeRef>PROJECT_ID$local</attributeRef>
+        </attributes>
+        <associatedAttributeNames>
+          <attributeName>PROJECT_ID</attributeName>
+        </associatedAttributeNames>
+        <properties joinType="referential" joinOperator="Equal" />
+        <associatedAttributeFeatures>
+          <attributeReference alias="v_bas_dime_project_LANGUAGE" attributeName="LANGUAGE" hidden="true" />
+          <attributeReference attributeName="PROJECT_COMPONENT_SPLIT_ID" hidden="true" />
+          <attributeReference attributeName="PROJECT_COMPONENT_SPLIT_DESCRIPTION" hidden="true" />
+          <attributeReference attributeName="PROJECT_COSTING_SHEET_ID" hidden="true" />
+          <attributeReference attributeName="PROJECT_COSTING_SHEET_DESCRIPTION" hidden="true" />
+          <attributeReference attributeName="PROJECT_REPORT_CURRENCY_ID" hidden="true" />
+          <attributeReference attributeName="PROJECT_SALES_DOCUMENT" hidden="true" />
+        </associatedAttributeFeatures>
+      </logicalJoin>
+      <logicalJoin associatedObjectUri="sap.plc.analytics.views.base::v_bas_dime_calcversion">
+        <attributes>
+          <attributeRef>CALCULATION_VERSION_ID$local</attributeRef>
+        </attributes>
+        <associatedAttributeNames>
+          <attributeName>CALCULATION_VERSION_ID</attributeName>
+        </associatedAttributeNames>
+        <properties joinType="referential" joinOperator="Equal" />
+        <associatedAttributeFeatures>
+          <attributeReference alias="v_bas_dime_calcversion_LANGUAGE" attributeName="LANGUAGE" hidden="true" />
+        </associatedAttributeFeatures>
+      </logicalJoin>
+    </sharedDimensions>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="150" y="112" />
+        <rectangleSize height="156" width="201" />
+      </shape>
+      <shape expanded="true" modelObjectName="Fact_table" modelObjectNameSpace="CalculationView">
+        <upperLeftCorner x="92" y="296" />
+        <rectangleSize height="66" width="311" />
+      </shape>
+      <shape modelObjectName="Fact_table" modelObjectNameSpace="StarJoinViewNodeInput" modelObjectType="repository">
+        <upperLeftCorner x="596" y="236" />
+        <rectangleSize width="304" />
+      </shape>
+      <shape modelObjectName="sap.plc.analytics.views.base::v_bas_dime_item" modelObjectNameSpace="StarJoinViewNodeSharedCV" modelObjectType="repository">
+        <upperLeftCorner x="1153" y="32" />
+        <rectangleSize width="297" />
+      </shape>
+      <shape modelObjectName="sap.plc.analytics.views.base::v_bas_dime_account" modelObjectNameSpace="StarJoinViewNodeSharedCV" modelObjectType="repository">
+        <upperLeftCorner x="45" y="120" />
+        <rectangleSize width="234" />
+      </shape>
+      <shape modelObjectName="sap.plc.analytics.views.base::v_bas_dime_project" modelObjectNameSpace="StarJoinViewNodeSharedCV" modelObjectType="repository">
+        <upperLeftCorner x="41" y="327" />
+        <rectangleSize width="279" />
+      </shape>
+      <shape modelObjectName="sap.plc.analytics.views.base::v_bas_dime_calcversion" modelObjectNameSpace="StarJoinViewNodeSharedCV" modelObjectType="repository">
+        <upperLeftCorner x="91" y="747" />
+        <rectangleSize width="252" />
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

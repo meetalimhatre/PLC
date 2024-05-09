@@ -1,0 +1,19 @@
+{
+    "role": {
+        "name": "sqlcc_role",
+        "schema_privileges": [
+            {
+                "privileges": [
+                    "SELECT",
+                    "INSERT",
+                    "DELETE",
+                    "UPDATE",
+                    "EXECUTE",
+                    "CREATE TEMPORARY TABLE",
+                    "SELECT CDS METADATA",
+                    "ALTER"
+                ]
+            }
+        ]
+    }
+}

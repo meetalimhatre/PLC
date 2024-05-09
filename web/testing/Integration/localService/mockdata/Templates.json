@@ -1,0 +1,966 @@
+{
+    "body": {
+        "LAYOUTS": [{
+                "LAYOUT_ID": 1000,
+                "LAYOUT_NAME": "#SAP Default for BoM Compare",
+                "IS_CORPORATE": 0,
+                "IS_CURRENT": 0,
+                "LAYOUT_COLUMNS": [{
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 0,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 400
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 1,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 2,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 3,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 4,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 5,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 6,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 7,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST_PER_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 8,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 9,
+                        "PATH": "CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "LIFECYCLE_PERIOD_DESCRIPTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 10,
+                        "PATH": "CALCULATION_VERSION.MATERIAL_PRICE_STRATEGY",
+                        "BUSINESS_OBJECT": "Price_Determination_Strategy",
+                        "COLUMN_ID": "PRICE_DETERMINATION_STRATEGY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 11,
+                        "PATH": "CALCULATION_VERSION.COSTING_SHEET",
+                        "BUSINESS_OBJECT": "Costing_Sheet",
+                        "COLUMN_ID": "COSTING_SHEET_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 12,
+                        "PATH": "CALCULATION_VERSION.COMPONENT_SPLIT",
+                        "BUSINESS_OBJECT": "Component_Split",
+                        "COLUMN_ID": "COMPONENT_SPLIT_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 13,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FIXED_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 14,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 15,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_VARIABLE_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 16,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 17,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 18,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 19,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 20,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 21,
+                        "PATH": "ITEM.PRICE_SOURCE",
+                        "BUSINESS_OBJECT": "Price_Source",
+                        "COLUMN_ID": "PRICE_SOURCE_DESCRIPTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 22,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FOR_TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1000,
+                        "DISPLAY_ORDER": 23,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    }
+                ],
+                "HIDDEN_FIELDS": []
+            },
+            {
+                "LAYOUT_ID": 1001,
+                "LAYOUT_NAME": "test3",
+                "IS_CORPORATE": 0,
+                "IS_CURRENT": 0,
+                "LAYOUT_COLUMNS": [{
+                        "LAYOUT_ID": 1001,
+                        "DISPLAY_ORDER": 0,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 400
+                    },
+                    {
+                        "LAYOUT_ID": 1001,
+                        "DISPLAY_ORDER": 1,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1001,
+                        "DISPLAY_ORDER": 2,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1001,
+                        "DISPLAY_ORDER": 3,
+                        "PATH": "CALCULATION_VERSION.BASE_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "CALCULATION_VERSION_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1001,
+                        "DISPLAY_ORDER": 4,
+                        "PATH": "CALCULATION_VERSION.CUSTOMER",
+                        "BUSINESS_OBJECT": "Customer",
+                        "COLUMN_ID": "CUSTOMER_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    }
+                ],
+                "HIDDEN_FIELDS": []
+            },
+            {
+                "LAYOUT_ID": 1002,
+                "LAYOUT_NAME": null,
+                "IS_CORPORATE": 0,
+                "IS_CURRENT": 1,
+                "LAYOUT_COLUMNS": [{
+                        "LAYOUT_ID": 1002,
+                        "DISPLAY_ORDER": 0,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 400
+                    },
+                    {
+                        "LAYOUT_ID": 1002,
+                        "DISPLAY_ORDER": 1,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1002,
+                        "DISPLAY_ORDER": 2,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1002,
+                        "DISPLAY_ORDER": 3,
+                        "PATH": "CALCULATION_VERSION.BASE_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "CALCULATION_VERSION_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1002,
+                        "DISPLAY_ORDER": 4,
+                        "PATH": "CALCULATION_VERSION.CUSTOMER",
+                        "BUSINESS_OBJECT": "Customer",
+                        "COLUMN_ID": "CUSTOMER_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    }
+                ],
+                "HIDDEN_FIELDS": []
+            },
+            {
+                "LAYOUT_ID": 1,
+                "LAYOUT_NAME": "#SAP Default",
+                "IS_CORPORATE": 1,
+                "IS_CURRENT": null,
+                "LAYOUT_COLUMNS": [{
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 0,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 400
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 1,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 2,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 3,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 4,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 5,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 6,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 7,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST_PER_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 8,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 9,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FIXED_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 10,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 11,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_VARIABLE_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 12,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 13,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 14,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 15,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 16,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 17,
+                        "PATH": "ITEM.PRICE_SOURCE",
+                        "BUSINESS_OBJECT": "Price_Source",
+                        "COLUMN_ID": "PRICE_SOURCE_DESCRIPTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 18,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FOR_TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 1,
+                        "DISPLAY_ORDER": 19,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    }
+                ],
+                "HIDDEN_FIELDS": []
+            },
+            {
+                "LAYOUT_ID": 2,
+                "LAYOUT_NAME": "#SAP Default with #COGS",
+                "IS_CORPORATE": 1,
+                "IS_CURRENT": null,
+                "LAYOUT_COLUMNS": [{
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 0,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 400
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 1,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 2,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 3,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 4,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_QUANTITY_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 5,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 6,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 7,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST_PER_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 8,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 9,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FIXED_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 10,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 11,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_VARIABLE_PORTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 12,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 13,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 14,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TRANSACTION_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 15,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 16,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_UNIT_UOM_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 17,
+                        "PATH": "ITEM.PRICE_SOURCE",
+                        "BUSINESS_OBJECT": "Price_Source",
+                        "COLUMN_ID": "PRICE_SOURCE_DESCRIPTION",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 18,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "PRICE_FOR_TOTAL_QUANTITY",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 19,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 20,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "DMC",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 21,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 22,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "MOC",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 23,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 24,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "DPC",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 25,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 26,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "POC",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 27,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 28,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "COGM",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 29,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 30,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "SAO",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 31,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 32,
+                        "PATH": null,
+                        "BUSINESS_OBJECT": null,
+                        "COLUMN_ID": null,
+                        "COSTING_SHEET_ROW_ID": "COGS",
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 33,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 34,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "OTHER_COST",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 35,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 36,
+                        "PATH": "ITEM",
+                        "BUSINESS_OBJECT": "Item",
+                        "COLUMN_ID": "TOTAL_COST",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 100
+                    },
+                    {
+                        "LAYOUT_ID": 2,
+                        "DISPLAY_ORDER": 37,
+                        "PATH": "ITEM.CALCULATION_VERSION",
+                        "BUSINESS_OBJECT": "Calculation_Version",
+                        "COLUMN_ID": "REPORT_CURRENCY_ID",
+                        "COSTING_SHEET_ROW_ID": null,
+                        "COST_COMPONENT_ID": null,
+                        "COLUMN_WIDTH": 66
+                    }
+                ],
+                "HIDDEN_FIELDS": []
+            }
+        ]
+    },
+    "head": {}
+}

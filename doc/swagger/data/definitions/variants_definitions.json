@@ -1,0 +1,525 @@
+{
+    "definitions": {
+        "VariantsGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariantHeaderModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "VariantGeneratePostResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariantHeaderModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "VariantHeaderModel": {
+            "type": "object",
+            "properties": {
+                "VARIANT_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "VARIANT_NAME": {
+                    "type": "string",
+                    "description": "ex: Variant desc"
+                },
+                "CALCULATION_VERSION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Id of calculation version for which the variant is defined. ex: 1"
+                },
+                "COMMENT": {
+                    "type": "string",
+                    "description": "ex: Comment"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "Exchange rate type used during calculation of the variant. ex: avg"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "TOTAL_COST": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "IS_SELECTED": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "LAST_GENERATED_VERSION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Id of the latest version generated from this variant, ex: 1001"
+                },
+                "LAST_GENERATED_CALCULATION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Id of the calculation containing the last generated version from this variant, ex: 1"
+                },
+                "LAST_CALCULATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last date on which variant was calculated, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_CALCULATED_BY": {
+                    "type": "string",
+                    "description": "Last calculated by user id"
+                },
+                "LAST_REMOVED_MARKINGS_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last date on which the changes in items were accepted, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_REMOVED_MARKINGS_BY": {
+                    "type": "string",
+                    "description": "Markings removed by user id"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last modified date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "Last modified by user id"
+                }
+            }
+        },
+        "VariantHeaderModelCalculateRequest": {
+            "type": "object",
+            "properties": {
+                "VARIANT_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "Exchange rate type used during calculation of the variant. ex: avg"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                }
+            }
+        },
+        "VariantHeaderModelCalculate": {
+            "type": "object",
+            "properties": {
+                "VARIANT_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "TOTAL_COST": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "LAST_CALCULATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last date on which variant was calculated, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_CALCULATED_BY": {
+                    "type": "string",
+                    "description": "Last calculated by user id"
+                }
+            }
+        },
+        "VariantWithItemsModel": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/VariantHeaderModel"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ITEMS": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/VariantItemModel"
+                    },
+                    "description": "Items defined in the variant."
+                  }
+                }
+              }
+            ]
+        },
+        "VariantWithItemsCompressedModelResponse": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/VariantHeaderModelCalculate"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ITEMS": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/VariantItemCompressedModelResponse"
+                    },
+                    "description": "Items defined in the variant."
+                  }
+                }
+              }
+            ]
+        },
+        "VariantWithItemsCompressedModelRequest": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/VariantHeaderModelCalculateRequest"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ITEMS": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/VariantItemCompressedModelRequest"
+                    },
+                    "description": "Items defined in the variant."
+                  }
+                }
+              }
+            ]
+        },
+        "VariantItemModel": {
+            "type": "object",
+            "properties": {
+                "ITEM_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 3952"
+                },
+                "VARIANT_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "IS_INCLUDED": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Indicates if the item is active in the variant; ex: 1"
+                },
+                "QUANTITY": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "QUANTITY_UOM_ID": {
+                    "type": "string",
+                    "description": "ex: PC"
+                },
+                "TOTAL_QUANTITY": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "TOTAL_COST": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 8115.0168"
+                }
+            }
+        },
+        "VariantsHeaderRequest":{
+            "type": "object",
+            "properties": {
+                "VARIANT_NAME": {
+                    "type": "string",
+                    "description": "ex: #Variant 1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last modified date, ex: 2016-03-31T15:13:57.385Z"
+                }
+            }
+        },
+        "VariantPostBody": {
+            "type": "object",
+            "properties": {
+                "VARIANT_NAME": {
+                    "type": "string",
+                    "description": "ex: Variant desc"
+                },
+                "COMMENT": {
+                    "type": "string",
+                    "description": "ex: Comment"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "Exchange rate type used during calculation of the variant. ex: avg"
+                },
+                "IS_SELECTED": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },  
+                "ITEMS": {
+                    "type": "object",
+                    "properties": {
+                        "ITEMS": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "description": "Items defined in the variant.",
+                                "properties": {
+                                    "ITEM_ID": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "ex: 3952"
+                                    },
+                                    "IS_INCLUDED": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "Indicates if the item is active in the variant; ex: 1"
+                                    },
+                                    "QUANTITY": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "description": "ex: 18"
+                                    },
+                                    "QUANTITY_UOM_ID": {
+                                        "type": "string",
+                                        "description": "ex: PC"
+                                    }
+                                }   
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "VariantsPatchBody": {
+            "type": "object",
+            "properties": {
+                "VARIANT_NAME": {
+                    "type": "string",
+                    "description": "ex: #Variant 1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last modified date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "CHANGES_ACCEPTED": {
+                    "type": "integer",
+                    "description": "CHANGES_ACCEPTED is of type BooleanInt. Allowed values: 1 (true) or 0 (false)"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "ITEMS": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"ITEM_ID": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 1"
+							},
+							"IS_INCLUDED": {
+								"type": "integer",
+								"format": "int32",
+								"description": "ex: 1"
+                            },
+                            "QUANTITY": {
+                                "type": "number",
+                                "format": "double",
+                                "description": "ex: 18"
+                            },
+							"QUANTITY_UOM_ID": {
+								"type": "string",
+								"description": "ex: PC"
+							}
+						}
+					}
+				}
+            }
+        },
+        "VariantsPostPatchResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariantHeaderModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "VariantsPatchOrder": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+					"VARIANT_ID": {
+						"type": "integer",
+						"format": "int32",
+						"description": "ex: 1"
+                    },
+                    "LAST_MODIFIED_ON": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last modified date, ex: 2016-03-31T15:13:57.385Z"
+                    }
+				}
+			}
+		},
+		"VariantItemCompressedModelResponse": {
+		  "type": "object",
+          "properties": {
+            "VARIANT_ID": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Ex:[1, 2]"
+            },
+            "ITEM_ID": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Ex:[1, 2]"
+            },
+            "TOTAL_QUANTITY": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              },
+              "description": "Ex:[100, 200]"
+            },
+            "TOTAL_COST": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              },
+              "description": "Ex:[1, 2]"
+            }
+          }
+        },
+		"VariantItemCompressedModelRequest": {
+          "type": "object",
+          "properties": {
+            "ITEM_ID": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Ex:[1, 2]"
+            },
+            "QUANTITY": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              },
+              "description": "Ex:[10, 20]"
+            },
+            "QUANTITY_UOM_ID": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Ex:[PC, MM]"
+            }
+          }
+        },
+		"GenerateVersionRequest": {
+            "type": "object",
+            "properties": {
+                "TARGET_CALCULATION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Optional. Calculation Id under which the new generated calculation version will be create. ex: 1. "
+                },
+                "CALCULATION_VERSION_NAME": {
+                    "type": "string",
+                    "description": "Optional. ex: Generated Version Name"
+                }
+            }
+        }
+    }
+}

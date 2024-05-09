@@ -1,0 +1,23 @@
+service  {
+	"sap.plc.analytics.viewsCF::V_BOM_COMPARE"
+	keys generate local "ID" 
+	parameters via entity "BOM_COMPARE" results property "Execute"
+	create forbidden
+	update forbidden
+	delete forbidden;
+	"sap.plc.analytics.views.base::v_calculation_version_search" 	
+	as "versionsearch" 	
+	key ("calculation_version_id")
+	create forbidden
+	update forbidden
+	delete forbidden;
+}
+annotations {
+	enable OData4SAP;
+ }
+ settings {
+    support null;
+	content cache-control "no-store";
+  	metadata cache-control "max-age=3600,must-revalidate";
+	limits max_records = 1000000;
+ }

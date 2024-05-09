@@ -1,0 +1,177 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_currency_conversion" (
+    IN INPUT_TABLE TABLE (
+    	"EXCHANGE_RATE_TYPE_ID" NVARCHAR(20),
+    	"FROM_CURRENCY_ID" NVARCHAR(3),
+    	"TO_CURRENCY_ID" NVARCHAR(3),
+    	"FROM_FACTOR" INTEGER,
+    	"TO_FACTOR" INTEGER, 
+    	"RATE" DECIMAL(28, 7),
+    	"VALID_FROM" DATE,
+    	"_SOURCE" TINYINT -- 1: PLC / 2: ERP
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+
+as
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select SESSION_CONTEXT('APPLICATIONUSER')
+        into lv_current_user
+        from "sap.plc.db::DUMMY";
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";   
+
+    -- Insert into general Error Table
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )-- check if exchange rate type exists, not yet
+        select 
+            'EXCHANGE_RATE_TYPE_ID'             as FIELD_NAME ,
+            it.EXCHANGE_RATE_TYPE_ID            as FIELD_VALUE ,
+            'Unknown Exchange rate type ID'     as MESSAGE_TEXT ,
+            :lv_current_utctimestamp            as MESSAGE_TIME ,
+            'ERROR'                             as MESSAGE_TYPE ,
+            't_currency_conversion'             as TABLE_NAME ,
+            'Replication_Update'                as OPERATION ,
+            :lv_run_id                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.EXCHANGE_RATE_TYPE_ID not in (select EXCHANGE_RATE_TYPE_ID from "sap.plc.db::basis.t_exchange_rate_type")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE ,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )-- check if exchange rate type exists, not yet
+        select 
+            'FROM_CURRENCY_ID'                                                                      as FIELD_NAME ,
+            it.FROM_CURRENCY_ID                                                                     as FIELD_VALUE ,
+            'Unknown currency ID for Exchange rate type ID ' || it.EXCHANGE_RATE_TYPE_ID            as MESSAGE_TEXT ,
+            :lv_current_utctimestamp                                                                as MESSAGE_TIME ,
+            'ERROR'                                                                                 as MESSAGE_TYPE ,
+            't_currency_conversion'                                                                 as TABLE_NAME ,
+            'Replication_Update'                                                                    as OPERATION ,
+            :lv_run_id                                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where it.FROM_CURRENCY_ID not in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null)
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE ,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )-- check if exchange rate type exists, not yet
+        select 
+            'TO_CURRENCY_ID'                                                                        as FIELD_NAME ,
+            it.TO_CURRENCY_ID                                                                       as FIELD_VALUE ,
+            'Unknown currency ID for Exchange rate type ID ' || it.EXCHANGE_RATE_TYPE_ID            as MESSAGE_TEXT ,
+            :lv_current_utctimestamp                                                                as MESSAGE_TIME ,
+            'ERROR'                                                                                 as MESSAGE_TYPE ,
+            't_currency_conversion'                                                                 as TABLE_NAME ,
+            'Replication_Update'                                                                    as OPERATION ,
+            :lv_run_id                                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where it.TO_CURRENCY_ID not in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null)
+    ;
+    
+    -- Check existance of VALID_FROM
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE ,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME ,
+        OPERATION ,
+        RUN_ID
+    )
+        select 
+            'VALID_FROM'                                                                    as FIELD_NAME ,
+            it.VALID_FROM                                                                   as FIELD_VALUE,
+            'Invalid Valid From for Exchange rate type ID ' || it.EXCHANGE_RATE_TYPE_ID     as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                         as MESSAGE_TIME ,
+            'ERROR'                                                                         as MESSAGE_TYPE ,
+            't_currency_conversion'                                                         as TABLE_NAME , 
+            'Replication_Update'                                                            as OPERATION ,
+            :lv_run_id                                                                      as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALID_FROM is null -- must be Date format as defined on input
+    ;
+
+    lt_update_records =
+        select EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, FROM_FACTOR, TO_FACTOR, RATE, VALID_FROM, _SOURCE
+        from 
+        (select *, 
+            Count(*) OVER (PARTITION BY EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+            -- ignore not existing exchange rate type, currencies
+          and it.EXCHANGE_RATE_TYPE_ID in (select EXCHANGE_RATE_TYPE_ID from "sap.plc.db::basis.t_exchange_rate_type")
+          and it.FROM_CURRENCY_ID in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null) 
+          and it.TO_CURRENCY_ID in (select CURRENCY_ID from "sap.plc.db::basis.t_currency" where _VALID_TO is null) 
+          and it.VALID_FROM is not null    
+          except    
+              (select EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, FROM_FACTOR, TO_FACTOR, RATE, VALID_FROM, _SOURCE
+                    from "sap.plc.db::basis.t_currency_conversion" as std
+                    where _VALID_TO IS NULL
+                    AND (std.EXCHANGE_RATE_TYPE_ID, std.FROM_CURRENCY_ID, std.TO_CURRENCY_ID, std.VALID_FROM) in (select EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM from :INPUT_TABLE));
+
+    SELECT COUNT(EXCHANGE_RATE_TYPE_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS = :lv_rows_count;
+
+    if (:lv_rows_count > 0) then
+    
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_currency_conversion" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.EXCHANGE_RATE_TYPE_ID, tbl.FROM_CURRENCY_ID, tbl.TO_CURRENCY_ID, tbl.VALID_FROM)
+    		      in (select EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM
+    			      from :lt_update_records as upd 
+    			      where upd.EXCHANGE_RATE_TYPE_ID = tbl.EXCHANGE_RATE_TYPE_ID
+    			        and upd.FROM_CURRENCY_ID = tbl.FROM_CURRENCY_ID
+    			        and upd.TO_CURRENCY_ID = tbl.TO_CURRENCY_ID
+    			        and upd.VALID_FROM = tbl.VALID_FROM
+    		      )
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- insert the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_currency_conversion" 
+    		(EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, FROM_FACTOR, TO_FACTOR, RATE, VALID_FROM, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select EXCHANGE_RATE_TYPE_ID, FROM_CURRENCY_ID, TO_CURRENCY_ID, FROM_FACTOR, TO_FACTOR, RATE, VALID_FROM,  :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+    
+END

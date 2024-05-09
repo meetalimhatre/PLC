@@ -1,0 +1,330 @@
+{
+    "layouts": {
+        "get": {
+            "tags": [
+                "layouts"
+            ],
+            "summary": "Gets corporate layouts and personal layouts (for the logged in user)",
+            "description": "",
+            "operationId": "layoutsGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [{
+                "name": "layout_type",
+                "in": "query",
+                "description": "Specifies the layout type",
+                "required": false,
+                "type": "integer"
+            }],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutsGetResponse"
+                    }
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "read:layouts"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "layouts"
+            ],
+            "summary": "Create a personal or corporate layout.",
+            "description": "Creates a new layout with the values from request. Only users with specific privilege can create corporate layouts.",
+            "operationId": "layoutsPost",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the layout is personal or corporate.",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Layout that needs to be created. It contains among others the layout columns and the hidden fields.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "201": {
+                    "description": "Created. The id of the new layout is returned when the creation succeeds.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutId"
+                    }
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "409": {
+                    "description": "Layout with the same name already exists.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageWriteLayoutNamingConflict"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "edit:layouts_is_corporate:false"
+                    ]
+                },
+                {
+                    "Privileges.CORPORATE_LAYOUT_EDIT": [
+                        "edit:layouts_is_corporate:true"
+                    ]
+                }
+            ]
+        },
+        "put": {
+            "tags": [
+                "layouts"
+            ],
+            "summary": "Updates a layout.",
+            "description": "Updates personal or corporate layout together with the layout columns and hidden fields.",
+            "operationId": "layoutsPut",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the layout is personal or corporate",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false"
+                    ]
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Layout that needs to be updated, the current layout columns and the current hidden fields.",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutId"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "409": {
+                    "description": "Layout name is updated to a name that already exists in the table.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageWriteLayoutNamingConflict"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "edit:layouts_is_corporate:false"
+                    ]
+                },
+                {
+                    "Privileges.CORPORATE_LAYOUT_EDIT": [
+                        "edit:layouts_is_corporate:true"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "layouts"
+            ],
+            "summary": "Deletes layouts (personal or corporate)",
+            "description": "",
+            "operationId": "layoutsDelete",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "is_corporate",
+                    "in": "query",
+                    "description": "Specifies if the layout is personal or corporate",
+                    "required": true,
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false"
+                    ]
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Layout that needs to be deleted (the id).",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/LayoutId"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "403": {
+                    "description": "Access denied, missing privileges"
+                },
+                "404": {
+                    "description": "If the requested layout id does not exist",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                },
+                "502": {
+                    "description": "Bad Gateway"
+                },
+                "503": {
+                    "description": "Service unavailable"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.BASE_ACCESS": [
+                        "edit:layouts_is_corporate:false"
+                    ]
+                },
+                {
+                    "Privileges.CORPORATE_LAYOUT_EDIT": [
+                        "edit:layouts_is_corporate:true"
+                    ]
+                }
+            ]
+        }
+    }
+}

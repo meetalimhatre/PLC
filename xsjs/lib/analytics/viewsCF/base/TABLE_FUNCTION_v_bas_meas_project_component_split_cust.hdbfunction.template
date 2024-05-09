@@ -1,0 +1,162 @@
+FUNCTION "sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bas_meas_project_component_split_cust"
+	(
+		projectId NVARCHAR(5000) default '',
+		VAR_ONLY_CURRENT TINYINT
+	)
+	RETURNS TABLE (
+		"PROJECT_ID" NVARCHAR(35),
+		"CALCULATION_VERSION_ID" INTEGER,
+		"ACCOUNT_ID" NVARCHAR(10),
+		"COST_COMPONENT_ID" INTEGER,
+		"COST" DECIMAL(28, 7),
+		"COST_FIXED_PORTION" DECIMAL(28, 7),
+		"COST_VARIABLE_PORTION" DECIMAL(28, 7),
+		"COST2" DECIMAL(28, 7),
+		"COST2_FIXED_PORTION" DECIMAL(28, 7),
+		"COST2_VARIABLE_PORTION" DECIMAL(28, 7),
+		"COST3" DECIMAL(28, 7),
+		"COST3_FIXED_PORTION" DECIMAL(28, 7),
+		"COST3_VARIABLE_PORTION" DECIMAL(28, 7),
+		"PRICE" DECIMAL (28, 7),
+		"PRICE_FIXED_PORTION" DECIMAL (28, 7),
+		"PRICE_VARIABLE_PORTION" DECIMAL (28, 7),
+		"TRANSACTION_CURRENCY_ID" NVARCHAR (3),
+		"PRICE_UNIT" DECIMAL (28, 7),
+		"PRICE_UNIT_UOM_ID" NVARCHAR (3),
+		"COST_PER_UNIT" DECIMAL(28, 7),
+		"COST_FIXED_PER_UNIT" DECIMAL(28, 7),
+		"COST_VARIABLE_PER_UNIT" DECIMAL(28, 7),
+		"TOTAL_COST_PER_UNIT" DECIMAL(28, 7),
+		"COST2_PER_UNIT" DECIMAL(28, 7),
+		"COST2_FIXED_PER_UNIT" DECIMAL(28, 7),
+		"COST2_VARIABLE_PER_UNIT" DECIMAL(28, 7),
+		"TOTAL_COST2_PER_UNIT" DECIMAL(28, 7),
+		"COST3_PER_UNIT" DECIMAL(28, 7),
+		"COST3_FIXED_PER_UNIT" DECIMAL(28, 7),
+		"COST3_VARIABLE_PER_UNIT" DECIMAL(28, 7),
+		"TOTAL_COST3_PER_UNIT" DECIMAL(28, 7),
+		"REPORT_CURRENCY_ID" NVARCHAR(3),
+		"TOTAL_QUANTITY" DECIMAL(28, 7),
+		"TOTAL_QUANTITY_UOM_ID" NVARCHAR(3),
+		"TARGET_COST" DECIMAL(28, 7),
+		"TARGET_COST_CURRENCY_ID" NVARCHAR(3),
+		"SALES_PRICE" DECIMAL(28, 7),
+		"SALES_PRICE_CURRENCY_ID" NVARCHAR(3),
+		"PROJECT_SALES_PRICE" DECIMAL(28, 7),
+		"PROJECT_SALES_PRICE_CURRENCY_ID" NVARCHAR(3)
+		{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctList Item}}
+	{{/if}}
+)
+
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY DEFINER AS
+
+BEGIN
+
+	var_out =
+
+	SELECT
+	   project.project_id,
+       compSplit.calculation_version_id,
+	   compSplit.account_id,
+       compSplit.cost_component_id,
+       compSplit.cost,
+       compSplit.cost_fixed_portion,
+       compSplit.cost_variable_portion,
+	   compSplit.cost2,
+       compSplit.cost2_fixed_portion,
+       compSplit.cost2_variable_portion,
+	   compSplit.cost3,
+       compSplit.cost3_fixed_portion,
+       compSplit.cost3_variable_portion,
+       compSplit.price,
+	   compSplit.price_fixed_portion,
+	   compSplit.price_variable_portion,
+	   compSplit.transaction_currency_id,
+	   compSplit.price_unit,
+	   compSplit.price_unit_uom_id,
+	   -- 1
+       CASE WHEN compSplit.total_quantity > 0
+       		THEN (compSplit.cost / compSplit.total_quantity)
+       		ELSE null
+       END as cost_per_unit,
+       CASE WHEN compSplit.total_quantity > 0
+       		THEN (compSplit.cost_fixed_portion / compSplit.total_quantity)
+       		ELSE null
+       END as cost_fixed_per_unit,
+       CASE WHEN compSplit.total_quantity > 0
+       		THEN (compSplit.cost_variable_portion / compSplit.total_quantity)
+       		ELSE null
+       END as cost_variable_per_unit,
+       compSplit.total_cost_per_unit,
+	   -- 2
+	   CASE WHEN compSplit.total_quantity > 0
+		THEN (compSplit.cost2 / compSplit.total_quantity)
+		ELSE null
+	 	END as cost2_per_unit,
+		CASE WHEN compSplit.total_quantity > 0
+		THEN (compSplit.cost2_fixed_portion / compSplit.total_quantity)
+		ELSE null
+		END as cost2_fixed_per_unit,
+		CASE WHEN compSplit.total_quantity > 0
+		THEN (compSplit.cost2_variable_portion / compSplit.total_quantity)
+		ELSE null
+		END as cost2_variable_per_unit,
+		compSplit.total_cost2_per_unit,
+	   -- 3
+	   CASE WHEN compSplit.total_quantity > 0
+		THEN (compSplit.cost3 / compSplit.total_quantity)
+		ELSE null
+		END as cost3_per_unit,
+		CASE WHEN compSplit.total_quantity > 0
+				THEN (compSplit.cost3_fixed_portion / compSplit.total_quantity)
+				ELSE null
+		END as cost3_fixed_per_unit,
+		CASE WHEN compSplit.total_quantity > 0
+				THEN (compSplit.cost3_variable_portion / compSplit.total_quantity)
+				ELSE null
+		END as cost3_variable_per_unit,
+		compSplit.total_cost3_per_unit,
+       calcVersion.report_currency_id,
+       compSplit.total_quantity,
+	   compSplit.total_quantity_uom_id,
+       compSplit.target_cost,
+	    compSplit.target_cost_currency_id,
+       	calcVersion.sales_price,
+		calcVersion.sales_price_currency_id,
+		project.sales_price as project_sales_price,
+		project.sales_price_currency_id as project_sales_price_currency_id
+		{{#if Item.customFields}}
+			{{cv_customFieldsTableFunctSelect Item}}
+		{{/if}}
+
+	FROM "sap.plc.analytics.views.base::v_bas_meas_component_split"(placeholder."$$projectId$$"=>:projectId) compSplit
+			
+		INNER JOIN "sap.plc.db::basis.t_calculation_version" calcVersion
+			ON calcVersion.calculation_version_id = compSplit.calculation_version_id
+
+		INNER JOIN "sap.plc.db::basis.t_calculation" calc
+			ON calc.calculation_id = calcVersion.calculation_id
+			
+		INNER JOIN "sap.plc.db::basis.t_project" project
+			ON project.project_id = calc.project_id
+			and project.project_id IN (SELECT "OUTPUT_SPLIT" FROM "sap.plc.analytics.views.base::TF_SPLIT_STRING" (:projectId))
+
+	
+	{{#if Item.customFields}}
+		LEFT OUTER JOIN {{t_extensionTable Item}} plcExtTable ON plcExtTable.item_id = compSplit.item_id AND plcExtTable.calculation_version_id = compSplit.calculation_version_id
+	{{/if}}
+WHERE
+		-- Select only Calculation Versions Root Item w/o Children
+		compSplit.parent_item_id IS NULL
+
+		-- Limit selection to either Current Calculation Versions or to Current && Non-Current Calculation Versions
+		AND  ( case when :VAR_ONLY_CURRENT = 1
+        		then ( case when calc.current_calculation_version_id = calcVersion.calculation_version_id then 1 else 0 end )
+            	else 1 end
+            ) = 1;
+
+	return :var_out;
+
+END;

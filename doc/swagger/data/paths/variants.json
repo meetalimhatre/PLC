@@ -1,0 +1,555 @@
+{
+    "calculation-versions/:calculation_version_id/variants": {
+        "get": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Get all variant headers",
+            "description": "Get data of all variant headers of calculation version.",
+            "operationId": "variantsGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which all the variant headers will be retrieved",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsGetResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input parameter",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant for the parameter cannot be found)."
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        },
+        "patch": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Update the variant order",
+            "description": "Updates the the order of variants. Variant order is determined by the order of variant elements within the array in body object. Only given variants are affected. Variants not part of the request are not modified.",
+            "operationId": "variantsPatch",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "body",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsPatchOrder"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsPostPatchResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors; GENERAL_ENTITY_NOT_CURRENT_ERROR if a concurrent edit was detected.",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant/calculation version for the parameters cannot be found)."
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "open:calculation versions"
+                    ]
+                }
+            ]
+        },
+        "post": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Create a new variant",
+            "description": "Create a new entry based on the JSON data the client gives in the request body.",
+            "operationId": "variantsPost",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which the variant shall be created",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Variant that needs to be created",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "201": {
+                    "description": "Created",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsGetResponse"
+                    }
+                },
+                "400": {
+                    "description": "General Entity Already Exists",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityAlreadyExistsError"
+                    }
+                },
+                "500": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    },
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id/variants/:variant_id": {
+        "get": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Get a variant header",
+            "description": "Get data of a variant header",
+            "operationId": "variantsGet",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which the variant header will be retrieved",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "variant_id",
+                    "in": "path",
+                    "description": "Id of the variant header that shall be retrieved",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "expand",
+                    "in": "query",
+                    "description": "Expands an association of the variant. Currently only the value \"ITEMS\" is allowed, which includes items in the response.",
+                    "required": false,
+                    "type": "string",
+                    "enum": [
+                        "ITEMS"
+                    ]
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantWithItemsModel"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input parameter",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant for the parameter cannot be found)."
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_OPEN": [
+                        "read:calculation-versions"
+                    ]
+                }
+            ]
+        },
+        "patch": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Updates a variant.",
+            "description": "The implementation updates the database entry in t_variant based on JSON data the client gives in the request body. This update uses a opt-in approach, which means only properties that are contained in the request are updated. Properties that shall be set to <code>NULL</code> must be explicitly set to to <code>null</code> in the request data.",
+            "operationId": "variantsPatch",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which the variant shall be updated",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "variant_id",
+                    "in": "path",
+                    "description": "Id of the variant that shall be updated",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Variant that needs to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsPatchBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantsPostPatchResponse"
+                    }
+                },
+                "400": {
+                    "description": "Invalid input parameter",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "description": "If the requested resource is not found",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                },
+                "500": {
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "create:calculationVersions"
+                    ]
+                }
+            ]
+        },
+        "delete": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Delete variant",
+            "description": "Delete variant and updates the order of variants in backend",
+            "operationId": "variantsDel",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which a variant will be deleted",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "variant_id",
+                    "in": "path",
+                    "description": "Id of the variant to delete.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors or GENERAL_ENTITY_NOT_CURRENT_ERROR if a concurrent edit was detected",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant for the parameter cannot be found)."
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "delete:calculation versions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id/variant-calculator": {
+        "post": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Calculate variants",
+            "description": "Calculates variants and returns variant headers",
+            "operationId": "variantsPostCalculate",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version, for which the variants costs need to be calculated",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Variants and their items that needs to be calculated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantWithItemsCompressedModelRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Calculated",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantWithItemsCompressedModelResponse"
+                    }
+                },
+                "400": {
+                    "description": "General Entity Already Exists",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityAlreadyExistsError"
+                    }
+                },
+                "500": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralValidationError"
+                    },
+                    "description": "If the service was called using wrong HTTP method, invalid parameter or invalid parameter value"
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "edit:calculation-versions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id/variant-calculator/:variant_id": {
+        "put": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Calculate variant",
+            "description": "Calculate the given variant and updates the calculated values in the database",
+            "operationId": "variantCalculate",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version to which the variant belongs",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "variant_id",
+                    "in": "path",
+                    "description": "Id of the variant to calculate.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/EmptyResponse"
+                    }
+                },
+                "400": {
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors or GENERAL_ENTITY_NOT_CURRENT_ERROR if a concurrent edit was detected",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant for the parameter cannot be found)."
+                }
+            },
+            "security": [
+                {
+                    "Privileges.CALCULATION_VERSIONS_CREATE_UPDATE": [
+                        "put:calculation versions"
+                    ]
+                }
+            ]
+        }
+    },
+    "calculation-versions/:calculation_version_id/variant-generator/:variant_id": {
+        "post": {
+            "tags": [
+                "variants"
+            ],
+            "summary": "Generate version",
+            "description": "Generate a Calculation Version from a given Variant",
+            "operationId": "variantGenerate",
+            "produces": [
+                "application/json"
+            ],
+            "consumes": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "calculation_version_id",
+                    "in": "path",
+                    "description": "Id of the calculation version to which the variant belongs",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "variant_id",
+                    "in": "path",
+                    "description": "Id of the variant used to generate a new Calculation Version",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "body",
+                    "in": "body",
+                    "required": false,
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/GenerateVersionRequest"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK",
+                    "schema": {
+                        "$ref": "../definitions/variants_definitions.json#/definitions/VariantGeneratePostResponse"
+                    }
+                },
+                "400": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    },
+                    "description": "Bad Request. Multiple PLC error codes are possible: GENERAL_VALIDATION_ERROR in case the request is malformed or has semantical errors or GENERAL_ENTITY_NOT_CURRENT_ERROR if a concurrent edit was detected"
+                },
+                "403": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralAccessDeniedError"
+                    },
+                    "description": "Forbidden. If the requesting user has not sufficient access rights to generate a version"
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    },
+                    "description": "Not Found (if a variant for the parameter cannot be found)."
+                }
+            }
+        }
+    }
+}

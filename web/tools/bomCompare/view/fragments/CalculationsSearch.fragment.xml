@@ -1,0 +1,60 @@
+<core:FragmentDefinition
+xmlns="sap.ui.table"
+xmlns:mvc="sap.ui.core.mvc"
+xmlns:u="sap.ui.unified"
+xmlns:m="sap.m"
+xmlns:core="sap.ui.core">
+    <m:Dialog  id="calculationSearch" type="Message" contentWidth="80%" title="{i18n>XTIT_findCalculationVersion}">
+        <m:content>
+            <Table
+            id="calculationsTable"
+            selectionMode="Single"
+            selectionBehavior="Row"
+            rows="{
+                path: 'CalculationsOdataModel>/versionsearch'
+            }"
+            visibleRowCount="7"
+            enableCellFilter="{ui>/cellFilterOn}"
+            rowSelectionChange=".CalculationSelectionChange"
+            ariaLabelledBy="title">
+            <columns>
+                <Column
+                    filterProperty="calculation_version_id"
+                    sortProperty="calculation_version_id">
+                    <m:Label text="{i18n>XCOL_column.CALCULATION_VERSION_ID}" />
+                    <template>
+                        <m:Text text="{CalculationsOdataModel>calculation_version_id}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column
+                    filterProperty="calculation_version_name"
+                    sortProperty="calculation_version_name">
+                    <m:Label text="{i18n>XCOL_column.CALCULATION_VERSION_NAME}" />
+                    <template>
+                        <m:Text text="{CalculationsOdataModel>calculation_version_name}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column
+                    filterProperty="project_name"
+                    sortProperty="project_name">
+                    <m:Label text="{i18n>XCOL_column.PROJECT_NAME}" />
+                    <template>
+                        <m:Text text="{CalculationsOdataModel>project_name}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column
+                    filterProperty="calculation_name"
+                    sortProperty="calculation_name">
+                    <m:Label text="{i18n>XCOL_column.CALCULATION_NAME}" />
+                    <template>
+                        <m:Text text="{CalculationsOdataModel>calculation_name}" wrapping="false" />
+                    </template>
+                </Column>
+            </columns>
+        </Table>
+        </m:content>
+        <m:endButton>
+            <m:Button text="{i18n>XBUT_cancel}"  press=".onClose('calculationSearch')"/>
+        </m:endButton>
+      </m:Dialog>
+</core:FragmentDefinition>

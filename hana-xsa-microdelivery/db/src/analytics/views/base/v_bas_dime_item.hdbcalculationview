@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" schemaVersion="3.0" id="sap.plc.analytics.views.base::v_bas_dime_item" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DEFAULT" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true">
+  <descriptions/>
+  <localVariables>
+    <variable id="VAR_LANGUAGE" parameter="true">
+      <descriptions defaultDescription="VAR_LANGUAGE"/>
+      <variableProperties datatype="NVARCHAR" length="11" mandatory="true" scale="NaN" defaultValue="EN">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_language</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>LANGUAGE</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  
+    <variable id="projectId" parameter="true">
+      <descriptions defaultDescription=""/>
+      <variableProperties datatype="NVARCHAR" length="35" scale="NaN" mandatory="true">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+    <variable id="versionId" parameter="true">
+      <descriptions defaultDescription=""/>
+      <variableProperties datatype="INTEGER" length="10" scale="0" mandatory="false">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>calculation_version_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item">
+      <targetVariable name="PROJECTID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item"/>
+      <localVariable>projectId</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item">
+      <targetVariable name="VERSIONID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item"/>
+      <localVariable>versionId</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item"/>
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="23"/>
+  <dataSources>
+    <DataSource id="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews/>
+  <logicalModel id="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_item">
+    <descriptions/>
+    <attributes>
+      <attribute id="CALCULATION_VERSION_ID" order="1" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="CALCULATION_VERSION_ID"/>
+      </attribute>
+      <attribute id="CALCULATION_VERSION_NAME" order="2" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_NAME"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="CALCULATION_VERSION_NAME"/>
+      </attribute>
+      <attribute id="LANGUAGE" order="3" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="LANGUAGE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="LANGUAGE"/>
+      </attribute>
+      <attribute id="ITEM_ID" order="4" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ITEM_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ITEM_ID"/>
+      </attribute>
+      <attribute id="ITEM_DESCRIPTION" order="5" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ITEM_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ITEM_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PARENT_ITEM_ID" order="6" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PARENT_ITEM_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PARENT_ITEM_ID"/>
+      </attribute>
+      <attribute id="PARENT_ITEM_DESCRIPTION" order="7" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PARENT_ITEM_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PARENT_ITEM_DESCRIPTION"/>
+      </attribute>
+      <attribute id="COMMENT" order="8" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COMMENT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="COMMENT"/>
+      </attribute>
+      <attribute id="IS_LEAF" order="9" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="IS_LEAF"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="IS_LEAF"/>
+      </attribute>
+      <attribute id="ITEM_CATEGORY_ID" order="10" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ITEM_CATEGORY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ITEM_CATEGORY_ID"/>
+      </attribute>
+      <attribute id="IS_ACTIVE" order="11" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="IS_ACTIVE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="IS_ACTIVE"/>
+      </attribute>
+      <attribute id="RESOURCE_ID" order="12" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="RESOURCE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="RESOURCE_ID"/>
+      </attribute>
+      <attribute id="RESOURCE_DESCRIPTION" order="13" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="RESOURCE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="RESOURCE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="RESOURCE_TYPE_ID" order="14" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="RESOURCE_TYPE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="RESOURCE_TYPE_ID"/>
+      </attribute>
+      <attribute id="RESOURCE_TYPE" order="15" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="RESOURCE_TYPE"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="RESOURCE_TYPE"/>
+      </attribute>
+      <attribute id="MATERIAL_ID" order="16" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="MATERIAL_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="MATERIAL_ID"/>
+      </attribute>
+      <attribute id="MATERIAL_DESCRIPTION" order="17" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="MATERIAL_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="MATERIAL_DESCRIPTION"/>
+      </attribute>
+      <attribute id="MATERIAL_GROUP_ID" order="18" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="MATERIAL_GROUP_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="MATERIAL_GROUP_ID"/>
+      </attribute>
+      <attribute id="MATERIAL_TYPE_ID" order="19" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="MATERIAL_TYPE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="MATERIAL_TYPE_ID"/>
+      </attribute>
+      <attribute id="ACTIVITY_TYPE_ID" order="20" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ACTIVITY_TYPE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ACTIVITY_TYPE_ID"/>
+      </attribute>
+      <attribute id="ACTIVITY_TYPE_DESCRIPTION" order="21" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ACTIVITY_TYPE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ACTIVITY_TYPE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PROCESS_ID" order="22" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROCESS_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PROCESS_ID"/>
+      </attribute>
+      <attribute id="PROCESS_DESCRIPTION" order="23" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROCESS_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PROCESS_DESCRIPTION"/>
+      </attribute>
+      <attribute id="COMPANY_CODE_ID" order="24" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COMPANY_CODE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="COMPANY_CODE_ID"/>
+      </attribute>
+      <attribute id="COMPANY_CODE_DESCRIPTION" order="25" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COMPANY_CODE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="COMPANY_CODE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="COST_CENTER_ID" order="26" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COST_CENTER_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="COST_CENTER_ID"/>
+      </attribute>
+      <attribute id="COST_CENTER_DESCRIPTION" order="27" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="COST_CENTER_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="COST_CENTER_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PLANT_ID" order="28" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PLANT_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PLANT_ID"/>
+      </attribute>
+      <attribute id="PLANT_DESCRIPTION" order="29" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PLANT_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PLANT_DESCRIPTION"/>
+      </attribute>
+      <attribute id="BUSINESS_AREA_ID" order="30" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="BUSINESS_AREA_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="BUSINESS_AREA_ID"/>
+      </attribute>
+      <attribute id="BUSINESS_AREA_DESCRIPTION" order="31" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="BUSINESS_AREA_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="BUSINESS_AREA_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PROFIT_CENTER_ID" order="32" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROFIT_CENTER_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PROFIT_CENTER_ID"/>
+      </attribute>
+      <attribute id="PROFIT_CENTER_DESCRIPTION" order="33" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PROFIT_CENTER_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PROFIT_CENTER_DESCRIPTION"/>
+      </attribute>
+      <attribute id="CONFIDENCE_LEVEL_ID" order="34" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="CONFIDENCE_LEVEL_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="CONFIDENCE_LEVEL_ID"/>
+      </attribute>
+      <attribute id="CONFIDENCE_LEVEL_DESCRIPTION" order="35" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="CONFIDENCE_LEVEL_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="CONFIDENCE_LEVEL_DESCRIPTION"/>
+      </attribute>
+      <attribute id="VENDOR_ID" order="36" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="VENDOR_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="VENDOR_ID"/>
+      </attribute>
+      <attribute id="VENDOR_NAME" order="37" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="VENDOR_NAME"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="VENDOR_NAME"/>
+      </attribute>
+      <attribute id="PRICE_SOURCE_ID" order="38" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PRICE_SOURCE_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PRICE_SOURCE_ID"/>
+      </attribute>
+      <attribute id="PRICE_SOURCE_DESCRIPTION" order="39" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PRICE_SOURCE_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PRICE_SOURCE_DESCRIPTION"/>
+      </attribute>
+      <attribute id="ENGINEERING_CHANGE_NUMBER_ID" order="40" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="ENGINEERING_CHANGE_NUMBER_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="ENGINEERING_CHANGE_NUMBER_ID"/>
+      </attribute>
+      <attribute id="TOTAL_QUANTITY_DEPENDS_ON" order="41" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="TOTAL_QUANTITY_DEPENDS_ON"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="TOTAL_QUANTITY_DEPENDS_ON"/>
+      </attribute>
+      <attribute id="IS_RELEVANT_TO_COSTING_IN_ERP" order="42" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="IS_RELEVANT_TO_COSTING_IN_ERP"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="IS_RELEVANT_TO_COSTING_IN_ERP"/>
+      </attribute>
+      <attribute id="IS_DISABLING_PRICE_DETERMINATION" order="43" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="IS_DISABLING_PRICE_DETERMINATION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="IS_DISABLING_PRICE_DETERMINATION"/>
+      </attribute>
+      <attribute id="PURCHASING_DOCUMENT" order="44" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PURCHASING_DOCUMENT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PURCHASING_DOCUMENT"/>
+      </attribute>
+      <attribute id="PURCHASING_GROUP" order="45" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="PURCHASING_GROUP"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="PURCHASING_GROUP"/>
+      </attribute>
+      <attribute id="WORK_CENTER_ID" order="46" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="WORK_CENTER_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="WORK_CENTER_ID"/>
+      </attribute>
+      <attribute id="WORK_CENTER_DESCRIPTION" order="47" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="WORK_CENTER_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="WORK_CENTER_DESCRIPTION"/>
+      </attribute>
+      <attribute id="CHILD_ITEM_CATEGORY_ID" order="48" displayAttribute="false" attributeHierarchyActive="false">
+        <descriptions defaultDescription="CHILD_ITEM_CATEGORY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_item" columnName="CHILD_ITEM_CATEGORY_ID"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape modelObjectName="Output" modelObjectNameSpace="MeasureGroup" expanded="true">
+        <upperLeftCorner x="40" y="85"/>
+        <rectangleSize height="0" width="0"/>
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

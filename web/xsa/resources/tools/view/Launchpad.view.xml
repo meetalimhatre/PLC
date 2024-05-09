@@ -1,0 +1,12 @@
+<core:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    controllerName="ui.controller.Launchpad">
+    <Page id="page">
+        <content>
+            <core:Fragment fragmentName="ui.view.ModeSelect" type="XML" />
+        </content>
+    </Page>
+</core:View>

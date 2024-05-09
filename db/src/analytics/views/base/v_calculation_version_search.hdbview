@@ -1,0 +1,16 @@
+view "sap.plc.analytics.views.base::v_calculation_version_search" ( "calculation_version_id", "calculation_version_name", "calculation_id", "calculation_name", "project_id", "project_name" ) as select	
+	calcVersion.calculation_version_id,	
+    calcVersion.calculation_version_name,	
+    calculation.calculation_id,	
+    calculation.calculation_name,	
+    project.project_id,	
+    project.project_name	
+from "sap.plc.db::basis.t_calculation_version" calcVersion	
+	inner join "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersionAuth	
+        on calcVersion.calculation_version_id = calcVersionAuth.calculation_version_id	
+        and upper(calcVersionAuth.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))	
+    inner join "sap.plc.db::basis.t_calculation" calculation	
+        on calcVersion.calculation_id = calculation.calculation_id	
+    inner join "sap.plc.db::basis.t_project" project	
+        on project.project_id = calculation.project_id	
+with read only; 

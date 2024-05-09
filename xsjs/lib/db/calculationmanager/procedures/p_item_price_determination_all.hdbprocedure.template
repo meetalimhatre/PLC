@@ -1,0 +1,292 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_price_determination_all" ( 
+		IN iv_cv_id 					INTEGER,
+     	IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_price_determination_input",
+		IN it_calculation_version       "sap.plc.db.calculationmanager::calculationmanager_types.ts_calculation_version_price_determination_input",
+		OUT ot_determined_prices 	    "sap.plc.db.calculationmanager.procedures::ts_item_price_determination_output" default empty,
+		OUT ot_messages                 "sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+
+	lc_material_price		INTEGER DEFAULT 1;
+	lc_document 			INTEGER DEFAULT 1;
+    lc_material 			INTEGER DEFAULT 2;
+    lc_internal_activity 	INTEGER DEFAULT 3;
+    lc_external_activity    INTEGER DEFAULT 4;
+	lc_process              INTEGER DEFAULT 5;
+    lc_subcontracting 		INTEGER DEFAULT 6;
+	lc_resources_and_tools  INTEGER DEFAULT 7;
+    lc_variable_item		INTEGER DEFAULT 8;
+    lc_manual_price 		INTEGER DEFAULT 3;
+	lc_consider_vendor_filters	SMALLINT DEFAULT 1;
+    lc_use_multiple_plants	NVARCHAR(1) DEFAULT '';
+    lc_psource_changed      NVARCHAR(100) DEFAULT 'PRICEDETERMINATION_PRICESOURCE_CHANGED_INFO';
+    lc_price_not_found      NVARCHAR(100) DEFAULT 'PRICEDETERMINATION_STANDARDPRICE_NOT_FOUND_WARNING'; 
+
+BEGIN
+declare		lv_controlling_area_id nvarchar(4);
+declare		lv_project_id nvarchar(35);
+lv_controlling_area_id = :it_calculation_version.controlling_area_id[1];
+lv_project_id = :it_calculation_version.project_id[1];
+
+/****************************************************************** 
+	Price Determination 
+ ******************************************************************/
+-- Procedure used to determine/select prices for several items. 
+--
+-- Prerequisites: items should be leaves
+-- Input:  
+-- 		- it_items => table type of items for which prices should be determined
+--		- it_calculation_version => table type that also contains:
+--          - lv_controlling_area_id => controlling_area_id
+--      	- lv_project_id => project_id
+--				 
+-- Output:
+--		- ot_determined_prices => contains all determined prices
+--		- ot_messages => contains all the messages
+--
+-- Logic:
+--1. Determine prices for the items with item category: Document, Material, Subcontracting, External Activity
+--2. Determine prices for the items with item category: Internal Activity
+--4. For items for which the price was not determined, the price source will be set to manual price
+
+-- instant return if the input set is empty, for the sake of performance
+if is_empty(:it_items) then
+	return;
+end if;
+
+/****************************************************************** 
+   get prices for categories: document, material, subcontracting, external activity
+ *******************************************************************/
+lt_items_material =  select *
+					 	  from 	:it_items
+					      where item_category_id in (:lc_document,:lc_material,:lc_subcontracting,:lc_external_activity); 
+
+call 	"sap.plc.db.calculationmanager.procedures::p_item_price_determination_material"
+  		(
+  			:lt_items_material,
+			:it_calculation_version,
+			:lc_use_multiple_plants,
+   			:lc_consider_vendor_filters,
+  			lt_all_prices_for_material 
+  		);
+
+lt_best_prices_material_temp = select item_id, first_value(price_id order by item_id, PRICE_RANK) price_id 
+							   from :lt_all_prices_for_material 
+							   where IS_DISABLING_PRICE_DETERMINATION is null or IS_DISABLING_PRICE_DETERMINATION = 0
+							   group by item_id;
+
+lt_best_prices_material = select prices.*
+							{{getMasterdataCustomFieldsAsNull Activity_Price 'price'}}
+							from :lt_all_prices_for_material prices
+							inner join :lt_best_prices_material_temp as prices_temp
+								on prices.item_id = prices_temp.item_id
+							where prices.price_id = prices_temp.price_id;
+ 
+lt_valid_prices_material = select distinct given_prices.item_id, given_prices.vendor_id, 
+                                   given_prices.price_fixed_portion, given_prices.price_variable_portion, given_prices.transaction_currency_id, 
+                                   given_prices.price_unit, given_prices.price_unit_uom_id, determined_prices.is_price_split_active, determined_prices.price_id,
+                                   determined_prices.confidence_level_id, given_prices.price_source_id, given_prices.price_source_type_id, 
+                                   given_prices.purchasing_group, given_prices.purchasing_document, given_prices.local_content
+                                   {{masterdataCustomFieldsWithPrefix Material_Price 'given_prices'}}   
+                                   {{getMasterdataCustomFieldsAsNull Activity_Price 'given_prices'}}   
+                               	from :lt_items_material as given_prices
+                               	inner join :lt_all_prices_for_material as determined_prices
+                               	on given_prices.item_id = determined_prices.item_id
+                               	and given_prices.material_id = determined_prices.material_id
+                                and (ifnull(given_prices.plant_id,'') = determined_prices.plant_id or determined_prices.plant_id = '*')
+                               	--and (ifnull(given_prices.vendor_id,'') = determined_prices.vendor_id or determined_prices.vendor_id = '*')
+                               	and (determined_prices.project_id = :lv_project_id or determined_prices.project_id = '*')
+                               	and given_prices.price_fixed_portion = determined_prices.price_fixed_portion
+                               	and given_prices.price_variable_portion = determined_prices.price_variable_portion
+                               	and given_prices.transaction_currency_id = determined_prices.transaction_currency_id
+                               	and given_prices.price_unit = determined_prices.price_unit
+                               	and given_prices.price_unit_uom_id = determined_prices.price_unit_uom_id
+                               	and given_prices.price_source_id = determined_prices.price_source_id
+                               	and given_prices.price_source_type_id = determined_prices.price_source_type_id
+                               	where given_prices.IS_DISABLING_PRICE_DETERMINATION is not null and given_prices.IS_DISABLING_PRICE_DETERMINATION = 1
+                               	and determined_prices.IS_DISABLING_PRICE_DETERMINATION is not null and determined_prices.IS_DISABLING_PRICE_DETERMINATION = 1;
+                               	                        	
+lt_not_valid_prices_material = select item_id, vendor_id,
+                                   price_fixed_portion, price_variable_portion, transaction_currency_id, price_unit, price_unit_uom_id, is_price_split_active, price_id,
+                                   confidence_level_id, price_source_id, price_source_type_id, purchasing_group, purchasing_document, local_content
+                                   {{masterdataCustomFields Material_Price}}      
+                                   {{getMasterdataCustomFieldsAsNull Activity_Price}}      
+                               	from :lt_items_material
+                               	where IS_DISABLING_PRICE_DETERMINATION is not null and IS_DISABLING_PRICE_DETERMINATION = 1 
+                               	and item_id not in (select item_id from :lt_valid_prices_material); 
+
+/****************************************************************** 
+  get prices for category: internal activity
+*******************************************************************/
+lt_items_activity = select *
+					 	from 	:it_items
+					 	where 	item_category_id = :lc_internal_activity;
+ 
+call 	"sap.plc.db.calculationmanager.procedures::p_item_price_determination_activity"
+  		(
+  			:lt_items_activity, 
+  			:it_calculation_version,
+  			lt_all_prices_for_activity
+  		);
+
+lt_best_prices_activity_temp = select item_id, first_value(price_id order by item_id, PRICE_RANK) price_id 
+							   from :lt_all_prices_for_activity
+							   where IS_DISABLING_PRICE_DETERMINATION is null or IS_DISABLING_PRICE_DETERMINATION = 0
+							   group by item_id;
+
+lt_best_prices_activity = select prices.*
+						  {{getMasterdataCustomFieldsAsNull Material_Price}}
+						  from :lt_all_prices_for_activity prices
+						  inner join :lt_best_prices_activity_temp as prices_temp
+						  on prices.item_id = prices_temp.item_id 
+						  where prices.price_id = prices_temp.price_id;
+
+lt_valid_prices_activity = select distinct given_prices.item_id, given_prices.vendor_id, 
+                                   given_prices.price_fixed_portion, given_prices.price_variable_portion, given_prices.transaction_currency_id, 
+                                   given_prices.price_unit, given_prices.price_unit_uom_id, determined_prices.is_price_split_active, determined_prices.price_id,
+                                   determined_prices.confidence_level_id, given_prices.price_source_id, given_prices.price_source_type_id, 
+                                   given_prices.purchasing_group, given_prices.purchasing_document, given_prices.local_content
+                                   {{getMasterdataCustomFieldsAsNull Material_Price}}  
+                                   {{masterdataCustomFieldsWithPrefix Activity_Price 'given_prices'}} 
+                               	from :lt_items_activity as given_prices
+                               	inner join :lt_all_prices_for_activity as determined_prices
+                               	on given_prices.item_id = determined_prices.item_id
+                               	and (determined_prices.controlling_area_id = :lv_controlling_area_id or determined_prices.controlling_area_id = '*')
+                               	and (ifnull(given_prices.cost_center_id,'') = determined_prices.cost_center_id or determined_prices.cost_center_id = '*')
+                                and (ifnull(given_prices.activity_type_id,'') = determined_prices.activity_type_id or determined_prices.activity_type_id = '*')
+                               	and (determined_prices.project_id = :lv_project_id or determined_prices.project_id = '*')
+                               	and given_prices.price_fixed_portion = determined_prices.price_fixed_portion
+                               	and given_prices.price_variable_portion = determined_prices.price_variable_portion
+                               	and given_prices.transaction_currency_id = determined_prices.transaction_currency_id
+                               	and given_prices.price_unit = determined_prices.price_unit
+                               	and given_prices.price_unit_uom_id = determined_prices.price_unit_uom_id
+                               	and given_prices.price_source_id = determined_prices.price_source_id
+                               	and given_prices.price_source_type_id = determined_prices.price_source_type_id
+                               	where given_prices.IS_DISABLING_PRICE_DETERMINATION is not null and given_prices.IS_DISABLING_PRICE_DETERMINATION = 1
+                               	and determined_prices.IS_DISABLING_PRICE_DETERMINATION is not null and determined_prices.IS_DISABLING_PRICE_DETERMINATION = 1;
+                               	                        	
+lt_not_valid_prices_activity = select item_id, vendor_id, 
+                                   price_fixed_portion, price_variable_portion, transaction_currency_id, price_unit, price_unit_uom_id, is_price_split_active, price_id,
+                                   confidence_level_id, price_source_id, price_source_type_id, purchasing_group, purchasing_document, local_content
+                                   {{getMasterdataCustomFieldsAsNull Material_Price}}   
+                                   {{masterdataCustomFields Activity_Price}} 
+                               	from :lt_items_activity
+                               	where IS_DISABLING_PRICE_DETERMINATION is not null and IS_DISABLING_PRICE_DETERMINATION = 1 
+                               	and item_id not in (select item_id from :lt_valid_prices_activity); 
+
+/****************************************************************** 
+  Get the items for which the prices were not determined / are not valid and set the price source to Manual Price
+*******************************************************************/
+lt_items_no_plc_price = select * from :it_items
+							where 
+								( item_id not in ( select item_id from :lt_all_prices_for_material  union all 
+									  			   select item_id from :lt_all_prices_for_activity union all
+									  			   select item_id from :lt_valid_prices_material union all
+                                                   select item_id from :lt_valid_prices_activity ) 
+								 ) 
+								 or
+								 ( item_id in ( select item_id from :lt_not_valid_prices_material union all 
+									  			select item_id from :lt_not_valid_prices_activity) 
+								  and (IS_DISABLING_PRICE_DETERMINATION is not null and IS_DISABLING_PRICE_DETERMINATION = 1)
+								 );
+
+/****************************************************************** 
+  The items receiving a manual price should have PRICE_ID as null, since they no longer have a determined price. There should not be any link between t_material/activity_price and these items.
+  
+  Furthermore, the items with IS_PRICE_SPLIT_ACTIVE = 1 and for which the prices were deleted, or not valid, or not determined, the following logic was applied:
+	-> Manual prices take the value from calculated prices. (Price Components' total prices become the manual prices)
+	-> is_price_split_active is set to 0, so that the manual prices are taken into account instead of the calculated prices.
+*******************************************************************/ 
+lt_potential_prices_manual = select item.item_id, 
+  									item.vendor_id, 
+  									case 
+  										when item.is_price_split_active = 1
+  											then itemTemp.price_fixed_portion_calculated
+  											else item.price_fixed_portion
+  									end as price_fixed_portion, 
+  									case 
+  										when item.is_price_split_active = 1
+  											then itemTemp.price_variable_portion_calculated
+  											else item.price_variable_portion
+  									end as price_variable_portion,
+				 					item.transaction_currency_id, 
+									item.price_unit, 
+                                    item.price_unit_uom_id,
+                                    case 
+  										when item.is_price_split_active = 1
+  											then 0
+  											else item.is_price_split_active
+  									end as is_price_split_active,
+									null as price_id,
+                                    case
+                                        when item.confidence_level_id is not null 
+                                            then item.confidence_level_id 
+                                        else price_source.confidence_level_id 
+                                    end as confidence_level_id, 
+									price_source.price_source_id,
+									price_source.price_source_type_id,
+									item.purchasing_group,
+			 		                item.purchasing_document,
+			 		                item.local_content
+			 		                {{masterdataCustomFieldsWithPrefix Material_Price 'item'}}
+			 		                {{masterdataCustomFieldsWithPrefix Activity_Price 'item'}}
+							  from :lt_items_no_plc_price as item
+							  inner join (select top 1 * from "sap.plc.db::basis.t_price_source" where price_source_type_id = :lc_manual_price) as price_source	
+								   on price_source.price_source_type_id = :lc_manual_price
+							  left outer join "sap.plc.db::basis.t_item_temporary" as itemTemp
+									on item.item_id = itemTemp.item_id 
+									and itemTemp.calculation_version_id = :iv_cv_id
+							  where item.item_category_id in (lc_document,lc_material,lc_subcontracting,lc_internal_activity,lc_external_activity,lc_variable_item,lc_process,lc_resources_and_tools);
+
+ot_determined_prices = select * from 	
+                       (select item_id, replace(vendor_id,'*','') as vendor_id, 
+                               price_fixed_portion, price_variable_portion, transaction_currency_id, price_unit, price_unit_uom_id, is_price_split_active, price_id,
+						       confidence_level_id, price_source_id, price_source_type_id, purchasing_group, purchasing_document, local_content
+						       {{masterdataCustomFields Material_Price}}
+						       {{masterdataCustomFields Activity_Price}}
+							   from :lt_best_prices_material
+						union all
+						select item_id, null as vendor_id, price_fixed_portion, price_variable_portion, transaction_currency_id, price_unit, 
+						       price_unit_uom_id, is_price_split_active, price_id,
+						       confidence_level_id, price_source_id, price_source_type_id, null as purchasing_group, null as purchasing_document, 
+						       null as local_content
+						       {{masterdataCustomFields Material_Price}}
+						       {{masterdataCustomFields Activity_Price}}
+							   from :lt_best_prices_activity
+						union all
+                        select * from :lt_potential_prices_manual
+                        union all
+                        select * from :lt_valid_prices_material
+                        union all
+                        select * from :lt_valid_prices_activity)
+                        order by item_id;
+
+ot_messages = select * from (	
+                select 
+ 				 	lc_price_not_found as msg_id,--the price was not determined 
+ 				 	item_id,
+ 				 	null as md_id_1,
+ 				 	null as md_id_2,
+ 				 	null as md_id_3,
+ 				 	null as business_object,
+ 				 	null as price_source_id
+ 				 	from :ot_determined_prices
+ 				 	where price_source_type_id = lc_manual_price
+ 				 union all
+ 				 select 
+ 				 	lc_psource_changed as msg_id,--the price source was set
+ 				 	item_id,
+ 				 	null as md_id_1,
+ 				 	null as md_id_2,
+ 				 	null as md_id_3,
+ 				 	null as business_object,
+ 				 	null as price_source_id
+ 				 	from :ot_determined_prices
+ 				 	where price_source_type_id <> lc_manual_price)
+ 				 	order by item_id;
+					  
+END;
+
+

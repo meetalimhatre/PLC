@@ -1,0 +1,62 @@
+{
+    "plc-users": {
+        "get": {
+            "tags": [
+                "plc-users"
+            ],
+            "summary": "Get plc users",
+            "description": "Get plc users",
+            "operationId": "getUsers",
+            "consumes": [
+                "application/json",
+                "application/xml"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "searchAutocomplete",
+                    "in": "query",
+                    "description": "Used to filter, can be blank",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "top",
+                    "in": "query",
+                    "description": "Maximum number of results",
+                    "required": false,
+                    "type": "integer"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid Request",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/getUsersResponse"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                },
+                "404": {
+                    "description": "General Entity Not Found Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MessageGeneralEntityNotFoundError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.USERS_READ": [
+                        "get:plc-users"
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,1778 @@
+{
+    "xsappname": "xsac-plc",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.Admin",
+            "description": ""
+        },
+        {
+            "name": "$XSAPPNAME.ApiDocR",
+            "description": "Read access for the swagger api documentation"
+        },
+        {
+            "name": "$XSAPPNAME.AcctE",
+            "description": "create, update, delete all accounts"
+        },
+        {
+            "name": "$XSAPPNAME.AcctGrpE",
+            "description": "create, update, delete all account groups"
+        },
+        {
+            "name": "$XSAPPNAME.AcctGrpR",
+            "description": "read all account groups"
+        },
+        {
+            "name": "$XSAPPNAME.AcctR",
+            "description": "read all accounts"
+        },
+        {
+            "name": "$XSAPPNAME.ActPriceR",
+            "description": "read all activity prices"
+        },
+        {
+            "name": "$XSAPPNAME.ActPriceE",
+            "description": "create, update and delete activity prices"
+        },
+        {
+            "name": "$XSAPPNAME.ActTypeE",
+            "description": "create, update, delete all activity types"
+        },
+        {
+            "name": "$XSAPPNAME.ActTypeR",
+            "description": "read all activity types"
+        },
+        {
+            "name": "$XSAPPNAME.AddinE",
+            "description": "Edit addin status and configurations"
+        },
+        {
+            "name": "$XSAPPNAME.AddinRActiv",
+            "description": "Read activated addins and their configurations"
+        },
+        {
+            "name": "$XSAPPNAME.AddinRAll",
+            "description": "Read all addins and their configurations, independent of their status"
+        },
+        {
+            "name": "$XSAPPNAME.AnalyticsViewer",
+            "description": "Read all calculation views"
+        },
+        {
+            "name": "$XSAPPNAME.Base",
+            "description": "Basic access for init-session and ping"
+        },
+        {
+            "name": "$XSAPPNAME.BizAreaE",
+            "description": "create, update, delete all business areas"
+        },
+        {
+            "name": "$XSAPPNAME.BizAreaR",
+            "description": "read all business areas"
+        },
+        {
+            "name": "$XSAPPNAME.ProcE",
+            "description": "create, update, delete all processes"
+        },
+        {
+            "name": "$XSAPPNAME.ProcR",
+            "description": "read all processes"
+        },
+        {
+            "name": "$XSAPPNAME.CalcVerCU",
+            "description": "Create or update any calculation version"
+        },
+        {
+            "name": "$XSAPPNAME.CalcVerD",
+            "description": "Delete any calculation version (e.g. in cockpit)"
+        },
+        {
+            "name": "$XSAPPNAME.CalcVerFreeze",
+            "description": "Freeze any calculation version"
+        },
+        {
+            "name": "$XSAPPNAME.CalcVerOpen",
+            "description": "Read all calculation versions, i.e. open them"
+        },
+        {
+            "name": "$XSAPPNAME.CalcCU",
+            "description": "Create or update any calculations"
+        },
+        {
+            "name": "$XSAPPNAME.CalcD",
+            "description": "Delete any calculation"
+        },
+        {
+            "name": "$XSAPPNAME.CalcR",
+            "description": "Read all calculations (e.g. in cockpit)"
+        },
+        {
+            "name": "$XSAPPNAME.CompanyCodeE",
+            "description": "create, update, delete all company codes"
+        },
+        {
+            "name": "$XSAPPNAME.CompanyCodeR",
+            "description": "read all company codes"
+        },
+        {
+            "name": "$XSAPPNAME.CompoSplitE",
+            "description": "create, update, delete all component splits"
+        },
+        {
+            "name": "$XSAPPNAME.CompoSplitR",
+            "description": "read all component splits"
+        },
+        {
+            "name": "$XSAPPNAME.ConfLevelR",
+            "description": "read all confidence levels"
+        },
+        {
+            "name": "$XSAPPNAME.CAE",
+            "description": "create, update, delete all controlling areas"
+        },
+        {
+            "name": "$XSAPPNAME.CAR",
+            "description": "read all controlling areas"
+        },
+        {
+            "name": "$XSAPPNAME.CorpLayoutE",
+            "description": "edits corporate layouts"
+        },
+        {
+            "name": "$XSAPPNAME.CostCenterE",
+            "description": "create, update, delete all cost centers"
+        },
+        {
+            "name": "$XSAPPNAME.CostCenterR",
+            "description": "read all cost centers"
+        },
+        {
+            "name": "$XSAPPNAME.CostingSheetE",
+            "description": "create, update, delete all costing sheets"
+        },
+        {
+            "name": "$XSAPPNAME.CostingSheetR",
+            "description": "read all costing sheets"
+        },
+        {
+            "name": "$XSAPPNAME.CurrencyCnvE",
+            "description": "create, update, delete all currency conversions"
+        },
+        {
+            "name": "$XSAPPNAME.CurrencyCnvR",
+            "description": "read all currency conversions"
+        },
+        {
+            "name": "$XSAPPNAME.CurrencyE",
+            "description": "create, update, delete all currencys"
+        },
+        {
+            "name": "$XSAPPNAME.CFFCU",
+            "description": "Create or update any custom fields and formulas"
+        },
+        {
+            "name": "$XSAPPNAME.CustE",
+            "description": "create, update, delete all customers"
+        },
+        {
+            "name": "$XSAPPNAME.CustR",
+            "description": "read all customers"
+        },
+        {
+            "name": "$XSAPPNAME.DocE",
+            "description": "create, update, delete all documents"
+        },
+        {
+            "name": "$XSAPPNAME.DocR",
+            "description": "read all documents"
+        },
+        {
+            "name": "$XSAPPNAME.DocStatusR",
+            "description": "read all documents status"
+        },
+        {
+            "name": "$XSAPPNAME.DocTypeE",
+            "description": "create, update, delete all document types"
+        },
+        {
+            "name": "$XSAPPNAME.DocTypeR",
+            "description": "read all document types"
+        },
+        {
+            "name": "$XSAPPNAME.ExcgRateTypeE",
+            "description": "create, update, delete all exchange rate types"
+        },
+        {
+            "name": "$XSAPPNAME.ExcgRateTypeR",
+            "description": "read all exchange rate types"
+        },
+        {
+            "name": "$XSAPPNAME.FrontendSetCorpE",
+            "description": "edit corporate frontend settings"
+        },
+        {
+            "name": "$XSAPPNAME.GlobalDfltSetE",
+            "description": "Create and update all global default settings"
+        },
+        {
+            "name": "$XSAPPNAME.GrpE",
+            "description": "edit user groups"
+        },
+        {
+            "name": "$XSAPPNAME.GrpR",
+            "description": "read user groups"
+        },
+        {
+            "name": "$XSAPPNAME.HdAdmV",
+            "description" : "Hide admin view"
+        },
+        {
+            "name": "$XSAPPNAME.LangE",
+            "description": "create, update, delete all languages"
+        },
+        {
+            "name": "$XSAPPNAME.MatAcctDetE",
+            "description": "create, update, delete all material accounts determination"
+        },
+        {
+            "name": "$XSAPPNAME.MatAcctDetR",
+            "description": "read all material accounts determination"
+        },
+        {
+            "name": "$XSAPPNAME.MatlE",
+            "description": "create, update, delete all materials"
+        },
+        {
+            "name": "$XSAPPNAME.MatlGrpE",
+            "description": "create, update, delete all material groups"
+        },
+        {
+            "name": "$XSAPPNAME.MatlGrpR",
+            "description": "read all material groups"
+        },
+        {
+            "name": "$XSAPPNAME.MatlPlantE",
+            "description": "create, update, delete all material plants"
+        },
+        {
+            "name": "$XSAPPNAME.MatlPlantR",
+            "description": "read all material plants"
+        },
+        {
+            "name": "$XSAPPNAME.MatlPriceE",
+            "description": "create, update and delete material prices"
+        },
+        {
+            "name": "$XSAPPNAME.MatlPriceR",
+            "description": "read all material prices"
+        },
+        {
+            "name": "$XSAPPNAME.MatlR",
+            "description": "read all materials"
+        },
+        {
+            "name": "$XSAPPNAME.MatlTypeE",
+            "description": "create, update, delete all material types"
+        },
+        {
+            "name": "$XSAPPNAME.MatlTypeR",
+            "description": "read all material types"
+        },
+        {
+            "name": "$XSAPPNAME.OvhdGrpE",
+            "description": "create, update, delete all overhead groups"
+        },
+        {
+            "name": "$XSAPPNAME.OvhdGrpR",
+            "description": "read all overhead groups"
+        },
+        {
+            "name": "$XSAPPNAME.PersonalDataR",
+            "description": "read user ids, customer ids, vendor ids"
+        },
+        {
+            "name": "$XSAPPNAME.PersonalDataD",
+            "description": "update and delete user ids, customer ids, vendor ids"
+        },
+        {
+            "name": "$XSAPPNAME.RetPeriodsR",
+            "description": "read retention periods for user, customer, vendor, project"
+        },
+        {
+            "name": "$XSAPPNAME.RetPeriodsE",
+            "description": "create, update and delete retention periods for user, customer, vendor, project"
+        },
+        {
+            "name": "$XSAPPNAME.PlantE",
+            "description": "create, update, delete all plants"
+        },
+        {
+            "name": "$XSAPPNAME.PlantR",
+            "description": "read all plants"
+        },
+        {
+            "name": "$XSAPPNAME.PriceSrcR",
+            "description": "read all price sources"
+        },
+        {
+            "name": "$XSAPPNAME.PriceSrcE",
+            "description": "create and update price sources"
+        },
+        {
+          "name": "$XSAPPNAME.PriceSrcD",
+          "description": "delete price sources"
+        },
+        {
+            "name": "$XSAPPNAME.StatusR",
+            "description": "read statuses"
+        },
+        {
+            "name": "$XSAPPNAME.StatusE",
+            "description": "create, update, delete statuses"
+        },
+        {
+            "name": "$XSAPPNAME.TagR",
+            "description": "read all tags"
+        },
+        {
+            "name": "$XSAPPNAME.TagC",
+            "description": "create all tags"
+        },
+        {
+            "name": "$XSAPPNAME.TagD",
+            "description": "delete all tags"
+        },
+        {
+            "name": "$XSAPPNAME.PriceDetStratR",
+            "description": "read all price determination strategies"
+        },
+        {
+            "name": "$XSAPPNAME.PriceDetStratE",
+            "description": "create and update price determination strategies"
+        },
+        {
+            "name": "$XSAPPNAME.PriceDetStratD",
+            "description": "delete price determination strategies"
+        },
+        {
+            "name": "$XSAPPNAME.ProfitCenterE",
+            "description": "create, update, delete all profit centers"
+        },
+        {
+            "name": "$XSAPPNAME.ProfitCenterR",
+            "description": "read all profit centers"
+        },
+        {
+            "name": "$XSAPPNAME.PrjC",
+            "description": "Create any project"
+        },
+        {
+            "name": "$XSAPPNAME.PrjU",
+            "description": "Update any project"
+        },
+        {
+            "name": "$XSAPPNAME.PrjD",
+            "description": "Delete any project"
+        },
+        {
+            "name": "$XSAPPNAME.PrjOpen",
+            "description": "Open or close project for editing"
+        },
+        {
+            "name": "$XSAPPNAME.PrjR",
+            "description": "Read all projects (e.g. in cockpit)"
+        },
+        {
+            "name": "$XSAPPNAME.SalesOrgE",
+            "description": "create, update, delete all sales organizations"
+        },
+        {
+            "name": "$XSAPPNAME.SalesOrgR",
+            "description": "read all sales organizations"
+        },
+        {
+            "name": "$XSAPPNAME.TasksR",
+            "description": "read tasks"
+        },
+        {
+            "name": "$XSAPPNAME.TransExp",
+            "description": "Exporting customization data to other systems"
+        },
+        {
+            "name": "$XSAPPNAME.TransImp",
+            "description": "Importing customization data from other systems"
+        },
+        {
+            "name": "$XSAPPNAME.UOME",
+            "description": "create, update, delete all units of measure"
+        },
+        {
+            "name": "$XSAPPNAME.UserDfltSetE",
+            "description": "Create and update all user default settings"
+        },
+        {
+            "name": "$XSAPPNAME.UsersR",
+            "description": "read system users"
+        },
+        {
+            "name": "$XSAPPNAME.ValuationClsE",
+            "description": "create, update, delete all valuation classes"
+        },
+        {
+            "name": "$XSAPPNAME.ValuationClsR",
+            "description": "read all valuation classes"
+        },
+        {
+            "name": "$XSAPPNAME.VendorE",
+            "description": "create, update, delete all vendors"
+        },
+        {
+            "name": "$XSAPPNAME.VendorR",
+            "description": "read all vendors"
+        },
+        {
+            "name": "$XSAPPNAME.WorkCenterE",
+            "description": "create, update, delete all work centers"
+        },
+        {
+            "name": "$XSAPPNAME.WorkCenterR",
+            "description": "read all work centers"
+        },
+        {
+            "name": "$XSAPPNAME.Generators",
+            "description": "Allows usage of artifact generators."
+        },
+        {
+            "name": "$XSAPPNAME.JOBSCHEDULER",
+            "description": "Scope for Job Scheduler",
+            "grant-as-authority-to-apps": ["jobscheduler"]
+        },
+        {
+            "name": "$XSAPPNAME.FldR",
+            "description": "read folders"
+        },
+        {
+            "name": "$XSAPPNAME.FldD",
+            "description": "delete folders"
+        },
+        {
+            "name": "$XSAPPNAME.FldE",
+            "description": "create and update (move/rename) folders"
+        },
+        {
+            "name": "$XSAPPNAME.MdrLogs",
+            "description": "Read masterdata replication logs table"
+        },
+        {
+            "name": "$XSAPPNAME.MdrStatistics",
+            "description": "Read masterdata replication statistics table"
+        },
+        {
+            "name": "$XSAPPNAME.Repl",
+            "description": "configure replication tool"
+        },
+        {
+            "name": "$XSAPPNAME.Sched",
+            "description": "configure internal scheduling tool"
+        },
+        {
+            "name": "$XSAPPNAME.Ext",
+            "description": "call external APIs"
+        },
+        {
+            "name": "$XSAPPNAME.ExtGreet",
+            "description": "call extension greet"
+        },
+        {
+            "name": "$XSAPPNAME.ItemCatR",
+            "description": "read item categories"
+        },
+        {
+            "name": "$XSAPPNAME.ItemCatE",
+            "description": "edit item categories"
+        }
+    ],
+    "authorities":["$ACCEPT_GRANTED_AUTHORITIES", "$XSAPPNAME.ExtGreet"],
+    "role-templates": [
+        {
+            "name": "Admin_RT",
+            "scope-references": [
+                "$XSAPPNAME.Admin"
+            ]
+        },
+        {
+            "name": "ApiDocRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ApiDocR"
+            ]
+        },
+        {
+            "name": "AcctEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctE"
+            ]
+        },
+        {
+            "name": "AcctGrpEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctGrpE"
+            ]
+        },
+        {
+            "name": "AcctGrpRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctGrpR"
+            ]
+        },
+        {
+            "name": "AcctRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctR"
+            ]
+        },
+        {
+            "name": "ActPriceEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActPriceE"
+
+            ]
+        },
+        {
+            "name": "ActPriceRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActPriceR"
+            ]
+        },
+        {
+            "name": "ActTypeEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActTypeE"
+            ]
+        },
+        {
+            "name": "ActTypeRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActTypeR"
+            ]
+        },
+        {
+            "name": "AddinEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.AddinE"
+            ]
+        },
+        {
+            "name": "AddinReadActiv_RT",
+            "scope-references": [
+                "$XSAPPNAME.AddinRActiv"
+            ]
+        },
+        {
+            "name": "AddinReadAll_RT",
+            "scope-references": [
+                "$XSAPPNAME.AddinRAll"
+            ]
+        },
+        {
+            "name": "Base_RT",
+            "scope-references": [
+                "$XSAPPNAME.Base"
+            ]
+        },
+        {
+            "name": "BizAreaEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.BizAreaE"
+            ]
+        },
+        {
+            "name": "BizAreaRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.BizAreaR"
+            ]
+        },
+        {
+            "name": "ProcEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ProcE"
+            ]
+        },
+        {
+            "name": "ProcRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ProcR"
+            ]
+        },
+        {
+            "name": "CalcVerCreateUpdt_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcVerCU"
+            ]
+        },
+        {
+            "name": "CalcVerDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcVerD"
+            ]
+        },
+        {
+            "name": "CalcVerFreeze_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcVerFreeze"
+            ]
+        },
+        {
+            "name": "CalcVerOpen_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcVerOpen"
+            ]
+        },
+        {
+            "name": "CalcCreateUpdt_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcCU"
+            ]
+        },
+        {
+            "name": "CalcDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcD"
+            ]
+        },
+        {
+            "name": "CalcRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcR"
+            ]
+        },
+        {
+            "name": "CompanyCodeEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CompanyCodeE"
+            ]
+        },
+        {
+            "name": "CompanyCodeRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CompanyCodeR"
+            ]
+        },
+        {
+            "name": "CompoSplitEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CompoSplitE"
+            ]
+        },
+        {
+            "name": "CompoSplitRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CompoSplitR"
+            ]
+        },
+        {
+            "name": "ConfLevelRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ConfLevelR"
+            ]
+        },
+        {
+            "name": "CAEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CAE"
+            ]
+        },
+        {
+            "name": "CARead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CAR"
+            ]
+        },
+        {
+            "name": "CorpLayoutEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CorpLayoutE"
+            ]
+        },
+        {
+            "name": "CostCenterEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CostCenterE"
+            ]
+        },
+        {
+            "name": "CostCenterRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CostCenterR"
+            ]
+        },
+        {
+            "name": "CostingSheetEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CostingSheetE"
+            ]
+        },
+        {
+            "name": "CostingSheetRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CostingSheetR"
+            ]
+        },
+        {
+            "name": "CurrencyCnvEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CurrencyCnvE"
+            ]
+        },
+        {
+            "name": "CurrencyCnvRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CurrencyCnvR"
+            ]
+        },
+        {
+            "name": "CurrencyEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CurrencyE"
+            ]
+        },
+        {
+            "name": "CFFCreateUpdt_RT",
+            "scope-references": [
+                "$XSAPPNAME.CFFCU",
+                "$XSAPPNAME.TasksR"
+            ]
+        },
+        {
+            "name": "CustEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.CustE"
+            ]
+        },
+        {
+            "name": "CustRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.CustR"
+            ]
+        },
+        {
+            "name": "DocEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.DocE"
+            ]
+        },
+        {
+            "name": "DocRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.DocR"
+            ]
+        },
+        {
+            "name": "DocStatusRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.DocStatusR"
+            ]
+        },
+        {
+            "name": "DocTypeEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.DocTypeE"
+            ]
+        },
+        {
+            "name": "DocTypeRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.DocTypeR"
+            ]
+        },
+        {
+            "name": "ExcgRateTypeEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ExcgRateTypeE"
+            ]
+        },
+        {
+            "name": "ExcgRateTypeRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ExcgRateTypeR"
+            ]
+        },
+        {
+            "name": "FrontendSetCorpEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.FrontendSetCorpE"
+            ]
+        },
+        {
+            "name": "GlobalDfltSetEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.GlobalDfltSetE"
+            ]
+        },
+        {
+            "name": "GrpEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.GrpE"
+            ]
+        },
+        {
+            "name": "GrpRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.GrpR"
+            ]
+        },
+        {
+            "name": "HideAdminView_RT",
+            "scope-references":[
+                "$XSAPPNAME.HdAdmV"
+            ]
+        },
+        {
+            "name": "LangEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.LangE"
+            ]
+        },
+        {
+            "name": "MatAcctDetEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatAcctDetE"
+            ]
+        },
+        {
+            "name": "MatAcctDetRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatAcctDetR"
+            ]
+        },
+        {
+            "name": "MatlEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlE"
+            ]
+        },
+        {
+            "name": "MatlGrpEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlGrpE"
+            ]
+        },
+        {
+            "name": "MatlGrpRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlGrpR"
+            ]
+        },
+        {
+            "name": "MatlPlantEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPlantE"
+            ]
+        },
+        {
+            "name": "MatlPlantRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPlantR"
+            ]
+        },
+        {
+            "name": "MatlPriceEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPriceE"
+            ]
+        },
+        {
+            "name": "MatlPriceRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPriceR"
+            ]
+        },
+        {
+            "name": "MatlRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlR"
+            ]
+        },
+        {
+            "name": "MatlTypeEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlTypeE"
+            ]
+        },
+        {
+            "name": "MatlTypeRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlTypeR"
+            ]
+        },
+        {
+            "name": "OvhdGrpEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.OvhdGrpE"
+            ]
+        },
+        {
+            "name": "OvhdGrpRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.OvhdGrpR"
+            ]
+        },
+        {
+            "name": "PersonalDataRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PersonalDataR"
+            ]
+        },
+        {
+            "name": "PersonalDataDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.PersonalDataD"
+            ]
+        },
+        {
+            "name": "RetentionPeriodsRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.RetPeriodsR"
+            ]
+        },
+        {
+            "name": "RetentionPeriodsEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.RetPeriodsE"
+            ]
+        },
+        {
+            "name": "PlantEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.PlantE"
+            ]
+        },
+        {
+            "name": "PlantRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PlantR"
+            ]
+        },
+        {
+            "name": "PriceSrcRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PriceSrcR"
+            ]
+        },
+        {
+            "name": "PriceSrcEdit_RT",
+            "scope-references": [
+              "$XSAPPNAME.PriceSrcE"
+            ]
+        },
+        {
+            "name": "PriceSrcDel_RT",
+            "scope-references": [
+              "$XSAPPNAME.PriceSrcD"
+            ]
+        },
+        {
+            "name": "StatusRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.StatusR"
+            ]
+        },
+        {
+            "name": "StatusEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.StatusE"
+            ]
+        },
+        {
+            "name": "TagRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.TagR"
+            ]
+        },
+        {
+            "name": "TagEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.TagC"
+            ]
+        },
+        {
+            "name": "TagDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.TagD"
+            ]
+        },
+        {
+            "name": "PriceDetStratRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "PriceDetStratEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.PriceDetStratE"
+            ]
+        },
+        {
+            "name": "PriceDetStratDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.PriceDetStratD"
+            ]
+        },
+        {
+            "name": "ProfitCenterEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ProfitCenterE"
+            ]
+        },
+        {
+            "name": "ProfitCenterRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ProfitCenterR"
+            ]
+        },
+        {
+            "name": "PrjCreate_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjC",
+                "$XSAPPNAME.FldR"
+            ]
+        },
+        {
+            "name": "PrjUpdt_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjU"
+            ]
+        },
+        {
+            "name": "PrjDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjD"
+            ]
+        },
+        {
+            "name": "PrjOpen_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjOpen"
+            ]
+        },
+        {
+            "name": "PrjRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjR"
+            ]
+        },
+        {
+            "name": "FldRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.FldR"
+            ]
+        },
+        {
+            "name": "FldDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.FldD"
+            ]
+        },
+        {
+            "name": "FldEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.FldE"
+            ]
+        },
+        {
+            "name": "SalesOrgEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.SalesOrgE"
+            ]
+        },
+        {
+            "name": "SalesOrgRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.SalesOrgR"
+            ]
+        },
+        {
+            "name": "TasksRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.TasksR"
+            ]
+        },
+        {
+            "name": "TransExp_RT",
+            "scope-references": [
+                "$XSAPPNAME.TransExp"
+            ]
+        },
+        {
+            "name": "TransImp_RT",
+            "scope-references": [
+                "$XSAPPNAME.TransImp"
+            ]
+        },
+        {
+            "name": "UOMEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.UOME"
+            ]
+        },
+        {
+            "name": "UserDfltSetEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.UserDfltSetE"
+            ]
+        },
+        {
+            "name": "UsersRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.UsersR"
+            ]
+        },
+        {
+            "name": "ValuationClsEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ValuationClsE"
+            ]
+        },
+        {
+            "name": "ValuationClsRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ValuationClsR"
+            ]
+        },
+        {
+            "name": "VendorEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.VendorE"
+            ]
+        },
+        {
+            "name": "VendorRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.VendorR"
+            ]
+        },
+        {
+            "name": "WorkCenterEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.WorkCenterE"
+            ]
+        },
+        {
+            "name": "WorkCenterRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.WorkCenterR"
+            ]
+        },
+        {
+            "name": "Generators_RT",
+            "scope-references": [
+                "$XSAPPNAME.Generators"
+            ]
+        },
+        {
+            "name": "AddinAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.AddinE",
+                "$XSAPPNAME.AddinRAll",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AddinUser_RT",
+            "scope-references": [
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminCostingAndAnalysisAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctE",
+                "$XSAPPNAME.AcctGrpE",
+                "$XSAPPNAME.ProcE",
+                "$XSAPPNAME.CompoSplitE",
+                "$XSAPPNAME.CostingSheetE",
+                "$XSAPPNAME.MatAcctDetE",
+                "$XSAPPNAME.OvhdGrpE",
+                "$XSAPPNAME.ValuationClsE",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.AcctGrpR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.MatAcctDetR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminCostingAndAnalysisViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.AcctGrpR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.MatAcctDetR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminFinanceAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActTypeE",
+                "$XSAPPNAME.BizAreaE",
+                "$XSAPPNAME.CompanyCodeE",
+                "$XSAPPNAME.CAE",
+                "$XSAPPNAME.CostCenterE",
+                "$XSAPPNAME.ProfitCenterE",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminFinanceViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminGlobalSetAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.CurrencyE",
+                "$XSAPPNAME.LangE",
+                "$XSAPPNAME.UOME",
+                "$XSAPPNAME.CompoSplitE",
+                "$XSAPPNAME.CostingSheetE",
+                "$XSAPPNAME.GlobalDfltSetE",
+                "$XSAPPNAME.CorpLayoutE",
+                "$XSAPPNAME.GrpR",
+                "$XSAPPNAME.GrpE",
+                "$XSAPPNAME.UsersR",
+                "$XSAPPNAME.ExcgRateTypeE",
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.StatusE",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.ItemCatE",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminGlobalSetViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminLogisticsAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.CustE",
+                "$XSAPPNAME.DocE",
+                "$XSAPPNAME.DocTypeE",
+                "$XSAPPNAME.MatlE",
+                "$XSAPPNAME.MatlGrpE",
+                "$XSAPPNAME.MatlPlantE",
+                "$XSAPPNAME.MatlTypeE",
+                "$XSAPPNAME.PlantE",
+                "$XSAPPNAME.VendorE",
+                "$XSAPPNAME.WorkCenterE",
+                "$XSAPPNAME.ProcE",
+                "$XSAPPNAME.SalesOrgE",
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.DocR",
+                "$XSAPPNAME.DocTypeR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlPlantR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.WorkCenterR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.SalesOrgR",
+                "$XSAPPNAME.DocStatusR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminLogisticsViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.DocR",
+                "$XSAPPNAME.DocTypeR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlPlantR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.WorkCenterR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.SalesOrgR",
+                "$XSAPPNAME.DocStatusR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "AdminPricesAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPriceE",
+                "$XSAPPNAME.ActPriceE",
+                "$XSAPPNAME.CurrencyCnvE",
+                "$XSAPPNAME.PriceSrcE",
+                "$XSAPPNAME.PriceSrcD",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR",
+                "$XSAPPNAME.PriceDetStratE",
+                "$XSAPPNAME.PriceDetStratD",
+                "$XSAPPNAME.ExcgRateTypeE",
+                "$XSAPPNAME.MatlPriceR",
+                "$XSAPPNAME.ActPriceR",
+                "$XSAPPNAME.CurrencyCnvR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.PrjR"
+            ]
+        },
+        {
+            "name": "AdminPricesViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.MatlPriceR",
+                "$XSAPPNAME.ActPriceR",
+                "$XSAPPNAME.CurrencyCnvR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR",
+                "$XSAPPNAME.PrjR"
+            ]
+        },
+        {
+            "name": "AnalyticsViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.AnalyticsViewer",
+                "$XSAPPNAME.Base"
+            ]
+        },
+        {
+            "name": "BaseViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "CalcVerViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcVerOpen",
+                "$XSAPPNAME.TagR",
+                "$XSAPPNAME.CalcR",
+                "$XSAPPNAME.PrjOpen",
+                "$XSAPPNAME.PrjR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.FldR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "CalcViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.CalcR",
+                "$XSAPPNAME.TagR",
+                "$XSAPPNAME.PrjOpen",
+                "$XSAPPNAME.PrjR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.FldR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "Contributor_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjC",
+                "$XSAPPNAME.PrjU",
+                "$XSAPPNAME.CalcCU",
+                "$XSAPPNAME.CalcVerCU",
+                "$XSAPPNAME.CalcVerFreeze",
+                "$XSAPPNAME.UsersR",
+                "$XSAPPNAME.CalcVerOpen",
+                "$XSAPPNAME.TagR",
+                "$XSAPPNAME.TagC",
+                "$XSAPPNAME.CalcR",
+                "$XSAPPNAME.TagD",
+                "$XSAPPNAME.PrjOpen",
+                "$XSAPPNAME.PrjR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.AcctGrpR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.MatAcctDetR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.DocR",
+                "$XSAPPNAME.DocTypeR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlPlantR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.WorkCenterR",
+                "$XSAPPNAME.SalesOrgR",
+                "$XSAPPNAME.DocStatusR",
+                "$XSAPPNAME.MatlPriceR",
+                "$XSAPPNAME.ActPriceR",
+                "$XSAPPNAME.CurrencyCnvR",
+                "$XSAPPNAME.FldE",
+                "$XSAPPNAME.FldR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "Controller_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjD",
+                "$XSAPPNAME.CalcD",
+                "$XSAPPNAME.CalcVerD",
+                "$XSAPPNAME.CorpLayoutE",
+                "$XSAPPNAME.FrontendSetCorpE",
+                "$XSAPPNAME.PrjC",
+                "$XSAPPNAME.PrjU",
+                "$XSAPPNAME.CalcCU",
+                "$XSAPPNAME.CalcVerCU",
+                "$XSAPPNAME.CalcVerFreeze",
+                "$XSAPPNAME.UsersR",
+                "$XSAPPNAME.CalcVerOpen",
+                "$XSAPPNAME.CalcR",
+                "$XSAPPNAME.TagR",
+                "$XSAPPNAME.TagC",
+                "$XSAPPNAME.TagD",
+                "$XSAPPNAME.PrjOpen",
+                "$XSAPPNAME.PrjR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.AcctR",
+                "$XSAPPNAME.AcctGrpR",
+                "$XSAPPNAME.ProcR",
+                "$XSAPPNAME.CompoSplitR",
+                "$XSAPPNAME.CostingSheetR",
+                "$XSAPPNAME.MatAcctDetR",
+                "$XSAPPNAME.OvhdGrpR",
+                "$XSAPPNAME.ValuationClsR",
+                "$XSAPPNAME.CAR",
+                "$XSAPPNAME.PlantR",
+                "$XSAPPNAME.MatlTypeR",
+                "$XSAPPNAME.CompanyCodeR",
+                "$XSAPPNAME.BizAreaR",
+                "$XSAPPNAME.ProfitCenterR",
+                "$XSAPPNAME.ActTypeR",
+                "$XSAPPNAME.CostCenterR",
+                "$XSAPPNAME.ExcgRateTypeR",
+                "$XSAPPNAME.CustR",
+                "$XSAPPNAME.DocR",
+                "$XSAPPNAME.DocTypeR",
+                "$XSAPPNAME.MatlGrpR",
+                "$XSAPPNAME.MatlPlantR",
+                "$XSAPPNAME.MatlR",
+                "$XSAPPNAME.VendorR",
+                "$XSAPPNAME.WorkCenterR",
+                "$XSAPPNAME.SalesOrgR",
+                "$XSAPPNAME.DocStatusR",
+                "$XSAPPNAME.MatlPriceR",
+                "$XSAPPNAME.ActPriceR",
+                "$XSAPPNAME.CurrencyCnvR",
+                "$XSAPPNAME.FldD",
+                "$XSAPPNAME.FldE",
+                "$XSAPPNAME.FldR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "CFFAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.CFFCU",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "DataProtectionOfficerRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.PersonalDataR",
+                "$XSAPPNAME.RetPeriodsR"
+            ]
+        },
+        {
+            "name": "DataProtectionOfficerDel_RT",
+            "scope-references": [
+                "$XSAPPNAME.PersonalDataD",
+                "$XSAPPNAME.RetPeriodsE"
+            ]
+        },
+        {
+            "name": "PrjViewer_RT",
+            "scope-references": [
+                "$XSAPPNAME.PrjOpen",
+                "$XSAPPNAME.PrjR",
+                "$XSAPPNAME.Base",
+                "$XSAPPNAME.StatusR",
+                "$XSAPPNAME.ItemCatR",
+                "$XSAPPNAME.UserDfltSetE",
+                "$XSAPPNAME.TasksR",
+                "$XSAPPNAME.ConfLevelR",
+                "$XSAPPNAME.AddinRActiv",
+                "$XSAPPNAME.FldR",
+                "$XSAPPNAME.PriceSrcR",
+                "$XSAPPNAME.PriceDetStratR"
+            ]
+        },
+        {
+            "name": "TransAdministrator_RT",
+            "scope-references": [
+                "$XSAPPNAME.TransImp",
+                "$XSAPPNAME.TransExp"
+            ]
+        },
+        {
+            "name": "MdrLogs_RT",
+            "description": "Role Template for read masterdata replication logs table",
+            "scope-references": ["$XSAPPNAME.MdrLogs"]
+        },
+        {
+            "name": "MdrStatistics_RT",
+            "description": "Role Template for read masterdata replication statistics table",
+            "scope-references": ["$XSAPPNAME.MdrStatistics"]
+        },
+        {
+            "name":"Replication_RT",
+            "scope-references":[
+                "$XSAPPNAME.Repl"
+            ]
+        },
+        {
+            "name":"Scheduler_RT",
+            "scope-references":[
+                "$XSAPPNAME.Sched"
+            ]
+        },
+        {
+            "name": "PlcJobScheduler_RT",
+            "description": "Role Template for Job Scheduler",
+            "scope-references": ["$XSAPPNAME.JOBSCHEDULER"]
+        },
+        {
+            "name": "PlcExternalAPI_RT",
+            "description": "Role Template for external API calls",
+            "scope-references": ["$XSAPPNAME.Ext"]
+        },
+        {
+            "name": "ItemCatRead_RT",
+            "scope-references": [
+                "$XSAPPNAME.ItemCatR"
+            ]
+        },
+        {
+            "name": "ItemCatEdit_RT",
+            "scope-references": [
+                "$XSAPPNAME.ItemCatE"
+            ]
+        }
+    ]
+}

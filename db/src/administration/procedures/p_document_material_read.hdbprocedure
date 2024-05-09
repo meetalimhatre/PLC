@@ -1,0 +1,40 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_document_material_read" ( 
+		IN iv_logon_language        NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,
+		IN iv_document_id			NVARCHAR(40),
+		IN iv_document_type_id 	    NVARCHAR(3),
+		IN iv_document_version	  	NVARCHAR(2),
+		IN iv_document_part	 	 	NVARCHAR(3),
+		IN iv_material_id	 	 	NVARCHAR(40),   
+        OUT ot_document_material    "sap.plc.db::basis.t_document_material" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Select Document Material
+ *****************************/
+ --select document material
+ 	ot_document_material =
+ 			
+ 			select
+ 							plcTable.document_type_id,
+ 							plcTable.document_id,
+ 							plcTable.document_version,
+ 							plcTable.document_part,
+ 							plcTable.material_id,
+ 							plcTable._VALID_FROM,
+ 							plcTable._VALID_TO,
+ 							plcTable._SOURCE,
+ 							plcTable._CREATED_BY,
+							plcTable.DELETED_FROM_SOURCE 
+ 						from "sap.plc.db::basis.t_document_material" as plcTable 	 					
+						where plcTable._VALID_FROM <= :iv_master_data_timestamp
+							and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null)						 	
+						 	and plcTable.document_type_id = :iv_document_type_id and plcTable.document_id = :iv_document_id
+						 	and plcTable.document_part = :iv_document_part and plcTable.document_version = :iv_document_version
+						 	and plcTable.material_id = :iv_material_id;
+ 
+END;

@@ -1,0 +1,30 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_TGSBT__TEXT" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_tgsbt"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+select count(BUSINESS_AREA_ID) into lv_identical_rows_count
+    from "sap.plc.db::basis.t_business_area__text"
+        where "sap.plc.db::basis.t_business_area__text"."BUSINESS_AREA_ID" = :NEWROW."GSBER"
+                AND "sap.plc.db::basis.t_business_area__text"."BUSINESS_AREA_DESCRIPTION" = :NEWROW."GTEXT"
+                AND "sap.plc.db::basis.t_business_area__text"."LANGUAGE" = :NEWROW."LANGU"
+                AND "sap.plc.db::basis.t_business_area__text"."_SOURCE" = :lv_source
+                AND "sap.plc.db::basis.t_business_area__text"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_business_area__text"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0 THEN                  
+    UPDATE "sap.plc.db::basis.t_business_area__text" 
+                SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+                WHERE "sap.plc.db::basis.t_business_area__text"."BUSINESS_AREA_ID" = :NEWROW."GSBER" 
+                AND "sap.plc.db::basis.t_business_area__text"."LANGUAGE" = :NEWROW."LANGU" 
+                AND "sap.plc.db::basis.t_business_area__text"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_business_area__text"."_VALID_TO" IS NULL;
+    INSERT INTO "sap.plc.db::basis.t_business_area__text" 
+        (BUSINESS_AREA_ID, BUSINESS_AREA_DESCRIPTION,LANGUAGE,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+        VALUES (:NEWROW."GSBER",:NEWROW."GTEXT",:NEWROW."LANGU",:lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

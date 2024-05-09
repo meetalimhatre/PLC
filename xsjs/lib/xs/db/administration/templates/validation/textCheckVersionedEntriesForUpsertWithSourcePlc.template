@@ -1,0 +1,20 @@
+/* eslint no-var: 0, no-unused-vars: 0, max-len: 0, no-multi-str:0 , no-tabs:0	*/
+update temp_table 
+					set	temp_table.ERROR_CODE = 'GENERAL_VALIDATION_ERROR', 
+					temp_table.ERROR_DETAILS = '{"validationObj": {"validationInfoCode": "SOURCE_ERP"}}'
+					from {{temporaryTextTable MasterdataBusinessObject}} as temp_table, 
+					(select {{keyFields MasterdataBusinessObject}}, LANGUAGE 
+						from (select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE 
+							from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+							inner join {{textTable MasterdataBusinessObject}} as main_table
+							on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+							and temp_table.LANGUAGE = main_table.LANGUAGE
+							and temp_table.operation in ('Upsert')
+							and (temp_table.error_code = '' or  temp_table.error_code is null)
+							where main_table._SOURCE = 2 
+							and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and main_table._VALID_TO is null) 
+					) as result 
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+					and temp_table.LANGUAGE = result.LANGUAGE
+					and temp_table.operation in ('Upsert')
+					and (temp_table.error_code = '' or  temp_table.error_code is null)

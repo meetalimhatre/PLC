@@ -1,0 +1,43 @@
+namespace sap.plc.db.calculationmanager;
+
+context calculationmanager_types {
+
+    table type tt_item_ids {
+    	ITEM_ID: Integer;
+    }
+    table type tt_calculation_version_ids {
+    	CALCULATION_VERSION_ID: Integer;
+    }
+
+    table type ts_calculation_version_price_determination_input {
+        MASTER_DATA_TIMESTAMP: UTCTimestamp;
+        VALUATION_DATE: LocalDate;
+        REPORT_CURRENCY_ID: String(3);
+        CONTROLLING_AREA_ID: String(4);
+        PROJECT_ID: String(35);
+        CUSTOMER_ID: String(10);
+        MATERIAL_PRICE_STRATEGY_ID: String(20);
+        ACTIVITY_PRICE_STRATEGY_ID: String(20);   
+    }
+
+    table type tt_bom_compare_items_input {
+    	RANK: Integer;
+        LEVEL: Integer;
+        ITEM_ID: Integer;
+        CALCULATION_VERSION_ID: Integer;
+        BOM_COMPARE_KEY: String(256);
+        BOM_COMPARE_PARENT_KEY: String(256);
+        NODE_ID: String(256);
+        PARENT_ID: String(256);
+        ITEM_ORDER: Integer;
+        RANK_BOMC2: Integer;
+        LEVEL_BOMC2: Integer;
+        ITEM_ID_BOMC2: Integer;
+        CALCULATION_VERSION_ID_BOMC2: Integer;
+        BOM_COMPARE_KEY_BOMC2: String(256);
+        BOM_COMPARE_PARENT_KEY_BOMC2: String(256);
+        NODE_ID_BOMC2: String(256);
+        PARENT_ID_BOMC2: String(256);
+        ITEM_ORDER_BOMC2: Integer;
+    }
+};

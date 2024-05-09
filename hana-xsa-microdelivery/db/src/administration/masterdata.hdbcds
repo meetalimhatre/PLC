@@ -1,0 +1,879 @@
+namespace sap.plc.db.administration;
+
+
+context masterdata {	
+
+	table type tt_activity_type {
+		ACTIVITY_TYPE_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+		ACCOUNT_ID: String(10);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		ACTIVITY_TYPE_DESCRIPTION: String(250);
+	};
+
+	table type tt_work_center_activity_type {
+		WORK_CENTER_ID: String(15);
+     	PLANT_ID: String(8);
+      	CONTROLLING_AREA_ID: String(4);
+      	ACTIVITY_TYPE_ID: String(12);
+      	PROCESS_ID: String(12);
+        QUANTITY: Decimal(28,7);
+        QUANTITY_UOM_ID: String(3);
+        TOTAL_QUANTITY_DEPENDS_ON: Integer;
+        LOT_SIZE: Decimal(28,7); 
+      	_VALID_FROM: UTCTimestamp;
+     	_VALID_TO: UTCTimestamp;
+      	_SOURCE: hana.TINYINT;
+        _CREATED_BY: String(256);
+     };
+
+	table type tt_activity_type_key {
+		ACTIVITY_TYPE_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_material_key {
+		MATERIAL_ID: String(40);
+	};
+
+	table type tt_material_type {
+		MATERIAL_TYPE_ID: String(4); // Type is used in Material Acount Determination (Materialkontenfindung)
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		MATERIAL_TYPE_DESCRIPTION: String(250);
+	};
+
+	table type tt_material_type_key {
+		MATERIAL_TYPE_ID: String(4);
+	};
+
+	table type tt_material_group {
+		MATERIAL_GROUP_ID: String(9); // Material Group is used for Purchasing Info Records
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		MATERIAL_GROUP_DESCRIPTION: String(250);
+	};
+
+	table type tt_material_group_key {
+		MATERIAL_GROUP_ID: String(9);
+	};
+
+	table type tt_exchange_rate_type {
+		EXCHANGE_RATE_TYPE_ID: String(20);
+	    CREATED_ON: UTCTimestamp; 
+	    CREATED_BY: String(256);
+	    LAST_MODIFIED_ON: UTCTimestamp; 
+	    LAST_MODIFIED_BY: String(256);
+		EXCHANGE_RATE_TYPE_DESCRIPTION: String(250);
+	};
+
+	table type tt_exchange_rate_type_key {
+		EXCHANGE_RATE_TYPE_ID: String(20);
+	};
+
+	table type tt_confidence_level {
+		CONFIDENCE_LEVEL_ID: Integer;
+	   	CONFIDENCE_LEVEL_DESCRIPTION: String(250);
+	};
+
+	table type tt_business_area {
+		BUSINESS_AREA_ID: String(15);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		BUSINESS_AREA_DESCRIPTION: String(250);
+	};
+
+	table type tt_business_area_key {
+		BUSINESS_AREA_ID: String(15);
+	};
+
+	table type tt_process {
+		PROCESS_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+		ACCOUNT_ID: String(10);
+		COMMENT: String(5000);
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; 
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		PROCESS_DESCRIPTION: String(250);
+	};
+
+	table type tt_company_code {
+		COMPANY_CODE_ID: String(4);
+		CONTROLLING_AREA_ID: String(4);
+		COMPANY_CODE_CURRENCY_ID: String(5);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		COMPANY_CODE_DESCRIPTION: String(250);
+	};
+
+	table type tt_company_code_key {
+		COMPANY_CODE_ID: String(4);
+	};
+
+	table type tt_controlling_area {
+		CONTROLLING_AREA_ID: String(4);
+		CONTROLLING_AREA_CURRENCY_ID: String(5);
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		CONTROLLING_AREA_DESCRIPTION: String(250);
+	};
+
+	table type tt_controlling_area_key {
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_cost_center_key {
+		COST_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_process_key {
+		PROCESS_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_currency {
+		CURRENCY_ID: String(5);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		CURRENCY_CODE: String(5);
+		CURRENCY_DESCRIPTION: String(40);
+	};
+
+	table type tt_currency_conversion {
+		EXCHANGE_RATE_TYPE_ID: String(20);
+		FROM_CURRENCY_ID: String(3);
+		TO_CURRENCY_ID: String(3);
+		FROM_FACTOR: Integer;
+		TO_FACTOR: Integer;
+		RATE: Decimal(28, 7);
+		VALID_FROM: LocalDate;
+		_VALID_FROM: UTCTimestamp;
+		_VALID_TO: UTCTimestamp;
+		_SOURCE: hana.TINYINT;
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_dimension {
+		DIMENSION_ID: String(10);
+		_VALID_FROM: UTCTimestamp;
+		_VALID_TO: UTCTimestamp;
+		_SOURCE: hana.TINYINT;
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);  
+		DIMENSION_DESCRIPTION: String(50); 		
+	};
+
+    table type tt_dimension_key {
+		DIMENSION_ID: String(10);
+    };   		
+
+	table type tt_uom {
+		UOM_ID: String(5);
+		DIMENSION_ID: String(10);
+		NUMERATOR: Integer;
+		DENOMINATOR: Integer;
+		EXPONENT_BASE10: hana.SMALLINT;
+		SI_CONSTANT: Decimal(9, 6);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		UOM_CODE: String(5);
+		UOM_DESCRIPTION: String(40);
+	};
+
+	table type tt_component_split {
+		COMPONENT_SPLIT_ID: String(35);
+		CONTROLLING_AREA_ID: String(4);	
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data,
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		COMPONENT_SPLIT_DESCRIPTION: String(250);
+	};
+
+	table type tt_accounts {
+		ACCOUNT_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		ACCOUNT_DESCRIPTION: String(250);
+	};
+
+	table type tt_accounts_key {
+		ACCOUNT_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_account_groups {
+		ACCOUNT_GROUP_ID: Integer;
+		CONTROLLING_AREA_ID: String(4);
+		COST_PORTION: Integer;
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		ACCOUNT_GROUP_DESCRIPTION: String(250);
+	};
+
+	table type tt_account_groups_key {
+		ACCOUNT_GROUP_ID: Integer;
+	};
+
+	table type tt_account_range {
+		FROM_ACCOUNT_ID: String(10);
+		TO_ACCOUNT_ID: String(10);
+		ACCOUNT_GROUP_ID: Integer;
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+        _CREATED_BY: String(256);
+        _VALID_FROM_FIRST_VERSION:UTCTimestamp;
+        _CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_costing_sheet {
+		COSTING_SHEET_ID: String(15);
+		CONTROLLING_AREA_ID: String(4);
+		IS_TOTAL_COST2_ENABLED: hana.TINYINT;
+		IS_TOTAL_COST3_ENABLED: hana.TINYINT;
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		COSTING_SHEET_DESCRIPTION: String(250);
+		TOTAL_COST2_DESCRIPTION: String(50);
+		TOTAL_COST3_DESCRIPTION: String(50);
+	};
+
+	table type tt_costing_sheet_base {
+		COSTING_SHEET_BASE_ID: Integer;
+		COST_PORTION: Integer; // 1=Fixed cost only, 2=Variable cost only, 3=Overall cost (fixed+variable)
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+	};
+
+	table type tt_costing_sheet_base_row {
+		COSTING_SHEET_BASE_ID: Integer;
+		ITEM_CATEGORY_ID: Integer;
+		SUBITEM_STATE: hana.SMALLINT;
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		CHILD_ITEM_CATEGORY_ID: Integer;
+	};
+
+	table type tt_costing_sheet_row {
+		COSTING_SHEET_ROW_ID: String(5);
+		COSTING_SHEET_ID: String(15);
+		COSTING_SHEET_ROW_TYPE: Integer;
+		COSTING_SHEET_BASE_ID: Integer;
+		ACCOUNT_GROUP_AS_BASE_ID: Integer;
+		COSTING_SHEET_OVERHEAD_ID: Integer;
+		CALCULATION_ORDER: Integer;
+		IS_RELEVANT_FOR_TOTAL: hana.TINYINT; 
+      	IS_RELEVANT_FOR_TOTAL2: hana.TINYINT;
+      	IS_RELEVANT_FOR_TOTAL3: hana.TINYINT;
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		COSTING_SHEET_ROW_DESCRIPTION: String(250);
+	};
+
+	table type tt_costing_sheet_row_dependencies {
+		SOURCE_ROW_ID: String(5);
+		TARGET_ROW_ID: String(5);
+		COSTING_SHEET_ID: String(15);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+	};
+
+	table type tt_costing_sheet_overhead {
+		COSTING_SHEET_OVERHEAD_ID: Integer;
+		CREDIT_ACCOUNT_ID: String(10); // account for credit
+		CREDIT_FIXED_COST_PORTION: Integer; // percentage of fixed cost portion in percentage
+		IS_ROLLED_UP: hana.TINYINT; // if set = rollUp; in ERP: CHAR(1)
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		USE_DEFAULT_FIXED_COST_PORTION: hana.TINYINT;
+	};
+
+	table type tt_costing_sheet_overhead_row {
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		VALID_FROM : LocalDate;
+		VALID_TO : LocalDate;
+		CONTROLLING_AREA_ID : String(4);
+		COMPANY_CODE_ID : String(4);
+		BUSINESS_AREA_ID : String(15);
+		PROFIT_CENTER_ID : String(10);
+		PLANT_ID: String(8);
+		OVERHEAD_GROUP_ID : String(10);
+		OVERHEAD_PERCENTAGE : Decimal(28, 7);
+		PROJECT_ID: String(35);
+		ACTIVITY_TYPE_ID : String(12);
+		COST_CENTER_ID : String(10);
+		WORK_CENTER_ID : String(15);
+		OVERHEAD_QUANTITY_BASED : Decimal(28, 7);
+		OVERHEAD_CURRENCY_ID : String(3);
+		OVERHEAD_PRICE_UNIT : Decimal(28, 7);
+		OVERHEAD_PRICE_UNIT_UOM_ID : String(3);
+		CREDIT_FIXED_COST_PORTION : Integer;
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+	};
+
+	table type tt_costing_sheet_overhead_row_ext {
+		COSTING_SHEET_OVERHEAD_ROW_ID : Integer;
+		COSTING_SHEET_OVERHEAD_ID : Integer;
+		VALID_FROM : LocalDate;
+		VALID_TO : LocalDate;
+		CONTROLLING_AREA_ID : String(4);
+		COMPANY_CODE_ID : String(4);
+		BUSINESS_AREA_ID : String(15);
+		PROFIT_CENTER_ID : String(10);
+		PLANT_ID: String(8);
+		OVERHEAD_GROUP_ID : String(10);
+		OVERHEAD_PERCENTAGE : Decimal(28, 7);
+		PROJECT_ID: String(35);
+		ACTIVITY_TYPE_ID : String(12);
+		COST_CENTER_ID : String(10);
+		WORK_CENTER_ID : String(15);
+		OVERHEAD_QUANTITY_BASED : Decimal(28, 7);
+		OVERHEAD_CURRENCY_ID : String(3);
+		OVERHEAD_PRICE_UNIT : Decimal(28, 7);
+		OVERHEAD_PRICE_UNIT_UOM_ID : String(3);
+		CREDIT_FIXED_COST_PORTION: Integer;
+		FORMULA_ID: Integer;
+		FORMULA_STRING: LargeString;
+		FORMULA_DESCRIPTION: String(5000);
+		OVERHEAD_CUSTOM: String(127);
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_price_component {
+		PRICE_ID: String(32);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		ACCOUNT_ID: String(10);
+		PRICE_FIXED: Decimal(28,7);
+		PRICE_VARIABLE: Decimal(28,7);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_price_component_input {
+		PRICE_ID: String(32);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+		VALUATION_DATE: LocalDate;
+	};
+
+	table type tt_language {
+		LANGUAGE: String(11);
+		TEXTS_MAINTAINABLE: hana.TINYINT;
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_plant {
+		PLANT_ID: String(8);
+		COMPANY_CODE_ID: String(4);
+		COUNTRY: String(100);
+		POSTAL_CODE: String(35);
+		REGION: String(100);
+		CITY: String(100);
+		STREET_NUMBER_OR_PO_BOX: String(100);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		PLANT_DESCRIPTION: String(250);
+	};
+
+	table type tt_plant_key {
+		PLANT_ID: String(8);
+	};
+
+	table type tt_profit_center {
+		PROFIT_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		PROFIT_CENTER_DESCRIPTION: String(250);
+	};
+
+	table type tt_profit_center_key {
+		PROFIT_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+	};
+
+	table type tt_profit_center__text {
+		PROFIT_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		LANGUAGE: String(11);
+		PROFIT_CENTER_DESCRIPTION: String(250);
+		_VALID_FROM: UTCTimestamp; 
+		_VALID_TO: UTCTimestamp;
+		_SOURCE: hana.TINYINT;
+		_CREATED_BY: String(256);		  
+	};	   
+
+	table type tt_valuation_class {
+		VALUATION_CLASS_ID: String(4);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		VALUATION_CLASS_DESCRIPTION: String(250);
+	};
+
+	table type tt_valuation_class_key{
+		VALUATION_CLASS_ID: String(4);
+	};
+
+	table type tt_vendor_key {
+		VENDOR_ID: String(10);
+	};
+
+	table type tt_vendor {
+		VENDOR_ID: String(10);
+		VENDOR_NAME: String(100); // not localized
+		COUNTRY: String(100);
+		POSTAL_CODE: String(35);
+		REGION: String(100);
+		CITY: String(100);
+		STREET_NUMBER_OR_PO_BOX: String(100);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_work_center_key {
+        WORK_CENTER_ID: String(15);
+		PLANT_ID: String(8);
+    };
+
+	table type tt_overhead_group {
+		OVERHEAD_GROUP_ID: String(10);
+		PLANT_ID: String(8);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		OVERHEAD_GROUP_DESCRIPTION: String(250);
+	};
+
+	table type tt_overhead_group_key {
+		OVERHEAD_GROUP_ID: String(10);
+		PLANT_ID: String(8);
+	};
+
+	table type tt_material_account_determination {
+		CONTROLLING_AREA_ID: String(4);
+		MATERIAL_TYPE_ID: String(4);
+		PLANT_ID: String(8);
+		VALUATION_CLASS_ID: String(4);
+		ACCOUNT_ID: String(10);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+	  	_VALID_TO: UTCTimestamp; // used to define the validity of master data
+	  	_SOURCE: hana.TINYINT; // used to define the source of master data
+	  	_CREATED_BY: String(256);
+	  	_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+	  	_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_document_type {
+		DOCUMENT_TYPE_ID: String(3);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		DOCUMENT_TYPE_DESCRIPTION: String(250);
+	};
+
+	table type tt_document_type_key {
+		DOCUMENT_TYPE_ID: String(3);
+	};
+
+	table type tt_document {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_ID: String(40);
+		DOCUMENT_VERSION: String(2);
+		DOCUMENT_PART: String(3);
+		IS_CREATED_VIA_CAD_INTEGRATION: hana.TINYINT;
+		DOCUMENT_STATUS_ID: String(2);
+		DESIGN_OFFICE_ID: String(3);
+		_VALID_FROM: UTCTimestamp;
+		_VALID_TO: UTCTimestamp;
+		_SOURCE: hana.TINYINT;
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		DOCUMENT_DESCRIPTION: String(250);
+	};
+
+	table type tt_document_key {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_ID: String(40);
+		DOCUMENT_VERSION: String(2);
+		DOCUMENT_PART: String(3);
+	};	
+
+	table type tt_document_material {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_ID: String(40);
+		DOCUMENT_VERSION: String(2);
+		DOCUMENT_PART: String(3);
+		MATERIAL_ID: String(40);
+		_VALID_FROM: UTCTimestamp;
+		_VALID_TO: UTCTimestamp;
+		_SOURCE: hana.TINYINT;
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		DOCUMENT_MATERIAL_DESCRIPTION: String(250);
+	};   
+
+	table type tt_document_status {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_STATUS_ID: String(2);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION: UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		DOCUMENT_STATUS_DESCRIPTION: String(250);
+	};
+
+	table type tt_document_status_key {
+		DOCUMENT_STATUS_ID: String(3);
+	};
+
+	table type tt_document_material_key {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_ID: String(40);
+		DOCUMENT_VERSION: String(2);
+		DOCUMENT_PART: String(3);
+		MATERIAL_ID: String(40);
+	};
+
+	table type tt_design_office {
+		DESIGN_OFFICE_ID: String(3);
+		_VALID_FROM: UTCTimestamp; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; // used to define the source of master data
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+		DESIGN_OFFICE_DESCRIPTION: String(250);
+	};
+
+	table type tt_design_office_key {
+		DESIGN_OFFICE_ID: String(3);
+	};
+
+	table type tt_customer {
+		CUSTOMER_ID: String(10);
+		CUSTOMER_NAME: String(100);
+		COUNTRY: String(100);
+		POSTAL_CODE: String(35);
+		REGION: String(100);
+		CITY: String(100);
+		STREET_NUMBER_OR_PO_BOX: String(100);
+		_VALID_FROM: UTCTimestamp ; // used to define the validity of master data
+		_VALID_TO: UTCTimestamp; // used to define the validity of master data
+		_SOURCE: hana.TINYINT; 
+		_CREATED_BY: String(256);
+		_VALID_FROM_FIRST_VERSION:UTCTimestamp;
+		_CREATED_BY_FIRST_VERSION: String(256);
+	};
+
+	table type tt_item_copy_master_data_input {
+      ITEM_ID: Integer;
+      ITEM_CATEGORY_ID: Integer; /* 0 Calculation Version (Kalkulationsversion)
+       * 1 Component (Document) (Komponente (Dokument))
+       * 2 Component (Material) (Komponente (Material))
+       * 3 Internal Activity (Eigenleistung) 
+       * 4 External Activity (Fremdleistung) 
+       * 5 Process (Prozess) 
+       * 6 Subcontracting (Lohnbearbeitung) 
+       * 7 Resources and Tools (Fertigungshilfsmittel) 
+       * 8 Variable Item (Variable Position) 
+       * 9 Text Item (Textposition) */
+      ACCOUNT_ID: String(10);
+      DOCUMENT_TYPE_ID: String(3);
+      DOCUMENT_STATUS_ID: String(2);
+      DOCUMENT_ID: String(40);
+      DOCUMENT_VERSION: String(2);
+      DOCUMENT_PART: String(3);
+      MATERIAL_ID: String(40);
+      MATERIAL_TYPE_ID: String(4);
+      MATERIAL_GROUP_ID: String(9);
+      OVERHEAD_GROUP_ID: String(10);
+      VALUATION_CLASS_ID: String(4);
+      ACTIVITY_TYPE_ID: String(12);
+      PROCESS_ID: String(12);
+      COMPANY_CODE_ID: String(4);
+      COST_CENTER_ID: String(10);
+      PLANT_ID: String(8);
+      WORK_CENTER_ID: String(15);
+      BUSINESS_AREA_ID: String(15);
+      PROFIT_CENTER_ID: String(10);
+      QUANTITY_UOM_ID: String(3);
+      TOTAL_QUANTITY_UOM_ID: String(3);
+      TRANSACTION_CURRENCY_ID: String(3);
+      PRICE_UNIT_UOM_ID: String(3);
+      TARGET_COST_CURRENCY_ID: String(3);
+      VENDOR_ID: String(10);
+	};
+
+	table type tt_master_data_not_found {
+		ID1: String(20);
+		ID2: String(20);
+		ID3: String(20);
+		BUSINESS_OBJECT: String(20);
+	};
+
+	table type tt_item_id {
+     	ITEM_ID: Integer;
+	};
+
+	table type tt_calculation_id {
+     	CALCULATION_ID: Integer;
+	};
+
+	table type tt_accounts_input {
+		ACCOUNT_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_activity_type_input {
+		ACTIVITY_TYPE_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_business_area_input {
+		BUSINESS_AREA_ID: String(15);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_company_code_input {
+		COMPANY_CODE_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_controlling_area_input {
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_cost_center_input {
+		COST_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_material_input {
+		MATERIAL_ID: String(40);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_material_plant_input {
+		MATERIAL_ID: String(40);
+		PLANT_ID: String(8);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_material_type_input {
+		MATERIAL_TYPE_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_material_group_input {
+		MATERIAL_GROUP_ID: String(9);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_plant_input {
+		PLANT_ID: String(8);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_profit_center_input {
+		PROFIT_CENTER_ID: String(10);
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_overhead_group_input {
+		OVERHEAD_GROUP_ID: String(10);
+		PLANT_ID: String(8);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_valuation_class_input{
+		VALUATION_CLASS_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_component_split_input {
+		COMPONENT_SPLIT_ID: String(35);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};	
+
+	table type tt_costing_sheet_input {
+		COSTING_SHEET_ID: String(15);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+    table type tt_account_groups_input {
+		ACCOUNT_GROUP_ID: Integer;
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;		
+	}
+
+	table type tt_work_center_input {
+		WORK_CENTER_ID: String(15);
+		PLANT_ID: String(8);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_process_input {
+		PROCESS_ID: String(12);
+		CONTROLLING_AREA_ID: String(4);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;		
+	};
+
+	table type tt_document_input {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_ID: String(40);
+		DOCUMENT_VERSION: String(2);
+		DOCUMENT_PART: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;		
+	};
+
+	table type tt_document_type_input {
+		DOCUMENT_TYPE_ID: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;		
+	};
+
+	table type tt_document_status_input {
+		DOCUMENT_TYPE_ID: String(3);
+		DOCUMENT_STATUS_ID: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;		
+	};
+
+	table type tt_design_office_input {
+		DESIGN_OFFICE_ID: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};	
+
+	table type tt_customer_input {
+		CUSTOMER_ID: String(10);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};	
+
+   table type tt_vendor_input {
+		VENDOR_ID: String(10);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_uom_input {
+		UOM_ID: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};	
+
+   table type tt_currency_input {
+		CURRENCY_ID: String(3);
+		MASTER_DATA_TIMESTAMP: UTCTimestamp;
+	};
+
+	table type tt_customer_key {
+		CUSTOMER_ID: String(10);
+	};		
+};

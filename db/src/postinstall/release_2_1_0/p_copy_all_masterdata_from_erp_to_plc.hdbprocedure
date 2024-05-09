@@ -1,0 +1,553 @@
+PROCEDURE "sap.plc.xs.postinstall.release_2_1_0::p_copy_all_masterdata_from_erp_to_plc" ( ) 
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+
+AS
+lv_timestamp 			TIMESTAMP DEFAULT current_utctimestamp;
+lv_erp_source			INTEGER DEFAULT 2;
+lv_user	                NVARCHAR(256) DEFAULT user();
+
+BEGIN
+
+insert into "sap.plc.db::basis.t_account"(CONTROLLING_AREA_ID, ACCOUNT_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+select  KOKRS , KSTAR , :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from (select erpTable.KOKRS, erpTable.KSTAR 
+			from "sap.plc.db.replication.views::v_cskb" as erpTable
+			left outer join "sap.plc.db::basis.t_account" as plcTable
+					 on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+					 and erpTable.KSTAR = plcTable.ACCOUNT_ID
+					 and plcTable._valid_from <= :lv_timestamp
+					 and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+			Where erpTable.KOKRS is not null and erpTable.KSTAR is not null and 
+			plcTable.CONTROLLING_AREA_ID is null and  plcTable.ACCOUNT_ID is null);
+			
+insert into "sap.plc.db::basis.t_account__text" (CONTROLLING_AREA_ID, LANGUAGE, ACCOUNT_ID, ACCOUNT_DESCRIPTION, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+select KOKRS, LANGU, KSTAR, KTEXT,  :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from (select erpTable.KOKRS, erpTable.KSTAR, erpTable.LANGU, erpTable.KTEXT 
+			from  "sap.plc.db::repl.t_csku_tka01" as erpTable
+			left outer join "sap.plc.db::basis.t_account__text" as plcTable
+					on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+					and erpTable.KSTAR = plcTable.ACCOUNT_ID
+					and erpTable.LANGU = plcTable.LANGUAGE
+					and plcTable._valid_from <= :lv_timestamp
+					and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+			Where erpTable.KOKRS is not null and erpTable.KSTAR is not null and erpTable.LANGU is not null and 
+			plcTable.CONTROLLING_AREA_ID is null and  plcTable.ACCOUNT_ID is null and plcTable.LANGUAGE is null);
+			
+insert into "sap.plc.db::basis.t_activity_type"(CONTROLLING_AREA_ID, ACCOUNT_ID, ACTIVITY_TYPE_ID,  _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)		
+select KOKRS, VKSTA, LSTAR, :lv_timestamp as _VALID_FROM , null as _VALID_TO ,  :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from (select erpTable.KOKRS, erpTable.VKSTA, erpTable.LSTAR
+			from "sap.plc.db.replication.views::v_csla" as erpTable
+				left outer join "sap.plc.db::basis.t_activity_type" as plcTable
+					 on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						   and erpTable.VKSTA = plcTable.ACCOUNT_ID
+						   and erpTable.LSTAR = plcTable.ACTIVITY_TYPE_ID
+						   and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.KOKRS is not null and erpTable.VKSTA is not null and erpTable.LSTAR is not null
+				and plcTable.CONTROLLING_AREA_ID is null and plcTable.ACCOUNT_ID is null and plcTable.ACTIVITY_TYPE_ID is null);
+
+			
+insert into "sap.plc.db::basis.t_activity_type__text"(ACTIVITY_TYPE_ID, CONTROLLING_AREA_ID, LANGUAGE, ACTIVITY_TYPE_DESCRIPTION,  _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+SELECT LSTAR, KOKRS, LANGU, KTEXT, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.LSTAR, erpTable.KOKRS, erpTable.LANGU, erpTable.KTEXT
+			from "sap.plc.db.replication.views::v_cslt" AS erpTable
+				left outer join "sap.plc.db::basis.t_activity_type__text" as plcTable
+						ON erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						AND erpTable.LSTAR = plcTable.ACTIVITY_TYPE_ID
+						AND erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.KOKRS is not null and erpTable.LSTAR is not null and erpTable.LANGU is not null
+				and plcTable.ACTIVITY_TYPE_ID is null and plcTable.CONTROLLING_AREA_ID is null and plcTable.LANGUAGE is null);
+					
+
+insert into "sap.plc.db::basis.t_business_area" (BUSINESS_AREA_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+SELECT GSBER, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.GSBER
+				from "sap.plc.db::repl.tgsb" as erpTable
+				left outer join "sap.plc.db::basis.t_business_area" as plcTable
+				on erpTable.GSBER = plcTable.BUSINESS_AREA_ID
+				and plcTable._valid_from <= :lv_timestamp
+				and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+			where erpTable.GSBER is not null and plcTable.BUSINESS_AREA_ID is null);						
+				
+insert into "sap.plc.db::basis.t_business_area__text" (BUSINESS_AREA_ID, BUSINESS_AREA_DESCRIPTION, LANGUAGE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+SELECT GSBER, GTEXT, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	FROM ( SELECT erpTable.GSBER, erpTable.GTEXT, erpTable.LANGU
+		from "sap.plc.db::repl.t_tgsbt" as erpTable
+			LEFT OUTER JOIN "sap.plc.db::basis.t_business_area__text" as plcTable
+			on erpTable.GSBER = plcTable.BUSINESS_AREA_ID
+			and erpTable.LANGU = plcTable.LANGUAGE
+			and plcTable._valid_from <= :lv_timestamp
+			and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+		where erpTable.GSBER is not null and erpTable.GTEXT is not null and erpTable.LANGU is not null
+		and plcTable.BUSINESS_AREA_ID is null and plcTable.BUSINESS_AREA_DESCRIPTION is null and plcTable.LANGUAGE is null);
+	
+insert into "sap.plc.db::basis.t_process"(PROCESS_ID, CONTROLLING_AREA_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+SELECT PRZNR, KOKRS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+  FROM ( SELECT erpTable.PRZNR, erpTable.KOKRS
+		  FROM "sap.plc.db.replication.views::v_cbpr" as erpTable
+			  left outer join "sap.plc.db::basis.t_process" as plcTable
+				  on erpTable.PRZNR = plcTable.PROCESS_ID
+				  and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+				  and plcTable._valid_from <= :lv_timestamp
+				and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+		  where erpTable.PRZNR is not null and erpTable.KOKRS is not null
+		  and plcTable.PROCESS_ID is null  and plcTable.CONTROLLING_AREA_ID is null);
+				  
+insert into "sap.plc.db::basis.t_process__text" ( PROCESS_ID, CONTROLLING_AREA_ID, PROCESS_DESCRIPTION, LANGUAGE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	 SELECT PRZNR, KOKRS, KTEXT, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		 FROM ( SELECT erpTable.PRZNR, erpTable.KOKRS, erpTable.KTEXT, erpTable.LANGU
+					 FROM "sap.plc.db.replication.views::v_cbpt" as erpTable
+						 left outer join "sap.plc.db::basis.t_process__text" as plcTable
+						 on erpTable.PRZNR = plcTable.PROCESS_ID
+						  and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						  and erpTable.LANGU = plcTable.LANGUAGE
+						  and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				  where erpTable.PRZNR is not null and erpTable.KOKRS is not null and erpTable.LANGU is not null
+				  and plcTable.PROCESS_ID is null  and plcTable.CONTROLLING_AREA_ID is null and plcTable.PROCESS_DESCRIPTION is null and plcTable.LANGUAGE is null);									
+
+
+insert into "sap.plc.db::basis.t_company_code" (COMPANY_CODE_ID, CONTROLLING_AREA_ID, COMPANY_CODE_CURRENCY_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select BUKRS, KOKRS, WAERS,	:lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.BUKRS, erpTable.KOKRS, erpTable.WAERS
+					from "sap.plc.db::repl.t_t001_tka02" as erpTable
+						left outer join "sap.plc.db::basis.t_company_code" as plcTable
+						on erpTable.BUKRS = plcTable.COMPANY_CODE_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.BUKRS is not null
+				and plcTable.COMPANY_CODE_ID is null);		
+
+insert into "sap.plc.db::basis.t_company_code__text" (COMPANY_CODE_ID, COMPANY_CODE_DESCRIPTION, LANGUAGE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select BUKRS, BUTXT, LANGU,	:lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.BUKRS, erpTable.BUTXT, erpTable.LANGU
+					from "sap.plc.db::repl.t_t001__text" as erpTable
+						left outer join "sap.plc.db::basis.t_company_code__text" as plcTable
+						on erpTable.BUKRS = plcTable.COMPANY_CODE_ID
+						and  erpTable.LANGU	= plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.BUKRS is not null and erpTable.BUTXT is not null and  erpTable.LANGU is not null
+				and plcTable.COMPANY_CODE_ID is null and plcTable.COMPANY_CODE_DESCRIPTION is null and  plcTable.LANGUAGE is null);
+
+
+insert into "sap.plc.db::basis.t_controlling_area" ( CONTROLLING_AREA_ID, CONTROLLING_AREA_CURRENCY_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select KOKRS, WAERS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.KOKRS, erpTable.WAERS
+				from "sap.plc.db::repl.tka01" as erpTable
+					left outer join "sap.plc.db::basis.t_controlling_area" as plcTable
+						on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOKRS is not null 
+						and plcTable.CONTROLLING_AREA_ID is null);
+						
+insert into "sap.plc.db::basis.t_controlling_area__text" ( CONTROLLING_AREA_ID, CONTROLLING_AREA_DESCRIPTION, LANGUAGE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select KOKRS, BEZEI, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.KOKRS, erpTable.BEZEI, erpTable.LANGU
+				from "sap.plc.db::repl.t_tka01__text" as erpTable
+					left outer join "sap.plc.db::basis.t_controlling_area__text" as plcTable
+						on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOKRS is not null and erpTable.LANGU is not null
+						and plcTable.CONTROLLING_AREA_ID is null and plcTable.LANGUAGE is null);
+
+
+insert into "sap.plc.db::basis.t_cost_center" (COST_CENTER_ID, CONTROLLING_AREA_ID, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select  KOSTL, KOKRS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.KOSTL, erpTable.KOKRS
+					from "sap.plc.db.replication.views::v_csks" as erpTable
+					left outer join "sap.plc.db::basis.t_cost_center" as plcTable
+						on erpTable.KOSTL = plcTable.COST_CENTER_ID
+						and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOSTL is not null and erpTable.KOKRS is not null 
+					and plcTable.COST_CENTER_ID is null and plcTable.CONTROLLING_AREA_ID is null);
+
+insert into "sap.plc.db::basis.t_cost_center__text" (COST_CENTER_ID, CONTROLLING_AREA_ID, COST_CENTER_DESCRIPTION, LANGUAGE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select  KOSTL, KOKRS, KTEXT, LANGU,  :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.KOSTL, erpTable.KOKRS, erpTable.KTEXT, erpTable.LANGU
+					from "sap.plc.db.replication.views::v_cskt" as erpTable
+					left outer join "sap.plc.db::basis.t_cost_center__text" as plcTable
+						on erpTable.KOSTL = plcTable.COST_CENTER_ID
+						and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOSTL is not null and erpTable.KOKRS is not null and erpTable.LANGU is not null 
+					and plcTable.COST_CENTER_ID is null and plcTable.CONTROLLING_AREA_ID is null and plcTable.LANGUAGE is null);
+
+insert into "sap.plc.db::basis.t_currency_conversion" (FROM_CURRENCY_ID, TO_CURRENCY_ID, VALID_FROM, FROM_FACTOR, TO_FACTOR, RATE, _VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+	select FCURR, TCURR, ERP_DATE, FFACT, TFACT, UKURS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.FCURR, erpTable.TCURR, erpTable.ERP_DATE, erpTable.FFACT, erpTable.TFACT, erpTable.UKURS
+				from "sap.plc.db.replication.views::v_tcurr_tcurf" as erpTable
+					left outer join "sap.plc.db::basis.t_currency_conversion" as plcTable
+						on erpTable.FCURR = plcTable.FROM_CURRENCY_ID
+						and erpTable.TCURR = plcTable.TO_CURRENCY_ID
+						and erpTable.ERP_DATE = plcTable.VALID_FROM
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+			where erpTable.FCURR is not null and erpTable.TCURR is not null and erpTable.ERP_DATE is not null
+			and plcTable.FROM_CURRENCY_ID is null and plcTable.TO_CURRENCY_ID is null and plcTable.VALID_FROM is null);
+
+insert into "sap.plc.db::basis.t_customer" (CUSTOMER_ID, CUSTOMER_NAME, COUNTRY, POSTAL_CODE, REGION, CITY, STREET_NUMBER_OR_PO_BOX, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+		SELECT KUNNR, NAME1, LAND1, PSTLZ, REGIO, ORT01, STRAS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			FROM (  SELECT erpTable.KUNNR, erpTable.NAME1, erpTable.LAND1, erpTable.PSTLZ, erpTable.REGIO, erpTable.ORT01, erpTable.STRAS
+					from "sap.plc.db::repl.t_kna1" as erpTable
+					left outer join "sap.plc.db::basis.t_customer" as plcTable
+						on erpTable.KUNNR = plcTable.CUSTOMER_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KUNNR is not null and plcTable.CUSTOMER_ID is null);	
+
+insert into "sap.plc.db::basis.t_document" ( DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+		SELECT DOKAR, DOKNR, DOKVR, DOKTL, DOKST, LABOR, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			FROM ( SELECT erpTable.DOKAR, erpTable.DOKNR, erpTable.DOKVR, erpTable.DOKTL, erpTable.DOKST, erpTable.LABOR
+						from "sap.plc.db::repl.draw" as erpTable
+							left outer join "sap.plc.db::basis.t_document" as plcTable
+								on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+								AND erpTable.DOKNR = plcTable.DOCUMENT_ID
+								and erpTable.DOKVR = plcTable.DOCUMENT_VERSION
+								and erpTable.DOKTL = plcTable.DOCUMENT_PART
+								and plcTable._valid_from <= :lv_timestamp
+								and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.DOKAR is not null and  erpTable.DOKNR is not null and erpTable.DOKVR is not null and	erpTable.DOKTL is not null 
+						and plcTable.DOCUMENT_TYPE_ID is null and plcTable.DOCUMENT_ID is null and plcTable.DOCUMENT_VERSION is null and plcTable.DOCUMENT_PART	is null);	
+				
+
+insert into "sap.plc.db::basis.t_document__text" ( DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, DOCUMENT_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+		SELECT DOKAR, DOKNR, DOKVR, DOKTL, DKTXT, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			FROM ( SELECT erpTable.DOKAR, erpTable.DOKNR, erpTable.DOKVR, erpTable.DOKTL, erpTable.DKTXT, erpTable.LANGU
+						from "sap.plc.db::repl.t_drat" as erpTable
+							left outer join "sap.plc.db::basis.t_document__text" as plcTable
+								on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+								AND erpTable.DOKNR = plcTable.DOCUMENT_ID
+								and erpTable.DOKVR = plcTable.DOCUMENT_VERSION
+								and erpTable.DOKTL = plcTable.DOCUMENT_PART
+								and erpTable.LANGU = plcTable.LANGUAGE
+								and plcTable._valid_from <= :lv_timestamp
+								and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.DOKAR is not null and  erpTable.DOKNR is not null and erpTable.DOKVR is not null and	erpTable.DOKTL is not null and erpTable.LANGU is not null
+						and plcTable.DOCUMENT_TYPE_ID is null and plcTable.DOCUMENT_ID is null and plcTable.DOCUMENT_VERSION is null and plcTable.DOCUMENT_PART	is null and plcTable.LANGUAGE is null);	
+
+
+insert into "sap.plc.db::basis.t_document_material" ( DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_VERSION, DOCUMENT_PART, MATERIAL_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+		SELECT DOKAR, DOKNR, DOKVR, DOKTL, OBJKY, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			FROM ( SELECT erpTable.DOKAR, erpTable.DOKNR, erpTable.DOKVR, erpTable.DOKTL, erpTable.OBJKY
+						from "sap.plc.db.replication.views::v_drad" as erpTable
+							left outer join "sap.plc.db::basis.t_document_material" as plcTable
+								on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+								AND erpTable.DOKNR = plcTable.DOCUMENT_ID
+								and erpTable.DOKVR = plcTable.DOCUMENT_VERSION
+								and erpTable.DOKTL = plcTable.DOCUMENT_PART
+								and erpTable.OBJKY = plcTable.MATERIAL_ID
+								and plcTable._valid_from <= :lv_timestamp
+								and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.DOKAR is not null and  erpTable.DOKNR is not null and erpTable.DOKVR is not null and	erpTable.DOKTL is not null and erpTable.OBJKY is not null
+						and plcTable.DOCUMENT_TYPE_ID is null and plcTable.DOCUMENT_ID is null and plcTable.DOCUMENT_VERSION is null and plcTable.DOCUMENT_PART	is null and plcTable.MATERIAL_ID is null);								
+				
+				
+insert into "sap.plc.db::basis.t_document_type" (DOCUMENT_TYPE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select DOKAR, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.DOKAR
+					from "sap.plc.db::repl.tdwa" as erpTable
+						left outer join "sap.plc.db::basis.t_document_type" as plcTable
+							on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+							and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.DOKAR is not null and plcTable.DOCUMENT_TYPE_ID is null);						
+
+
+insert into "sap.plc.db::basis.t_document_type__text" (DOCUMENT_TYPE_ID, DOCUMENT_TYPE_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select DOKAR, DARTXT, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.DOKAR, erpTable.DARTXT, erpTable.LANGU
+					from "sap.plc.db::repl.t_tdwat" as erpTable
+						left outer join "sap.plc.db::basis.t_document_type__text" as plcTable
+							on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+							and erpTable.LANGU = plcTable.LANGUAGE
+							and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.DOKAR is not null and erpTable.LANGU is not null
+						 and plcTable.DOCUMENT_TYPE_ID is null and plcTable.LANGUAGE is null);	
+						 
+			
+insert into "sap.plc.db::basis.t_document_status" (DOCUMENT_TYPE_ID, DOCUMENT_STATUS_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select DOKAR, DOKST, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.DOKAR, erpTable.DOKST
+			from "sap.plc.db::repl.tdws" as erpTable
+				left outer join "sap.plc.db::basis.t_document_status" as plcTable
+					on erpTable.DOKAR = plcTable.DOCUMENT_TYPE_ID
+					and erpTable.DOKST = plcTable.DOCUMENT_STATUS_ID
+					and plcTable._valid_from <= :lv_timestamp
+					and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.DOKAR is not null and erpTable.DOKST is not null
+				and plcTable.DOCUMENT_TYPE_ID is null and plcTable.DOCUMENT_STATUS_ID is null);
+				
+insert into "sap.plc.db::basis.t_document_status__text" (DOCUMENT_STATUS_ID, DOCUMENT_STATUS_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select DOKST, DOSTX, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.DOKST, erpTable.DOSTX, erpTable.LANGU
+			from "sap.plc.db::repl.t_tdwst" as erpTable
+				left outer join "sap.plc.db::basis.t_document_status__text" as plcTable
+					on erpTable.DOKST = plcTable.DOCUMENT_STATUS_ID
+					and erpTable.LANGU = plcTable.LANGUAGE
+					and plcTable._valid_from <= :lv_timestamp
+					and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.DOKST is not null and erpTable.LANGU is not null
+				and plcTable.DOCUMENT_STATUS_ID is null and plcTable.LANGUAGE is null);
+				
+insert into "sap.plc.db::basis.t_material" (MATERIAL_ID, BASE_UOM_ID, MATERIAL_TYPE_ID, MATERIAL_GROUP_ID, IS_CREATED_VIA_CAD_INTEGRATION, IS_CONFIGURABLE_MATERIAL, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	SELECT MATNR, MEINS, MTART, MATKL, CADKZ, KZKFG, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from (select erpTable.MATNR,  erpTable.MEINS,  erpTable.MTART, erpTable.MATKL, erpTable.CADKZ,  erpTable.KZKFG
+				from "sap.plc.db::repl.t_mara_t006" as erpTable
+					left outer join "sap.plc.db::basis.t_material" as plcTable
+					on erpTable.MATNR = plcTable.MATERIAL_ID
+					and plcTable._valid_from <= :lv_timestamp
+					and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.MATNR is not null and plcTable.MATERIAL_ID is null);
+				
+insert into "sap.plc.db::basis.t_material__text" (MATERIAL_ID, MATERIAL_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MATNR, MAKTX, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.MATNR, erpTable.MAKTX, erpTable.LANGU
+				from "sap.plc.db::repl.t_makt_t006" as erpTable
+					left outer join "sap.plc.db::basis.t_material__text" as plcTable
+				on erpTable.MATNR = plcTable.MATERIAL_ID
+				and erpTable.LANGU = plcTable.LANGUAGE
+				and plcTable._valid_from <= :lv_timestamp
+				and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+			where erpTable.MATNR is not null and erpTable.LANGU is not null 
+			and plcTable.MATERIAL_ID is null and plcTable.LANGUAGE is null);	
+
+
+insert into "sap.plc.db::basis.t_material_account_determination"(CONTROLLING_AREA_ID, MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID, ACCOUNT_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select KOKRS, MTART, WERKS, BKLAS, KONTS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.KOKRS, erpTable.MTART, erpTable.WERKS, erpTable.BKLAS, erpTable.KONTS
+				from "sap.plc.db.replication.views::v_t030_t001w" as erpTable
+					left outer join "sap.plc.db::basis.t_material_account_determination" as plcTable
+						on erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and erpTable.MTART = plcTable.MATERIAL_TYPE_ID
+						and erpTable.WERKS = plcTable.PLANT_ID
+						and erpTable.BKLAS = plcTable.VALUATION_CLASS_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOKRS is not null and erpTable.MTART is not null and erpTable.WERKS is not null and erpTable.BKLAS is not null
+					and  plcTable.CONTROLLING_AREA_ID is null and  plcTable.MATERIAL_TYPE_ID is null and plcTable.PLANT_ID is null and plcTable.VALUATION_CLASS_ID is null);  
+
+
+insert into "sap.plc.db::basis.t_material_group" (MATERIAL_GROUP_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MATKL,  :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.MATKL
+				from "sap.plc.db::repl.t023" as erpTable
+					left outer join "sap.plc.db::basis.t_material_group" as plcTable
+				on erpTable.MATKL = plcTable.MATERIAL_GROUP_ID
+				and plcTable._valid_from <= :lv_timestamp
+				and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+				where erpTable.MATKL is not null and plcTable.MATERIAL_GROUP_ID is null);	
+				
+insert into "sap.plc.db::basis.t_material_group__text" (MATERIAL_GROUP_ID, MATERIAL_GROUP_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MATKL, WGBEZ, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.MATKL, erpTable.WGBEZ, erpTable.LANGU
+				from "sap.plc.db::repl.t_t023t" as erpTable
+					left outer join "sap.plc.db::basis.t_material_group__text" as plcTable
+						on erpTable.MATKL = plcTable.MATERIAL_GROUP_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.MATKL is not null and erpTable.LANGU is not null
+					and plcTable.MATERIAL_GROUP_ID is null and plcTable.LANGUAGE is null);	
+
+
+insert into "sap.plc.db::basis.t_material_type" (MATERIAL_TYPE_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MTART, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.MTART
+				from "sap.plc.db::repl.t134" as erpTable
+					left outer join "sap.plc.db::basis.t_material_type" as plcTable
+						on erpTable.MTART = plcTable.MATERIAL_TYPE_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.MTART is not null and plcTable.MATERIAL_TYPE_ID is null);						
+
+
+insert into "sap.plc.db::basis.t_material_type__text" (MATERIAL_TYPE_ID, MATERIAL_TYPE_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MTART, MTBEZ, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		FROM (SELECT erpTable.MTART, erpTable.MTBEZ, erpTable.LANGU
+				from "sap.plc.db::repl.t_t134t" as erpTable
+					left outer join "sap.plc.db::basis.t_material_type__text" as plcTable
+						on erpTable.MTART = plcTable.MATERIAL_TYPE_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.MTART  is not null and erpTable.MTBEZ is not null
+					and plcTable.MATERIAL_TYPE_ID is null and plcTable.LANGUAGE is null);
+
+
+insert into "sap.plc.db::basis.t_material_plant" (MATERIAL_ID, PLANT_ID, MATERIAL_LOT_SIZE, VALUATION_CLASS_ID, OVERHEAD_GROUP_ID, MATERIAL_LOT_SIZE_UOM_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select 	MATNR, WERKS, LOSGR, BKLAS, KOSGR, MEINS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.MATNR, erpTable.WERKS, erpTable.LOSGR, erpTable.BKLAS, erpTable.KOSGR, erpTable.MEINS
+				from "sap.plc.db::repl.t_marc_mbew" as erpTable
+					left outer join "sap.plc.db::basis.t_material_plant" as plcTable
+						on erpTable.MATNR = plcTable.MATERIAL_ID
+						and erpTable.WERKS = plcTable.PLANT_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.MATNR is not null and erpTable.WERKS is not null
+					and plcTable.MATERIAL_ID is null and plcTable.PLANT_ID is null);	
+
+
+insert into "sap.plc.db::basis.t_material_price" (PRICE_ID, PRICE_SOURCE_ID, MATERIAL_ID, PLANT_ID, VENDOR_ID, PROJECT_ID, VALID_FROM,  VALID_TO, VALID_FROM_QUANTITY, VALID_TO_QUANTITY, PURCHASING_GROUP,  PURCHASING_DOCUMENT, LOCAL_CONTENT, PRICE_FIXED_PORTION, PRICE_VARIABLE_PORTION, TRANSACTION_CURRENCY_ID, PRICE_UNIT, PRICE_UNIT_UOM_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select (select CAST(SYSUUID AS NVARCHAR(32)) from "sap.plc.db::DUMMY") as "PRICE_ID", PRICE_SOURCE_ID, MATNR, WERKS, VENDOR_ID, PROJECT_ID, VALID_FROM, VALID_TO, VALID_FROM_QUANTITY, VALID_TO_QUANTITY, PURCHASING_GROUP, PURCHASING_DOCUMENT, LOCAL_CONTENT, 0 as PRICE_FIXED_PORTION, STPRS, WAERS, PEINH, MEINS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		 from (select plcTable.PRICE_ID, erpTable.PRICE_SOURCE_ID, erpTable.MATNR, erpTable.WERKS, erpTable.VENDOR_ID, erpTable.PROJECT_ID, erpTable.VALID_FROM, erpTable.VALID_TO, erpTable.VALID_FROM_QUANTITY, erpTable.VALID_TO_QUANTITY, erpTable.PURCHASING_GROUP, erpTable.PURCHASING_DOCUMENT, erpTable.LOCAL_CONTENT, erpTable.STPRS, erpTable.WAERS, erpTable.PEINH, erpTable.MEINS
+					 from "sap.plc.db::repl.t_mbew_marc" as erpTable
+						 left outer join "sap.plc.db::basis.t_material_price" as plcTable
+							 on erpTable.PRICE_SOURCE_ID = plcTable.PRICE_SOURCE_ID
+							 and erpTable.MATNR = plcTable.MATERIAL_ID
+							 and erpTable.WERKS = plcTable.PLANT_ID
+							 and erpTable.VALID_FROM = plcTable.VALID_FROM
+							 and erpTable.VENDOR_ID = plcTable.VENDOR_ID
+							 and erpTable.PROJECT_ID = plcTable.PROJECT_ID
+							 and erpTable.VALID_FROM_QUANTITY = plcTable.VALID_FROM_QUANTITY
+							 and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					 where  erpTable.PRICE_SOURCE_ID is not null and plcTable.PRICE_SOURCE_ID is null
+								 and erpTable.MATNR is not null and plcTable.MATERIAL_ID is null
+								 and erpTable.WERKS is not null and plcTable.PLANT_ID is null
+								 and erpTable.VALID_FROM is not null and plcTable.VALID_FROM is null
+								 and erpTable.VENDOR_ID is not null and plcTable.VENDOR_ID is null
+								 and erpTable.PROJECT_ID is not null and plcTable.PROJECT_ID is null
+								 and erpTable.VALID_FROM_QUANTITY is not null and plcTable.VALID_FROM_QUANTITY is null);
+						 
+
+insert into "sap.plc.db::basis.t_overhead_group" (OVERHEAD_GROUP_ID, PLANT_ID,  _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+select KOSGR, WERKS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.KOSGR, erpTable.WERKS
+				from "sap.plc.db::repl.t_tck14_t001w" as erpTable
+					left outer join "sap.plc.db::basis.t_overhead_group" as plcTable
+						on erpTable.KOSGR = plcTable.OVERHEAD_GROUP_ID
+						and erpTable.WERKS = plcTable.PLANT_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOSGR is not null and erpTable.WERKS is not null
+					and plcTable.OVERHEAD_GROUP_ID is null and plcTable.PLANT_ID is null);	
+				
+				
+insert into "sap.plc.db::basis.t_overhead_group__text" (OVERHEAD_GROUP_ID, PLANT_ID, OVERHEAD_GROUP_DESCRIPTION, LANGUAGE,  _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+select KOSGR, WERKS, TXZSCHL, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.KOSGR, erpTable.WERKS, erpTable.TXZSCHL, erpTable.LANGU
+				from "sap.plc.db::repl.t_tck15_t001w" as erpTable
+					left outer join "sap.plc.db::basis.t_overhead_group__text" as plcTable
+						on erpTable.KOSGR = plcTable.OVERHEAD_GROUP_ID
+						and erpTable.WERKS = plcTable.PLANT_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.KOSGR is not null and erpTable.WERKS is not null and erpTable.LANGU is not null
+					and plcTable.OVERHEAD_GROUP_ID is null and plcTable.PLANT_ID is null and plcTable.LANGUAGE is null);		 				
+
+insert into "sap.plc.db::basis.t_plant" (PLANT_ID, COMPANY_CODE_ID, COUNTRY, POSTAL_CODE, REGION, CITY, STREET_NUMBER_OR_PO_BOX,  _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+select WERKS, BUKRS, LAND1, PSTLZ, REGIO, ORT01, STRAS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.WERKS, erpTable.BUKRS, erpTable.LAND1, erpTable.PSTLZ, erpTable.REGIO, erpTable.ORT01, erpTable.STRAS
+				from "sap.plc.db::repl.t_t001w_t001k" as erpTable
+					left outer join "sap.plc.db::basis.t_plant" as plcTable
+						on erpTable.WERKS = plcTable.PLANT_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.WERKS is not null and plcTable.PLANT_ID is null);
+
+
+insert into "sap.plc.db::basis.t_plant__text" (PLANT_ID, PLANT_DESCRIPTION, LANGUAGE,  _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+select WERKS, NAME1, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+	from ( select erpTable.WERKS, erpTable.NAME1, erpTable.LANGU
+				from "sap.plc.db::repl.t_t001w__text" as erpTable
+					left outer join "sap.plc.db::basis.t_plant__text" as plcTable
+						on erpTable.WERKS = plcTable.PLANT_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+					where erpTable.WERKS is not null and erpTable.LANGU is not null and plcTable.PLANT_ID is null and plcTable.LANGUAGE is null);
+
+
+insert into "sap.plc.db::basis.t_profit_center" (PROFIT_CENTER_ID, CONTROLLING_AREA_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select PRCTR, KOKRS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.PRCTR, erpTable.KOKRS
+				from "sap.plc.db.replication.views::v_cepc" as erpTable
+					left outer join "sap.plc.db::basis.t_profit_center" as plcTable
+						on erpTable.PRCTR = plcTable.PROFIT_CENTER_ID
+						and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)					
+					where erpTable.PRCTR is not null and plcTable.PROFIT_CENTER_ID is null
+					and erpTable.KOKRS is not null and plcTable.CONTROLLING_AREA_ID is null);					
+									
+insert into "sap.plc.db::basis.t_profit_center__text" (PROFIT_CENTER_ID, CONTROLLING_AREA_ID, PROFIT_CENTER_DESCRIPTION, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select PRCTR, KOKRS, KTEXT, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+		from ( select erpTable.PRCTR, erpTable.KOKRS, erpTable.KTEXT, erpTable.LANGU
+				from "sap.plc.db.replication.views::v_cepct" as erpTable
+					left outer join "sap.plc.db::basis.t_profit_center__text" as plcTable
+						on erpTable.PRCTR = plcTable.PROFIT_CENTER_ID
+						and erpTable.KOKRS = plcTable.CONTROLLING_AREA_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)					
+					where erpTable.PRCTR is not null and plcTable.PROFIT_CENTER_ID is null 
+					and erpTable.KOKRS is not null and plcTable.CONTROLLING_AREA_ID is null
+					and erpTable.LANGU is not null and plcTable.LANGUAGE is null);	
+								
+insert into "sap.plc.db::basis.t_uom" (UOM_ID, DIMENSION_ID, NUMERATOR, DENOMINATOR, EXPONENT_BASE10, SI_CONSTANT, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MSEHI, DIMID, ZAEHL, NENNR, EXP10, ADDKO, current_utctimestamp, null, 2, null
+			from ( select  erpTable.MSEHI, erpTable.DIMID, erpTable.ZAEHL, erpTable.NENNR, erpTable.EXP10, erpTable.ADDKO
+				   from  "sap.plc.db::repl.t006" as erpTable
+					   left outer join "sap.plc.db::basis.t_uom" as plcTable
+						  on erpTable.MSEHI = plcTable.UOM_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)				      
+					  where erpTable.MSEHI is not null and plcTable.UOM_ID is null);
+							  
+insert into "sap.plc.db::basis.t_uom__text" (UOM_ID, UOM_DESCRIPTION, UOM_CODE, LANGUAGE, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select MSEHI, MSEHT, MSEH3, LANGU, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			from ( select  erpTable.MSEHI, erpTable.MSEHT, erpTable.MSEH3, erpTable.LANGU
+				   from  "sap.plc.db::repl.t_t006a_t006" as erpTable
+					   left outer join "sap.plc.db::basis.t_uom__text" as plcTable
+						on erpTable.MSEHI = plcTable.UOM_ID
+						and erpTable.LANGU = plcTable.LANGUAGE
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)				      
+					  where erpTable.MSEHI is not null and plcTable.UOM_ID is null
+					  and erpTable.LANGU is not null and plcTable.LANGUAGE is null);	
+								  
+insert into "sap.plc.db::basis.t_valuation_class" ( VALUATION_CLASS_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select  BKLAS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			from ( select erpTable.BKLAS
+					from "sap.plc.db::repl.t025" as erpTable
+						left outer join "sap.plc.db::basis.t_valuation_class" as plcTable
+							on erpTable.BKLAS = plcTable.VALUATION_CLASS_ID
+							and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.BKLAS is not null and plcTable.VALUATION_CLASS_ID is null);
+									
+insert into "sap.plc.db::basis.t_valuation_class__text" ( VALUATION_CLASS_ID, VALUATION_CLASS_DESCRIPTION, LANGUAGE,  _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select  BKLAS, BKBEZ, LANGU,  :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			from ( select erpTable.BKLAS, erpTable.BKBEZ, erpTable.LANGU
+					from "sap.plc.db::repl.t_t025t" as erpTable
+						left outer join "sap.plc.db::basis.t_valuation_class__text" as plcTable
+							on erpTable.BKLAS = plcTable.VALUATION_CLASS_ID
+							and erpTable.LANGU = plcTable.LANGUAGE
+							and plcTable._valid_from <= :lv_timestamp
+							and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.BKLAS is not null and plcTable.VALUATION_CLASS_ID is null
+						and erpTable.LANGU is not null and plcTable.LANGUAGE is null);	
+									
+insert into "sap.plc.db::basis.t_vendor" (VENDOR_ID, VENDOR_NAME, COUNTRY, POSTAL_CODE, REGION, STREET_NUMBER_OR_PO_BOX, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY)
+	select LIFNR, NAME1, LAND1, PSTL2, REGIO, STRAS, :lv_timestamp as _VALID_FROM , null as _VALID_TO, :lv_erp_source as _SOURCE, :lv_user as _CREATED_BY
+			from (select erpTable.LIFNR, erpTable.NAME1, erpTable.LAND1, erpTable.PSTL2, erpTable.REGIO, erpTable.STRAS	
+						from "sap.plc.db::repl.t_lfa1" as erpTable
+							left outer join "sap.plc.db::basis.t_vendor" as plcTable
+						on erpTable.LIFNR = plcTable.VENDOR_ID
+						and plcTable._valid_from <= :lv_timestamp
+						and (plcTable._valid_to > :lv_timestamp OR plcTable._valid_to IS NULL)
+						where erpTable.LIFNR is not null and plcTable.VENDOR_ID is null);									
+END;

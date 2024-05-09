@@ -1,0 +1,28 @@
+<mvc:View controllerName="mdr.ui.controller.MainView" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m" xmlns:tnt="sap.tnt" xmlns:core="sap.ui.core">
+	<tnt:ToolPage id="toolPage" busy="{AppModel>/showBusyIndicator}">
+		<tnt:header>
+			<tnt:ToolHeader>
+				<Button icon="sap-icon://menu2" press=".onCollapseExpandPress" tooltip="{i18n>XTOL_collapseExpand}">
+					<layoutData>
+						<OverflowToolbarLayoutData priority="NeverOverflow"/>
+					</layoutData>
+				</Button>
+                <core:Fragment fragmentName="core.header.header" type="XML"/>
+			</tnt:ToolHeader>
+		</tnt:header>
+		<tnt:sideContent>
+			<tnt:SideNavigation id="sideNavigation" itemSelect=".onItemSelect" selectedKey="">
+				<tnt:NavigationList id="navigationList">
+					<tnt:NavigationListItem text="{i18n>XMIT_homeListItem}" tooltip="{i18n>XTOL_homeTabTooltip}" id="homeItem" icon="sap-icon://home" key="home" enabled="{AppModel>/contentIsEnabled}"/>
+					<tnt:NavigationListItem text="{i18n>XMIT_configListItem}" tooltip="{i18n>XTOL_configTabTooltip}" icon="sap-icon://settings" key="config" enabled="{AppModel>/contentIsEnabled}"/>
+					<tnt:NavigationListItem text="{i18n>XMIT_scheduleListItem}" tooltip="{i18n>XTOL_scheduleTabTooltip}" id="scheduleItem" icon="sap-icon://date-time" key="schedule" enabled="{AppModel>/contentIsEnabled}"/>
+					<tnt:NavigationListItem text="{i18n>XMIT_logsListItem}" tooltip="{i18n>XTOL_logsTabTooltip}" id="logsItem" icon="sap-icon://survey" key="log" enabled="{AppModel>/contentIsEnabled}"/>
+					<tnt:NavigationListItem text="{i18n>XMIT_statisticsListItem}" tooltip="{i18n>XTOL_statisticsTabTooltip}" id="statisticsItem" icon="sap-icon://business-objects-experience" key="statistics" enabled="{AppModel>/contentIsEnabled}"/>
+				</tnt:NavigationList>
+			</tnt:SideNavigation>
+		</tnt:sideContent>
+		<tnt:mainContents>
+			<App id="app"/>
+		</tnt:mainContents>
+	</tnt:ToolPage>
+</mvc:View>

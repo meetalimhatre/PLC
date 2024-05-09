@@ -1,0 +1,84 @@
+{
+    "definitions": {
+        "TaskModel": {
+            "type": "object",
+            "properties": {
+                "SESSION_ID": {
+                    "type": "string",
+                    "description": "Id of the user who started the task"
+                },
+                "TASK_ID": {
+                    "type": "integer",
+                    "description": "task id"
+                },
+                "TASK_TYPE": {
+                    "type": "string",
+                    "enum": [
+                        "PROJECT_CALCULATE_LIFECYCLE_VERSIONS"
+                    ],
+                    "description": "the task type"
+                },
+                "PARAMETERS": {
+                    "type": "string",
+                    "description": "parameters of the task; could be formated as JSON in order to put multiple key-value pairs."
+                },
+                "STATUS": {
+                    "type": "string",
+                    "enum": [
+                        "inactive",
+                        "active",
+                        "completed",
+                        "canceled",
+                        "failed"
+                    ],
+                    "description": "the current status of the task"
+                },
+                "PROGRESS_STEP": {
+                    "type": "integer",
+                    "description": "current progress step of the task"
+                },
+                "PROGRESS_TOTAL": {
+                    "type": "integer",
+                    "description": "total amount of steps to complete the task"
+                },
+                "STARTED": {
+                    "type": "string",
+                    "format": "timestamp",
+                    "description": "Timestamp when the task was started the first time in UTC; if the task was not started yet, the value is null"
+                },
+                "LAST_UPDATED_ON": {
+                    "type": "string",
+                    "format": "timestamp",
+                    "description": "Timestamp when the task status or progress received the last update in UTC; if the task was not started yet, the value is null"
+                },
+                "ERROR_CODE": {
+                    "type": "string",
+                    "description": "the code of the error in case the task status is \"failed\""
+                },
+                "ERROR_DETAILS": {
+                    "type": "string",
+                    "description": "details to the occured error"
+                }
+            }
+        },
+        "TaskResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TaskModel"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

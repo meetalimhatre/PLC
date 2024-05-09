@@ -1,0 +1,428 @@
+namespace sap.plc.db.administration;
+
+context maintemporarytables {
+	temporary entity gtt_batch_account{
+		ACCOUNT_ID: String(10);
+        CONTROLLING_AREA_ID: String(4);
+        _VALID_FROM: UTCTimestamp; 
+        _VALID_TO: UTCTimestamp; 
+        _SOURCE: hana.TINYINT;
+        _CREATED_BY: String(256);
+        OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_activity_type {
+        ACTIVITY_TYPE_ID: String(12);
+        CONTROLLING_AREA_ID: String(4);
+        ACCOUNT_ID: String(10);
+        _VALID_FROM: UTCTimestamp; 
+        _VALID_TO: UTCTimestamp; 
+        _SOURCE: hana.TINYINT;
+        _CREATED_BY: String(256);
+        OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+		row store;
+   };
+
+    temporary entity gtt_batch_controlling_area{
+		CONTROLLING_AREA_CURRENCY_ID: String(3);
+		CONTROLLING_AREA_ID: String(4);
+		_CREATED_BY: String(256);
+		_SOURCE: Integer;
+		_VALID_FROM: UTCTimestamp;
+		_VALID_TO: UTCTimestamp;
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+		row store;
+	};
+
+   
+   temporary entity gtt_batch_currency {
+      CURRENCY_ID: String(3);
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+   } technical configuration {
+		row store;
+   };
+
+   temporary entity gtt_batch_currency_conversion {
+   	  EXCHANGE_RATE_TYPE_ID: String(20);
+      FROM_CURRENCY_ID: String(3);
+      TO_CURRENCY_ID: String(3);
+      FROM_FACTOR: Integer;
+      TO_FACTOR: Integer;
+      RATE: Decimal(28,7);
+      VALID_FROM: LocalDate; 
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+		row store;
+   };
+
+    temporary entity gtt_batch_material_account_determination{
+	  	CONTROLLING_AREA_ID: String(4);
+      	MATERIAL_TYPE_ID: String(4);
+     	PLANT_ID: String(8);
+      	VALUATION_CLASS_ID: String(4);
+      	ACCOUNT_ID: String(10);
+      	_VALID_FROM: UTCTimestamp;
+     	_VALID_TO: UTCTimestamp;
+      	_SOURCE: hana.TINYINT;
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_material_group{
+	  	MATERIAL_GROUP_ID: String(9);
+        _VALID_FROM: UTCTimestamp;
+        _VALID_TO: UTCTimestamp;
+        _SOURCE: hana.TINYINT;  
+        _CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_material_type{
+	  	MATERIAL_TYPE_ID: String(4);
+      	_VALID_FROM: UTCTimestamp;
+      	_VALID_TO: UTCTimestamp;
+      	_SOURCE: hana.TINYINT;
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_customer{
+	  	CUSTOMER_ID: String(10);
+      	CUSTOMER_NAME: String(100);
+      	COUNTRY: String(100);
+      	POSTAL_CODE: String(35);
+      	REGION: String(100);
+      	CITY: String(100);
+      	STREET_NUMBER_OR_PO_BOX: String(100);
+      	_VALID_FROM: UTCTimestamp; 
+      	_VALID_TO: UTCTimestamp;  
+      	_SOURCE: hana.TINYINT; 
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+      IS_PERSONAL_DATA: hana.TINYINT default 0;
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_vendor{
+	  	VENDOR_ID: String(10);
+      	VENDOR_NAME: String(100);
+      	COUNTRY: String(100);
+      	POSTAL_CODE: String(35);
+      	REGION: String(100);
+      	CITY: String(100);
+      	STREET_NUMBER_OR_PO_BOX: String(100);
+     	_VALID_FROM: UTCTimestamp; 
+      	_VALID_TO: UTCTimestamp; 
+      	_SOURCE: hana.TINYINT; 
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+      IS_PERSONAL_DATA: hana.TINYINT default 0;
+	} technical configuration {
+		row store;
+	};
+
+    temporary entity gtt_batch_valuation_class{
+	  	VALUATION_CLASS_ID: String(4);
+      	_VALID_FROM: UTCTimestamp; 
+      	_VALID_TO: UTCTimestamp; 
+      	_SOURCE: hana.TINYINT;
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+  row store;
+ };
+
+    temporary entity gtt_batch_plant{
+	  	PLANT_ID: String(8);
+      	COMPANY_CODE_ID: String(4);
+      	COUNTRY: String(100);
+      	POSTAL_CODE: String(35);
+      	REGION: String(100);
+      	CITY: String(100);
+      	STREET_NUMBER_OR_PO_BOX: String(100);
+      	_VALID_FROM: UTCTimestamp; 
+      	_VALID_TO: UTCTimestamp; 
+      	_SOURCE: hana.TINYINT; 
+      	_CREATED_BY: String(256);
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+  row store;
+ };
+
+    temporary entity gtt_batch_profit_center{
+	  	PROFIT_CENTER_ID: String(10);
+      	CONTROLLING_AREA_ID: String(4);
+      	_VALID_FROM: UTCTimestamp; 
+      	_VALID_TO: UTCTimestamp; 
+      	_SOURCE: hana.TINYINT;
+      	_CREATED_BY: String(256);	  
+		OPERATION: String(10);
+		ERROR_CODE: String(100);
+		ERROR_DETAILS: String(1000);
+		ORIGINAL_ENTRY: String(1000);
+		DELETED_FROM_SOURCE: hana.TINYINT; 
+	} technical configuration {
+  row store;
+ };
+
+   temporary entity gtt_batch_unit_of_measure {
+      UOM_ID: String(3);
+	  DIMENSION_ID: String(10);
+      NUMERATOR: Integer;
+      DENOMINATOR: Integer;
+      EXPONENT_BASE10: hana.SMALLINT;
+      SI_CONSTANT: Decimal(9,6);
+      _VALID_FROM: UTCTimestamp ; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_overhead_group {
+      OVERHEAD_GROUP_ID: String(10);
+      PLANT_ID: String(8);
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_company_code {
+      COMPANY_CODE_ID: String(4);
+      CONTROLLING_AREA_ID: String(4);
+      COMPANY_CODE_CURRENCY_ID: String(3);
+      _VALID_FROM: UTCTimestamp;
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT;
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_business_area {
+      BUSINESS_AREA_ID: String(15);
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp;
+      _SOURCE: hana.TINYINT;
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_process {
+      PROCESS_ID: String(12);
+      CONTROLLING_AREA_ID: String(4);
+      ACCOUNT_ID: String(10);
+      COMMENT: String(5000);
+      _VALID_FROM: UTCTimestamp;
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_language {
+      LANGUAGE: String(11);
+      TEXTS_MAINTAINABLE: hana.TINYINT;
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT;
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  MAPPING_LANGUAGE_ID: String(1);
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_document_status  {
+      DOCUMENT_TYPE_ID: String(3);
+      DOCUMENT_STATUS_ID: String(2);
+      _VALID_FROM: UTCTimestamp; 
+      _VALID_TO: UTCTimestamp; 
+      _SOURCE: hana.TINYINT; 
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+	  DELETED_FROM_SOURCE: hana.TINYINT; 
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_work_center_process  {
+      WORK_CENTER_ID: String(15);
+      PLANT_ID: String(8);
+      CONTROLLING_AREA_ID: String(4);
+      PROCESS_ID: String(12);
+      _VALID_FROM: UTCTimestamp;
+      _VALID_TO: UTCTimestamp;
+      _SOURCE: hana.TINYINT;
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_batch_work_center_activity  {
+      WORK_CENTER_ID: String(15);
+      PLANT_ID: String(8);
+      CONTROLLING_AREA_ID: String(4);
+      ACTIVITY_TYPE_ID: String(12); 
+      PROCESS_ID: String(12);
+      QUANTITY: Decimal(28,7);
+	  QUANTITY_UOM_ID: String(3);
+	  TOTAL_QUANTITY_DEPENDS_ON: Integer; 
+	  LOT_SIZE: Decimal(28,7); 
+      _VALID_FROM: UTCTimestamp;
+      _VALID_TO: UTCTimestamp;
+      _SOURCE: hana.TINYINT;
+      _CREATED_BY: String(256);
+      OPERATION: String(10);
+	  ERROR_CODE: String(100);
+	  ERROR_DETAILS: String(1000);
+	  ORIGINAL_ENTRY: String(1000);
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_validate_material_price  {
+      LIST_INDEX: Integer not null;
+      PRICE_ID: String(32);
+      PRICE_SOURCE_ID: String(20) not null;
+      MATERIAL_ID: String(40) not null;
+      PLANT_ID: String(8) not null;
+      VENDOR_ID: String(10) not null default '*';
+      PROJECT_ID: String(35) not null default '*';
+      CUSTOMER_ID: String(10) not null default '*';
+      VALID_FROM: LocalDate not null;
+      VALID_FROM_QUANTITY: Decimal(28,7) not null default 1;
+      TRANSACTION_CURRENCY_ID: String(3) not null;
+      PRICE_UNIT_UOM_ID: String(3) not null;
+      FK_ISSUE: String(120);
+      UK_ISSUE: hana.TINYINT not null default 0;
+   } technical configuration {
+   row store;
+   };
+
+   temporary entity gtt_validate_activity_price  {
+      LIST_INDEX: Integer not null;
+      PRICE_ID: String(32);
+      PRICE_SOURCE_ID: String(20) not null;
+      CONTROLLING_AREA_ID: String(4) not null;
+      COST_CENTER_ID: String(10) not null;
+      ACTIVITY_TYPE_ID: String(12) not null;
+      PROJECT_ID: String(35) not null default '*';
+      CUSTOMER_ID: String(10) not null default '*';
+      VALID_FROM: LocalDate not null;
+      VALID_FROM_QUANTITY: Decimal(28,7) not null default 1;
+      TRANSACTION_CURRENCY_ID: String(3) not null;
+      PRICE_UNIT_UOM_ID: String(3) not null;
+      FK_ISSUE: String(140);
+      UK_ISSUE: hana.TINYINT not null default 0;
+   } technical configuration {
+   row store;
+   };
+};

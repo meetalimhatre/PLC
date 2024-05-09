@@ -1,0 +1,57 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"(var_tname varchar(256), var_offset integer, var_limit integer)
+returns retsql varchar(210100)
+language sqlscript
+sql security invoker as
+
+BEGIN
+
+    declare fields_maps varchar(5000);
+    declare custsql varchar(200000);
+    declare regex_filter varchar(5000);
+    declare order_clause varchar(5000);
+    
+    if ifnull(:var_tname, '') = 't_material_price'  then
+    	order_clause = 'PRICE_SOURCE_ID, MATERIAL_ID, PLANT_ID, VENDOR_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM, VALID_FROM_QUANTITY';
+    elseif ifnull(:var_tname, '') = 't_activity_price' then 
+    	order_clause = 'PRICE_SOURCE_ID, CONTROLLING_AREA_ID, COST_CENTER_ID, ACTIVITY_TYPE_ID, PROJECT_ID, CUSTOMER_ID, VALID_FROM, VALID_FROM_QUANTITY';
+    else
+	    select string_agg(column_name, ', ') into order_clause
+		from (select column_name from "sap.plc.db::map.t_field_mapping" mapping
+		where table_name = :var_tname and mapping.IS_PK = 1 order by column_name);
+    end if;
+
+    select string_agg(
+                case 
+    		        when is_uppercase=1 and mapped_column is not null
+    			        then 'ucase(' || mapped_column || ') as '|| column_name
+    			        else ifnull(mapped_column,'null')||' as '|| column_name
+    	        end
+            ,',' order by field_order) sm into fields_maps 
+        from "sap.plc.db::map.t_field_mapping" 
+        where table_name=:var_tname group by table_name;
+
+    select TRIM (TRAILING ' and' from regex_filter_no_trim) into regex_filter default ''
+    from 
+        (select string_agg(mapping.mapped_column || ' like_regexpr ''' || regex.validation_regex_value || ''' flag ''i'' and ') as regex_filter_no_trim
+        from "sap.plc.db::map.t_field_mapping" mapping
+        inner join "sap.plc.db::basis.t_regex" regex
+            on regex.validation_regex_id = mapping.validation_regex
+        where table_name=:var_tname and 
+              mapping.mapped_column is not null)
+        ;
+
+    select input_sql into custsql 
+        from "sap.plc.db::map.t_destination_entity" 
+        where table_name=:var_tname;
+
+    retsql='select '||:fields_maps||', 2 as _SOURCE from ('||:custsql||')';
+    
+    if regex_filter != '' then
+        retsql = retsql || ' where ' || :regex_filter;
+    end if;
+
+    if :var_limit is not null then
+        retsql = retsql || ' order by ' || :order_clause || ' limit ' || :var_limit ||' offset '|| :var_offset;
+    end if;
+
+END;

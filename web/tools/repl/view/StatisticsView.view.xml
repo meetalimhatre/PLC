@@ -1,0 +1,111 @@
+<mvc:View controllerName="mdr.ui.controller.StatisticsView"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+	xmlns:smartTable="sap.ui.comp.smarttable" displayBlock="true" height="100%">
+	<Page title="{i18n>XTIT_statisticsTitle}">
+		<content>
+<VBox id="vboxMenuStatistics" class="sapUiNoMargin">
+				<items>
+					<VBox id="vboxError"/>
+					<VBox id="vboxStatistics" fitContainer="true">
+						<smartFilterBar:SmartFilterBar id="sfbStatistics" initialized=".onSmartFilterBarInitialized('stStatistics')" useToolbar="false" considerSelectionVariants="false">
+							<smartFilterBar:groupConfiguration>
+								<smartFilterBar:GroupConfiguration key="StatisticsOdata" label="{i18n>XFLD_statisticsOdataText}"/>
+							</smartFilterBar:groupConfiguration>
+							<smartFilterBar:controlConfiguration >
+								<smartFilterBar:ControlConfiguration key="START_TIME" visibleInAdvancedArea="true" conditionType="sap.ui.comp.config.condition.DateRangeType" label="{i18n>XFLD_startTime}"/>
+								<smartFilterBar:ControlConfiguration key="END_TIME" visibleInAdvancedArea="true" conditionType="sap.ui.comp.config.condition.DateRangeType" label="{i18n>XFLD_endTime}"/>
+								<smartFilterBar:ControlConfiguration key="TABLE_NAME" visibleInAdvancedArea="false" label="{i18n>XFLD_tableName}"/>
+								<smartFilterBar:ControlConfiguration key="FULL_COUNT" visibleInAdvancedArea="false" label="{i18n>XFLD_fullCount}"/>
+								<smartFilterBar:ControlConfiguration key="UPDATED_COUNT" visibleInAdvancedArea="false" label="{i18n>XFLD_updatedCount}"/>
+								<smartFilterBar:ControlConfiguration key="DELETED_COUNT" visibleInAdvancedArea="false" label="{i18n>XFLD_deletedCount}"/>
+								<smartFilterBar:ControlConfiguration key="RUN_TIME_SECONDS" visibleInAdvancedArea="false" label="{i18n>XFLD_runTimeSeconds}"/>
+								<smartFilterBar:ControlConfiguration key="RUN_ID" visibleInAdvancedArea="false" label="{i18n>XFLD_runId}"/>
+							</smartFilterBar:controlConfiguration>
+							<smartFilterBar:layoutData>
+								<FlexItemData shrinkFactor="0"/>
+							</smartFilterBar:layoutData>
+						</smartFilterBar:SmartFilterBar>
+						<smartTable:SmartTable id="stStatistics" smartFilterId="sfbStatistics" tableType="ResponsiveTable" useTablePersonalisation="true" showTablePersonalisation="true" noData="{i18n>XMSG_noStatisticsData}" useVariantManagement="false" header="{i18n>XTIT_numberOfEntries}" showRowCount="false" useExportToExcel="true">
+							<smartTable:layoutData>
+								<FlexItemData growFactor="1" baseSize="0%"/>
+							</smartTable:layoutData>
+
+							<Table id="tStatistics" growing="true">
+								<columns>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "TABLE_NAME", "columnIndex": "1", "leadingProperty": "TABLE_NAME", "sortProperty": "TABLE_NAME", "filterProperty" : "TABLE_NAME", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_tableName}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "START_TIME", "columnIndex": "2", "leadingProperty": "START_TIME", "sortProperty": "START_TIME", "filterProperty" : "START_TIME", "type":"date"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_startTime}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "FULL_COUNT", "columnIndex": "3", "leadingProperty": "FULL_COUNT", "sortProperty": "FULL_COUNT", "filterProperty" : "FULL_COUNT", "type":"numeric"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_fullCount}" tooltip="{i18n>XTOL_noOfReplicatedEntriesTooltip}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "UPDATED_COUNT", "columnIndex": "4", "leadingProperty": "UPDATED_COUNT", "sortProperty": "UPDATED_COUNT", "filterProperty" : "UPDATED_COUNT", "type":"numeric"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_updatedCount}" tooltip="{i18n>XTOL_noOfUpdatedEntriesTooltip}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "DELETED_COUNT", "columnIndex": "5", "leadingProperty": "DELETED_COUNT", "sortProperty": "DELETED_COUNT", "filterProperty" : "DELETED_COUNT", "type":"numeric"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_deletedCount}" tooltip="{i18n>XTOL_noOfDeletedEntriesTooltip}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "END_TIME", "columnIndex": "6", "leadingProperty": "END_TIME", "sortProperty": "END_TIME", "filterProperty" : "END_TIME", "type":"date"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_endTime}"/>
+									</Column>
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "RUN_TIME_SECONDS", "columnIndex": "7", "leadingProperty": "RUN_TIME_SECONDS", "sortProperty": "RUN_TIME_SECONDS", "filterProperty" : "RUN_TIME_SECONDS", "type":"numeric"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_runTimeSeconds}"/>
+									</Column>
+
+									<Column>
+										<customData>
+											<c:CustomData key="p13nData" value='\{"columnKey": "RUN_ID", "columnIndex": "8", "leadingProperty": "RUN_ID", "sortProperty": "RUN_ID", "filterProperty" : "RUN_ID", "type":"string"}'/>
+										</customData>
+										<Text text="{i18n>XFLD_runId}"/>
+									</Column>
+								</columns>
+								<ColumnListItem highlight="{path:'MESSAGE_TYPE',formatter:'.formatRowHighlight'}">
+									<cells>
+										<Text text="{TABLE_NAME}"/>
+										<Text text="{START_TIME}"/>
+										<Text text="{FULL_COUNT}"/>
+										<Text text="{UPDATED_COUNT}"/>
+										<Text text="{DELETED_COUNT}"/>
+										<Text text="{END_TIME}"/>
+										<Text text="{RUN_TIME_SECONDS}"/>
+										<Text text="{RUN_ID}"/>
+									</cells>
+								</ColumnListItem>
+							</Table>
+						</smartTable:SmartTable>
+					</VBox>
+				</items>
+			</VBox>
+		</content>
+		<footer>
+			<c:Fragment fragmentName="core.toolBarMessages.ToolbarMessages" type="XML"/>
+		</footer>
+	</Page>
+</mvc:View>

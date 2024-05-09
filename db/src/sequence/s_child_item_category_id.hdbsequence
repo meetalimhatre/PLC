@@ -1,0 +1,1 @@
+SEQUENCE "sap.plc.db.sequence::s_child_item_category_id" START WITH 30

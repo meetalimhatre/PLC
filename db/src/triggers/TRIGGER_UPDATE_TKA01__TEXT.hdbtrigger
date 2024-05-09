@@ -1,0 +1,30 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_TKA01__TEXT" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_tka01__text" 
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+select count(CONTROLLING_AREA_ID) into lv_identical_rows_count
+    from "sap.plc.db::basis.t_controlling_area__text"
+    where "sap.plc.db::basis.t_controlling_area__text"."CONTROLLING_AREA_ID" = :NEWROW."KOKRS"
+                AND "sap.plc.db::basis.t_controlling_area__text"."CONTROLLING_AREA_DESCRIPTION" = :NEWROW."BEZEI"
+                AND "sap.plc.db::basis.t_controlling_area__text"."LANGUAGE" = :NEWROW."LANGU"
+                AND "sap.plc.db::basis.t_controlling_area__text"."_SOURCE" = :lv_source
+                AND "sap.plc.db::basis.t_controlling_area__text"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_controlling_area__text"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0  THEN                 
+    UPDATE "sap.plc.db::basis.t_controlling_area__text" 
+        SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+                WHERE "sap.plc.db::basis.t_controlling_area__text"."CONTROLLING_AREA_ID" = :NEWROW."KOKRS" 
+                AND "sap.plc.db::basis.t_controlling_area__text"."LANGUAGE" = :NEWROW."LANGU"
+                AND "sap.plc.db::basis.t_controlling_area__text"."_VALID_FROM" < :lv_current_utctimestamp 
+                AND "sap.plc.db::basis.t_controlling_area__text"."_VALID_TO" IS NULL;
+    INSERT INTO "sap.plc.db::basis.t_controlling_area__text" 
+        (CONTROLLING_AREA_ID,CONTROLLING_AREA_DESCRIPTION,LANGUAGE ,_VALID_FROM,_VALID_TO,_SOURCE,_CREATED_BY)
+        VALUES (:NEWROW."KOKRS", :NEWROW."BEZEI",:NEWROW."LANGU", :lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

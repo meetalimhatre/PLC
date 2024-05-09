@@ -1,0 +1,52 @@
+PROCEDURE "sap.plc_test.db.calcengine.procedures::afl_calculate_for_save" ( 
+-- copied from _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC
+IN p1 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P1, IN p2 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P2, IN p3 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P3, IN p4 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P4, IN p5 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P5, IN p6 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P6, IN p7 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P7, IN p8 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P8, IN p9 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P9, IN p10 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P10, IN p11 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P11, IN p12 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P12, IN p13 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P13, IN p14 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P14, IN p15 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P15, IN p16 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P16, IN p17 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P17, OUT p18 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P18, OUT p19 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P19, OUT p20 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P20, OUT p21 _SYS_AFL.PLC_AREA_CALCULATE_FOR_SAVE_PROC__TT_P21
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	DEFAULT SCHEMA SAP_PLC
+	READS SQL DATA AS
+BEGIN
+
+p18 = SELECT 
+	1 AS item_id,
+	1 AS price_for_total_quantity,
+	1 AS price_for_total_quantity_fixed_portion,
+	2 AS price_for_total_quantity_variable_portion,
+	9 AS other_cost,
+	4 AS other_cost_fixed_portion,
+	5 AS other_cost_variable_portion,
+	13 AS total_cost,
+	6 AS total_cost_fixed_portion,
+	7 AS total_cost_variable_portion
+	FROM dummy;
+
+p19 = SELECT
+	1 AS item_id,
+	'bla' AS costing_sheet_row_id,
+    -1 AS costing_sheet_overhead_row_id,
+    '40' AS account_id,
+	1 AS is_rolled_up,
+	1 AS has_subitems,
+	5 AS cost,
+	2 AS cost_fixed_portion,
+	3 AS cost_variable_portion
+	FROM dummy;
+
+p20 = SELECT 
+	1 AS item_id,
+	'100' AS component_split_id,
+	2 AS cost_component_id,
+    '40' AS account_id,
+	5 AS cost,
+	3 AS cost_fixed_portion,
+	4 AS cost_variable_portion
+	FROM dummy;
+	
+p21 = SELECT
+	1 AS item_id,
+	100 AS error_code,
+	'error' AS error_details
+	FROM dummy;
+
+END;

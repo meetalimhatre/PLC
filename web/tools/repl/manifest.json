@@ -1,0 +1,204 @@
+{
+	"_version": "1.5.0",
+	"sap.app": {
+		"id": "mdr.ui",
+		"type": "application",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "Master Data Replication Tool",
+		"description": "Master Data Replication Tool",
+		"sourceTemplate": {
+			"id": "hanatemplates.basicSAPUI5ApplicationProject",
+			"version": "0.0.0"
+		},
+		"dataSources": {
+			"SchedulerOdata": {
+				"uri": "/sap/plc/xs/oData/schedulerService.xsodata",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
+			"LogsOdata": {
+				"uri": "/sap/plc/xs/oData/logsService.xsodata",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
+			"StatisticsOdata": {
+				"uri": "/sap/plc/xs/oData/statisticsService.xsodata",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			}
+		}
+	},
+
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": [
+		]
+	},
+
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "mdr.ui.view.MainView",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+		"dependencies": {
+			"minUI5Version": "1.30.0",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.ui.layout": {},
+				"sap.f": {},
+				"sap.ushell": {},
+				"sap.collaboration": {},
+				"sap.ui.comp": {},
+				"sap.uxap": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"SchedulerOdataModel": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"preload": true,
+				"dataSource": "SchedulerOdata",
+				"settings": {
+					"useBatch": false,
+					"json": true
+				}
+			},
+			"LogsOdataModel": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"preload": true,
+				"dataSource": "LogsOdata",
+				"settings": {
+					"useBatch": false,
+					"json": true
+				}
+			},
+			"StatisticsOdataModel": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"preload": true,
+				"dataSource": "StatisticsOdata",
+				"settings": {
+					"useBatch": false,
+					"json": true
+				}
+			}
+		},
+		"resources": {
+			"css": [{
+				"uri": "css/style.css"
+			}]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"async": true,
+				"viewPath": "mdr.ui.view",
+				"controlAggregation": "pages",
+				"controlId": "app"
+			},
+			"routes": [{
+					"pattern": "config",
+					"name": "config",
+					"target": ["config"]
+				}, {
+					"pattern": "configDetails/{filter}",
+					"name": "configDetails",
+					"target": ["configDetails"]
+				}, {
+					"pattern": "schedule",
+					"name": "schedule",
+					"target": ["schedule"]
+				}, {
+					"pattern": "log",
+					"name": "log",
+					"target": ["log"]
+				}, {
+					"pattern": "log:?query:",
+					"name": "logFilter",
+					"target": ["log"]
+				}, {
+					"pattern": "statistics",
+					"name": "statistics",
+					"target": ["statistics"]
+				}
+				, {
+					"pattern": "home",
+					"name": "home",
+					"target": ["home"]
+				}
+
+			],
+			"targets": {
+				"config": {
+					"viewName": "ConfigViewOverview",
+					"viewId":"ConfigView",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				},
+				"configDetails": {
+					"viewName": "ConfigViewDetails",
+					"viewId":"ConfigViewDetails",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				},
+				"schedule": {
+					"viewName": "ScheduleView",
+					"viewId":"ScheduleView",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				},
+				"log": {
+					"viewName": "LogView",
+					"viewId":"LogView",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				},
+				"statistics": {
+					"viewName": "StatisticsView",
+					"viewId":"StatisticsView",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				},
+				"home": {
+					"viewName": "HomeView",
+					"viewId":"HomeView",
+					"viewType": "XML",
+					"transition": "slide",
+					"clearAggregation": true
+				}
+			}
+		}
+	}
+}

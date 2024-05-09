@@ -1,0 +1,193 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_material" (
+    IN INPUT_TABLE TABLE (
+        "MATERIAL_ID" NVARCHAR(40),
+        "BASE_UOM_ID" NVARCHAR(3),
+        "MATERIAL_GROUP_ID" NVARCHAR(9),
+        "MATERIAL_TYPE_ID" NVARCHAR(4),
+        "IS_CREATED_VIA_CAD_INTEGRATION" TINYINT,  -- out due to performance issues
+        "IS_PHANTOM_MATERIAL" TINYINT,
+        "IS_CONFIGURABLE_MATERIAL" TINYINT,
+        "_SOURCE" TINYINT
+        {{#if Material.customFields}}
+            {{ddl_masterdataCustomFieldsWithoutUnit Material}}
+        {{/if}}
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)  
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+AS
+
+    lv_current_user nvarchar(256);
+    lv_current_utctimestamp timestamp;
+    lv_rows_count integer;
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+
+    SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";     
+        
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'MATERIAL_GROUP_ID'                                                     as FIELD_NAME ,
+            it.MATERIAL_GROUP_ID                                                    as FIELD_VALUE,
+            'Unknown Material Group ID for Material ID ' || it.MATERIAL_ID          as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                 as MESSAGE_TIME ,
+            'ERROR'                                                                 as MESSAGE_TYPE ,
+            't_material'                                                            as TABLE_NAME,
+            'Replication_Update'                                                    as OPERATION,
+            :lv_run_id                                                              as RUN_ID
+        from :INPUT_TABLE as it
+        where IFNULL(it.MATERIAL_GROUP_ID, '') <> '' AND it.MATERIAL_GROUP_ID not in (select MATERIAL_GROUP_ID from "sap.plc.db::basis.t_material_group")
+    ;
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'MATERIAL_TYPE_ID'                                                  as FIELD_NAME ,
+            it.MATERIAL_TYPE_ID                                                 as FIELD_VALUE,
+            'Unknown Material Type ID for Material ID ' || it.MATERIAL_ID       as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material'                                                        as TABLE_NAME,
+            'Replication_Update'                                                as OPERATION,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where IFNULL(it.MATERIAL_TYPE_ID, '') <> '' AND it.MATERIAL_TYPE_ID not in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type")
+    ;
+    
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT , 
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+        TABLE_NAME,
+        OPERATION,
+        RUN_ID
+    )
+        select 
+            'BASE_UOM_ID'                                                       as FIELD_NAME ,
+            it.BASE_UOM_ID                                                      as FIELD_VALUE,
+            'Unknown UOM ID for Material ID ' || it.MATERIAL_ID                 as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                             as MESSAGE_TIME ,
+            'ERROR'                                                             as MESSAGE_TYPE ,
+            't_material'                                                        as TABLE_NAME,
+            'Replication_Update'                                                as OPERATION,
+            :lv_run_id                                                          as RUN_ID
+        from :INPUT_TABLE as it
+        where it.BASE_UOM_ID not in (select UOM_ID from "sap.plc.db::basis.t_uom")
+    ;
+     
+    lt_update_records =
+    select it.MATERIAL_ID, 
+            it.BASE_UOM_ID, 
+            it.MATERIAL_GROUP_ID, 
+            it.MATERIAL_TYPE_ID, 
+            it.IS_CREATED_VIA_CAD_INTEGRATION,
+            it.IS_PHANTOM_MATERIAL,
+            it.IS_CONFIGURABLE_MATERIAL,
+            it._SOURCE 
+            {{masterdataCustomFieldsWithPrefixWithoutUnit Material 'it'}} 
+            from
+                (
+                select *, 
+                    Count(*) OVER (PARTITION BY MATERIAL_ID) AS DUPLICATE_KEY_COUNT
+                    from :INPUT_TABLE
+                ) as it  
+            where
+                it.DUPLICATE_KEY_COUNT = 1
+                and ( IFNULL(it.MATERIAL_GROUP_ID, '') = '' or it.MATERIAL_GROUP_ID in (select MATERIAL_GROUP_ID from "sap.plc.db::basis.t_material_group" where _valid_to is null) )
+                and ( IFNULL(it.MATERIAL_TYPE_ID,'') = '' or it.MATERIAL_TYPE_ID in (select MATERIAL_TYPE_ID from "sap.plc.db::basis.t_material_type" where _valid_to is null) )
+                and ( IFNULL(it.BASE_UOM_ID,'') = '' or it.BASE_UOM_ID in (select UOM_ID from "sap.plc.db::basis.t_uom" where _valid_to is null) )
+        except 
+            (select     std.MATERIAL_ID, 
+                        std.BASE_UOM_ID, 
+                        std.MATERIAL_GROUP_ID, 
+                        std.MATERIAL_TYPE_ID, 
+                        std.IS_CREATED_VIA_CAD_INTEGRATION,
+                        std.IS_PHANTOM_MATERIAL,
+                        std.IS_CONFIGURABLE_MATERIAL,
+                        std._SOURCE 
+                        {{masterdataCustomFieldsWithPrefixWithoutUnit Material 'plcExtTable'}} 
+                        from "sap.plc.db::basis.t_material" as std
+                        {{#if Material.customFields}}
+                        left outer join {{t_extensionTable Material}} as plcExtTable
+                            on  std.MATERIAL_ID         = plcExtTable.MATERIAL_ID
+                            and std._VALID_FROM         = plcExtTable._VALID_FROM
+                        {{/if}}
+                        where std._valid_to is NULL
+                        and std.MATERIAL_ID in (select MATERIAL_ID from :INPUT_TABLE) );
+
+
+    SELECT COUNT(MATERIAL_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+
+    if (:lv_rows_count > 0) then
+
+        -- outdate the old timestamp
+        UPDATE "sap.plc.db::basis.t_material" as tbl
+            SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+            WHERE 
+                  (tbl.MATERIAL_ID)
+                  in (select MATERIAL_ID
+                      from :lt_update_records as upd 
+                      where upd.MATERIAL_ID = tbl.MATERIAL_ID
+                  )
+                  AND tbl._VALID_FROM < :lv_current_utctimestamp 
+                  AND tbl._VALID_TO IS NULL;
+        
+        -- insert the new entries
+        INSERT INTO  "sap.plc.db::basis.t_material" 
+            (MATERIAL_ID, BASE_UOM_ID, MATERIAL_GROUP_ID, MATERIAL_TYPE_ID, 
+                 IS_CREATED_VIA_CAD_INTEGRATION, IS_PHANTOM_MATERIAL, IS_CONFIGURABLE_MATERIAL, 
+            _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+            select MATERIAL_ID, BASE_UOM_ID, MATERIAL_GROUP_ID, MATERIAL_TYPE_ID, 
+                 IS_CREATED_VIA_CAD_INTEGRATION, IS_PHANTOM_MATERIAL, IS_CONFIGURABLE_MATERIAL, 
+                :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+            from :lt_update_records;
+
+        {{#if Material.customFields}}
+        -- also do Custom Fields
+        INSERT INTO {{t_extensionTable Material}} 
+            (
+                MATERIAL_ID,
+                _VALID_FROM 
+                {{masterdataCustomFieldsWithoutUnit Material}} 
+            )
+            select 
+                MATERIAL_ID,              
+                :lv_current_utctimestamp as _VALID_FROM
+                {{masterdataCustomFieldsWithoutUnit Material}}
+            from :lt_update_records;
+        {{/if}}
+        
+    END IF;
+END

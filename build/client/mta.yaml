@@ -1,0 +1,15 @@
+_schema-version: '2.0'
+ID: com.sap.xsac.plc.client
+description: SAP Product Lifecycle Costing Client Download
+version: 4.4.13
+
+modules:
+  - name: xsac-plc-client-web
+    type: html5
+    path: web
+    requires:
+      - name: xsac-plc-client-uaa-service
+
+resources:
+  - name: xsac-plc-client-uaa-service
+    type: com.sap.xs.uaa-space

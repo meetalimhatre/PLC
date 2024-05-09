@@ -1,0 +1,10 @@
+{
+    "role": {
+        "name": "sap.plc.authorizations::replication_power_user",
+        "schema_privileges": [
+             {
+             "privileges": ["ALTER", "CREATE ANY", "DELETE", "EXECUTE", "INSERT", "SELECT", "UPDATE"]
+             }
+        ]
+    }
+}

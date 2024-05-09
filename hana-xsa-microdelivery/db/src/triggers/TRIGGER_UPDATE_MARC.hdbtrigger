@@ -1,0 +1,34 @@
+TRIGGER "sap.plc.db.triggers::TRIGGER_UPDATE_MARC" AFTER UPDATE OR INSERT ON "sap.plc.db::repl.t_marc_mbew"
+REFERENCING NEW ROW NEWROW FOR EACH ROW 
+BEGIN  
+declare lv_current_utctimestamp timestamp;
+declare lv_identical_rows_count INT := 0;
+declare lv_source INT := 2;
+select current_utctimestamp into lv_current_utctimestamp from "sap.plc.db::DUMMY";
+
+SELECT COUNT(MATERIAL_ID) into lv_identical_rows_count
+    FROM "sap.plc.db::basis.t_material_plant"
+        WHERE "sap.plc.db::basis.t_material_plant"."MATERIAL_ID" = :NEWROW."MATNR"
+              AND "sap.plc.db::basis.t_material_plant"."PLANT_ID" = :NEWROW."WERKS"
+              AND "sap.plc.db::basis.t_material_plant"."MATERIAL_LOT_SIZE" = :NEWROW."LOSGR"
+              AND "sap.plc.db::basis.t_material_plant"."VALUATION_CLASS_ID" = :NEWROW."BKLAS"
+              AND "sap.plc.db::basis.t_material_plant"."OVERHEAD_GROUP_ID" = :NEWROW."KOSGR"
+              AND "sap.plc.db::basis.t_material_plant"."MATERIAL_LOT_SIZE_UOM_ID" = :NEWROW."MEINS"
+              AND "sap.plc.db::basis.t_material_plant"."_SOURCE" = :lv_source
+              AND "sap.plc.db::basis.t_material_plant"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material_plant"."_VALID_TO" IS NULL;
+
+IF :lv_identical_rows_count = 0 THEN          
+    UPDATE "sap.plc.db::basis.t_material_plant"
+            SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = user() 
+            WHERE "sap.plc.db::basis.t_material_plant"."MATERIAL_ID" = :NEWROW."MATNR"
+              AND "sap.plc.db::basis.t_material_plant"."PLANT_ID" = :NEWROW."WERKS"
+              AND "sap.plc.db::basis.t_material_plant"."_VALID_FROM" < :lv_current_utctimestamp 
+              AND "sap.plc.db::basis.t_material_plant"."_VALID_TO" IS NULL;
+   
+   INSERT INTO  "sap.plc.db::basis.t_material_plant" 
+        (MATERIAL_ID, PLANT_ID, MATERIAL_LOT_SIZE, VALUATION_CLASS_ID, OVERHEAD_GROUP_ID, MATERIAL_LOT_SIZE_UOM_ID, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+         VALUES ( :NEWROW."MATNR", :NEWROW."WERKS", :NEWROW."LOSGR", :NEWROW."BKLAS", :NEWROW."KOSGR", :NEWROW."MEINS", :lv_current_utctimestamp, NULL, :lv_source, user());
+END IF;
+end 
+;

@@ -1,0 +1,144 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_load_t_vendor"
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+	lv_current_utctimestamp timestamp; 
+	lv_start_utctimestamp timestamp; 
+	lv_run_id nvarchar(50); 
+	lv_updated_rows integer; 
+	lv_deleted_rows integer; 
+	lv_count integer; 
+	lv_batch_size integer; 
+	lv_offset integer; 
+	lv_total_updated_rows integer; 
+	lv_current_user nvarchar(256); 
+	lv_full_count integer;
+BEGIN 
+	select current_utctimestamp 
+		into lv_current_utctimestamp 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+		into lv_run_id 
+		from "sap.plc.db::DUMMY";
+
+	select SESSION_CONTEXT('BATCH_SIZE') 
+		into lv_batch_size 
+		from "sap.plc.db::DUMMY"; 
+
+	select SESSION_CONTEXT('APPLICATIONUSER') 
+		into lv_current_user 
+		from "sap.plc.db::DUMMY";	  
+
+	if exists(select id from "sap.plc.db::map.t_destination_entity" where table_name = 't_vendor' and repl_status = 'ENABLED') 
+	then 
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+		lv_start_utctimestamp=:lv_current_utctimestamp; 
+		lv_offset = 0; 
+		lv_total_updated_rows = 0;
+		lv_full_count = 0;
+
+
+		--we mark every material_text coming from outside plc as 255
+		update "sap.plc.db::basis.t_vendor" 
+		set _source = 255
+		where _VALID_FROM < :lv_current_utctimestamp
+			AND _VALID_TO IS NULL
+			AND _SOURCE = 2; -- for the moment we keep only source 2
+
+		while (1=1) do 
+			ltMasterdataEntities=select * from "sap.plc.db.masterdata_replication.functions::f_select_t_vendor"(:lv_offset, :lv_batch_size); 
+			
+			--we unmark those values that came from the replication process
+			update "sap.plc.db::basis.t_vendor" as tbl
+			set _SOURCE = 2
+        	where (tbl.VENDOR_ID) 
+                in (select VENDOR_ID from :ltMasterdataEntities where _SOURCE = 2)
+            and tbl._SOURCE = 255;
+
+			call "sap.plc.db.masterdata_replication.procedures::p_update_t_vendor"(:ltMasterdataEntities,lv_updated_rows); 
+			lv_total_updated_rows = :lv_total_updated_rows + :lv_updated_rows;
+			select count(*) into lv_count from :ltMasterdataEntities;
+			if (:lv_count < :lv_batch_size) or (:lv_batch_size is null) THEN  
+				lv_full_count = :lv_full_count + :lv_count;
+				break; 
+			else
+				lv_full_count = :lv_full_count + :lv_count;  
+				lv_offset = :lv_offset + :lv_batch_size; 
+			end if; 
+		end while;  
+
+		select current_utctimestamp 
+			into lv_current_utctimestamp 
+			from "sap.plc.db::DUMMY"; 
+
+		lv_offset = 0; 
+
+		while (1=1) do 
+			lt_deleted_rows = select VENDOR_ID,VENDOR_NAME,COUNTRY,POSTAL_CODE,REGION,CITY,STREET_NUMBER_OR_PO_BOX, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, 1 as _SOURCE, :lv_current_user as _CREATED_BY, 1 as DELETED_FROM_SOURCE, IS_PERSONAL_DATA
+    			from "sap.plc.db::basis.t_vendor" 
+    			WHERE _SOURCE = 255 AND IS_PERSONAL_DATA = 0 
+				ORDER BY VENDOR_ID, _VALID_FROM ASC
+				limit :lv_batch_size offset :lv_offset;
+
+			INSERT INTO "sap.plc.db::map.t_replication_log" (
+			FIELD_NAME ,
+			FIELD_VALUE,
+			MESSAGE_TEXT ,
+			MESSAGE_TIME ,
+			MESSAGE_TYPE ,
+			TABLE_NAME,
+			OPERATION,
+			RUN_ID
+	    )
+	        select 'VENDOR_ID'             	    		as FIELD_NAME,
+	        		VENDOR_ID              	    		as FIELD_VALUE,
+		            'Changed to PLC source'             as MESSAGE_TEXT,
+		            lv_current_utctimestamp             as MESSAGE_TIME,
+					'INFO'                              as MESSAGE_TYPE,
+		            't_vendor' 				    		as TABLE_NAME,
+					'Replication_Delete'                as OPERATION,
+					:lv_run_id                          as RUN_ID
+    		from ( 
+                    select VENDOR_ID
+    			    from	:lt_deleted_rows);
+
+
+			INSERT INTO  "sap.plc.db::basis.t_vendor" 
+    		(VENDOR_ID,VENDOR_NAME,COUNTRY,POSTAL_CODE,REGION,CITY,STREET_NUMBER_OR_PO_BOX, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY, DELETED_FROM_SOURCE, IS_PERSONAL_DATA  )
+    		select VENDOR_ID,VENDOR_NAME,COUNTRY,POSTAL_CODE,REGION,CITY,STREET_NUMBER_OR_PO_BOX, _VALID_FROM, _VALID_TO,  _SOURCE,  _CREATED_BY, DELETED_FROM_SOURCE, IS_PERSONAL_DATA
+    		from :lt_deleted_rows;	
+
+			select count(*) into lv_count from :lt_deleted_rows;
+			if (:lv_count < :lv_batch_size) or (:lv_batch_size is null) THEN  
+				break; 
+			else  
+				lv_offset = :lv_offset + :lv_batch_size; 
+			end if; 
+		end while;  			
+
+		--we remove those values that remained with source 255
+		update "sap.plc.db::basis.t_vendor" 
+		set _VALID_TO = :lv_current_utctimestamp, _CREATED_BY = :lv_current_user, _SOURCE = 2
+        where _SOURCE = 255 AND IS_PERSONAL_DATA = 0;
+        
+		lv_deleted_rows = ::ROWCOUNT;
+
+		lt_personal_data_rows = SELECT VENDOR_ID FROM "sap.plc.db::basis.t_vendor" where _SOURCE = 255 AND IS_PERSONAL_DATA = 1;
+		select count(*) into lv_count from :lt_personal_data_rows;
+		if (:lv_count > 0) THEN  
+			lv_deleted_rows = :lv_deleted_rows + :lv_count;
+			call "sap.plc.db.masterdata_replication.procedures::p_delete_vendor"(:lt_personal_data_rows); 
+		end if; 
+		
+		insert into "sap.plc.db::map.t_statistics"(table_name,full_count,updated_count,deleted_count,start_time,end_time,run_time_seconds,run_id) 
+			values('t_vendor',:lv_full_count,:lv_total_updated_rows,:lv_deleted_rows,:lv_start_utctimestamp,:lv_current_utctimestamp,SECONDS_BETWEEN(:lv_start_utctimestamp,:lv_current_utctimestamp),:lv_run_id);  
+
+		update "sap.plc.db::map.t_replication_run" 
+			set last_update_time = :lv_current_utctimestamp 
+			where run_id=:lv_run_id; 
+
+	end if; 
+END

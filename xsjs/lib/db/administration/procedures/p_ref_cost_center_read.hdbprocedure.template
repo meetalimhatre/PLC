@@ -1,0 +1,42 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_cost_center_read" ( 
+		IN iv_logon_language        NVARCHAR(11),
+		IN iv_master_data_timestamp TIMESTAMP,
+        IN ot_cost_center_key		"sap.plc.db.administration::masterdata.tt_cost_center_key",
+        OUT ot_cost_center			"sap.plc.db.administration::masterdata.tt_cost_center" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+--select cost centers
+	ot_cost_center = 				
+					select  
+						plcTable.COST_CENTER_ID,
+						plcTable.CONTROLLING_AREA_ID,
+						plcTable._VALID_FROM,
+						plcTable._VALID_TO,
+						plcTable._SOURCE, 
+						plcTable._CREATED_BY,
+		                null AS _VALID_FROM_FIRST_VERSION,
+		                null AS _CREATED_BY_FIRST_VERSION,
+						plcTextTable.COST_CENTER_DESCRIPTION
+						{{customFieldsWithTablePrefix Cost_Center}} 
+					from "sap.plc.db::basis.t_cost_center" as plcTable 					
+					left outer join "sap.plc.db::basis.t_cost_center__text" as plcTextTable 
+						on  plcTable.COST_CENTER_ID = plcTextTable.COST_CENTER_ID 
+						and plcTable.CONTROLLING_AREA_ID = plcTextTable.CONTROLLING_AREA_ID 
+						and plcTextTable.LANGUAGE = :iv_logon_language 
+						and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+						and ( plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null )  
+					LEFT OUTER JOIN {{t_extensionTable Cost_Center}} as plcExtTable ON
+							plcTable.COST_CENTER_ID = plcExtTable.COST_CENTER_ID
+							and plcTable.CONTROLLING_AREA_ID = plcExtTable.CONTROLLING_AREA_ID
+			                and plcTable._VALID_FROM = plcExtTable._VALID_FROM 
+					where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+						and ( plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null ) 
+						and ( plcTable.COST_CENTER_ID, plcTable.CONTROLLING_AREA_ID ) in ( select COST_CENTER_ID, CONTROLLING_AREA_ID from :ot_cost_center_key );		
+				  
+END;
+
+

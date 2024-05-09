@@ -1,0 +1,18 @@
+{
+  "name": "build",
+  "dependencies": {
+    "csv-parse": "3.2.0",
+    "fs-extra": "^9.0.0",
+    "mbt": "1.2.7",
+    "filter-node-package": "2.2.0"
+  },
+  "engines": {
+    "node": "^14.x"
+  },
+  "scripts": {
+    "parseCSVs": "node db/src/csvConverter/csvConverter.js",
+    "cleanupCSVs": "node cleanupCSVs.js",
+    "build": "node node_modules/mbt/bin/mbt build -p xsa --mtar xsac-plc-assembly-xsa.mtar -t .",
+    "postinstall": "node node_modules/filter-node-package/lib/clean-packages"
+  }
+}

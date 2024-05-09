@@ -1,0 +1,31 @@
+{
+  "name": "xsac-plc-db",
+  "version": "4.4.16",
+  "description": "db",
+  "contributors": [
+    {
+      "name": "SAP SE",
+      "email": "SAPProductLifecycleCosting@sap.com",
+      "url": "https://www.sap.com/products/product-lifecycle-costing.html"
+    }
+  ],
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git"
+  },
+  "dependencies": {
+    "@sap/hdi-deploy": "4.3.3",
+    "@sap/hdi-dynamic-deploy": "2.5.5"
+  },
+  "devDependencies": {
+    "jsonfile": "^5.0.0"
+  },
+  "engines": {
+    "node": "^14.x"
+  },
+  "scripts": {
+    "start:cf": "node node_modules/@sap/hdi-dynamic-deploy/",
+    "start:xsa": "node node_modules/@sap/hdi-deploy/",
+    "deploy-initialize-local": "node deploy-initialize-local.js"
+  }
+}

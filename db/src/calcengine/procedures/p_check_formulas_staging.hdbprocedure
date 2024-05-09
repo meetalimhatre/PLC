@@ -1,0 +1,86 @@
+PROCEDURE "sap.plc.db.calcengine.procedures::p_check_formulas_staging" ( 
+            OUT errors "sap.plc.db.calcengine::calcengine_types.ts_formula_errors" default empty
+      )
+      LANGUAGE SQLSCRIPT
+      SQL SECURITY INVOKER
+      READS SQL DATA AS
+BEGIN
+
+lt_formulas =  select  formula_id,
+                    path,
+                    business_object,
+                    column_id,
+                    item_category_id,
+                    is_formula_used,
+                    formula_string,
+                    formula_description
+            from "sap.plc.db::basis.t_formula_staging";
+
+-- it is important to union staging with persistent tables since other wise the metadata set needed for formula validation
+-- is not complete (t_metadata_staging only contains custom fields currently; data for standard fields would be missing)
+
+-- note: the left outer join is used to determine data from t_metadata that is missing in the staging tables (esp. metadata for std fields);
+--       the join is used on purpose since a normal union (incl. all/distinct) could override changes on the data in t_metadata_staging
+
+lt_metadata =  select	path,
+        			business_object,
+        			column_id,
+        			is_custom,
+        			rollup_type_id,
+        			ref_uom_currency_path,
+        			ref_uom_currency_business_object,
+        			ref_uom_currency_column_id,
+        			uom_currency_flag,
+        			semantic_data_type,
+        			semantic_data_type_attributes,
+        			property_type,
+        			is_usable_in_formula
+    		from "sap.plc.db::basis.t_metadata_staging"
+            
+            union all 
+            
+            select	db.path,
+        			db.business_object,
+        			db.column_id,
+        			db.is_custom,
+        			db.rollup_type_id,
+        			db.ref_uom_currency_path,
+        			db.ref_uom_currency_business_object,
+        			db.ref_uom_currency_column_id,
+        			db.uom_currency_flag,
+        			db.semantic_data_type,
+        			db.semantic_data_type_attributes,
+        			db.property_type,
+        			db.is_usable_in_formula
+		from "sap.plc.db::basis.t_metadata" as db
+            left outer join "sap.plc.db::basis.t_metadata_staging" as staging
+                on  db.path = staging.path
+                and db.business_object = staging.business_object
+                and db.column_id = staging.column_id
+        where  staging.path is null;
+
+lt_metadata_item_attributes =     select	path,
+                            			business_object,
+                            			column_id,
+                            			item_category_id,
+                        			    default_value
+                                from "sap.plc.db::basis.t_metadata_item_attributes_staging"
+                                
+                                union all
+                                
+                                select  db.path,
+                              			db.business_object,
+                              			db.column_id,
+                              			db.item_category_id,
+                              			db.default_value
+                                from "sap.plc.db::basis.t_metadata_item_attributes" as db
+                                    left outer join "sap.plc.db::basis.t_metadata_item_attributes_staging" as staging
+                                    on  db.path = staging.path
+                                    and db.business_object = staging.business_object
+                                    and db.column_id = staging.column_id
+                                    and db.item_category_id = staging.item_category_id
+                                where  staging.path is null;
+  	
+call "sap.plc.db::PLC_AREA_CHECK_FORMULAS_PROC"(:lt_formulas, :lt_metadata, :lt_metadata_item_attributes, errors);
+      
+END;

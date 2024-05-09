@@ -1,0 +1,47 @@
+<core:FragmentDefinition
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:tnt="sap.tnt" 
+    xmlns:f="sap.f"
+    controllerName="ui.controller.App">
+    
+    <f:GridContainer class="sapUiSmallMargin" inlineBlockLayout="true">
+		<f:layout>
+			<f:GridContainerSettings rowSize="6rem" columnSize="6rem" gap="8px" />
+		</f:layout>
+		<f:items>
+            <GenericTile frameType='TwoThirds' class="sapUiSmallMargin tileLayout" header="New Installation"
+                press="freshInstallHandler">
+                <layoutData>
+					<f:GridContainerItemLayoutData minRows="3" columns="3" />
+				</layoutData>
+                <TileContent  class="sapUiMediumPadding">
+                    <Text text="Run Install Tool to set up and configure SAP Product Lifecycle Costing
+                          after deployment to SAP Hana XS advanced" wrapping="true"/>
+                </TileContent>
+            </GenericTile>
+
+            <GenericTile frameType='TwoThirds' class="sapUiSmallMargin tileLayout" header="Prepare for Upgrade"
+                press="prepareForUpgradeHandler">
+                <layoutData>
+					<f:GridContainerItemLayoutData minRows="3" columns="3" />
+				</layoutData>
+                <TileContent footer="* Use when upgrading V4.2 or above" >
+                    <Text wrapping="true" text="Execute pre-upgrade script to prepare SAP Produc Lifecycle Costing for upgrade."/>
+                </TileContent>
+            </GenericTile>
+
+            <GenericTile frameType='TwoThirds' class="sapUiSmallMargin tileLayout " header="Upgrade"
+                press="upgradeHandler">
+                <layoutData>
+					<f:GridContainerItemLayoutData minRows="3" columns="3" />
+				</layoutData>
+                <TileContent >
+                    <Text text="Run Install tool to migrate custom, standard and user data to SAP Product Lifecycle Costing" />
+                </TileContent>
+            </GenericTile>
+        </f:items>
+	</f:GridContainer>
+</core:FragmentDefinition>
+

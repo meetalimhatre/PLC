@@ -1,0 +1,741 @@
+PROCEDURE "sap.plc.db.calcengine.procedures::p_calculate_saved_calculation_version" (
+ 		IN iv_calculation_version_id INTEGER
+	)
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+	-- -----------------------------------------------------------------------------------------------------------
+	-- Begin of SQLScript which is similar to p_calcuation and p_calculation_save_results
+	-- Differences: no access to temporary tables and no use of SESSION_ID
+	-- -----------------------------------------------------------------------------------------------------------
+
+	-- scalar variables for storing data of master version
+	DECLARE lv_component_split_id NVARCHAR(35);
+
+	-- Table variable for saved results of referenced calculation versions.
+	-- It is empty if calculation version does not contain references.
+	DECLARE lt_referenced_version_component_split TABLE (
+      		master_calculation_version_id INTEGER,
+      		referenced_calculation_version_id INTEGER,
+      		cost_component_id INTEGER,
+      		account_id NVARCHAR(10),
+      		cost_fixed_portion DECIMAL(28,7),
+      		cost_variable_portion DECIMAL(28,7),
+			cost2_fixed_portion DECIMAL(28,7),
+			cost2_variable_portion DECIMAL(28,7),
+			cost3_fixed_portion DECIMAL(28,7),
+			cost3_variable_portion  DECIMAL(28,7)
+	);
+	
+	-- table with referenced_calculation_versions that have no saved results
+	DECLARE lt_unsaved_referenced_calculation_versions TABLE (
+		referenced_calculation_version_id INTEGER
+	);
+
+	-- get some data from calculation version
+	SELECT component_split_id
+		INTO lv_component_split_id
+		FROM "sap.plc.db::basis.t_calculation_version"
+		WHERE calculation_version_id = :iv_calculation_version_id;
+	 
+	-- get all referenced calculation versions from master version
+	lt_referenced_calculation_versions = SELECT DISTINCT referenced_calculation_version_id
+			FROM "sap.plc.db::basis.t_item"
+			WHERE calculation_version_id = :iv_calculation_version_id AND referenced_calculation_version_id IS NOT NULL;
+			
+	-- lt_new_referenced_calculation_versions stores new set of calculation versions that referenced from the current set of versions.
+	-- Initially it is set to all versions referenced by the calculation version :iv_calculation_version_id.
+	lt_new_referenced_calculation_versions = SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions;
+	
+	-- iteratively get all other (indirectly) referenced calculation versions
+	WHILE NOT IS_EMPTY(:lt_new_referenced_calculation_versions) DO
+		lt_new_referenced_calculation_versions = SELECT DISTINCT referenced_calculation_version_id
+				FROM "sap.plc.db::basis.t_item"
+				WHERE calculation_version_id in (SELECT referenced_calculation_version_id FROM :lt_new_referenced_calculation_versions) AND referenced_calculation_version_id IS NOT NULL;
+	
+		lt_referenced_calculation_versions = SELECT referenced_calculation_version_id FROM :lt_new_referenced_calculation_versions
+			UNION SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions;
+		
+	END WHILE;
+	
+	-- get all saved results of referenced calculation versions
+	lt_referenced_version_component_split = SELECT 		
+  		master_calculation_version_id,
+  		referenced_calculation_version_id,
+  		cost_component_id,
+  		account_id,
+  		cost_fixed_portion,
+  		cost_variable_portion,
+		cost2_fixed_portion,
+		cost2_variable_portion,
+		cost3_fixed_portion,
+		cost3_variable_portion
+	FROM "sap.plc.db::basis.t_item_referenced_version_component_split"
+	WHERE master_calculation_version_id = :iv_calculation_version_id AND component_split_id = :lv_component_split_id AND referenced_calculation_version_id IN (SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions);
+	
+	-- unsaved = all_referenced_versions - saved_referenced_versions
+	lt_unsaved_referenced_calculation_versions = SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions
+		MINUS SELECT referenced_calculation_version_id FROM :lt_referenced_version_component_split;
+		
+	lt_calculation_header = SELECT
+			version.CALCULATION_VERSION_ID,
+			version.CALCULATION_ID,
+			version.CALCULATION_VERSION_NAME,
+			version.CALCULATION_VERSION_TYPE,
+			version.ROOT_ITEM_ID,
+			version.CUSTOMER_ID,
+            version.SALES_DOCUMENT,
+			version.SALES_PRICE,
+			version.SALES_PRICE_CURRENCY_ID,
+			version.REPORT_CURRENCY_ID,
+			version.COSTING_SHEET_ID,
+			version.COMPONENT_SPLIT_ID,
+			version.START_OF_PRODUCTION,
+			version.END_OF_PRODUCTION,
+			version.VALUATION_DATE,
+			version.LAST_MODIFIED_ON,
+			version.LAST_MODIFIED_BY,
+			version.MASTER_DATA_TIMESTAMP,
+			version.LIFECYCLE_PERIOD_FROM,
+			version.BASE_VERSION_ID,
+			version.IS_FROZEN,
+			version.EXCHANGE_RATE_TYPE_ID,
+			version.MATERIAL_PRICE_STRATEGY_ID,
+			version.ACTIVITY_PRICE_STRATEGY_ID,
+			
+			calculation.CALCULATION_NAME,
+			calculation.CURRENT_CALCULATION_VERSION_ID,
+			calculation.CREATED_ON AS CALCULATION_CREATED_ON,
+			calculation.CREATED_BY AS CALCULATION_CREATED_BY,
+			calculation.LAST_MODIFIED_ON AS CALCULATION_LAST_MODIFIED_ON,
+			calculation.LAST_MODIFIED_BY AS CALCULATION_LAST_MODIFIED_BY,
+			
+			project.controlling_area_id AS controlling_area_id,
+			project.PROJECT_ID AS PROJECT_ID,
+			project.REFERENCE_PROJECT_ID AS PROJECT_REFERENCE_ID,
+			project.PROJECT_NAME AS PROJECT_NAME,
+			project.PROJECT_RESPONSIBLE AS PROJECT_RESPONSIBLE,
+			project.CUSTOMER_ID AS PROJECT_CUSTOMER_ID,
+			project.SALES_DOCUMENT AS PROJECT_SALES_DOCUMENT,
+			project.SALES_PRICE AS PROJECT_SALES_PRICE,
+			project.SALES_PRICE_CURRENCY_ID AS PROJECT_SALES_PRICE_CURRENCY_ID,
+			project.COMMENT AS PROJECT_COMMENT,
+			project.COMPANY_CODE_ID AS PROJECT_COMPANY_CODE_ID,
+			project.PLANT_ID AS PROJECT_PLANT_ID,
+			project.BUSINESS_AREA_ID AS PROJECT_BUSINESS_AREA_ID,
+			project.PROFIT_CENTER_ID AS PROJECT_PROFIT_CENTER_ID,
+			project.REPORT_CURRENCY_ID AS PROJECT_REPORT_CURRENCY_ID,
+			project.COSTING_SHEET_ID AS PROJECT_COSTING_SHEET_ID,
+			project.COMPONENT_SPLIT_ID AS PROJECT_COMPONENT_SPLIT_ID,
+			project.START_OF_PROJECT AS PROJECT_START,
+			project.END_OF_PROJECT AS PROJECT_END,
+			project.START_OF_PRODUCTION AS PROJECT_START_OF_PRODUCTION,
+			project.END_OF_PRODUCTION AS PROJECT_END_OF_PRODUCTION,
+			project.VALUATION_DATE AS PROJECT_VALUATION_DATE,
+			project.CREATED_ON AS PROJECT_CREATED_ON,
+			project.CREATED_BY AS PROJECT_CREATED_BY,
+			project.LAST_MODIFIED_ON AS PROJECT_LAST_MODIFIED_ON,
+			project.LAST_MODIFIED_BY AS PROJECT_LAST_MODIFIED_BY,
+			project.EXCHANGE_RATE_TYPE_ID as PROJECT_EXCHANGE_RATE_TYPE_ID,
+			project.MATERIAL_PRICE_STRATEGY_ID as PROJECT_MATERIAL_PRICE_STRATEGY_ID,
+			project.ACTIVITY_PRICE_STRATEGY_ID as PROJECT_ACTIVITY_PRICE_STRATEGY_ID
+	    FROM "sap.plc.db::basis.t_calculation_version" version
+			INNER JOIN "sap.plc.db::basis.t_calculation" calculation ON version.calculation_id = calculation.calculation_id
+			INNER JOIN "sap.plc.db::basis.t_project" project ON calculation.project_id = project.project_id
+	    WHERE calculation_version_id = :iv_calculation_version_id
+	    	OR calculation_version_id IN (SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions);
+
+	lt_formula = SELECT
+			FORMULA_ID,
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			ITEM_CATEGORY_ID,
+			IS_FORMULA_USED,
+			FORMULA_STRING,
+			FORMULA_DESCRIPTION
+		FROM "sap.plc.db::basis.t_formula";
+
+	lt_metadata = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			IS_CUSTOM,
+			ROLLUP_TYPE_ID,
+			REF_UOM_CURRENCY_PATH,
+			REF_UOM_CURRENCY_BUSINESS_OBJECT,
+			REF_UOM_CURRENCY_COLUMN_ID,
+			UOM_CURRENCY_FLAG,
+			SEMANTIC_DATA_TYPE,
+			SEMANTIC_DATA_TYPE_ATTRIBUTES,
+			PROPERTY_TYPE,
+			IS_USABLE_IN_FORMULA
+		FROM "sap.plc.db::basis.t_metadata";
+
+	lt_metadata_item_attributes = SELECT
+			PATH,
+			BUSINESS_OBJECT,
+			COLUMN_ID,
+			ITEM_CATEGORY_ID,
+			DEFAULT_VALUE
+		FROM "sap.plc.db::basis.t_metadata_item_attributes";
+
+	lt_item = SELECT
+			ITEM_ID,
+			CALCULATION_VERSION_ID,
+			PARENT_ITEM_ID,
+			IS_ACTIVE,
+			HIGHLIGHT_GREEN,
+			HIGHLIGHT_ORANGE,
+			HIGHLIGHT_YELLOW,
+			ITEM_CATEGORY_ID,
+			CHILD_ITEM_CATEGORY_ID,
+			ITEM_DESCRIPTION,
+			REFERENCED_CALCULATION_VERSION_ID,
+			COMMENT,
+			ACCOUNT_ID,
+			DOCUMENT_TYPE_ID,
+			DOCUMENT_ID,
+			DOCUMENT_VERSION,
+			DOCUMENT_PART,
+			DOCUMENT_STATUS_ID,
+			DESIGN_OFFICE_ID,
+			MATERIAL_ID,
+			MATERIAL_TYPE_ID,
+			MATERIAL_GROUP_ID,
+			IS_PHANTOM_MATERIAL,
+			IS_CONFIGURABLE_MATERIAL,
+			MATERIAL_SOURCE,
+			OVERHEAD_GROUP_ID,
+			VALUATION_CLASS_ID,
+			PURCHASING_GROUP,
+			PURCHASING_DOCUMENT,
+			LOCAL_CONTENT,
+			ACTIVITY_TYPE_ID,
+			PROCESS_ID,
+			LOT_SIZE,
+			LOT_SIZE_IS_MANUAL,
+			ENGINEERING_CHANGE_NUMBER_ID,
+			COMPANY_CODE_ID,
+			COST_CENTER_ID,
+			PLANT_ID,
+			WORK_CENTER_ID,
+			WORK_CENTER_CATEGORY,
+			EFFICIENCY,
+			BUSINESS_AREA_ID,
+			PROFIT_CENTER_ID,
+			QUANTITY,
+			QUANTITY_IS_MANUAL,
+			QUANTITY_UOM_ID,
+			TOTAL_QUANTITY,
+			TOTAL_QUANTITY_UOM_ID,
+			TOTAL_QUANTITY_DEPENDS_ON,
+			TOTAL_QUANTITY_OF_VARIANTS,
+			IS_RELEVANT_TO_COSTING_IN_ERP,
+			BASE_QUANTITY,
+			BASE_QUANTITY_IS_MANUAL,
+			PRICE_FIXED_PORTION,
+			PRICE_FIXED_PORTION_IS_MANUAL,
+			PRICE_VARIABLE_PORTION,
+			PRICE_VARIABLE_PORTION_IS_MANUAL,
+			TRANSACTION_CURRENCY_ID,
+			PRICE_UNIT,
+			PRICE_UNIT_IS_MANUAL,
+			PRICE_UNIT_UOM_ID,
+			IS_PRICE_SPLIT_ACTIVE,
+			PRICE_ID,
+			CONFIDENCE_LEVEL_ID,
+			PRICE_SOURCE_ID,
+			PRICE_SOURCE_TYPE_ID,
+			SURCHARGE,
+			IS_DISABLING_PRICE_DETERMINATION,
+			VENDOR_ID,
+			TARGET_COST,
+			TARGET_COST_IS_MANUAL,
+			TARGET_COST_CURRENCY_ID,
+			CREATED_ON,
+			CREATED_BY,
+			LAST_MODIFIED_ON,
+			LAST_MODIFIED_BY,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION,
+			TO_DECIMAL(NULL,28,7) as PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION
+	    FROM "sap.plc.db::basis.t_item"
+	    WHERE calculation_version_id = :iv_calculation_version_id
+	UNION ALL
+		SELECT
+			ITEM_ID,
+			CALCULATION_VERSION_ID,
+			PARENT_ITEM_ID,
+			IS_ACTIVE,
+			HIGHLIGHT_GREEN,
+			HIGHLIGHT_ORANGE,
+			HIGHLIGHT_YELLOW,
+			ITEM_CATEGORY_ID,
+			CHILD_ITEM_CATEGORY_ID,
+			ITEM_DESCRIPTION,
+			REFERENCED_CALCULATION_VERSION_ID,
+			COMMENT,
+			ACCOUNT_ID,
+			DOCUMENT_TYPE_ID,
+			DOCUMENT_ID,
+			DOCUMENT_VERSION,
+			DOCUMENT_PART,
+			DOCUMENT_STATUS_ID,
+			DESIGN_OFFICE_ID,
+			MATERIAL_ID,
+			MATERIAL_TYPE_ID,
+			MATERIAL_GROUP_ID,
+			IS_PHANTOM_MATERIAL,
+			IS_CONFIGURABLE_MATERIAL,
+			MATERIAL_SOURCE,
+			OVERHEAD_GROUP_ID,
+			VALUATION_CLASS_ID,
+			PURCHASING_GROUP,
+			PURCHASING_DOCUMENT,
+			LOCAL_CONTENT,
+			ACTIVITY_TYPE_ID,
+			PROCESS_ID,
+			LOT_SIZE,
+			LOT_SIZE_IS_MANUAL,
+			ENGINEERING_CHANGE_NUMBER_ID,
+			COMPANY_CODE_ID,
+			COST_CENTER_ID,
+			PLANT_ID,
+			WORK_CENTER_ID,
+			WORK_CENTER_CATEGORY,
+			EFFICIENCY,
+			BUSINESS_AREA_ID,
+			PROFIT_CENTER_ID,
+			QUANTITY,
+			QUANTITY_IS_MANUAL,
+			QUANTITY_UOM_ID,
+			TOTAL_QUANTITY,
+			TOTAL_QUANTITY_UOM_ID,
+			TOTAL_QUANTITY_DEPENDS_ON,
+			TOTAL_QUANTITY_OF_VARIANTS,
+			IS_RELEVANT_TO_COSTING_IN_ERP,
+			BASE_QUANTITY,
+			BASE_QUANTITY_IS_MANUAL,
+			PRICE_FIXED_PORTION,
+			PRICE_FIXED_PORTION_IS_MANUAL,
+			PRICE_VARIABLE_PORTION,
+			PRICE_VARIABLE_PORTION_IS_MANUAL,
+			TRANSACTION_CURRENCY_ID,
+			PRICE_UNIT,
+			PRICE_UNIT_IS_MANUAL,
+			PRICE_UNIT_UOM_ID,
+			IS_PRICE_SPLIT_ACTIVE,
+			PRICE_ID,
+			CONFIDENCE_LEVEL_ID,
+			PRICE_SOURCE_ID,
+			PRICE_SOURCE_TYPE_ID,
+			SURCHARGE,
+			IS_DISABLING_PRICE_DETERMINATION,
+			VENDOR_ID,
+			TARGET_COST,
+			TARGET_COST_IS_MANUAL,
+			TARGET_COST_CURRENCY_ID,
+			CREATED_ON,
+			CREATED_BY,
+			LAST_MODIFIED_ON,
+			LAST_MODIFIED_BY,
+			PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION,
+			PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION,
+			PRICE_FOR_TOTAL_QUANTITY2_FIXED_PORTION,
+			PRICE_FOR_TOTAL_QUANTITY2_VARIABLE_PORTION,
+			PRICE_FOR_TOTAL_QUANTITY3_FIXED_PORTION,
+			PRICE_FOR_TOTAL_QUANTITY3_VARIABLE_PORTION
+	    FROM "sap.plc.db::basis.t_item"
+	    WHERE calculation_version_id IN (SELECT referenced_calculation_version_id FROM :lt_unsaved_referenced_calculation_versions);
+
+	lt_item_ext = SELECT
+			CALCULATION_VERSION_ID,
+			ITEM_ID
+			{{customFields Item}}
+	    FROM "sap.plc.db::basis.t_item_ext"
+	    WHERE calculation_version_id = :iv_calculation_version_id
+	    	OR calculation_version_id IN (SELECT referenced_calculation_version_id FROM :lt_unsaved_referenced_calculation_versions);
+	    
+	lt_saved_costing_sheets_results = SELECT
+	        calculation_version_id,
+		    item_id,
+	        costing_sheet_row_id,
+			costing_sheet_overhead_row_id,
+	        account_id,
+	        cost_fixed_portion,
+	        cost_variable_portion,
+			cost2_fixed_portion,
+	        cost2_variable_portion,
+			cost3_fixed_portion,
+	        cost3_variable_portion
+		FROM "sap.plc.db::basis.t_item_calculated_values_costing_sheet"
+		WHERE calculation_version_id IN (SELECT referenced_calculation_version_id FROM :lt_unsaved_referenced_calculation_versions)
+			AND is_rolled_up_value=0;
+		
+	lt_account = SELECT DISTINCT
+	        ACCOUNT_ID
+	    FROM "sap.plc.db::basis.t_account";
+
+	lt_account_group = SELECT
+	        ACCOUNT_GROUP_ID,
+	        CONTROLLING_AREA_ID,
+	        COST_PORTION,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_account_group";
+
+	lt_account_account_group = SELECT
+	        FROM_ACCOUNT_ID,
+	        TO_ACCOUNT_ID,
+	        ACCOUNT_GROUP_ID,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_account_account_group";
+
+	lt_costing_sheet = SELECT
+	        COSTING_SHEET_ID,
+	        CONTROLLING_AREA_ID,
+	        _VALID_FROM,
+	        _VALID_TO,
+			IS_TOTAL_COST2_ENABLED,
+			IS_TOTAL_COST3_ENABLED
+	    FROM "sap.plc.db::basis.t_costing_sheet";
+
+	lt_costing_sheet_row = SELECT
+	        COSTING_SHEET_ROW_ID,
+	        COSTING_SHEET_ID,
+	        COSTING_SHEET_ROW_TYPE,
+	        COSTING_SHEET_BASE_ID,
+	        ACCOUNT_GROUP_AS_BASE_ID,
+	        COSTING_SHEET_OVERHEAD_ID,
+	        CALCULATION_ORDER,
+	        _VALID_FROM,
+	        _VALID_TO,
+			IS_RELEVANT_FOR_TOTAL,
+			IS_RELEVANT_FOR_TOTAL2,
+			IS_RELEVANT_FOR_TOTAL3
+	    FROM "sap.plc.db::basis.t_costing_sheet_row";
+
+	lt_costing_sheet_row_dependencies = SELECT
+	        SOURCE_ROW_ID,
+	        TARGET_ROW_ID,
+	        COSTING_SHEET_ID,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_costing_sheet_row_dependencies";
+	    	
+	lt_costing_sheet_base = SELECT
+	        COSTING_SHEET_BASE_ID,
+	        COST_PORTION,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_costing_sheet_base";
+
+	lt_costing_sheet_base_row = SELECT
+	        COSTING_SHEET_BASE_ID,
+	        CHILD_ITEM_CATEGORY_ID as ITEM_CATEGORY_ID,
+	        SUBITEM_STATE,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_costing_sheet_base_row";
+
+	lt_costing_sheet_overhead = SELECT
+	        COSTING_SHEET_OVERHEAD_ID,
+	        CREDIT_ACCOUNT_ID,
+			CREDIT_FIXED_COST_PORTION,
+	        IS_ROLLED_UP,
+	        _VALID_FROM,
+	        _VALID_TO,
+            USE_DEFAULT_FIXED_COST_PORTION
+	    FROM "sap.plc.db::basis.t_costing_sheet_overhead";
+
+	lt_costing_sheet_overhead_row = SELECT
+	        COSTING_SHEET_OVERHEAD_ROW_ID,
+	        COSTING_SHEET_OVERHEAD_ID,
+	        VALID_FROM,
+	        VALID_TO,
+	        CONTROLLING_AREA_ID,
+	        COMPANY_CODE_ID,
+	        BUSINESS_AREA_ID,
+	        PROFIT_CENTER_ID,
+	        PLANT_ID,
+	        OVERHEAD_GROUP_ID,
+	        OVERHEAD_PERCENTAGE,
+	        PROJECT_ID,
+	        ACTIVITY_TYPE_ID,
+	        COST_CENTER_ID,
+	        WORK_CENTER_ID,
+	        OVERHEAD_QUANTITY_BASED,
+	        OVERHEAD_CURRENCY_ID,
+	        OVERHEAD_PRICE_UNIT,
+	        OVERHEAD_PRICE_UNIT_UOM_ID,
+	        _VALID_FROM,
+	        _VALID_TO,
+            CREDIT_FIXED_COST_PORTION as FIXED_COST_OVERHEAD_PERCENTAGE,
+			FORMULA_ID
+	    FROM "sap.plc.db::basis.t_costing_sheet_overhead_row";
+	
+	lt_costing_sheet_overhead_row_formula = SELECT 
+			formula.FORMULA_ID,
+			formula.FORMULA_STRING,
+			formula.FORMULA_DESCRIPTION,
+			overhead_row.COSTING_SHEET_OVERHEAD_ID,
+			overhead_row.COSTING_SHEET_OVERHEAD_ROW_ID,
+			formula.OVERHEAD_CUSTOM
+		FROM "sap.plc.db::basis.t_costing_sheet_overhead_row_formula" formula, "sap.plc.db::basis.t_costing_sheet_overhead_row" overhead_row
+		WHERE formula.FORMULA_ID = overhead_row.FORMULA_ID;
+
+	lt_component_split = SELECT
+	        COMPONENT_SPLIT_ID,
+	        CONTROLLING_AREA_ID,
+			_VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_component_split";
+
+	lt_component_split_account_group = SELECT
+	        ACCOUNT_GROUP_ID,
+	        COMPONENT_SPLIT_ID,
+	        _VALID_FROM,
+	        _VALID_TO
+	    FROM "sap.plc.db::basis.t_component_split_account_group";
+
+	lt_uom = SELECT
+			UOM_ID,
+			DIMENSION_ID,
+			NUMERATOR,
+			DENOMINATOR,
+			EXPONENT_BASE10,
+			SI_CONSTANT,
+			_VALID_FROM,
+			_VALID_TO
+	    FROM "sap.plc.db::basis.t_uom";
+
+	lt_currency = SELECT
+			EXCHANGE_RATE_TYPE_ID,
+			FROM_CURRENCY_ID,
+			TO_CURRENCY_ID,
+			RATE,
+			FROM_FACTOR,
+			TO_FACTOR,
+			VALID_FROM,
+			_VALID_FROM,
+			_VALID_TO
+	    FROM "sap.plc.db::basis.t_currency_conversion";
+
+	lt_item_price_components = SELECT 
+	                                     price_components.PRICE_FIXED,
+									     price_components.PRICE_VARIABLE,
+									     items.ITEM_ID,
+										 items.CALCULATION_VERSION_ID,
+										 price_components.ACCOUNT_ID 
+                                    FROM "sap.plc.db::basis.t_price_component" as price_components  
+	                                INNER JOIN :lt_item AS items 
+	                                	ON items.price_id = price_components.price_id
+									INNER JOIN "sap.plc.db::basis.t_activity_price" as activity_price
+										on price_components.PRICE_ID = activity_price.PRICE_ID
+									and price_components._VALID_FROM = activity_price._VALID_FROM
+									INNER JOIN :lt_calculation_header version
+										on items.CALCULATION_VERSION_ID = version.CALCULATION_VERSION_ID
+									where activity_price._VALID_FROM <= version.MASTER_DATA_TIMESTAMP and 
+										(activity_price._VALID_TO is null or activity_price._VALID_TO > version.MASTER_DATA_TIMESTAMP)
+									and price_components.controlling_area_id = version.CONTROLLING_AREA_ID and
+										activity_price.VALID_FROM <= version.VALUATION_DATE and 
+										(activity_price.VALID_TO is null or activity_price.VALID_TO >= version.VALUATION_DATE)
+									
+								UNION ALL
+								SELECT 
+	                                     price_components.PRICE_FIXED,
+									     price_components.PRICE_VARIABLE,
+									     items.ITEM_ID,
+										 items.CALCULATION_VERSION_ID,
+										 price_components.ACCOUNT_ID 
+                                    FROM "sap.plc.db::basis.t_price_component" as price_components  
+	                                INNER JOIN :lt_item AS items 
+	                                	ON items.price_id = price_components.price_id
+									INNER JOIN "sap.plc.db::basis.t_material_price" as material_price
+										on price_components.PRICE_ID = material_price.PRICE_ID
+									and price_components._VALID_FROM = material_price._VALID_FROM
+									INNER JOIN :lt_calculation_header version
+										on items.CALCULATION_VERSION_ID = version.CALCULATION_VERSION_ID
+									where material_price._VALID_FROM <= version.MASTER_DATA_TIMESTAMP and 
+										(material_price._VALID_TO is null or material_price._VALID_TO > version.MASTER_DATA_TIMESTAMP)
+									and price_components.controlling_area_id = version.CONTROLLING_AREA_ID and
+										material_price.VALID_FROM <= version.VALUATION_DATE and 
+										(material_price.VALID_TO is null or material_price.VALID_TO >= version.VALUATION_DATE);	
+
+	-- ---------------------------------------------------------------------------- 
+	-- End similar part of SQLScript
+	-- ----------------------------------------------------------------------------
+
+	CALL PLC_AREA_CALCULATE_FOR_SAVE_PROC(
+		:lt_calculation_header,
+		:lt_formula, :lt_metadata, :lt_metadata_item_attributes,
+		:lt_item, :lt_item_ext, :lt_saved_costing_sheets_results, :lt_referenced_version_component_split,
+		:lt_account, :lt_account_group, :lt_account_account_group,
+		:lt_costing_sheet, :lt_costing_sheet_row, :lt_costing_sheet_row_dependencies, :lt_costing_sheet_base, :lt_costing_sheet_base_row,
+		:lt_costing_sheet_overhead, :lt_costing_sheet_overhead_row, :lt_costing_sheet_overhead_row_formula,
+		:lt_component_split, :lt_component_split_account_group, :lt_uom, :lt_currency, :lt_item_price_components,
+		lt_item_calculated_prices, lt_item_calculated_values_costing_sheet, lt_item_calculated_values_component_split, lt_result_component_split, errors);
+
+
+	-- delete not required referenced component split results
+	DELETE FROM "sap.plc.db::basis.t_item_referenced_version_component_split"
+		WHERE master_calculation_version_id = :iv_calculation_version_id
+			AND (referenced_calculation_version_id NOT IN (SELECT referenced_calculation_version_id FROM :lt_referenced_calculation_versions)
+			     OR component_split_id <> :lv_component_split_id);
+
+	-- get component split results for newly referenced calculation versions
+	lt_cached_component_splits = SELECT
+		    master_calculation_version_id,
+		    referenced_calculation_version_id,
+		    :lv_component_split_id as component_split_id,
+		    cost_component_id,
+		    account_id,
+		    cost_fixed_portion,
+		    cost_variable_portion,
+			cost2_fixed_portion,
+	        cost2_variable_portion,
+			cost3_fixed_portion,
+	        cost3_variable_portion
+		FROM :lt_result_component_split
+		WHERE master_calculation_version_id = :iv_calculation_version_id;
+
+	-- The CalcEngine only outputs results of component splits for newly referenced versions (added the very first time).
+	-- Existing stored component split restults for those referenced versions, must be deleted because otherwise
+	-- results for non-existing cost_component_ids might remain in the table.
+	DELETE FROM "sap.plc.db::basis.t_item_referenced_version_component_split"
+		WHERE master_calculation_version_id = :iv_calculation_version_id
+			and referenced_calculation_version_id in (SELECT referenced_calculation_version_id FROM :lt_cached_component_splits);
+
+	-- save newly calculated component split results of referenced calculation versions
+	UPSERT "sap.plc.db::basis.t_item_referenced_version_component_split"
+		SELECT
+		    master_calculation_version_id,
+		    referenced_calculation_version_id,
+		    component_split_id,
+		    cost_component_id,
+		    account_id,
+		    cost_fixed_portion,
+		    cost_variable_portion,
+			cost2_fixed_portion,
+		    cost2_variable_portion,
+			cost3_fixed_portion,
+		    cost3_variable_portion
+		FROM :lt_cached_component_splits;
+
+	-- save calculated fields in item table
+	UPDATE "sap.plc.db::basis.t_item" AS stored
+		SET
+	        quantity_calculated = calculated.quantity,
+	        base_quantity_calculated = calculated.base_quantity,
+	        total_quantity = calculated.total_quantity,
+	        total_quantity_uom_id = calculated.total_quantity_uom_id,
+	        quantity_per_base_unit = calculated.quantity_per_base_unit,
+	        quantity_per_base_unit_uom_id = calculated.quantity_per_base_unit_uom_id,
+	        price_unit_calculated = calculated.price_unit,
+	        target_cost_calculated = calculated.target_cost,
+	        lot_size_calculated = calculated.lot_size,
+	        price_fixed_portion_calculated = calculated.price_fixed_portion,
+	        price_variable_portion_calculated = calculated.price_variable_portion,
+	        price_for_total_quantity = calculated.price_for_total_quantity,
+	        price_for_total_quantity_fixed_portion = calculated.price_for_total_quantity_fixed_portion,
+	        price_for_total_quantity_variable_portion = calculated.price_for_total_quantity_variable_portion,
+			price_for_total_quantity2 = calculated.price_for_total_quantity2,
+	        price_for_total_quantity2_fixed_portion = calculated.price_for_total_quantity2_fixed_portion,
+	        price_for_total_quantity2_variable_portion = calculated.price_for_total_quantity2_variable_portion,
+			price_for_total_quantity3 = calculated.price_for_total_quantity3,
+	        price_for_total_quantity3_fixed_portion = calculated.price_for_total_quantity3_fixed_portion,
+	        price_for_total_quantity3_variable_portion = calculated.price_for_total_quantity3_variable_portion,
+	        other_cost = calculated.other_cost,
+	        other_cost_fixed_portion = calculated.other_cost_fixed_portion,
+	        other_cost_variable_portion = calculated.other_cost_variable_portion,
+	        total_cost = calculated.total_cost,
+	        total_cost_fixed_portion = calculated.total_cost_fixed_portion,
+	        total_cost_variable_portion = calculated.total_cost_variable_portion,
+			total_cost2 = calculated.total_cost2,
+	        total_cost2_fixed_portion = calculated.total_cost2_fixed_portion,
+	        total_cost2_variable_portion = calculated.total_cost_variable_portion,
+			total_cost3 = calculated.total_cost3,
+	        total_cost3_fixed_portion = calculated.total_cost3_fixed_portion,
+	        total_cost3_variable_portion = calculated.total_cost3_variable_portion,
+	        total_cost_per_unit_fixed_portion = calculated.total_cost_per_unit_fixed_portion,
+	        total_cost_per_unit_variable_portion = calculated.total_cost_per_unit_variable_portion,
+	        total_cost_per_unit = calculated.total_cost_per_unit,
+			total_cost2_per_unit_fixed_portion = calculated.total_cost2_per_unit_fixed_portion,
+	        total_cost2_per_unit_variable_portion = calculated.total_cost2_per_unit_variable_portion,
+	        total_cost2_per_unit = calculated.total_cost2_per_unit,
+			total_cost3_per_unit_fixed_portion = calculated.total_cost3_per_unit_fixed_portion,
+	        total_cost3_per_unit_variable_portion = calculated.total_cost3_per_unit_variable_portion,
+	        total_cost3_per_unit = calculated.total_cost3_per_unit,
+			bom_compare_key = calculated.bom_compare_key
+	     FROM "sap.plc.db::basis.t_item" AS stored INNER JOIN :lt_item_calculated_prices AS calculated
+	     	ON stored.item_id = calculated.item_id
+	     WHERE stored.calculation_version_id = :iv_calculation_version_id;
+
+	-- delete old calculation results
+	DELETE FROM "sap.plc.db::basis.t_item_calculated_values_costing_sheet"
+		WHERE calculation_version_id = :iv_calculation_version_id;
+
+	DELETE FROM "sap.plc.db::basis.t_item_calculated_values_component_split"
+		WHERE calculation_version_id = :iv_calculation_version_id;
+
+	-- save costing sheet results
+	INSERT INTO "sap.plc.db::basis.t_item_calculated_values_costing_sheet"
+		SELECT
+	        item_id,
+	        calculation_version_id,
+	        costing_sheet_row_id,
+			costing_sheet_overhead_row_id,
+	        account_id,
+	        is_rolled_up_value,
+	        has_subitems,
+	        cost,
+	        cost_fixed_portion,
+	        cost_variable_portion,
+			cost2,
+	        cost2_fixed_portion,
+	        cost2_variable_portion,
+			cost3,
+	        cost3_fixed_portion,
+	        cost3_variable_portion
+    	FROM :lt_item_calculated_values_costing_sheet
+    	WHERE calculation_version_id = :iv_calculation_version_id;
+
+	-- save component split results
+	INSERT INTO "sap.plc.db::basis.t_item_calculated_values_component_split"
+		SELECT
+	        item_id,
+	        calculation_version_id,
+	        component_split_id,
+	        cost_component_id,
+	        account_id,
+	        cost,
+	        cost_fixed_portion,
+	        cost_variable_portion,
+			cost2,
+	        cost2_fixed_portion,
+	        cost2_variable_portion,
+			cost3,
+	        cost3_fixed_portion,
+	        cost3_variable_portion
+		FROM :lt_item_calculated_values_component_split
+    	WHERE calculation_version_id = :iv_calculation_version_id;
+
+{{#if Item.hasCalculatedCustomFields}}
+       -- save calculated custom fields
+       UPDATE "sap.plc.db::basis.t_item_ext" AS stored
+              SET
+              	{{ddl_updateCustomFieldsCalculated Item}}
+            FROM "sap.plc.db::basis.t_item_ext" AS stored INNER JOIN :lt_item_calculated_prices AS calculated
+              ON stored.item_id = calculated.item_id
+            WHERE stored.calculation_version_id = :iv_calculation_version_id;
+{{/if}}
+END
+
+

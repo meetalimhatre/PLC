@@ -1,0 +1,24 @@
+{
+    "body": [{
+        "ENTITY": "CUSTOMER",
+        "SUBJECT": "*",
+        "VALID_TO": null,
+        "VALID_FOR": 100
+    }, {
+        "ENTITY": "USER",
+        "SUBJECT": "TES",
+        "VALID_TO": "2021-07-29T00:00:00.000Z",
+        "VALID_FOR": null
+    }, {
+        "ENTITY": "PROJECT",
+        "SUBJECT": "*",
+        "VALID_TO": null,
+        "VALID_FOR": 5
+    }, {
+        "ENTITY": "VENDOR",
+        "SUBJECT": "JJ",
+        "VALID_TO": "2021-07-27T00:00:00.000Z",
+        "VALID_FOR": null
+    }],
+    "head": {}
+}

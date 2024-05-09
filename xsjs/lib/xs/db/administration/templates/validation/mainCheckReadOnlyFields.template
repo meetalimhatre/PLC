@@ -1,0 +1,20 @@
+{{#if MasterdataBusinessObject.fieldsReadOnly}}
+					update temp_table
+						set	temp_table.ERROR_CODE = 'GENERAL_VALIDATION_ERROR', 
+						temp_table.ERROR_DETAILS = '{"validationObj": {"validationInfoCode": "READONLY_FIELD_ERROR"}}'
+						from {{temporaryTable MasterdataBusinessObject}} as temp_table, 
+						( select {{keyFields MasterdataBusinessObject}}, _VALID_FROM 
+						  from (select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table._VALID_FROM 
+						        from {{temporaryTable MasterdataBusinessObject}} as temp_table
+								inner join {{mainTable MasterdataBusinessObject}} as main_table
+								on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+						        and ( {{readOnlyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}} )
+								and temp_table._VALID_FROM = main_table._VALID_FROM
+								and temp_table.operation in ('Update')
+								and ( temp_table.error_code = '' or  temp_table.error_code is null )) 
+						) as result
+						where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+						and temp_table._VALID_FROM = result._VALID_FROM 
+						and temp_table.operation in ('Update')
+						and ( temp_table.error_code = '' or  temp_table.error_code is null )
+					{{/if}}

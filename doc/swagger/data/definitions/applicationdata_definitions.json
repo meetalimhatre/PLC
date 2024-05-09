@@ -1,0 +1,50 @@
+{
+    "definitions": {
+        "LanguagesGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LanguageModel"
+                    }
+                }
+            }
+        },
+        "LanguageModel": {
+            "type": "object",
+            "properties": {
+                "LANGUAGE": {
+                    "type": "string",
+                    "description": "Language code. ex: DE."
+                }
+            }
+        },
+        "CurrentUserGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CurrentUserModel"
+                    }
+                }
+            }
+        },
+        "CurrentUserModel": {
+            "type": "object",
+            "properties": {
+                "USER_ID": {
+                    "type": "string",
+                    "description": "User id. ex: JOHN_DOW."
+                }
+            }
+        }        
+    }
+}

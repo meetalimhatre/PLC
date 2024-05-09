@@ -1,0 +1,7 @@
+COLUMN VIEW "sap.plc.db.views::v_entity_relation" TYPE HIERARCHY AS SELECT child."PARENT_ENTITY_ID" pred, child."ENTITY_ID" succ, child."ENTITY_TYPE", parent."ENTITY_TYPE" PARENT_ENTITY_TYPE FROM "sap.plc.db::basis.t_entity_relation" child LEFT JOIN "sap.plc.db::basis.t_entity_relation" parent ON parent."ENTITY_ID" = child."PARENT_ENTITY_ID"
+WITH PARAMETERS (
+	'hierarchyDefinitionType' = 'select',
+	'hierarchyDefinition' = '{
+		"sourceType":"recursive",
+		"runtimeObjectType":"blob" }'
+);

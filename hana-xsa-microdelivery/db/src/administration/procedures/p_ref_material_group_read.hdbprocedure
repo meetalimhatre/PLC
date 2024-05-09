@@ -1,0 +1,35 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_ref_material_group_read" ( 
+  	    IN iv_logon_language 			NVARCHAR(11),
+		IN iv_master_data_timestamp 	TIMESTAMP,	
+        IN ot_material_group_key 		"sap.plc.db.administration::masterdata.tt_material_group_key",
+        OUT ot_material_group 			"sap.plc.db.administration::masterdata.tt_material_group" default empty
+    ) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	READS SQL DATA AS
+BEGIN
+
+/***************************** 
+	Select valuation class
+ *****************************/
+ 
+ ot_material_group = 
+	                    select  
+		                    plcTable.MATERIAL_GROUP_ID, 
+		                    plcTable._VALID_FROM, 
+		                    plcTable._VALID_TO,
+		                    plcTable._SOURCE, 
+		                    plcTable._CREATED_BY,
+		                    null AS _VALID_FROM_FIRST_VERSION,
+				        	null AS _CREATED_BY_FIRST_VERSION,
+		                    plcTextTable.MATERIAL_GROUP_DESCRIPTION 
+	                    from "sap.plc.db::basis.t_material_group" as plcTable 
+	                    left outer join "sap.plc.db::basis.t_material_group__text" as plcTextTable 
+	                        on  plcTable.MATERIAL_GROUP_ID = plcTextTable.MATERIAL_GROUP_ID 
+	                        and plcTextTable.LANGUAGE = :iv_logon_language 
+	                        and plcTextTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        and (plcTextTable._VALID_TO > :iv_master_data_timestamp or plcTextTable._VALID_TO is null)  
+	                    where plcTable._VALID_FROM <= :iv_master_data_timestamp 
+	                        and (plcTable._VALID_TO > :iv_master_data_timestamp or plcTable._VALID_TO is null) 
+	                        and ( plcTable.MATERIAL_GROUP_ID ) in ( select MATERIAL_GROUP_ID from :ot_material_group_key );
+END;

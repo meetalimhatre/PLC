@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" schemaVersion="3.0" id="sap.plc.analytics.views.base::v_bas_dime_costing_sheet_row" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DIMENSION" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true">
+  <descriptions/>
+  <localVariables>
+    <variable id="VAR_LANGUAGE" parameter="true">
+      <descriptions defaultDescription="VAR_LANGUAGE"/>
+      <variableProperties datatype="NVARCHAR" length="11" mandatory="true" scale="null" defaultValue="EN">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_language</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>LANGUAGE</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_costing_sheet_row">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_costing_sheet_row"/>
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="27"/>
+  <dataSources>
+    <DataSource id="TABLE_FUNCTION_v_bas_dime_costing_sheet_row" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_costing_sheet_row</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews/>
+  <logicalModel id="TABLE_FUNCTION_v_bas_dime_costing_sheet_row">
+    <descriptions/>
+    <attributes>
+      <attribute id="CALCULATION_VERSION_ID" order="1" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="CALCULATION_VERSION_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_costing_sheet_row" columnName="CALCULATION_VERSION_ID"/>
+      </attribute>
+      <attribute id="LANGUAGE" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_costing_sheet_row" columnName="LANGUAGE"/>
+      </attribute>
+      <attribute id="COSTING_SHEET_ROW_ID" order="3" attributeHierarchyActive="false" descriptionColumnName="COSTING_SHEET_ROW_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_ROW"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_costing_sheet_row" columnName="COSTING_SHEET_ROW_ID"/>
+      </attribute>
+      <attribute id="COSTING_SHEET_ROW_DESCRIPTION" hidden="true" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="COSTING_SHEET_DESCRIPTION"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_costing_sheet_row" columnName="COSTING_SHEET_ROW_DESCRIPTION"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="40" y="85"/>
+        <rectangleSize height="0" width="0"/>
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

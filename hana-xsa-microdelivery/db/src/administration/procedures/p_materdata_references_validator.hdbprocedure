@@ -1,0 +1,95 @@
+PROCEDURE "sap.plc.db.administration.procedures::p_materdata_references_validator" (
+        IN iv_master_data_timestamp     TIMESTAMP,
+        IN iv_controlling_area_id       NVARCHAR(4)
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER
+	AS
+BEGIN
+
+    /** ACCOUNT_GROUP_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_account_group" masterdataTable
+    			ON tempTable.value = cast(masterdataTable.account_group_id AS nvarchar)
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND controlling_area_id = :iv_controlling_area_id
+			    AND column_id = upper('account_group_id');
+
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('account_group_id') AND value IN (SELECT * FROM :lt_values);
+
+    /** MATERIAL_GROUP_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_material_group" masterdataTable
+    			ON tempTable.value = masterdataTable.material_group_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('material_group_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('material_group_id') AND value IN (SELECT * FROM :lt_values);
+
+    /** MATERIAL_TYPE_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_material_type" masterdataTable
+    			ON tempTable.value = masterdataTable.material_type_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('material_type_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('material_type_id') AND value IN (SELECT * FROM :lt_values);
+    
+    /** PLANT_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_plant" masterdataTable
+    			ON tempTable.value = masterdataTable.plant_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('plant_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('plant_id') AND value IN (SELECT * FROM :lt_values);
+
+    /** MATERIAL_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_material" masterdataTable
+    			ON tempTable.value = masterdataTable.material_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('material_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('material_id') AND value IN (SELECT * FROM :lt_values);
+
+    /** COST_CENTER_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_cost_center" masterdataTable
+    			ON tempTable.value = masterdataTable.cost_center_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('cost_center_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('cost_center_id') AND value IN (SELECT * FROM :lt_values);
+    
+    /** ACTIVITY_TYPE_ID property **/
+    lt_values = SELECT value
+    			FROM "sap.plc.db::temp.gtt_masterdata_validator" tempTable
+    			INNER JOIN "sap.plc.db::basis.t_activity_type" masterdataTable
+    			ON tempTable.value = masterdataTable.activity_type_id
+			    WHERE _valid_from <= :iv_master_data_timestamp
+			    AND (_valid_to > :iv_master_data_timestamp OR _valid_to IS null)
+			    AND column_id = upper('activity_type_id');
+			    
+    DELETE FROM "sap.plc.db::temp.gtt_masterdata_validator"
+    WHERE column_id = upper('activity_type_id') AND value IN (SELECT * FROM :lt_values);
+    
+END;

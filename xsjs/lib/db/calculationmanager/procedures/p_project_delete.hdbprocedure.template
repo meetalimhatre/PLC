@@ -1,0 +1,198 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_project_delete" ( 
+		IN iv_projectId 	STRING,
+		OUT ov_affectedRows INTEGER
+	) 
+	LANGUAGE SQLSCRIPT 
+	SQL SECURITY INVOKER 
+	AS
+	
+	rowCountPrj INTEGER;
+	
+BEGIN
+
+---------------------------------------------------
+-- Activity Prices for deletion
+---------------------------------------------------
+-- Select Activity Prices to be deleted
+activityItemsToDelete = select PRICE_ID, _VALID_FROM from "sap.plc.db::basis.t_activity_price" where PROJECT_ID = :iv_projectId;
+
+-- Delete the Activity Prices
+delete from "sap.plc.db::basis.t_activity_price" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :activityItemsToDelete);
+
+{{#if Activity_Price.customFields}}
+-- Delete the Ext Activity Price
+    delete from "sap.plc.db::basis.t_activity_price_ext" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :activityItemsToDelete);
+{{/if}}
+
+-- Delete the First Version Activity Price
+delete from "sap.plc.db::basis.t_activity_price__first_version" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :activityItemsToDelete);
+
+-- Delete the Activity Price component
+delete from "sap.plc.db::basis.t_price_component" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :activityItemsToDelete);
+    
+---------------------------------------------------
+-- Mateial Prices for deletion
+---------------------------------------------------
+
+-- Select the Material Prices for deletion
+materialItemsToDelete = select PRICE_ID, _VALID_FROM from "sap.plc.db::basis.t_material_price" where PROJECT_ID = :iv_projectId;
+
+-- Delete the Material Prices
+delete from "sap.plc.db::basis.t_material_price" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :materialItemsToDelete);
+
+{{#if Material_Price.customFields}}
+-- Delete the Ext Material Prices
+    delete from "sap.plc.db::basis.t_material_price_ext" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :materialItemsToDelete);
+{{/if}}
+
+-- Delete the First Version Material Price
+delete from "sap.plc.db::basis.t_material_price__first_version" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :materialItemsToDelete);
+
+-- Delete the Material Price component
+delete from "sap.plc.db::basis.t_price_component" where (PRICE_ID, _VALID_FROM) in (select PRICE_ID, _VALID_FROM from :materialItemsToDelete);
+
+---------------------------------------------------
+-- Delete the project / folder entity relation
+---------------------------------------------------
+-- Delete entity relation
+delete from "sap.plc.db::basis.t_entity_relation"
+	where entity_id in
+		(
+			select entity_id from "sap.plc.db::basis.t_project" where project_id = :iv_projectid
+		);
+
+---------------------------------------------------
+-- Delete monthly lifecycles
+---------------------------------------------------
+-- Delete entity relation
+delete from "sap.plc.db::basis.t_project_lifecycle_period_type" where project_id = :iv_projectid;
+delete from "sap.plc.db::basis.t_project_monthly_lifecycle_period" where project_id = :iv_projectid;
+delete from "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" where project_id = :iv_projectid;
+delete from "sap.plc.db::basis.t_project_lifecycle_configuration" where project_id = :iv_projectid;
+
+--------------------------------------------------------------------------------------------
+---Deletes one project and all assigned calculation versions. 
+---It is assumed that the project and all assigned calculation versions are closed. This is checked in xs business logic.
+--------------------------------------------------------------------------------------------
+lt_versions_to_delete = 
+	select calcVersion.calculation_version_id 
+		from "sap.plc.db::basis.t_calculation_version" as calcVersion,
+			 "sap.plc.db::basis.t_calculation" as calculation
+		where calcVersion.calculation_id = calculation.calculation_id and calculation.project_id = :iv_projectId;
+	
+lt_calculations_to_delete = 
+	select calculation_id
+		from "sap.plc.db::basis.t_calculation"
+		where project_id = :iv_projectId;
+
+---------------------------------------------------
+-- Delete one time costs
+---------------------------------------------------
+delete from "sap.plc.db::basis.t_one_time_project_cost" where project_id = :iv_projectid;
+delete from "sap.plc.db::basis.t_one_time_product_cost" where calculation_id in (select calculation_id from :lt_calculations_to_delete);
+delete from "sap.plc.db::basis.t_one_time_cost_lifecycle_value" where calculation_id in (select calculation_id from :lt_calculations_to_delete);
+
+---------------------------------------------------
+-- Delete definitions and values of project lifecycle details (quantities, activity and material price surcharges)  
+---------------------------------------------------
+-- Delete quantities
+delete from "sap.plc.db::basis.t_project_lifecycle_configuration"
+	where project_id = :iv_projectId;
+
+delete from "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" t_project_lifecycle_period_quantity_value
+	where project_id = :iv_projectId;
+
+-- Delete activity price surcharges
+delete from "sap.plc.db::basis.t_project_activity_price_surcharges"
+	where project_id = :iv_projectId;
+
+delete from "sap.plc.db::basis.t_project_activity_price_surcharge_values" 
+	where rule_id not in 
+	( select rule_id from "sap.plc.db::basis.t_project_activity_price_surcharges" );
+	
+-- Delete material price surcharges
+delete from "sap.plc.db::basis.t_project_material_price_surcharges"
+	where project_id = :iv_projectId;
+
+delete from "sap.plc.db::basis.t_project_material_price_surcharge_values" 
+	where rule_id not in 
+	( select rule_id from "sap.plc.db::basis.t_project_material_price_surcharges" );
+		
+---------------------------------------------------
+-- Delete items of associated calculation versions of calculation and their calculated values
+---------------------------------------------------
+{{#if Item.customFields}}
+--delete from extension table
+delete from {{t_extensionTable Item}}
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+{{/if}}
+
+delete from "sap.plc.db::basis.t_item"  
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+	
+delete from "sap.plc.db::basis.t_item_calculated_values_component_split" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_calculated_values_costing_sheet" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);
+
+delete from "sap.plc.db::basis.t_item_referenced_version_component_split" 
+	where master_calculation_version_id in (select calculation_version_id from :lt_versions_to_delete);	
+
+---------------------------------------------------
+-- Delete associated calculation versions and calculations of project
+---------------------------------------------------
+-- Set row locks for calculation versions that are in the project
+select calculation_version_id 
+	from "sap.plc.db::basis.t_calculation_version" 
+	where calculation_version_id in (select calculation_version_id from :lt_versions_to_delete) for update;
+
+delete from "sap.plc.db::basis.t_calculation_version" 
+	where calculation_version_id  in (select calculation_version_id from :lt_versions_to_delete);
+
+-- Delete calculations assigned to project
+delete from "sap.plc.db::basis.t_calculation"  
+	where calculation_id in (select calculation_id from :lt_calculations_to_delete);
+
+---------------------------------------------------
+-- Delete project
+---------------------------------------------------
+-- Count how much other projects contain versions referencing the versions of the project to delete. 
+--  If any version is referenced, then the project will not be deleted and whole transaction will be rollbacked in xs logic. 
+--  The check is done here and in xs logic since this is potentially a long-running task and we have to ensure that nothing changed in-between.
+--  This check is done at the end of procedure to minimize the duration of locking. 
+
+select count(distinct calc.PROJECT_ID) into rowCountPrj 
+	from "sap.plc.db::basis.t_calculation" calc  
+	inner join "sap.plc.db::basis.t_calculation_version" calcVers 
+		on calcVers.CALCULATION_ID = calc.CALCULATION_ID   
+	inner join (select REFERENCED_CALCULATION_VERSION_ID, CALCULATION_VERSION_ID 
+					from "sap.plc.db::basis.t_item"  
+				union 
+				select REFERENCED_CALCULATION_VERSION_ID, CALCULATION_VERSION_ID 
+					from "sap.plc.db::basis.t_item_temporary"
+				) item
+		on item.CALCULATION_VERSION_ID = calcVers.CALCULATION_VERSION_ID  
+	where item.REFERENCED_CALCULATION_VERSION_ID in (SELECT calculation_version_id FROM :lt_versions_to_delete) and calc.PROJECT_ID != iv_projectId; 
+	
+delete from "sap.plc.db::basis.t_project"   
+	where project_id = :iv_projectId and :rowCountPrj = 0; 
+
+-- Returns rows affected
+select ::rowcount into ov_affectedRows from "sap.plc.db::DUMMY";
+
+--Delete project privileges
+DELETE FROM "sap.plc.db::auth.t_auth_project"
+	WHERE project_id = iv_projectId and :rowCountPrj = 0;
+
+--Delete user privileges
+DELETE FROM "sap.plc.db::auth.t_auth_user"
+	WHERE UCASE(OBJECT_TYPE) = UCASE('Project') and OBJECT_ID = iv_projectId and :rowCountPrj = 0;
+
+--Delete group privileges
+DELETE FROM "sap.plc.db::auth.t_auth_usergroup"
+	WHERE UCASE(OBJECT_TYPE) = UCASE('Project') and OBJECT_ID = iv_projectId and :rowCountPrj = 0;
+
+END
+
+

@@ -1,0 +1,9 @@
+PROCEDURE "sap.plc.db.management.procedures::p_unlock_project" ( 
+		IN projectID NVARCHAR(35)
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+	UPDATE "sap.plc.db::basis.t_open_projects" SET is_writeable = 0 WHERE UCASE(project_id) = UCASE(:projectID) and is_writeable = 1;
+END

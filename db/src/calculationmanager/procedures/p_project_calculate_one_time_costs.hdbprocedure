@@ -1,0 +1,113 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_project_calculate_one_time_costs" ( 
+	IN 	iv_project_id 							               	NVARCHAR(35)
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+/***************
+
+The procedure calculates the one time costs per project based on the configurations and quantities previously defined when DISTRIBUTION_TYPE is either EQUALLY or BASED_ON_QUANTITY
+Steps:
+    1. Update the costs to be distributed for table t_one_time_cost_per_product based on the defined one_time_costs
+    2. Update the costs to be distributed for table t_one_time_lifecycle_value based on the previously updated values from t_one_time_cost_per_product
+
+***************/
+--calculate the total value and number_of_occurences for each calculation_id from t_project_lifecycle_period_quantity_value table
+lt_project_lifecycle_period_summed_values = 
+    select calculation_id, sum(value) as total_value, count(value) as no_of_occurences
+    from "sap.plc.db::basis.t_project_lifecycle_period_quantity_value"
+    where project_id = :iv_project_id and value != 0
+    group by calculation_id;
+
+if is_empty(:lt_project_lifecycle_period_summed_values) then
+    return;
+end if;
+
+lt_marked_calculations_per_one_time_cost = 
+    select one_time_product_cost.one_time_cost_id, count(one_time_product_cost.one_time_cost_id) as no_of_occurences, sum(plsv.total_value) as total_quantity_to_be_distributed
+    from "sap.plc.db::basis.t_one_time_product_cost"  one_time_product_cost
+    inner join "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+        on one_time_project_cost.project_id = :iv_project_id
+        and one_time_product_cost.one_time_cost_id = one_time_project_cost.one_time_cost_id
+        and one_time_project_cost.distribution_type in (0, 1) -- based_on_quantity /equally 
+    inner join :lt_project_lifecycle_period_summed_values plsv
+        on one_time_product_cost.calculation_id = plsv.calculation_id
+    group by one_time_product_cost.one_time_cost_id;
+
+update one_time_project_cost
+set one_time_project_cost.cost_not_distributed = 0
+from "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+inner join :lt_marked_calculations_per_one_time_cost mcotc
+    on one_time_project_cost.one_time_cost_id = mcotc.one_time_cost_id
+    and mcotc.no_of_occurences <> 0
+where one_time_project_cost.project_id = :iv_project_id
+    and one_time_project_cost.distribution_type in (0, 1); -- based_on_quantity /equally 
+
+update  "sap.plc.db::basis.t_one_time_product_cost"  one_time_product_cost
+set one_time_product_cost.cost_to_distribute = 
+    case 
+        when one_time_project_cost.distribution_type = 0 then ifnull(plsv.total_value / total_quantity_to_be_distributed, 0) * one_time_project_cost.cost_to_distribute -- based_on_quantity
+        else ifnull(one_time_project_cost.cost_to_distribute / mcotc.no_of_occurences, 0) --equally
+    end
+from "sap.plc.db::basis.t_one_time_product_cost"  one_time_product_cost
+inner join "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+    on one_time_project_cost.project_id = :iv_project_id
+    and one_time_product_cost.one_time_cost_id = one_time_project_cost.one_time_cost_id
+    and one_time_project_cost.distribution_type in (0, 1) -- based_on_quantity / equally 
+inner join :lt_project_lifecycle_period_summed_values plsv
+    on one_time_product_cost.calculation_id = plsv.calculation_id
+inner join :lt_marked_calculations_per_one_time_cost mcotc
+    on one_time_product_cost.one_time_cost_id = mcotc.one_time_cost_id;
+
+lt_lifecycle_values_marked_for_deletion = select distinct one_time_product_cost.one_time_cost_id, one_time_product_cost.calculation_id
+                                             from "sap.plc.db::basis.t_one_time_product_cost" one_time_product_cost
+                                             inner join "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+                                                 on one_time_project_cost.project_id = :iv_project_id
+                                                 and one_time_product_cost.one_time_cost_id = one_time_project_cost.one_time_cost_id
+                                             inner join :lt_project_lifecycle_period_summed_values plsv
+                                                 on plsv.calculation_id = one_time_product_cost.calculation_id
+                                             inner join "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" project_lifecycle_period_quantity_value
+                                                 on project_lifecycle_period_quantity_value.project_id = :iv_project_id
+                                                 and project_lifecycle_period_quantity_value.calculation_id = one_time_product_cost.calculation_id
+                                             where one_time_product_cost.distribution_type in (0, 1);
+
+update otpc
+set otpc.cost_not_distributed = 0
+from "sap.plc.db::basis.t_one_time_product_cost" otpc
+inner join :lt_lifecycle_values_marked_for_deletion lvmfd
+    on otpc.one_time_cost_id = lvmfd.one_time_cost_id
+    and otpc.calculation_id = lvmfd.calculation_id;
+
+update otpc
+set otpc.cost_to_distribute = 0, otpc.cost_not_distributed = 0
+from "sap.plc.db::basis.t_one_time_product_cost" otpc
+inner join  "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+    on  otpc.one_time_cost_id = one_time_project_cost.one_time_cost_id
+    and one_time_project_cost.project_id = :iv_project_id
+    and one_time_project_cost.distribution_type in (0, 1) -- based_on_quantity /equally
+where otpc.calculation_id not in
+    (SELECT calculation_id from :lt_project_lifecycle_period_summed_values);
+
+delete from "sap.plc.db::basis.t_one_time_cost_lifecycle_value"
+    where (one_time_cost_id, calculation_id) in (select one_time_cost_id, calculation_id from :lt_lifecycle_values_marked_for_deletion);
+
+upsert "sap.plc.db::basis.t_one_time_cost_lifecycle_value"  (one_time_cost_id, calculation_id, lifecycle_period_from, value)
+    select one_time_product_cost.one_time_cost_id, one_time_product_cost.calculation_id, project_lifecycle_period_quantity_value.lifecycle_period_from,
+        case 
+            when one_time_product_cost.distribution_type = 0 then one_time_product_cost.cost_to_distribute * ifnull(project_lifecycle_period_quantity_value.value / plsv.total_value, 0)  --based on quantity
+            else ifnull(one_time_product_cost.cost_to_distribute / plsv.no_of_occurences, 0) --equally
+        end
+    from "sap.plc.db::basis.t_one_time_product_cost" one_time_product_cost
+    inner join "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+        on one_time_project_cost.project_id = :iv_project_id
+        and one_time_product_cost.one_time_cost_id = one_time_project_cost.one_time_cost_id
+    inner join :lt_project_lifecycle_period_summed_values plsv
+        on plsv.calculation_id = one_time_product_cost.calculation_id
+    inner join "sap.plc.db::basis.t_project_lifecycle_period_quantity_value" project_lifecycle_period_quantity_value
+        on project_lifecycle_period_quantity_value.project_id = :iv_project_id
+        and project_lifecycle_period_quantity_value.calculation_id = one_time_product_cost.calculation_id
+        and project_lifecycle_period_quantity_value.value != 0
+    where one_time_product_cost.distribution_type in (0, 1);
+
+END

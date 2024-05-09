@@ -1,0 +1,94 @@
+{
+    "plugin": {
+        "get": {
+            "tags": [
+                "plugin"
+            ],
+            "summary": "Gets configuration properties for a specific plugin",
+            "description": "Gets configuration properties for a specific plugin",
+            "operationId": "pluginGet",
+            "consumes": [
+                "application/json"
+            ],
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "addinId",
+                    "in": "query",
+                    "description": "addinId for what configuration should be retrieved",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Valid request",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "head": {
+                                "type": "object",
+                                "properties": {}
+                            },
+                            "body": {
+                                "type": "object",
+                                "properties": {
+                                    "transactionaldata": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "PLUGIN_SETTINGS": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "HOST": {
+                                                            "type": "string",
+                                                            "description": "ex: example.domain.com"
+                                                        },
+                                                        "INSTANCE": {
+                                                            "type": "string",
+                                                            "description": "ex: 123"
+                                                        },
+                                                        "CLIENT": {
+                                                            "type": "string",
+                                                            "description": "ex: 8999"
+                                                        },
+                                                        "SYSTEM": {
+                                                            "type": "string",
+                                                            "description": "ex: test"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "Privileges.ADDIN_READ_ACTIVATED": [
+                        "read:addinActivated"
+                    ]
+                }
+            ]
+        }
+    }
+}

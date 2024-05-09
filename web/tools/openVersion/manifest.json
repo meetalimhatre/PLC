@@ -1,0 +1,10 @@
+{
+  "_version": "1.5.0",
+
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "plc.redirect.view.OpenVersion",
+      "type": "XML"
+    }
+  }
+}

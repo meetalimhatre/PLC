@@ -1,0 +1,11 @@
+div.resizeableCodeEditor {
+    resize: vertical;
+    overflow: scroll;
+    /*border: 2px solid black;*/
+}
+
+#__xmlview1--__label4-text-bdi {
+    font-size: 16px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    color: black;
+}

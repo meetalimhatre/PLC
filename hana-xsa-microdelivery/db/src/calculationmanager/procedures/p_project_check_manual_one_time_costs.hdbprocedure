@@ -1,0 +1,76 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_project_check_manual_one_time_costs" ( 
+	IN 	iv_project_id 							               	NVARCHAR(35),
+	OUT ov_is_valid				                                INTEGER
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	AS
+BEGIN
+/***************************** 
+	This is procedure is used to check whether the manual one time costs introduced by the user are valid or not. By valid, we understand that all of the one_time_product_costs summed up
+    should match exactly the costs defined in one_time_project_cost.
+Steps:
+    1. Check whether there are manual product cost and check if their sum is equal to the cost defined in project costs
+    2. Check whether there are manual lifecycle values and check if their sum is equal to the cost defined in product cost
+*****************************/
+lt_manual_one_time_project_costs = 
+    select one_time_cost_id, cost_to_distribute 
+    from  "sap.plc.db::basis.t_one_time_project_cost"
+    where project_id = :iv_project_id
+        and distribution_type = 2;-- manual
+
+lt_difference_of_project_product_costs =
+    with motpc as
+        (
+            select otpc.one_time_cost_id, sum(otpc.cost_to_distribute) as cost_to_distribute
+            from "sap.plc.db::basis.t_one_time_product_cost" otpc
+            inner join :lt_manual_one_time_project_costs as manual_one_time_project_costs
+                on manual_one_time_project_costs.one_time_cost_id = otpc.one_time_cost_id
+            group by otpc.one_time_cost_id
+        )
+    select  abs(motpc.cost_to_distribute - manual_one_time_project_costs.cost_to_distribute) as cost_difference
+    from :lt_manual_one_time_project_costs manual_one_time_project_costs, motpc
+    where manual_one_time_project_costs.one_time_cost_id = motpc.one_time_cost_id;
+    
+if is_empty(:lt_difference_of_project_product_costs) then 
+    ov_is_valid = 0;
+else 
+	select sum(cost_difference) into ov_is_valid
+	from :lt_difference_of_project_product_costs;
+end if;      
+    
+if ov_is_valid > 0 then
+    return;
+end if;
+
+lt_manual_one_time_product_costs = 
+    select otpc.one_time_cost_id, otpc.calculation_id, otpc.cost_to_distribute 
+    from  "sap.plc.db::basis.t_one_time_product_cost" otpc
+    inner join "sap.plc.db::basis.t_one_time_project_cost" one_time_project_cost
+    	on one_time_project_cost.one_time_cost_id = otpc.one_time_cost_id
+    where  one_time_project_cost.project_id = :iv_project_id
+        and otpc.distribution_type = 2; -- manual  
+
+if is_empty(:lt_manual_one_time_product_costs) then 
+    return;
+end if;  
+
+lt_difference_of_product_values_costs = 
+    with motlv as 
+        (
+            select otlv.one_time_cost_id, otlv.calculation_id, sum(otlv.value) as cost_to_distribute
+            from "sap.plc.db::basis.t_one_time_cost_lifecycle_value" otlv
+            inner join :lt_manual_one_time_product_costs as motpc
+                on motpc.one_time_cost_id = otlv.one_time_cost_id
+                and motpc.calculation_id = otlv.calculation_id
+            group by otlv.one_time_cost_id, otlv.calculation_id
+        )
+    select abs(motlv.cost_to_distribute - motpc.cost_to_distribute) as cost_difference
+    from :lt_manual_one_time_product_costs motpc, motlv 
+    where motpc.one_time_cost_id = motlv.one_time_cost_id 
+        and motpc.calculation_id = motlv.calculation_id;
+    
+select sum(cost_difference) into ov_is_valid
+from :lt_difference_of_product_values_costs;
+
+END

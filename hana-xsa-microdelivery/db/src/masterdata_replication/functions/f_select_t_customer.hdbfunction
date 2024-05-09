@@ -1,0 +1,31 @@
+FUNCTION "sap.plc.db.masterdata_replication.functions::f_select_t_customer" (VAR_OFFSET INTEGER, VAR_BATCH_SIZE INTEGER)
+returns TABLE (
+	"CUSTOMER_ID"	NVARCHAR(10),
+	"CUSTOMER_NAME"	NVARCHAR(100),
+	"COUNTRY"	NVARCHAR(100),
+	"POSTAL_CODE"	NVARCHAR(35),
+	"REGION"	NVARCHAR(100),
+	"CITY"	NVARCHAR(100),
+	"STREET_NUMBER_OR_PO_BOX"	NVARCHAR(100),
+	"IS_PERSONAL_DATA" TINYINT,
+	"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+)
+
+LANGUAGE SQLSCRIPT 
+SQL SECURITY INVOKER AS 
+
+BEGIN 
+	 declare ret TABLE ( 
+		"CUSTOMER_ID"	NVARCHAR(10),
+		"CUSTOMER_NAME"	NVARCHAR(100),
+		"COUNTRY"	NVARCHAR(100),
+		"POSTAL_CODE"	NVARCHAR(35),
+		"REGION"	NVARCHAR(100),
+		"CITY"	NVARCHAR(100),
+		"STREET_NUMBER_OR_PO_BOX"	NVARCHAR(100),
+		"IS_PERSONAL_DATA" TINYINT,
+		"_SOURCE"	TINYINT	 -- 1: PLC / 2: ERP
+	 ); 
+	 execute immediate "sap.plc.db.masterdata_replication.functions::f_build_dynamic_select"('t_customer', :VAR_OFFSET, :VAR_BATCH_SIZE) into ret reads SQL data;
+	 return :ret; 
+END

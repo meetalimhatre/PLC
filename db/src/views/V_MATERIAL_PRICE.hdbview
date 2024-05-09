@@ -1,0 +1,32 @@
+VIEW "sap.plc.db.views::v_material_price" AS SELECT
+	material_price.PRICE_ID,
+	material_price."_VALID_FROM",
+	material_price.PRICE_SOURCE_ID,
+	material_price.MATERIAL_ID,
+	material_price.PLANT_ID,
+	material_price.VENDOR_ID,
+	material_price.PURCHASING_GROUP,
+	material_price.PURCHASING_DOCUMENT,
+	material_price.LOCAL_CONTENT,
+	material_price.PROJECT_ID,
+	material_price.CUSTOMER_ID,
+	material_price.VALID_FROM,
+	material_price.VALID_TO,
+	material_price.VALID_FROM_QUANTITY,
+	material_price.VALID_TO_QUANTITY,
+	material_price.PRICE_FIXED_PORTION,
+	material_price.PRICE_VARIABLE_PORTION,
+	material_price.TRANSACTION_CURRENCY_ID,
+	material_price.PRICE_UNIT,
+	material_price.PRICE_UNIT_UOM_ID,
+	material_price.IS_PRICE_SPLIT_ACTIVE,
+	material_price.IS_PREFERRED_VENDOR,
+	material_price."_VALID_TO",
+	material_price."_SOURCE",
+	material_price."_CREATED_BY",
+	material_text.MATERIAL_DESCRIPTION,
+	material_text."LANGUAGE" MATERIAL_LANGUAGE
+FROM
+	"sap.plc.db::basis.t_material_price" material_price
+LEFT JOIN "sap.plc.db::basis.t_material__text" material_text ON
+	material_price.MATERIAL_ID = material_text.MATERIAL_ID;

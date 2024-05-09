@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:Variable="http://www.sap.com/ndb/BiModelVariable.ecore" schemaVersion="3.0" id="sap.plc.analytics.views.base::v_bas_dime_project" applyPrivilegeType="SQL_ANALYTIC_PRIVILEGE" defaultClient="$$client$$" defaultLanguage="$$language$$" hierarchiesSQLEnabled="false" dataCategory="DIMENSION" enforceSqlExecution="false" executionSemantic="UNDEFINED" outputViewType="Projection" xscCompatibilityMode="true">
+  <descriptions/>
+  <localVariables>
+    <variable id="VAR_LANGUAGE" parameter="true">
+      <descriptions defaultDescription="VAR_LANGUAGE"/>
+      <variableProperties datatype="NVARCHAR" length="11" mandatory="true" scale="NaN" defaultValue="EN">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_language</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>LANGUAGE</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="false" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  
+    <variable id="projectId" parameter="true">
+      <descriptions defaultDescription=""/>
+      <variableProperties mandatory="true" datatype="NVARCHAR" length="35" scale="NaN">
+        <valueDomain type="AttributeValue">
+          <externalLikeStructureName>sap.plc.analytics.views.base::v_bas_help_calculation_version</externalLikeStructureName>
+          <externalLikeStructureType>CALCULATION_VIEW</externalLikeStructureType>
+          <externalLikeElementName>project_id</externalLikeElementName>
+        </valueDomain>
+        <selection multiLine="true" type="SingleValue"/>
+      </variableProperties>
+    </variable>
+  </localVariables>
+  <variableMappings>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_project">
+      <targetVariable name="VAR_LANGUAGE" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_project"/>
+      <localVariable>VAR_LANGUAGE</localVariable>
+    </mapping>
+    <mapping xsi:type="Variable:VariableMapping" dataSource="TABLE_FUNCTION_v_bas_dime_project">
+      <targetVariable name="PROJECTID" resourceUri="sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_project"/>
+      <localVariable>projectId</localVariable>
+    </mapping>
+  </variableMappings>
+  <informationModelLayout relativeWidthScenario="25"/>
+  <dataSources>
+    <DataSource id="TABLE_FUNCTION_v_bas_dime_project" type="TABLE_FUNCTION">
+      <resourceUri>sap.plc.analytics.views.base::TABLE_FUNCTION_v_bas_dime_project</resourceUri>
+    </DataSource>
+  </dataSources>
+<calculationViews/>
+  <logicalModel id="TABLE_FUNCTION_v_bas_dime_project">
+    <descriptions/>
+    <attributes>
+      <attribute id="PROJECT_ID" order="1" attributeHierarchyActive="false" descriptionColumnName="PROJECT_NAME" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_ID"/>
+      </attribute>
+      <attribute id="PROJECT_NAME" hidden="true" order="2" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_NAME"/>
+      </attribute>
+      <attribute id="REFERENCE_PROJECT_ID" order="3" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="REFERENCE_PROJECT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="REFERENCE_PROJECT_ID"/>
+      </attribute>
+      <attribute id="PROJECT_RESPONSIBLE" order="4" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_RESPONSIBLE"/>
+      </attribute>
+      <attribute id="LANGUAGE" order="5" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="LANGUAGE"/>
+      </attribute>
+      <attribute id="CONTROLLING_AREA_ID" order="6" attributeHierarchyActive="false" descriptionColumnName="CONTROLLING_AREA_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="CONTROLLING_AREA"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="CONTROLLING_AREA_ID"/>
+      </attribute>
+      <attribute id="CONTROLLING_AREA_DESCRIPTION" hidden="true" order="7" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="CONTROLLING_AREA_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PROJECT_SALES_DOCUMENT" order="8" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_SALES_DOCUMENT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_SALES_DOCUMENT"/>
+      </attribute>
+      <attribute id="PROJECT_CUSTOMER_ID" order="9" attributeHierarchyActive="false" descriptionColumnName="PROJECT_CUSTOMER_NAME" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_CUSTOMER"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_CUSTOMER_ID"/>
+      </attribute>
+      <attribute id="PROJECT_CUSTOMER_NAME" hidden="true" order="10" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_CUSTOMER_NAME"/>
+      </attribute>
+      <attribute id="PROJECT_COMMENT" order="11" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_COMMENT"/>
+      </attribute>
+      <attribute id="PROJECT_START" order="12" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_START"/>
+      </attribute>
+      <attribute id="PROJECT_END" order="13" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_END"/>
+      </attribute>
+      <attribute id="PROJECT_START_OF_PRODUCTION" order="14" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_START_OF_PRODUCTION"/>
+      </attribute>
+      <attribute id="PROJECT_END_OF_PRODUCTION" order="15" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_END_OF_PRODUCTION"/>
+      </attribute>
+      <attribute id="PROJECT_VALUATION_DATE" order="16" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_VALUATION_DATE"/>
+      </attribute>
+      <attribute id="PROJECT_COMPONENT_SPLIT_ID" order="17" attributeHierarchyActive="false" descriptionColumnName="PROJECT_COMPONENT_SPLIT_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_COMPONENT_SPLIT"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_COMPONENT_SPLIT_ID"/>
+      </attribute>
+      <attribute id="PROJECT_COMPONENT_SPLIT_DESCRIPTION" hidden="true" order="18" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_COMPONENT_SPLIT_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PROJECT_COSTING_SHEET_ID" order="19" attributeHierarchyActive="false" descriptionColumnName="PROJECT_COSTING_SHEET_DESCRIPTION" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_COSTING_SHEET"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_COSTING_SHEET_ID"/>
+      </attribute>
+      <attribute id="PROJECT_COSTING_SHEET_DESCRIPTION" hidden="true" order="20" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_COSTING_SHEET_DESCRIPTION"/>
+      </attribute>
+      <attribute id="PROJECT_REPORT_CURRENCY_ID" order="21" attributeHierarchyActive="false" displayAttribute="false">
+        <descriptions defaultDescription="PROJECT_REPORT_CURRENCY_ID"/>
+        <keyMapping columnObjectName="TABLE_FUNCTION_v_bas_dime_project" columnName="PROJECT_REPORT_CURRENCY_ID"/>
+      </attribute>
+    </attributes>
+    <calculatedAttributes/>
+    <privateDataFoundation>
+      <tableProxies/>
+      <joins/>
+      <layout>
+        <shapes/>
+      </layout>
+    </privateDataFoundation>
+    <baseMeasures/>
+    <calculatedMeasures/>
+    <restrictedMeasures/>
+    <localDimensions/>
+  </logicalModel>
+<layout>
+  <shapes>
+      <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+        <upperLeftCorner x="22" y="87"/>
+        <rectangleSize height="64" width="251"/>
+      </shape>
+    </shapes>
+</layout>
+</Calculation:scenario>

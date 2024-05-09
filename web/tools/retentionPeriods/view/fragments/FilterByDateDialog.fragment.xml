@@ -1,0 +1,26 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+    <Dialog  id="FilterByDate"  title="{i18n>XTIT_FilterByDate}" >
+        <content> 
+            <DatePicker
+                id="DP1"
+                placeholder="{i18n>XFLD_EnterDateFrom}"
+                class="sapUiSmallMarginBottom" 
+                showFooter="true"
+                value="{view>/dateFromFilter}"
+                valueFormat="MM-dd-yyyy" displayFormat="short"/>
+            <DatePicker
+                id="DP2"
+                placeholder="{i18n>XFLD_EnterDateTo}"
+                class="sapUiSmallMarginBottom" 
+                showFooter="true"
+                value="{view>/dateToFilter}"
+                valueFormat="MM-dd-yyyy" displayFormat="short"/>
+        </content>
+        <beginButton>
+            <Button id="filter" text="{i18n>XBUT_Filter}" tooltip="{i18n>XTOL_Filter}" press=".filterByDate" />
+        </beginButton>
+        <endButton>
+            <Button id="filterCancel" text="{i18n>XBUT_cancel}" tooltip="{i18n>XTOL_cancel}"  press=".onClose('FilterByDate')"/>
+        </endButton>
+      </Dialog>  
+</core:FragmentDefinition>

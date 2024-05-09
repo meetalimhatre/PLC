@@ -1,0 +1,72 @@
+<core:FragmentDefinition xmlns="sap.ui.table" xmlns:m="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+        <Table id="rententionsTable" selectionMode="MultiToggle" selectionBehavior="RowSelector" rowActionCount="2" rowSelectionChange=".setRententionPeriodDeleteButtonIsEnabled"
+        rows="{path:'view>/RetentionPeriods'}" rowHeight="50px" visibleRowCountMode="Interactive" enableSelectAll="false" busy="{view>/tableBusy}">
+
+            <extension>
+                <m:OverflowToolbar>
+                    <m:Text text="{i18n>XFLD_RetentionPeriodHeader}" tooltip="{i18n>XTOL_RetentionPeriodHeader_ToolTip}"/>
+                    <m:ToolbarSpacer />
+                    <m:Button id="Button_Add"  tooltip="{i18n>XTOL_ADD_DPP}" icon="sap-icon://add" press=".openAddDialog"/>
+                    <m:Button id="Button_Delete_Multiple" tooltip="{i18n>XTOL_DELETE_DPP}" icon="sap-icon://delete" press=".openDeleteMultipleDialog" enabled="{view>/bDeleteRetentionPeriodBtnIsEnabled}"/>
+                    <m:Button id="Button_Filter" icon="sap-icon://clear-filter" tooltip="{i18n>XTOL_RESET_TABLE_FILTERS_DPP}" press="clearAllTableFilters" />
+                    <m:Button id="Button_Refresh" icon="sap-icon://refresh" tooltip="{i18n>XTOL_REFRESH_TABLE_DPP}" press=".refreshTable"/>
+                </m:OverflowToolbar>
+            </extension>
+            <rowActionTemplate>
+                <RowAction>
+                    <items>
+                        <RowActionItem id="RowActionItem_Edit" icon="sap-icon://edit" tooltip="{i18n>XTOL_EDIT_ROW_DPP}"  press=".openEditRowDialog"></RowActionItem>
+                        <RowActionItem id="RowActionItem_Delete" icon="sap-icon://delete" tooltip="{i18n>XTOL_DELETE_ROW_DPP}"  press=".openDeleteSingleRowDialog"></RowActionItem>
+                    </items>
+                </RowAction>
+            </rowActionTemplate>
+            <columns>
+                <Column
+                    filterProperty="ENTITY" sortProperty="ENTITY">
+                    <m:Label text="{i18n>XFLD_ENTITY}"  tooltip="{i18n>XTOL_ENTITY_Tooltip}"/>
+                    <template>
+                        <m:Text text="{view>ENTITY}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column
+                    filterProperty="SUBJECT" sortProperty="SUBJECT">
+                    <m:Label text="{i18n>XFLD_ENTITY_ID}"  tooltip="{i18n>XTOL_ENTITY_ID_Tooltip}"/>
+                    <template>
+                        <m:Text text="{view>SUBJECT}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column id="VALID_TO"
+                    filterProperty="VALID_TO" sortProperty="VALID_TO">
+                    <menu>
+                        <u:Menu>
+                            <u:MenuItem
+                                text="{i18n>XFLD_SortAscending}"
+                                icon="sap-icon://sort-ascending"
+                                select=".sortValidToDateAscending"/>
+                            <u:MenuItem
+                                text="{i18n>XFLD_SortDescending}"
+                                icon="sap-icon://sort-descending"
+                                select=".sortValidToDateDescending"/>
+                            <u:MenuItem
+                                text="{i18n>XTIT_FilterByDate}"
+                                icon="sap-icon://check-availability"
+                                select=".openfilterByValidToDateDialog"/>
+                        </u:Menu>
+                    </menu>
+                    <m:Label text="{i18n>XFLD_VALID_TO}" tooltip="{i18n>XTOL_VALID_TO_Tooltip}"/>
+                    <template>
+                        <m:Text text="{path: 'view>VALID_TO', formatter:'.formatValidTo'}"  wrapping="false" />
+                    </template>
+                </Column>
+                <Column
+                    filterProperty="VALID_FOR" sortProperty="VALID_FOR">
+                    <m:Label text="{i18n>XFLD_VALID_FOR}" tooltip="{i18n>XTOL_VALID_FOR_Tooltip}"/>
+                    <template>
+                        <m:Text text="{path: 'view>VALID_FOR'}" wrapping="false" />
+                    </template>
+                </Column>
+
+            </columns>
+
+        </Table>
+</core:FragmentDefinition>

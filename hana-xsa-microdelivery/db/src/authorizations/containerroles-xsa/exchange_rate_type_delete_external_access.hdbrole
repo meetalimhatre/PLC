@@ -1,0 +1,18 @@
+{
+	 "role": { 
+		"name": "sap.plc.authorizations.containerroles-xsa::exchange_rate_type_delete_external_access",
+		"object_privileges": [ 
+		{ 
+			"name":"sap.plc.db::basis.t_exchange_rate_type", 
+			"type":"TABLE", 
+ 			"privileges":[ "DELETE" ] 
+		}
+		,
+		{ 
+			"name":"sap.plc.db::basis.t_exchange_rate_type__text", 
+			"type":"TABLE", 
+ 			"privileges":[ "DELETE" ] 
+		}
+		]
+	}
+}

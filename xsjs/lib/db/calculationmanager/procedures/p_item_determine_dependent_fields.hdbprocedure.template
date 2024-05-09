@@ -1,0 +1,600 @@
+PROCEDURE "sap.plc.db.calculationmanager.procedures::p_item_determine_dependent_fields" ( 
+		IN it_items 					"sap.plc.db.calculationmanager.procedures::ts_item_determine_dependent_fields",
+		IN iv_calculation_version_id 	INTEGER,
+	    IN iv_session_id 				NVARCHAR(50),
+	    IN iv_master_data_timestamp 	TIMESTAMP,
+	    IN iv_controlling_area_id       NVARCHAR(4),
+	    IN iv_reevaluate     			    NVARCHAR(1),
+	    IN iv_update_masterdata 		BOOLEAN,
+		OUT ot_updated_dependent_fields	"sap.plc.db.calculationmanager.procedures::ts_item_determine_dependent_fields" default empty,	
+		OUT ot_messages 				"sap.plc.db.calculationmanager.procedures::ts_item_message_output" default empty
+	) 
+	LANGUAGE SQLSCRIPT
+	SQL SECURITY INVOKER 
+	READS SQL DATA AS
+BEGIN
+
+declare lv_session_language NVARCHAR(11);
+
+-- Procedure determines dependent fields for an item after updating or creating it. Those dependencies are
+-- 	1.ITEM_DESCRIPTION:
+-- 		a) Delete the contents of ITEM_DESCRIPTION, since in this case the description of the material/activity shall be used
+-- 	2. PLANT_ID and/or COMPANY_CODE_ID:
+-- 		a) company code changed							=> set company code to input value, set plant to null
+-- 		b) company code changed	& plant changed 		=> set plant to input value, set company code from t_plant, ignore input for company code
+-- 		c) plant changed 								=> set plant to input value, set company code from t_plant
+-- 		d) company code not changed	& plant not changed	=> no action	
+-- 3. DOCUMENT_TYPE_ID, DOCUMENT_ID, DOCUMENT_PART and DOCUMENT_VERSION:
+-- 		a) if material_id references an existing material and a document in t_document_material is available  for this material, the newest document 
+--		   from t_document_material is used to set document_id, document_type_id, document_part and document_version
+-- 4. IS_PHANTOM_MATERIAL
+--		a) if material_id references an existing material, take the value from t_material
+--		b) otherwise, take the input value
+-- 5. IS_CONFIGURABLE_MATERIAL
+--		a) if material_id references an existing material, take the value from t_material
+--		b) otherwise, take the input value
+-- 6.  VALUATION_CLASS_ID
+--		a) if material_id references an existing material and the combination of material_id and plant_id exist an entry in t_material_plant take the value 
+-- 		   for valuation_class_id from this table
+--		b) if material_id references an existing material and the combination of material_id and plant_id does NOT exists set valuation_class_id to null
+-- 		c) if material_id does not reference an existing material, take the value of valuation_class_id if the value is an existing valuation class from t_valuation_class
+-- 7.  OVERHEAD_GROUP_ID
+--		a) if material_id references an existing material and the combination of material_id and plant_id exist in t_material_plant take the value 
+-- 		   from this table
+--		b) if material_id references an existing material and the combination of material_id and plant_id does NOT exists set overhead_group_id to null
+-- 		c) if material_id does not reference an existing material, take the value of valuation_class_id if the value is an existing valuation class from t_overhead_group
+-- 8.  DOCUMENT_STATUS_ID, DESIGN_OFFICE_ID
+--		a) if material id is changed and it references an existing material in t_document_material, take the value from the referenced document from t_document
+--		a) if document id is changed and it references an existing document, take the value from t_document
+-- 		c) otherwise, take the input value
+-- 9. master data custom fields
+--		a) if COST_CENTER_ID / MATERIAL_ID / MATERIAL_PLANT_ID is not changed, it reads (master data) custom fields values from t_item_temporary_ext
+--		b) if COST_CENTER_ID / MATERIAL_ID / MATERIAL_PLANT_ID is changed or it is in the import mode, it reads (master data) custom fields values from the corresponding extension table
+-- 10. WORK_CENTER, PLANT_ID and/or COST_CENTER_ID:
+-- 		a) cost center changed							=> set cost center to input value, set plant to null
+-- 		b) company code changed	& plant changed 		=> set plant to input value, set company code from t_plant, ignore input for company code
+-- 		c) plant changed 								=> set plant to input value, set company code from t_plant
+-- 		d) company code not changed	& plant not changed	=> no action	
+
+
+	-- select existing items from t_item_temporary and filter by session_id and calculation_version_id in order to select only relevant items; the result set is used for 
+	-- subsequent joins
+	lt_existing_items = 
+		select 	item_id,
+				item_description,
+				item_category_id,
+				material_id,
+				is_phantom_material,
+				document_type_id,
+				document_id,
+				document_version,
+				document_part,
+				document_status_id,
+				plant_id,
+				company_code_id,
+				cost_center_id,
+				work_center_id,
+				work_center_category,
+				efficiency,
+				material_type_id,
+				material_group_id,
+				is_configurable_material,
+				design_office_id,
+				overhead_group_id,
+				valuation_class_id,
+				activity_type_id,
+				process_id
+		from 	"sap.plc.db::basis.t_item_temporary"
+		where 		session_id = :iv_session_id 
+				and calculation_version_id = :iv_calculation_version_id;
+	
+	select language into lv_session_language default null from "sap.plc.db::basis.t_session" where session_id = iv_session_id;
+				
+	lt_determined_fields = 
+		select 	input.item_id,
+				case 
+					when (materials.material_id is not null or activities.activity_type_id is not null or processes.process_id is not null or documents.document_id is not null or work_centers.work_center_id is not null) and (input.item_category_id != db.item_category_id or ifnull(db.material_id, '') != ifnull(input.material_id, '') or ifnull(db.activity_type_id, '') != ifnull(input.activity_type_id, '') or ifnull(db.process_id, '') != ifnull(input.process_id, '') or ifnull(input.document_id, '') != ifnull(db.document_id, '') or ifnull(input.work_center_id, '') != ifnull(db.work_center_id, '') or :iv_update_masterdata = true)
+						then (
+							case
+								when input.item_category_id != db.item_category_id then (case
+																								when input.item_category_id in (2, 4, 6) then material_text.material_description -- for Material, External Activity and Subcontracting -> MATERIAL_ID shoul be used to determine the item's description; otherwise, reset to null
+																								when input.item_category_id = 1 then document_text.document_description
+																								else null
+																						end)
+								when documents.document_id is not null and input.item_category_id = 1 then document_text.document_description
+								when processes.process_id is not null and work_centers.work_center_id is not null and input.item_category_id = 5 then process_text.process_description || ' - ' || work_center_text.work_center_description
+								when processes.process_id is not null and work_centers.work_center_id is null and input.item_category_id = 5 then process_text.process_description
+								when processes.process_id is null and work_centers.work_center_id is not null and input.item_category_id = 5 then work_center_text.work_center_description
+								when materials.material_id is not null and input.item_category_id in (2, 4, 6) then material_text.material_description
+								when activities.activity_type_id is not null and input.item_category_id = 3 then activity_type_text.activity_type_description
+							end
+						)
+					else input.item_description														-- (case 1.a)
+				end as item_description,
+				input.material_id as material_id,
+				case 
+					when 	ifnull(db.company_code_id, '') != ifnull(input.company_code_id, '')   	-- reset plant_id if company_code_id was changed (case 2.a):
+					 	and	ifnull(db.plant_id, '') = ifnull(input.plant_id, '')				  	-- only reset the plant if it was not changed as well and if it's not temporary
+						and plants.plant_id is not null											  	-- for a temporary plant plants.plant_id is null since there is no entry in t_plant
+						then null
+					else input.plant_id
+				end as plant_id,
+				case 
+					when 	ifnull(db.company_code_id, '') != ifnull(input.company_code_id, '')   	-- This column tracks the reset of the plant_id (needed to create messages); unfortunately 
+						and	ifnull(db.plant_id, '') = ifnull(input.plant_id, '')					-- this has to copy all contraints for reset the plant (above)
+						and plants.plant_id is not null												
+						then true
+					else false
+				end as is_plant_id_changed,
+				case 
+					when 	ifnull(db.plant_id, '') != ifnull(input.plant_id, '') 					
+						and plants.plant_id is not null
+						then plants.company_code_id
+					else input.company_code_id
+				end as company_code_id,
+				case 
+					when 	ifnull(db.plant_id, '') != ifnull(input.plant_id, '') 
+						and plants.plant_id is not null
+						then true
+					else false
+				end as is_company_code_id_changed,
+				case 
+					when ifnull(db.material_id, '') != ifnull(input.material_id, '')
+						then true
+					else false
+				end as is_material_id_changed,	
+				case 
+					when (ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, ''))
+						and work_centers.plant_id is not null and work_centers.work_center_id is not null
+							then work_centers.cost_center_id
+					else input.cost_center_id
+				end as cost_center_id,
+				input.work_center_id as work_center_id,
+				case 
+					when ((ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, ''))
+						and work_centers.plant_id is not null and work_centers.work_center_id is not null) or (work_centers.plant_id is not null and work_centers.work_center_id is not null)
+							then work_centers.work_center_category
+					else input.work_center_category
+				end as work_center_category,
+				case 
+					when ((input.efficiency is null and (ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, '')))
+					or :iv_update_masterdata = true) and work_centers.plant_id is not null and work_centers.work_center_id is not null
+							then work_centers.efficiency
+					else input.efficiency
+				end as efficiency,
+				case 
+					when ((ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, ''))
+						and work_centers.plant_id is not null and work_centers.work_center_id is not null
+						and work_centers.cost_center_id is not null) or ifnull(db.cost_center_id, '') != ifnull(input.cost_center_id, '')
+							then true
+					else false
+				end as is_cost_center_id_changed,		
+				case 
+					when ((ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, ''))
+						and work_centers.plant_id is not null and work_centers.work_center_id is not null
+						and work_centers.cost_center_id is not null)
+							then true
+					else false
+				end as is_cost_center_id_changed_info,		
+				case 
+					when (ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or ifnull(db.work_center_id, '') != ifnull(input.work_center_id, ''))
+						and work_centers.plant_id is not null and work_centers.work_center_id is not null
+							then true
+					else false
+				end as is_work_center_id_changed,		
+				case 
+				when materials.material_id is not null and ifnull(db.is_phantom_material, 2) = ifnull(input.is_phantom_material, 2) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true)												
+						then materials.is_phantom_material 											-- case 4.a
+					else  input.is_phantom_material													-- case 4.b
+				end as is_phantom_material,
+				case 
+				when materials.material_id is not null and ifnull(db.is_configurable_material, 2) = ifnull(input.is_configurable_material, 2) and (ifnull(db.material_id, '') != ifnull(input.material_id, '')	or :iv_update_masterdata = true)										
+						then materials.is_configurable_material 									-- case 5.a
+					else input.is_configurable_material												-- case 5.b
+				end as is_configurable_material,
+				case 
+				when materials.material_id is not null and (ifnull(db.material_type_id, '') = ifnull(input.material_type_id,'') or material_types.material_type_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true)-- it could be that the material_type_id is null for a specific material in t_material; in this case null shall be set as material_type_id;
+						then materials.material_type_id												-- case/when is used, since with ifnull() it would not be possible to detect if null is a wanted value in t_material and shall be set;
+					else material_types.material_type_id											-- the case stmt uses materials.material_id is not null to determine if there exists a material for the id and uses materials.material_type_id if yes
+				end as material_type_id,															-- materials.material_id is null, we have a temporary material; in this case the input value for material_type_id is used, if it is an existing 
+				case 																				-- material type; this pattern is used also for other columns
+				when materials.material_id is not null and (ifnull(db.material_group_id, '') = ifnull(input.material_group_id,'') or material_groups.material_group_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true)											
+						then materials.material_group_id											
+					else material_groups.material_group_id											
+				end as material_group_id,					
+				case 
+					when 	materials.material_id is not null										-- in case the material_id was set to an existing material and in t_document_material exists a document for this material, the document-related 
+					and newest_document.material_id is not null	and (ifnull(db.document_type_id, '') = ifnull(input.document_type_id,'') or document_types.document_type_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true) -- fields are set to this document; since multiple documents can exist for a material_id, the newest document is determined by the join logic below;
+						then newest_document.document_type_id										-- (case 3.a)
+					else document_types.document_type_id											
+				end as document_type_id,
+				case 
+					when 	materials.material_id is not null
+					and newest_document.material_id is not null and ifnull(db.document_id, '') = ifnull(input.document_id,'') and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true)	
+						then newest_document.document_id
+					else input.document_id
+				end as document_id,
+				case 
+					when 	materials.material_id is not null
+					and newest_document.material_id is not null and ifnull(db.document_version, '') = ifnull(input.document_version,'') and (:iv_update_masterdata = true or ifnull(db.material_id, '') != ifnull(input.material_id, ''))
+						then newest_document.document_version
+					else input.document_version
+				end as document_version,
+				case 
+					when 	materials.material_id is not null
+					and newest_document.material_id is not null and ifnull(db.document_part, '') = ifnull(input.document_part,'') and (:iv_update_masterdata = true or ifnull(db.material_id, '') != ifnull(input.material_id, ''))
+						then newest_document.document_part
+					else input.document_part
+				end as document_part,
+				case
+					when materials.material_id is not null
+					and newest_document.material_id is not null and (ifnull(db.document_status_id, '') = ifnull(input.document_status_id,'') or document_status.document_status_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true) --case 8.a
+						then newest_document.document_status_id
+						when documents.document_id is not null and (ifnull(db.document_status_id, '') = ifnull(input.document_status_id,'') or document_status.document_status_id is null) and (ifnull(db.document_id, '') != ifnull(input.document_id, '') or :iv_update_masterdata = true) --case 8.b
+						then documents.document_status_id
+					else document_status.document_status_id --case 8.c
+				end as document_status_id,						
+				case 
+				when materials.material_id is not null and (ifnull(db.overhead_group_id, '') = ifnull(input.overhead_group_id,'') or overhead_groups.overhead_group_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or :iv_update_masterdata = true)
+					 	then material_plants.overhead_group_id									-- case 7.a&b: if t_material_plant does not have a row for material_id+plant_id, the value would be null; that is desired
+					else overhead_groups.overhead_group_id 										-- case 7.c
+				end as overhead_group_id,
+				case 
+					when materials.material_id is not null 
+					and plants.plant_id is not null and (ifnull(db.valuation_class_id, '') = ifnull(input.valuation_class_id,'') or valuation_classes.valuation_class_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or ifnull(db.plant_id, '') != ifnull(input.plant_id, '') or :iv_update_masterdata = true)
+						then material_plants.valuation_class_id 								-- case 6.a&b:: if t_material_plant does not have a row for material_id+plant_id, the value would be null; that is desired			
+					else valuation_classes.valuation_class_id									-- case 6.c
+				end as valuation_class_id,							
+				case
+					when materials.material_id is not null
+					and newest_document.material_id is not null and (ifnull(db.design_office_id, '') = ifnull(input.design_office_id,'') or design_offices.design_office_id is null) and (ifnull(db.material_id, '') != ifnull(input.material_id, '') or :iv_update_masterdata = true) --case 8.a
+						then newest_document.design_office_id
+						when documents.document_id is not null and (ifnull(db.design_office_id, '') = ifnull(input.design_office_id,'') or design_offices.design_office_id is null) and (ifnull(db.document_id, '') != ifnull(input.document_id, '') or :iv_update_masterdata = true) --case 8.b
+						then documents.design_office_id
+					else input.design_office_id --case 8.c
+				end as design_office_id,
+				case 
+					when materials.material_id is not null
+						then false
+					else true
+				end as is_temporary_material,	
+				case 
+					when material_plants.material_id is not null and  material_plants.plant_id is not null
+						then false
+					else true
+				end as is_temporary_material_plant,
+				case 
+					when cost_centers.cost_center_id is not null
+						then false
+					else true
+				end as is_temporary_cost_center,
+				case 
+					when work_centers.work_center_id is not null and work_centers.plant_id is not null
+						then false
+					else true
+				end as is_temporary_work_center,
+				case
+					when input.item_category_id is not null 
+						then input.item_category_id
+					else db.item_category_id
+				end as item_category_id,		 	
+				input.activity_type_id as activity_type_id, 
+				input.process_id as process_id
+				{{masterdataCustomFieldsWithPrefix Cost_Center 'input'}}		
+				{{masterdataCustomFieldsWithPrefix Material 'input'}}	
+				{{masterdataCustomFieldsWithPrefix Material_Plant 'input'}}		
+				{{masterdataCustomFieldsWithPrefix Work_Center 'input'}}						
+		from :it_items as input
+			left outer join :lt_existing_items as db
+				on input.item_id = db.item_id
+	left outer join "sap.plc.db::basis.t_process" as processes
+		on input.process_id = processes.process_id
+		and :iv_controlling_area_id = processes.controlling_area_id
+		and :iv_master_data_timestamp >= processes._valid_from 
+		and (processes._valid_to is null or :iv_master_data_timestamp < processes._valid_to)
+			left outer join "sap.plc.db::basis.t_plant" as plants
+				on input.plant_id = plants.plant_id
+				and :iv_master_data_timestamp >= plants._valid_from 
+				and (plants._valid_to is null or :iv_master_data_timestamp < plants._valid_to)
+				and plants.company_code_id in 
+					(select company_code_id from "sap.plc.db::basis.t_company_code" 
+						where controlling_area_id = :iv_controlling_area_id
+						and :iv_master_data_timestamp >= _valid_from 
+						and (_valid_to is null or :iv_master_data_timestamp < _valid_to))
+			left outer join "sap.plc.db::basis.t_material" as materials
+				on input.material_id = materials.material_id
+				and :iv_master_data_timestamp >= materials._valid_from 
+				and (materials._valid_to is null or :iv_master_data_timestamp < materials._valid_to)
+			left outer join "sap.plc.db::basis.t_activity_type" as activities
+				on activities.activity_type_id = input.activity_type_id
+				and activities.controlling_area_id = :iv_controlling_area_id
+				and :iv_master_data_timestamp >= activities._valid_from 
+				and (activities._valid_to is null or :iv_master_data_timestamp < activities._valid_to)
+			left outer join  (
+				select * from (																        -- in t_document_material multiple rows can exits for a material_id (material_id is not the single primary key)
+				select document_materials.material_id, document_materials.document_type_id, 			-- sub-selects and sub-joins determine the newest document for a material, which is used to set the document properties
+				document_materials.document_id, document_materials.document_version, document_materials.document_part,
+				masterdata_document.design_office_id, masterdata_document.document_status_id,
+				ROW_NUMBER() OVER (PARTITION BY document_materials.material_id ORDER BY document_materials.document_id DESC) ROW_NUMBER
+				from "sap.plc.db::basis.t_document_material" as document_materials					-- of the item
+				 	inner join (																		
+						select 	material_id,															-- inner join determines the newest document for the material by grouping by the material_id
+								max(_valid_from) as max_valid_from										-- and use of the max() function; 
+						from "sap.plc.db::basis.t_document_material"									-- NOTE: HANA does not allow order by and limit/top not available in sub-queries  :(
+						group by material_id
+					) as newest_document_for_material
+					on 	newest_document_for_material.material_id = document_materials.material_id
+					left outer join "sap.plc.db::basis.t_document" as masterdata_document
+					on document_materials.document_id = masterdata_document.document_id and document_materials.document_version = masterdata_document.document_version
+					and document_materials.document_part = masterdata_document.document_part and document_materials.document_type_id = masterdata_document.document_type_id
+					where newest_document_for_material.max_valid_from = document_materials._valid_from -- filter on the max_valid_from necessary, since the select would have more than one row in the result set (material_id can occur
+						and :iv_master_data_timestamp >= document_materials._valid_from									--  more than once in the table)
+						and (document_materials._valid_to is null or :iv_master_data_timestamp < document_materials._valid_to)
+			) where ROW_NUMBER = 1 ) as newest_document
+				on input.material_id = newest_document.material_id
+			left outer join "sap.plc.db::basis.t_material_type" as material_types 
+				on  input.material_type_id = material_types.material_type_id 
+				and material_types._valid_from <= :iv_master_data_timestamp 
+				and (material_types._valid_to > :iv_master_data_timestamp or material_types._valid_to is null)
+			left outer join "sap.plc.db::basis.t_material_group" as material_groups 
+				on  input.material_group_id  = material_groups.material_group_id
+				and material_groups._valid_from <= :iv_master_data_timestamp 
+				and (material_groups._valid_to > :iv_master_data_timestamp or material_groups._valid_to is null)
+			left outer join "sap.plc.db::basis.t_material_plant" as material_plants 
+				on  input.material_id = material_plants.material_id  
+				and	input.plant_id = material_plants.plant_id
+				and material_plants._valid_from <= :iv_master_data_timestamp 
+				and (material_plants._valid_to > :iv_master_data_timestamp or material_plants._valid_to is null)
+			left outer join "sap.plc.db::basis.t_overhead_group" as overhead_groups 
+				on  input.overhead_group_id = overhead_groups.overhead_group_id 
+				and input.plant_id = overhead_groups.plant_id
+				and	overhead_groups._valid_from <= :iv_master_data_timestamp 
+				and (overhead_groups._valid_to > :iv_master_data_timestamp or overhead_groups._valid_to is null)
+			left outer join "sap.plc.db::basis.t_valuation_class" as valuation_classes 
+				on 	input.valuation_class_id = valuation_classes.valuation_class_id 
+				and valuation_classes._valid_from <= :iv_master_data_timestamp
+				and (valuation_classes._valid_to > :iv_master_data_timestamp or valuation_classes._valid_to is null)
+			left outer join "sap.plc.db::basis.t_document" as documents
+			on input.document_id = documents.document_id 
+			and	input.document_type_id = documents.document_type_id
+			and input.document_version =  documents.document_version 
+			and input.document_part = documents.document_part
+				and documents._valid_from <= :iv_master_data_timestamp 
+				and (documents._valid_to > :iv_master_data_timestamp or documents._valid_to is null)
+			left outer join "sap.plc.db::basis.t_document_type" as document_types 
+				on 	input.document_type_id = document_types.document_type_id 
+				and document_types._valid_from <= :iv_master_data_timestamp 
+				and (document_types._valid_to > :iv_master_data_timestamp or  document_types._valid_to is null)
+			left outer join "sap.plc.db::basis.t_document_status" as document_status 
+				on	 input.document_type_id = document_status.document_type_id 
+				and  input.document_status_id = document_status.document_status_id
+				and	 document_status._valid_from <= :iv_master_data_timestamp 
+				and  (document_status._valid_to > :iv_master_data_timestamp or document_status._valid_to is null)
+			left outer join "sap.plc.db::basis.t_design_office" as design_offices 
+				on  input.design_office_id= design_offices.design_office_id 
+				and design_offices._valid_from <= :iv_master_data_timestamp 
+				and	(design_offices._valid_to > :iv_master_data_timestamp or	 design_offices._valid_to is null)
+			left outer join "sap.plc.db::basis.t_cost_center" as cost_centers
+				on input.cost_center_id = cost_centers.cost_center_id
+				and cost_centers.controlling_area_id = :iv_controlling_area_id
+				and :iv_master_data_timestamp >= cost_centers._valid_from 
+				and (cost_centers._valid_to is null or :iv_master_data_timestamp < cost_centers._valid_to)
+			left outer join "sap.plc.db::basis.t_work_center" as work_centers
+				on input.work_center_id = work_centers.work_center_id
+				and input.plant_id = work_centers.plant_id
+				and :iv_master_data_timestamp >= work_centers._valid_from 
+				and (work_centers._valid_to is null or :iv_master_data_timestamp < work_centers._valid_to)
+			left outer join "sap.plc.db::basis.t_document__text" as document_text
+				on input.document_id = document_text.document_id 
+				and	input.document_type_id = document_text.document_type_id
+				and input.document_version =  document_text.document_version 
+				and input.document_part = document_text.document_part
+				and lv_session_language = document_text.language  
+				and :iv_master_data_timestamp >= document_text._valid_from
+				and (document_text._valid_to is null or :iv_master_data_timestamp < document_text._valid_to)
+			left outer join "sap.plc.db::basis.t_material__text" as material_text
+				on input.material_id = material_text.material_id 
+				and lv_session_language = material_text.language  
+				and :iv_master_data_timestamp >= material_text._valid_from
+				and (material_text._valid_to is null or :iv_master_data_timestamp < material_text._valid_to)
+			left outer join "sap.plc.db::basis.t_process__text" as process_text
+				on input.process_id = process_text.process_id 
+				and :iv_controlling_area_id = process_text.controlling_area_id
+				and lv_session_language = process_text.language  
+				and :iv_master_data_timestamp >= process_text._valid_from
+				and (process_text._valid_to is null or :iv_master_data_timestamp < process_text._valid_to)
+			left outer join "sap.plc.db::basis.t_work_center__text" as work_center_text
+				on input.work_center_id = work_center_text.work_center_id
+				and input.plant_id = work_center_text.plant_id
+				and lv_session_language = work_center_text.language  
+				and :iv_master_data_timestamp >= work_center_text._valid_from
+				and (work_center_text._valid_to is null or :iv_master_data_timestamp < work_center_text._valid_to)
+			left outer join "sap.plc.db::basis.t_activity_type__text" as activity_type_text
+				on input.activity_type_id  = activity_type_text.activity_type_id  
+				and :iv_controlling_area_id = activity_type_text.controlling_area_id
+				and lv_session_language = activity_type_text.language  
+				and :iv_master_data_timestamp >= activity_type_text._valid_from
+				and (activity_type_text._valid_to is null or :iv_master_data_timestamp < activity_type_text._valid_to);	
+	-----------------------------------------------------------------------------------
+	-- Results of condition queries are combined to one output			
+	-----------------------------------------------------------------------------------
+ 	lt_updated_dependent_fields_and_custom_fields = 
+		select 	dependent_fields.item_id, 
+	 			dependent_fields.item_description,
+				dependent_fields.material_id,
+				dependent_fields.material_type_id,
+				dependent_fields.material_group_id,
+	 			dependent_fields.is_phantom_material,
+				dependent_fields.is_configurable_material,
+	 			dependent_fields.document_type_id,
+				dependent_fields.document_id,
+				dependent_fields.document_version,
+				dependent_fields.document_part,
+				dependent_fields.document_status_id,
+				dependent_fields.plant_id,
+				dependent_fields.work_center_id,
+				dependent_fields.work_center_category,
+				dependent_fields.efficiency,
+				dependent_fields.company_code_id,
+				dependent_fields.overhead_group_id,
+				dependent_fields.valuation_class_id,
+				dependent_fields.design_office_id,
+				dependent_fields.cost_center_id,
+				dependent_fields.activity_type_id,
+				dependent_fields.item_category_id,
+				dependent_fields.process_id
+
+				{{#each Cost_Center.customFields as |value key|}}
+					,case 
+						when ((dependent_fields.is_cost_center_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_cost_center = false) then costCenter.{{key}}_MANUAL
+						else dependent_fields.{{key}}_MANUAL
+					end as {{key}}_MANUAL
+					,case 
+						when ((dependent_fields.is_cost_center_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_cost_center = false) then costCenter.{{key}}_UNIT
+						else dependent_fields.{{key}}_UNIT
+					end as {{key}}_UNIT
+		        {{/each}}
+
+				{{#each Material.customFields as |value key|}}
+					,case 
+						when ((dependent_fields.is_material_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_material = false) then material.{{key}}_MANUAL
+						else dependent_fields.{{key}}_MANUAL
+					end as {{key}}_MANUAL
+					,case 
+						when ((dependent_fields.is_material_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_material = false) then material.{{key}}_UNIT
+						else dependent_fields.{{key}}_UNIT
+					end as {{key}}_UNIT
+				{{/each}}
+				
+				{{#each Material_Plant.customFields as |value key|}}
+					,case 
+						when (( dependent_fields.is_material_id_changed = true or dependent_fields.is_plant_id_changed = true or dependent_fields.is_company_code_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_material_plant = false)
+						 then materialPlant.{{key}}_MANUAL
+						else dependent_fields.{{key}}_MANUAL
+					end as {{key}}_MANUAL
+					,case 
+						when (( dependent_fields.is_material_id_changed = true or dependent_fields.is_plant_id_changed = true or dependent_fields.is_company_code_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_material_plant = false)
+						 then materialPlant.{{key}}_UNIT
+						else dependent_fields.{{key}}_UNIT
+					end as {{key}}_UNIT
+				{{/each}}
+
+				{{#each Work_Center.customFields as |value key|}}
+					,case 
+						when ((dependent_fields.is_work_center_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_work_center = false) then workCenter.{{key}}_MANUAL
+						else dependent_fields.{{key}}_MANUAL
+					end as {{key}}_MANUAL
+					,case 
+						when ((dependent_fields.is_work_center_id_changed = true or :iv_reevaluate = 'X') and dependent_fields.is_temporary_work_center = false) then workCenter.{{key}}_UNIT
+						else dependent_fields.{{key}}_UNIT
+					end as {{key}}_UNIT
+		        {{/each}}
+				
+ 		from :lt_determined_fields as dependent_fields
+	 		LEFT OUTER JOIN 
+	 				(select main.COST_CENTER_ID, main.CONTROLLING_AREA_ID, main._VALID_FROM {{masterdataCustomFields Cost_Center}} 
+	 						from {{t_extensionTable Cost_Center}} ext inner join "sap.plc.db::basis.t_cost_center" main 
+	 						ON main.COST_CENTER_ID = ext.COST_CENTER_ID and main.CONTROLLING_AREA_ID = ext.CONTROLLING_AREA_ID and main._VALID_FROM = ext._VALID_FROM
+	 					where main.CONTROLLING_AREA_ID = :iv_controlling_area_id and
+								main._VALID_FROM <= :iv_master_data_timestamp and (main._VALID_TO is null or 
+								main._VALID_TO >= :iv_master_data_timestamp)
+	 					) as costCenter ON dependent_fields.COST_CENTER_ID = costCenter.COST_CENTER_ID
+	 		LEFT OUTER JOIN 
+	 				(select main.MATERIAL_ID, main._VALID_FROM {{masterdataCustomFields Material}} 
+	 						from {{t_extensionTable Material}} ext inner join "sap.plc.db::basis.t_material" main 
+	 						ON main.MATERIAL_ID = ext.MATERIAL_ID and main._VALID_FROM = ext._VALID_FROM
+	 					where main._VALID_FROM <= :iv_master_data_timestamp and (main._VALID_TO is null or 
+								main._VALID_TO >= :iv_master_data_timestamp)
+	 					) as material ON
+	 					dependent_fields.material_id = material.material_id
+	 		LEFT OUTER JOIN 
+	 			( select main.MATERIAL_ID, main.PLANT_ID, main._VALID_FROM {{masterdataCustomFields Material_Plant}} 
+					from {{t_extensionTable Material_Plant}} ext inner join "sap.plc.db::basis.t_material_plant" main 
+						ON main.MATERIAL_ID = ext.MATERIAL_ID and main.PLANT_ID = ext.PLANT_ID and main._VALID_FROM = ext._VALID_FROM
+					where main._VALID_FROM <= :iv_master_data_timestamp and (main._VALID_TO is null or 
+						main._VALID_TO >= :iv_master_data_timestamp)
+			) as materialPlant ON
+						dependent_fields.material_id = materialPlant.material_id
+						and dependent_fields.plant_id = materialPlant.plant_id
+			LEFT OUTER JOIN 
+	 			( select main.	WORK_CENTER_ID, main.PLANT_ID, main._VALID_FROM {{masterdataCustomFields Work_Center}} 
+					from {{t_extensionTable Work_Center}} ext inner join "sap.plc.db::basis.t_work_center" main 
+						ON main.WORK_CENTER_ID = ext.WORK_CENTER_ID and main.PLANT_ID = ext.PLANT_ID and main._VALID_FROM = ext._VALID_FROM
+			where main._VALID_FROM <= :iv_master_data_timestamp and (main._VALID_TO is null or 
+					main._VALID_TO >= :iv_master_data_timestamp)
+			) as workCenter ON
+						dependent_fields.WORK_CENTER_ID = workCenter.WORK_CENTER_ID
+						and dependent_fields.PLANT_ID = workCenter.PLANT_ID
+ 		;
+	
+ 	
+ 	 ot_updated_dependent_fields =	select 	item_id, 
+								 			item_description,
+											material_id,
+											material_type_id,
+											material_group_id,
+								 			is_phantom_material,
+											is_configurable_material,
+								 			document_type_id,
+											document_id,
+											document_version,
+											document_part,
+											document_status_id,
+											plant_id,
+											work_center_id,
+											work_center_category,
+											efficiency,
+											company_code_id,
+											overhead_group_id,
+											valuation_class_id,
+											design_office_id,
+											cost_center_id,
+											activity_type_id,
+											item_category_id,
+											process_id
+											{{masterdataCustomFields Cost_Center}}		
+											{{masterdataCustomFields Material}}	
+											{{masterdataCustomFields Material_Plant}}
+											{{masterdataCustomFields Work_Center}}										
+							 		from :lt_updated_dependent_fields_and_custom_fields;
+ 	
+ 	ot_messages = 	select	'DEPENDENTFIELDSDETERMINATION_FIELDS_SET_FOR_CHANGED_MATERIALS_INFO' as msg_id,
+							item_id as item_id,
+							null as md_id_1,
+							null as md_id_2,
+							null as md_id_3,
+							null as business_object,
+							null as price_source_id
+						from :lt_determined_fields
+						where is_material_id_changed = true
+					union all
+					select	'DEPENDENTFIELDSDETERMINATION_PLANTS_SET_FOR_CHANGED_COMPANY_CODES_INFO' as msg_id,
+							item_id as item_id,
+							null as md_id_1,
+							null as md_id_2,
+							null as md_id_3,
+							null as business_object,
+							null as price_source_id
+						from :lt_determined_fields
+						where  is_plant_id_changed = true
+					union all
+					select	'DEPENDENTFIELDSDETERMINATION_COMPANY_CODES_SET_FOR_CHANGED_PLANTS_INFO' as msg_id,
+							item_id as item_id,
+							null as md_id_1,
+							null as md_id_2,
+							null as md_id_3,
+							null as business_object,
+							null as price_source_id
+						from :lt_determined_fields
+						where is_company_code_id_changed = true
+						union all
+						select	'DEPENDENTFIELDSDETERMINATION_COST_CENTER_SET_FOR_CHANGED_WORK_CENTER_INFO' as msg_id,
+								item_id as item_id,
+								null as md_id_1,
+								null as md_id_2,
+								null as md_id_3,
+								null as business_object,
+								null as price_source_id
+							from :lt_determined_fields
+							where  is_cost_center_id_changed_info = true;
+END;

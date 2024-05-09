@@ -1,0 +1,44 @@
+<core:FragmentDefinition xmlns="sap.ui.table" xmlns:m="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core">
+        <TreeTable id="treeTable" selectionMode="Single" selectionBehavior="RowOnly" enableColumnReordering="false"
+        toggleOpenState="getChildren" busy="{view>/treeBusy}" visibleRowCountMode="Interactive" rowSelectionChange="onRowSelect"
+        rows="{path:'view>/BomCalculations', parameters: {arrayNames:['children']}}">
+
+            <extension>
+                <m:OverflowToolbar>
+                    <m:Text text="{i18n>XFLD_accessibility}"></m:Text>
+                    <m:Switch busy="{view>/treeBusy}" change="changedAccessibilityState" state="false" customTextOn="On" customTextOff="Off">
+                        <m:layoutData>
+                            <m:FlexItemData growFactor="1" />
+                        </m:layoutData>
+                    </m:Switch>    
+                    <m:ToolbarSpacer />
+                    <m:Text text="{i18n>XFLD_layout}: {view>/LayoutName}"/>
+                    <m:MenuButton icon="sap-icon://action-settings" >
+                        <m:menu>
+                            <m:Menu>
+                                <m:MenuItem text="{i18n>XMIT_new}" icon="sap-icon://add-document"
+                                    press=".openLayoutFragment('new')" />
+                                <m:MenuItem text="{i18n>XMIT_edit}" enabled="{= ${view>/LayoutId} !== ${view>/DefaultLayoutId}}"
+                                    icon="sap-icon://edit" press=".openLayoutFragment('edit')" />
+                                <m:MenuItem text="{i18n>XBUT_btnSelect}" icon="sap-icon://complete"
+                                    press=".openLayoutFragment('change')" />
+                                <m:MenuItem text="{i18n>XMIT_delete}" enabled="{= ${view>/LayoutId} !== ${view>/DefaultLayoutId}}"
+                                    icon="sap-icon://delete" press=".openLayoutFragment('delete')" />
+                            </m:Menu>
+                        </m:menu>
+                    </m:MenuButton>
+                    <m:Button text="{i18n>XBUT_btnSaveLayout}" icon="sap-icon://save" press=".persistLayout" enabled="{= ${view>/LayoutHasEdits} === true}"/>
+                    <m:Button text="{i18n>XBUT_btnExpComp}" icon="sap-icon://expand" press="onExpCompAs" enabled="{= ${view>/EnableExpComp} === true}"/>
+                    <m:Button text="{i18n>XMIT_export}" enabled="{view>/EnableExcel}" icon="sap-icon://excel-attachment" press="onExportAs"/>
+                </m:OverflowToolbar>
+            </extension>
+            <rowSettingsTemplate>
+                <RowSettings highlight="{view>Status}"/>
+            </rowSettingsTemplate>
+            <columns>
+
+
+            </columns>
+
+        </TreeTable>
+</core:FragmentDefinition>

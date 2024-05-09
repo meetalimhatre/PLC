@@ -1,0 +1,4163 @@
+{
+    "definitions": {
+        "MessageNotAllowed": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "GENERAL_METHOD_NOT_ALLOWED_ERROR"
+                    ],
+                    "default": "GENERAL_METHOD_NOT_ALLOWED_ERROR",
+                    "description": "PLC Code GENERAL_METHOD_NOT_ALLOWED_ERROR will be returned"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "Error"
+                    ],
+                    "default": "Error",
+                    "description": "PLC severity Error will be returned"
+                },
+                "details": {
+                    "type": "object",
+                    "default": {}
+                }
+            }
+        },
+        "MessageGeneralValidationError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "GENERAL_VALIDATION_ERROR"
+                    ],
+                    "default": "GENERAL_VALIDATION_ERROR",
+                    "description": "PLC Code GENERAL_VALIDATION_ERROR will be returned"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "Error"
+                    ],
+                    "default": "Error",
+                    "description": "PLC severity Error will be returned"
+                },
+                "details": {
+                    "type": "object",
+                    "properties": {
+                        "messageTextObj": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "MethodNotAllowed": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/MessageNotAllowed"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+        "EmptyResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+ 	"GeneralValidationError": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/MessageGeneralValidationError"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+        "LockStatusModel": {
+            "type": "object",
+            "properties": {
+                "IS_LOCKED": {
+                    "type": "integer",
+                    "description": "Ex: 0 (false) if locked by user himself or 1 ( true ) if locked by another user"
+                },
+                "USER_ID": {
+                    "type": "string",
+                    "description": "Ex: D012345, Id of User that locked this object"
+                }
+            }
+        },
+        "LockActiveUsersStatusModel": {
+            "type": "object",
+            "properties": {
+                "IS_LOCKED": {
+                    "type": "integer",
+                    "description": "Ex: 0 (false) if only user himself is active or 1 ( true ) if other users are active"
+                },
+                "ACTIVE_USERS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "USER_ID": {
+                                "type": "string",
+                                "description": "Ex: D012345, a user which is active in system"
+                            },
+                            "LANGUAGE": {
+                                "type": "string",
+                                "description": "Ex: EN, the language code under which the user is logged in"
+                            },
+                            "SECONDS_BETWEEN": {
+                                "type": "integer",
+                                "description": "Ex: 3, seconds passed since user's last activity time"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+		"VariantsGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariantHeaderModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "VariantHeaderModel": {
+            "type": "object",
+            "properties": {
+                "VARIANT_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "VARIANT_NAME": {
+                    "type": "string",
+                    "description": "ex: Variant desc"
+                },
+                "CALCULATION_VERSION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Id of calculation version for which the variant is defined. ex: 1"
+                },
+                "COMMENT": {
+                    "type": "string",
+                    "description": "ex: Comment"
+                },
+                "EXCHANGE_RATE_TYPE_ID": {
+                    "type": "string",
+                    "description": "Exchange rate type used during calculation of the variant. ex: avg"
+                },
+                "TOTAL_QUANTITY": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "TOTAL_QUANTITY_UOM_ID": {
+                    "type": "string",
+                    "description": "ex: PC"
+                },
+                "TOTAL_COST": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "ex: 18"
+                },
+                "SALES_PRICE_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "IS_SELECTED": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "ex: 1"
+                },
+                "LAST_GENERATED_VERSION_ID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Id of the latest version generated from this variant, ex: 1001"
+                },
+                "LAST_CALCULATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last date on which variant was calculated, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_CALCULATED_BY": {
+                    "type": "string",
+                    "description": "Last calculated by user id"
+                },
+                "LAST_REMOVED_MARKINGS_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last date on which the changes in items were accepted, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_REMOVED_MARKINGS_BY": {
+                    "type": "string",
+                    "description": "Markings removed by user id"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last modified date, ex: 2016-03-31T15:13:57.385Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "Last modified by user id"
+                }
+            }
+        },
+        "GetPricesForItemMessagesModel": {
+            "type": "object",
+            "properties": {
+                "MSG_ID": {
+                    "type": "string",
+                    "description": "ex: Error 123"
+                },
+                "ITEM_ID": {
+                    "type": "integer",
+                    "description": "ex: 12"
+                }
+            }
+        },
+       "UserPrivilegesModel": {
+            "type": "object",
+            "properties": {
+                "USER_ID": {
+                    "type": "string",
+                    "description": "Ex: I123456"
+                },
+                "PRIVILEGE": {
+                    "type": "string",
+                    "description": "Ex: ADMINISTRATE"
+                }
+            }
+        },
+        "GroupPrivilegesModel": {
+            "type": "object",
+            "properties": {
+                "GROUP_ID": {
+                    "type": "string",
+                    "description": "Ex: Gr1"
+                },
+                "PRIVILEGE": {
+                    "type": "string",
+                    "description": "Ex: ADMINISTRATE"
+                }
+            }
+        },
+        "PrivilegesProjectModel": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "ENTITY_TYPE": {
+                            "type": "string",
+                            "description": "Project"
+                        },
+                        "ENTITY_ID": {
+                            "type": "string",
+                            "description": "ex: #P1"
+                        },
+                        "USER_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserPrivilegesModel"
+                            }
+                        },
+                        "GROUP_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupPrivilegesModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "PrivilegesBatchRequest": {
+            "type": "object",
+            "properties": {
+                "ENTITY_TYPE": {
+                    "type": "string",
+                    "description": "Project"
+                },
+                "ENTITY_ID": {
+                    "type": "string",
+                    "description": "ex: #P1"
+                },
+                "CREATE": {
+                    "type": "object",
+                    "properties": {
+                        "USER_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserPrivilegesModel"
+                            }
+                        },
+                        "GROUP_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupPrivilegesModel"
+                            }
+                        }
+                    }
+                },
+                "UPDATE": {
+                    "type": "object",
+                    "properties": {
+                        "USER_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserPrivilegesModel"
+                            }
+                        },
+                        "GROUP_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupPrivilegesModel"
+                            }
+                        }
+                    }
+                },
+                "DELETE": {
+                    "type": "object",
+                    "properties": {
+                        "USER_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "USER_ID": {
+                                        "type": "string",
+                                        "description": "Ex: I123456"
+                                    }
+                                }
+                            }
+                        },
+                        "GROUP_PRIVILEGES": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "GROUP_ID": {
+                                        "type": "string",
+                                        "description": "Ex: Gr1"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "PrivilegesBatchResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "$ref": "#/definitions/PrivilegesBatchRequest"
+                }
+            }
+        },
+        "LayoutModel": {
+            "type": "object",
+            "properties": {
+                "HIDDEN_FIELDS": {
+                    "type": "array",
+                    "items": {
+                        "properties": {}
+                    }
+                },
+                "IS_CORPORATE": {
+                    "type": "integer",
+                    "description": "1"
+                },
+                "IS_CURRENT": {
+                    "type": "integer",
+                    "description": "1"
+                },
+                "LAYOUT_COLUMNS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "COLUMN_ID": {
+                                "type": "string",
+                                "description": "ITEM_KEY"
+                            },
+                            "COLUMN_WIDTH": {
+                                "type": "integer",
+                                "description": "250"
+                            },
+                            "COSTING_SHEET_ROW_ID": {
+                                "type": "string",
+                                "description": "null"
+                            },
+                            "COST_COMPONENT_ID": {
+                                "type": "string",
+                                "description": "null"
+                            },
+                            "DISPLAY_ORDER": {
+                                "type": "integer",
+                                "description": "0"
+                            },
+                            "LAYOUT_ID": {
+                                "type": "integer",
+                                "description": "1500"
+                            },
+                            "PATH": {
+                                "type": "string",
+                                "description": "null"
+                            }
+                        }
+                    }
+                },
+                "LAYOUT_ID": {
+                    "type": "integer",
+                    "description": "1000"
+                },
+                "LAYOUT_NAME": {
+                    "type": "string",
+                    "description": "layout_name"
+                },
+                "LAYOUT_TYPE": {
+                    "type": "integer",
+                    "description": "2"
+                }
+            }
+        },
+        "LayoutsGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "LAYOUTS": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/LayoutModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "LockDeleteResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "description": "Ex: GENERAL_SYSTEMMESSAGE_INFO"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "description": "Ex: info"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "properties": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {}
+                }
+            }
+        },
+        "PluginGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "PLUGIN_SETTINGS": {
+                                        "type": "object",
+                                        "properties": {
+                                            "HOST": {
+                                                "type": "string",
+                                                "description": "ex: example.domain.com"
+                                            },
+                                            "INSTANCE": {
+                                                "type": "string",
+                                                "description": "ex: 123"
+                                            },
+                                            "CLIENT": {
+                                                "type": "string",
+                                                "description": "ex: 8999"
+                                            },
+                                            "SYSTEM": {
+                                                "type": "string",
+                                                "description": "ex: test"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MetadataItemAttributesModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "ex: Account_Group"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "ex: Account_Group"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "ex: _SOURCE"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: -1"
+                },
+                "SUBITEM_STATE": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: -1"
+                },
+                "IS_MANDATORY": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_READ_ONLY": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_TRANSFERABLE": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "DEFAULT_VALUE": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "default": "date-time",
+                    "description": "2015-09-01T09:00:00.000Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "ex: Demouser1"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "default": "date-time",
+                    "description": "2015-09-01T09:00:00.000Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "ex: Demouser1"
+                }
+            }
+        },
+        "InitSessionMetadataModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "ex: Account_Group"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "ex: Account_Group"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "ex: _SOURCE"
+                },
+                "IS_CUSTOM": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "ROLLUP_TYPE_ID": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "SIDE_PANEL_GROUP_ID": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "DISPLAY_ORDER": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "TABLE_DISPLAY_ORDER": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "REF_UOM_CURRENCY_PATH": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "REF_UOM_CURRENCY_BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "REF_UOM_CURRENCY_COLUMN_ID": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "DIMENSION_ID": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "UOM_CURRENCY_FLAG": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "SEMANTIC_DATA_TYPE": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "SEMANTIC_DATA_TYPE_ATTRIBUTES": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "PROPERTY_TYPE": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_IMMUTABLE_AFTER_SAVE": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_REQUIRED_IN_MASTERDATA": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_WILDCARD_ALLOWED": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "IS_USABLE_IN_FORMULA": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "ex: 1"
+                },
+                "RESOURCE_KEY_DISPLAY_NAME": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "RESOURCE_KEY_DISPLAY_DESCRIPTION": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "default": "date-time",
+                    "description": "2015-09-01T09:00:00.000Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "ex: Demouser1"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "default": "date-time",
+                    "description": "2015-09-01T09:00:00.000Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "ex: Demouser1"
+                },
+                "VALIDATION_REGEX_ID": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "VALIDATION_REGEX_VALUE": {
+                    "type": "string",
+                    "description": "ex: "
+                },
+                "TEXT": {
+                    "type": "array",
+                    "items": {}
+                },
+                "ATTRIBUTES": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MetadataItemAttributesModel"
+                    }
+                },
+                "FORMULAS": {
+                    "type": "array",
+                    "items": {}
+                },
+                "SELECTION_FILTER": {
+                    "type": "array",
+                    "items": {}
+                },
+                "SELECTION_DISPLAYED": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "InitSessionPostResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "APPLICATION": {
+                            "type": "object",
+                            "properties": {
+                                "SERVER_VERSION": {
+                                    "type": "string",
+                                    "description": "ex: 2.1.0"
+                                }
+                            }
+                        },
+                        "LANGUAGES": {
+                            "type": "object",
+                            "properties": {
+                                "LANGUAGE": {
+                                    "type": "string",
+                                    "description": "Ex: AF"
+                                },
+                                "TEXTS_MAINTAINABLE": {
+                                    "type": "integer",
+                                    "description": "Ex: 0"
+                                }
+                            }
+                        },
+                        "CURRENCIES": {
+                            "type": "object",
+                            "properties": {
+                                "CURRENCY_ID": {
+                                    "type": "string",
+                                    "description": "Ex: ZZZ"
+                                },
+                                "CURRENCY_CODE": {
+                                    "type": "string",
+                                    "description": "ex: EUR"
+                                },
+                                "CURRENCY_DESCRIPTION": {
+                                    "type": "string",
+                                    "description": "Ex: Test"
+                                }
+                            }
+                        },
+                        "SYSTEMMESSAGES": {
+                            "type": "array",
+                            "items": {}
+                        },
+                        "UNITSOFMEASURE": {
+                            "type": "array",
+                            "items": {
+                               "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationUnitOfMeasureModel"
+                            }
+                        },
+                        "METADATA": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InitSessionMetadataModel"
+                            }
+                        },
+                        "GROUPS": {
+                            "type": "object",
+                            "properties": {
+                                "SIDE_PANEL_GROUP_ID": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "ex: 101"
+                                },
+                                "SIDE_PANEL_GROUP_DISPLAY_ORDER": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "ex: 1"
+                                },
+                                "RESOURCE_KEY_GROUP_DESCRIPTION": {
+                                    "type": "string",
+                                    "description": "ex: XGRP_SidePanel_General"
+                                }
+                            }
+                        },
+                        "CURRENTUSER": {
+                            "type": "object",
+                            "properties": {
+                                "ID": {
+                                    "type": "string",
+                                    "description": "ex: Demouser1"
+                                },
+                                "HIDE_ADMIN_VIEW": {
+                                    "type": "integer",
+                                    "description": "Ex: 0 (false)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "head": {
+                    "type": "object"
+                }
+            }
+        },
+        "DefaultSettingsGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "DEFAULT_SETTINGS": {
+                                "type": "object",
+                                "required": [
+                                    "CONTROLLING_AREA",
+                                    "CURRENCY"
+                                ],
+                                "properties": {
+                                    "CONTROLLING_AREA": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+                                    },
+                                    "CURRENCY": {
+                                        "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+                                    },
+                                    "LOCK_STATUS": {
+                                        "$ref": "#/definitions/LockStatusModel"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "DefaultSettingsPostBody": {
+            "type": "object",
+            "properties": {
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "ex: #CA1"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "Ex: PT1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "COMPONENT_SPLIT_ID": {
+                    "type": "string",
+                    "description": "Ex: #SPLIT_DETAILED"
+                },
+                "COSTING_SHEET_ID": {
+                    "type": "string",
+                    "description": "#COGSL"
+                }
+            }
+        },
+        "DefaultSettingsPostResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "Default_Settings": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "IS_LOCKED": {
+                                                "type": "string",
+                                                "description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+                                            },
+                                            "USER_ID": {
+                                                "type": "string",
+                                                "description": "User that locked this object. Ex: I072519"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "DEFAULT_SETTINGS": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "DefaultSettingsPutBody": {
+            "type": "object",
+            "properties": {
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "ex: #CA1"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "Ex: PT1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "ex: EUR"
+                },
+                "COMPONENT_SPLIT_ID": {
+                    "type": "string",
+                    "description": "Ex: #SPLIT_DETAILED"
+                },
+                "COSTING_SHEET_ID": {
+                    "type": "string",
+                    "description": "Ex: #COGSL"
+                }
+            }
+        },
+        "DefaultSettingsPutResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "Default_Settings": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "IS_LOCKED": {
+                                                "type": "string",
+                                                "description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+                                            },
+                                            "USER_ID": {
+                                                "type": "string",
+                                                "description": "User that locked this object. Ex: I072519"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "DEFAULT_SETTINGS": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "../definitions/default_settings-definitions.json#/definitions/DefaultSettingsModel" 
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "DefaultSettingsDeleteResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "Default_Settings": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "IS_LOCKED": {
+                                                "type": "string",
+                                                "description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+                                            },
+                                            "USER_ID": {
+                                                "type": "string",
+                                                "description": "User that locked this object. Ex: I072519"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "DEFAULT_SETTINGS": {
+                                "type": "string",
+                                "description": "User id"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "DefaultSettingsModel": {
+            "type": "object",
+            "properties": {
+                "CONTROLLING_AREA_ID": {
+                    "type": "string",
+                    "description": "Ex: #CA1"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "description": "Ex: #C1"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "description": "Ex: #PT1"
+                },
+                "REPORT_CURRENCY_ID": {
+                    "type": "string",
+                    "description": "Ex: EUR"
+                },
+                "COMPONENT_SPLIT_ID": {
+                    "type": "string",
+                    "description": "Ex: #SPLIT_DETAILED"
+                },
+                "COSTING_SHEET_ID": {
+                    "type": "string",
+                    "description": "Ex: #COGSL"
+                }
+            }
+        },
+        "GlobalSearchGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "GLOBAL_SEARCH": {
+                            "type": "object",
+                            "properties": {
+                                "PROJECT_ID": {
+                                    "type": "string",
+                                    "description": "Ex: #P1"
+                                },
+                                "PROJECT_NAME": {
+                                    "type": "string",
+                                    "description": "Ex: #P1"
+                                },
+                                "CALCULATION_ID": {
+                                    "type": "integer",
+                                    "description": "Ex: 1"
+                                },
+                                "CALCULATION_NAME": {
+                                    "type": "string",
+                                    "description": "Ex: #SAP Example: Pump P-100"
+                                },
+                                "CALCULATION_VERSION_ID": {
+                                    "type": "integer",
+                                    "description": "Ex: 1403"
+                                },
+                                "CALCULATION_VERSION_NAME": {
+                                    "type": "string",
+                                    "description": "Ex: Test Calculation Version"
+                                },
+                                "ENTITY_TYPE": {
+                                    "type": "string",
+                                    "description": "Type of the object: can be Project, Calculation or CalculationVersion"
+                                },
+                                "ENTITY_NAME": {
+                                    "type": "string",
+                                    "description": "Ex: Name of the entity,can be Project, Calculation or CalculationVersion name"
+                                },
+                                "ENTITY_ID": {
+                                    "type": "string",
+                                    "description": "Ex: Id of the entity,can be Project, Calculation or CalculationVersion name"
+                                },
+                                "BASE_VERSION_ID": {
+                                    "type": "integer",
+                                    "description": "Ex: Id of the base version if the calculation version is of type lifecycle or manual lifecycle"
+                                },
+                                "BASE_VERSION_NAME": {
+                                    "type": "string",
+                                    "description": "Ex: The name of the base version id"
+                                },
+                                "CALCULATION_VERSION_TYPE": {
+                                    "type": "integer",
+                                    "description": "Ex: Type of the calculation version"
+                                },
+                                "CUSTOMER_NAME": {
+                                    "type": "string",
+                                    "description": "Customer Name, Ex: Kunde 1"
+                                },
+                                "CUSTOMER_ID": {
+                                    "type": "string",
+                                    "description": "Customer Id, Ex: #CU1"
+                                },
+                                "TOTAL_COST": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Total Cost 8115.0168"
+                                },
+                                "TOTAL_COST_UOM_ID": {
+                                    "type": "string",
+                                    "description": "Total Cost Unit Of Measure Id, Ex: EUR"
+                                },
+                                "TOTAL_QUANTITY": {
+                                    "type": "integer",
+                                    "description": "Total quantity, Ex: 10"
+                                },
+                                "TOTAL_QUANTITY_UOM_ID": {
+                                    "type": "string",
+                                    "description": "Total Quantity Unit Of Measure Id, Ex: EUR"
+                                },
+                                "CREATED_ON": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "ex: 2000-01-01T00:00:00.000Z"
+                                },
+                                "CREATED_BY": {
+                                    "type": "string",
+                                    "description": "Created by user id"
+                                },
+                                "LAST_MODIFIED_ON": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "ex: 2000-01-01T00:00:00.000Z"
+                                },
+                                "LAST_MODIFIED_BY": {
+                                    "type": "string",
+                                    "description": "Last modified by user id"
+                                },
+                                "PROJECT_PATH": {
+                                    "type": "string",
+                                    "description": "Project Path of object, Ex: 5/7"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CustomFieldsFormulaGetResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "METADATA": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "PATH": {
+                                        "type": "string",
+                                        "description": "Item.Calculation_Version"
+                                    },
+                                    "BUSINESS_OBJECT": {
+                                        "type": "string",
+                                        "description": "Calculation_Version"
+                                    },
+                                    "COLUMN_ID": {
+                                        "type": "string",
+                                        "description": "CALCULATION_VERSION_ID"
+                                    },
+                                    "IS_CUSTOM": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "0"
+                                    },
+                                    "ROLLUP_TYPE_ID": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "0"
+                                    },
+                                    "SIDE_PANEL_GROUP_ID": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "1"
+                                    },
+                                    "DISPLAY_ORDER": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "TABLE_DISPLAY_ORDER": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "Ex: 1"
+                                    },
+                                    "REF_UOM_CURRENCY_PATH": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "REF_UOM_CURRENCY_BUSINESS_OBJECT": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "REF_UOM_CURRENCY_COLUMN_ID": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "DIMENSION_ID": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "UOM_CURRENCY_FLAG": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "SEMANTIC_DATA_TYPE": {
+                                        "type": "string",
+                                        "description": "PositiveInteger"
+                                    },
+                                    "SEMANTIC_DATA_TYPE_ATTRIBUTES": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "PROPERTY_TYPE": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "IS_IMMUTABLE_AFTER_SAVE": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "Ex: 0"
+                                    },
+                                    "IS_REQUIRED_IN_MASTERDATA": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "ex: 1"
+                                    },
+                                    "IS_WILDCARD_ALLOWED": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "ex: 1"
+                                    },
+                                    "IS_USABLE_IN_FORMULA": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "description": "ex: 1"
+                                    },
+                                    "RESOURCE_KEY_DISPLAY_NAME": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "RESOURCE_KEY_DISPLAY_DESCRIPTION": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "CREATED_ON": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "CREATED_BY": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "LAST_MODIFIED_ON": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "LAST_MODIFIED_BY": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "LOCK_ACTIVE_USERS_STATUS": {
+                                        "$ref": "#/definitions/LockActiveUsersStatusModel"
+                                    },
+                                    "VALIDATION_REGEX_ID": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "VALIDATION_REGEX_VALUE": {
+                                        "type": "string",
+                                        "description": "null"
+                                    },
+                                    "TEXT": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/CustomFieldsFormulaGetTextModel"
+                                        }
+                                    },
+                                    "ATTRIBUTES": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/MetadataItemAttributesModel"
+                                        }
+                                    },
+                                    "FORMULAS": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/CustomFieldsFormulaGetFormulasModel"
+                                        }
+                                    },
+                                    "SELECTION_FILTER": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {}
+                                        }
+                                    },
+                                    "SELECTION_DISPLAYED": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CustomFieldsFormulaPostResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "metadata": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "IS_LOCKED": {
+                                                "type": "string",
+                                                "description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+                                            },
+                                            "ACTIVE_USERS": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "USER_ID": {
+                                                            "type": "string",
+                                                            "description": "User ID. Ex: I072519"
+                                                        },
+                                                        "LANGUAGE": {
+                                                            "type": "string",
+                                                            "description": "EN"
+                                                        },
+                                                        "SECONDS_BETWEEN": {
+                                                            "type": "integer",
+                                                            "description": "Seconds passed from user's last activity time"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "TASK_ID":  {
+                            "type": "integer",
+                            "description": "task id"
+                        },
+                        "TASK_TYPE":{   "type": "string",
+                            "enum": [
+                                "METADATA_CUSTOM_FIELDS"
+                            ],
+                            "description": "the task type"
+                        },
+                        "SESSION_ID":   {
+                                            "type": "string",
+                                            "description": "Id of the user who started the task"
+                                        },
+                        "STATUS":{
+                                    "type": "string",
+                                    "enum": [
+                                        "inactive",
+                                        "active",
+                                        "completed",
+                                        "canceled",
+                                        "failed"
+                                    ],
+                                    "description": "the current status of the task"
+                                },
+                        "PROGRESS_STEP":{
+                                            "type": "integer",
+                                            "description": "current progress step of the task"
+                                        },
+                        "PROGRESS_TOTAL":{
+                                            "type": "integer",
+                                            "description": "total amount of steps to complete the task"
+                                         },
+                        "CREATED_ON": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Ex: 2016-11-07T12:02:30.398Z"
+                        }
+                    }
+                }
+            }
+        },
+        "CustomFieldsFormulaToBeCreatedUpdatedDeleted": {
+            "type": "object",
+            "properties": {
+                "CREATE": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "COLUMN_ID": {
+                                "type": "string",
+                                "description": "CUST_TEST"
+                            },
+                            "SIDE_PANEL_GROUP_ID": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Ex: 1"
+                            },
+                            "PATH": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "ATTRIBUTES": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaCreateAttributesModel"
+                                }
+                            },
+                            "TEXT": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaCreateTextModel"
+                                }
+                            },
+                            "REF_UOM_CURRENCY_BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "null"
+                            },
+                            "REF_UOM_CURRENCY_COLUMN_ID": {
+                                "type": "string",
+                                "description": "null"
+                            },
+                            "REF_UOM_CURRENCY_PATH": {
+                                "type": "string",
+                                "description": "null"
+                            },
+                            "ROLLUP_TYPE_ID": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Ex: 0"
+                            },
+                            "SEMANTIC_DATA_TYPE": {
+                                "type": "string",
+                                "description": "Decimal"
+                            },
+                            "UOM_CURRENCY_FLAG": {
+                                "type": "integer",
+                                "description": "0"
+                            },
+                            "FORMULAS": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaCreateFormulasModel"
+                                }
+                            }
+                        }
+                    }
+                },
+                "UPDATE": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "COLUMN_ID": {
+                                "type": "string",
+                                "description": "CUST_TEST"
+                            },
+                            "SIDE_PANEL_GROUP_ID": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Ex: 1"
+                            },
+                            "PATH": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "ATTRIBUTES": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaUpdateAttributesModel"
+                                }
+                            },
+                            "TEXT": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaUpdateTextModel"
+                                }
+                            },
+                            "ROLLUP_TYPE_ID": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "0"
+                            },
+                            "UOM_CURRENCY_FLAG": {
+                                "type": "integer",
+                                "description": "0"
+                            },
+                            "FORMULAS": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/CustomFieldsFormulaCreateFormulasModel"
+                                }
+                            }
+                        }
+                    }
+                },
+                "DELETE": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "Item"
+                            },
+                            "COLUMN_ID": {
+                                "type": "string",
+                                "description": "CUST_TEST"
+                            },
+                            "PATH": {
+                                "type": "string",
+                                "description": "Item"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CustomFieldsFormulaGetTextModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "LANGUAGE": {
+                    "type": "string",
+                    "description": "EN"
+                },
+                "DISPLAY_NAME": {
+                    "type": "string",
+                    "description": "Splitting"
+                },
+                "DISPLAY_DESCRIPTION": {
+                    "type": "string",
+                    "description": "Splitting gives the thickness of a metal split in millimeters"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                }
+            }
+        },
+        "CustomFieldsFormulaGetFormulasModel": {
+            "type": "object",
+            "properties": {
+                "FORMULA_ID": {
+                    "type": "integer",
+                    "description": "1000"
+                },
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "IS_FORMULA_USED": {
+                    "type": "integer",
+                    "description": "value tells user that formula is used (value 1) or not (value 0)"
+                },
+                "FORMULA_STRING": {
+                    "type": "string",
+                    "description": "Ex: $BASE_QUANTITY*3"
+                },
+                "FORMULA_DESCRIPTION": {
+                    "type": "string",
+                    "description": "formula comments"
+                }
+            }
+        },
+        "CustomFieldsFormulaCreateAttributesModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "DEFAULT_VALUE": {
+                    "type": "string",
+                    "description": "0.2"
+                }
+            }
+        },
+        "CustomFieldsFormulaCreateAttributesModelResponse": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "DEFAULT_VALUE": {
+                    "type": "string",
+                    "description": "0.2"
+                },
+                "SUBITEM_STATE": {
+                    "type": "integer",
+                    "description": "-1"
+                },
+                "IS_READ_ONLY": {
+                    "type": "integer",
+                    "description": "ex: 0"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                }
+            }
+        },
+        "CustomFieldsFormulaCreateTextModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "LANGUAGE": {
+                    "type": "string",
+                    "description": "EN"
+                },
+                "DISPLAY_NAME": {
+                    "type": "string",
+                    "description": "Splitting"
+                },
+                "DISPLAY_DESCRIPTION": {
+                    "type": "string",
+                    "description": "Splitting gives the thickness of a metal split in millimeters"
+                }
+            }
+        },
+        "CustomFieldsFormulaCreateTextModelResponse": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "LANGUAGE": {
+                    "type": "string",
+                    "description": "EN"
+                },
+                "DISPLAY_NAME": {
+                    "type": "string",
+                    "description": "Splitting"
+                },
+                "DISPLAY_DESCRIPTION": {
+                    "type": "string",
+                    "description": "Splitting gives the thickness of a metal split in millimeters"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                }
+            }
+        },
+        "CustomFieldsFormulaCreateFormulasModel": {
+            "type": "object",
+            "properties": {
+                "FORMULA_ID": {
+                    "type": "integer",
+                    "description": "1000"
+                },
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "IS_FORMULA_USED": {
+                    "type": "integer",
+                    "description": "indicates if formula is used (= 1) or not (= 0)"
+                },
+                "FORMULA_STRING": {
+                    "type": "string",
+                    "description": "Ex: $BASE_QUANTITY*3"
+                },
+                "FORMULA_DESCRIPTION": {
+                    "type": "string",
+                    "description": "formula comments"
+                }
+            }
+        },
+        "CustomFieldsFormulaUpdateAttributesModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "DEFAULT_VALUE": {
+                    "type": "string",
+                    "description": "0.2"
+                }
+            }
+        },
+        "CustomFieldsFormulaUpdateAttributesModelResponse": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "IS_MANDATORY": {
+                    "type": "integer",
+                    "description": "0"
+                },
+                "IS_READ_ONLY": {
+                    "type": "integer",
+                    "description": "ex: 0"
+                },
+                "DEFAULT_VALUE": {
+                    "type": "string",
+                    "description": "0.2"
+                },
+                "SUBITEM_STATE": {
+                    "type": "integer",
+                    "description": "-1"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Ex: 2016-11-07T12:02:30.398Z"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "description": "I072519"
+                }
+            }
+        },
+        "CustomFieldsFormulaUpdateTextModel": {
+            "type": "object",
+            "properties": {
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "LANGUAGE": {
+                    "type": "string",
+                    "description": "EN"
+                },
+                "DISPLAY_NAME": {
+                    "type": "string",
+                    "description": "Splitting"
+                },
+                "DISPLAY_DESCRIPTION": {
+                    "type": "string",
+                    "description": "Splitting gives the thickness of a metal split in millimeters"
+                }
+            }
+        },
+        "CustomFieldsFormulaUpdateFormulasModel": {
+            "type": "object",
+            "properties": {
+                "FORMULA_ID": {
+                    "type": "integer",
+                    "description": "1000"
+                },
+                "PATH": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "BUSINESS_OBJECT": {
+                    "type": "string",
+                    "description": "Item"
+                },
+                "COLUMN_ID": {
+                    "type": "string",
+                    "description": "CUST_TEST"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "IS_FORMULA_USED": {
+                    "type": "integer",
+                    "description": "value tells user that formula is used (value 1) or not (value 0)"
+                },
+                "FORMULA_STRING": {
+                    "type": "string",
+                    "description": "Ex: $BASE_QUANTITY*3"
+                },
+                "FORMULA_DESCRIPTION": {
+                    "type": "string",
+                    "description": "formula comments"
+                }
+            }
+        },
+        "LayoutRequestBody": {
+            "type": "object",
+            "properties": {
+                "LAYOUT_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001 for update, -1 for create"
+                },
+                "LAYOUT_NAME": {
+                    "type": "string",
+                    "description": "ex: Corp1 Layout"
+                },
+                "IS_CURRENT": {
+                    "type": "integer",
+                    "description": "ex: 0"
+                },
+                "LAYOUT_TYPE": {
+                    "type": "integer",
+                    "description": "2"
+                },
+                "LAYOUT_COLUMNS": {
+                    "type": "array",
+                    "items": {
+                        "properties": {
+                            "DISPLAY_ORDER": {
+                                "type": "integer",
+                                "description": "1"
+                            },
+                            "PATH": {
+                                "type": "string",
+                                "description": "ex: Item"
+                            },
+                            "BUSINESS_OBJECT": {
+                                "type": "string",
+                                "description": "ex: Item"
+                            },
+                            "COLUMN_ID": {
+                                "type": "string",
+                                "description": "ex: QUANTITY"
+                            },
+                            "COLUMN_WIDTH": {
+                                "type": "integer",
+                                "description": "43"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "TransportationDataModel": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "t_metadata": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "All column names and all values from t_metadata: PATH,BUSINESS_OBJECT,COLUMN_ID,IS_CUSTOM,ROLLUP_TYPE_ID,SIDE_PANEL_GROUP_ID,DISPLAY_ORDER,TABLE_DISPLAY_ORDER,REF_UOM_CURRENCY_PATH,REF_UOM_CURRENCY_BUSINESS_OBJECT,REF_UOM_CURRENCY_COLUMN_ID,UOM_CURRENCY_FLAG,SEMANTIC_DATA_TYPE,SEMANTIC_DATA_TYPE_ATTRIBUTES,VALIDATION_REGEX_ID,PROPERTY_TYPE,IS_IMMUTABLE_AFTER_SAVE,IS_REQUIRED_IN_MASTERDATA,IS_WILDCARD_ALLOWED,IS_USABLE_IN_FORMULA,RESOURCE_KEY_DISPLAY_NAME,RESOURCE_KEY_DISPLAY_DESCRIPTION"
+                                }
+                            }
+                        },
+                        "t_metadata_item_attributes": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "All column names and all values from t_metadata_item_attributes: PATH,BUSINESS_OBJECT,COLUMN_ID,ITEM_CATEGORY_ID,SUBITEM_STATE,IS_ACTIVE,IS_MANDATORY,IS_READ_ONLY,IS_TRANSFERABLE,DEFAULT_VALUE"
+                                }
+                            }
+                        },
+                        "t_metadata__text": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "All column names and all values from t_metadata__text: Item,CUST_BOOLEAN_INT,EN,CUST_BOOLEAN_INT,CUST_BOOLEAN_INT"
+                                }
+                            }
+                        },
+                        "t_formula": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "All column names and all values from t_formula: FORMULA_ID,PATH,BUSINESS_OBJECT,COLUMN_ID,ITEM_CATEGORY_ID,IS_FORMULA_USED,FORMULA_STRING,FORMULA_DESCRIPTION"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "LayoutId": {
+            "type": "object",
+            "properties": {
+                "LAYOUT_ID": {
+                    "type": "integer",
+                    "description": "ex: 1001"
+                }
+            }
+        },
+        "GroupMembersModel": {
+            "type": "object",
+            "properties": {
+                "GROUPS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "GROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR1"
+                            },
+                            "DESCRIPTION": {
+                                "type": "string",
+                                "description": "ex: Controllers"
+                            }
+                        }
+                    }
+                },
+                "MEMBERS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "GROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR1"
+                            },
+                            "USER_ID": {
+                                "type": "string",
+                                "description": "ex: D000000"
+                            }
+                        }
+                    }
+                },
+                "SUBGROUPS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "GROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR1"
+                            },
+                            "SUBGROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR2"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "getUsersResponse": {
+            "type": "object",
+            "properties": {
+                "head": {},
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "PLC_USERS": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "USER_ID": {
+                                        "type": "string",
+                                        "description": "user id"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "dataProtectionDeleteRequestBody":{
+            "type": "object",
+            "properties": {
+                "USER_ID" :{
+                    "type": "string",
+                    "description":"ID of the user to be deleted from PLC."
+                },
+                "CUSTOMER_ID": {
+                    "type":"string",
+                    "description":"ID of the customer to be deleted from PLC."
+                },
+                "VENDOR_ID": {
+                    "type":"string",
+                    "description":"ID of the vendor to be deleted from PLC."
+                },
+                "PROJECT_ID": {
+                    "type":"string",
+                    "description":"ID of the project to be anonymized"
+                }
+            }        
+        },
+        "dataProtectionDeleteResponseBody": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "PERSONAL_DATA_IN_FORMULA"
+                                        ],
+                                        "default": "PERSONAL_DATA_IN_FORMULA",
+                                        "description": "info message"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Info"
+                                        ],
+                                        "default": "Info",
+                                        "description": "PLC message severity - Info"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+        "dataProtectionPostBody": {
+			"type": "object",
+			"properties": {
+				"entity": {
+					"type": "string",
+					"description": "ex: USER1"
+				}
+			}
+        },
+        "dataProtectionPostResponseBody": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "array",
+					"items": {
+                        "type": "object",
+                        "properties": {
+                            "TABLE_NAME": {
+                                "type": "string",
+                                "description": "ex: TABLE1"
+                            },
+                            "COLUMN_NAME": {
+                                "type": "string",
+                                "description": "ex: COLUMN1"
+                            },
+                            "ENTITY": {
+                                "type": "string",
+                                "description": "ex: USER1"
+                            },
+                            "COUNTER": {
+                                "type": "integer",
+                                "description": "ex: 5"
+                            }
+                        }
+                    }
+					
+				}
+			}
+        },
+        "retentionPeriodsBody": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "array",
+					"items": {
+                        "type": "object",
+                        "properties": {
+                            "ENTITY": {
+                                "type": "string",
+                                "description": "VENDOR, CUSTOMER, PROJECT, USER"
+                            },
+                            "SUBJECT": {
+                                "type": "string",
+                                "description": "the id, ex VD1"
+                            },
+                            "VALID_TO": {
+                                "type": "timestamp",
+                                "description": "date until valid"
+                            },
+                            "VALID_FOR": {
+                                "type": "integer",
+                                "description": "number of months of validity since creation"
+                            }
+                        }
+                    }
+					
+				}
+			}
+        },
+        "retentionPeriodsDeleteRequestBody": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "array",
+					"items": {
+                        "type": "object",
+                        "properties": {
+                            "ENTITY": {
+                                "type": "string",
+                                "description": "VENDOR, CUSTOMER, PROJECT, USER"
+                            },
+                            "SUBJECT": {
+                                "type": "string",
+                                "description": "the id, ex VD1"
+                            }
+                        }
+                    }
+					
+				}
+			}
+        },
+        "GroupModel": {
+            "type": "object",
+            "properties": {
+                "GROUP": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "GROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR1"
+                            },
+                            "DESCRIPTION": {
+                                "type": "string",
+                                "description": "Group 1"
+                            }
+                        }
+                    }
+                },
+                "MEMBERS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "USER_ID": {
+                                "type": "string",
+                                "description": "ex: USER1"
+                            }
+                        }
+                    }
+                },
+                "SUBGROUPS": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "GROUP_ID": {
+                                "type": "string",
+                                "description": "ex: GR1"
+                            },
+                            "DESCRIPTION": {
+                                "type": "string",
+                                "description": "Group 1"
+                            }
+                        }
+                    }
+                },
+                "LOCK_STATUS": {
+                    "$ref": "#/definitions/LockStatusModel"
+                }
+            }
+        },
+        "GroupsRequestBody": {
+            "type": "object",
+            "properties": {
+                "CREATE": {
+                    "$ref": "#/definitions/GroupMembersModel"
+                },
+                "DELETE": {
+                    "$ref": "#/definitions/GroupMembersModel"
+                },
+                "UPDATE": {
+                    "type": "object",
+                    "properties": {
+                        "GROUP": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "GROUP_ID": {
+                                        "type": "string",
+                                        "description": "ex: GR1"
+                                    },
+                                    "DESCRIPTION": {
+                                        "type": "string",
+                                        "description": "Group 1"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageGroupCycleError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "GROUP_CYCLE_ERROR"
+                    ],
+                    "default": "GROUP_CYCLE_ERROR",
+                    "description": "PLC Code GROUP_CYCLE_ERROR will be returned"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "Error"
+                    ],
+                    "default": "Error",
+                    "description": "PLC severity Error will be returned"
+                }
+            }
+        },
+        "GroupCycleError": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/MessageGroupCycleError"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+        "MessageGeneralEntityNotFoundError": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GENERAL_ENTITY_NOT_FOUND_ERROR"
+                                        ],
+                                        "default": "GENERAL_ENTITY_NOT_FOUND_ERROR",
+                                        "description": "PLC Code GENERAL_ENTITY_NOT_FOUND_ERROR will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "default": {}
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageGeneralEntityNotWriteable": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ENTITY_NOT_WRITEABLE_INFO"
+                                        ],
+                                        "default": "ENTITY_NOT_WRITEABLE_INFO",
+                                        "description": "info message"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "required": [ "notWriteableEntityDetailsObj", "calculationVersionObjs" ],
+                                        "properties": { 
+                                            "notWriteableEntityDetailsObj" : {
+                                                "type" : "string",
+                                                "description" : "Detailed reason for raise of message ENTITY_NOT_WRITEABLE_INFO, ex: IS_OPENED_BY_ANOTHER_USER"
+                                            },
+                                            "calculationVersionObjs" : {
+                                                "type": "array",
+                                                "description" : "Calculation version IDs that are affected by the messages"
+                                            },
+                                            "userObjs" : {
+                                                "type": "array",
+                                                "description" : "Additional user objects describing the locking users"
+                                            }
+                                        }
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Info",
+                                            "Warning"
+                                        ],
+                                        "default": "Info",
+                                        "description": "PLC message severity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageGeneralEntityNotCurrentError": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GENERAL_ENTITY_NOT_CURRENT_ERROR"
+                                        ],
+                                        "default": "GENERAL_ENTITY_NOT_CURRENT_ERROR",
+                                        "description": "PLC Code GENERAL_ENTITY_NOT_CURRENT_ERROR will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "default": {}
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageGeneralAccessDeniedError": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GENERAL_ACCESS_DENIED"
+                                        ],
+                                        "default": "GENERAL_ACCESS_DENIED",
+                                        "description": "PLC Code GENERAL_ACCESS_DENIED will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "default": {}
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageGeneralEntityAlreadyExistsError": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GENERAL_ENTITY_ALREADY_EXISTS_ERROR"
+                                        ],
+                                        "default": "GENERAL_ENTITY_ALREADY_EXISTS_ERROR",
+                                        "description": "PLC Code GENERAL_ENTITY_ALREADY_EXISTS_ERROR will be returned"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "properties": {
+                                            "projectObjs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "description": "Ex. Prj1"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageWriteLayoutNamingConflict": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "WRITE_LAYOUT_NAMING_CONFLICT"
+                                        ],
+                                        "default": "WRITE_LAYOUT_NAMING_CONFLICT",
+                                        "description": "PLC Code WRITE_LAYOUT_NAMING_CONFLICT will be returned"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "PLC severity Error will be returned"
+                                    },
+                                    "details": {
+                                        "type": "object",
+                                        "properties": {
+                                            "projectObjs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "description": "Ex. -1"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "TaskModel": {
+            "type": "object",
+            "properties": {
+                "SESSION_ID": {
+                    "type": "string",
+                    "description": "Id of the user who started the task"
+                },
+                "TASK_ID": {
+                    "type": "integer",
+                    "description": "task id"
+                },
+                "TASK_TYPE": {
+                    "type": "string",
+                    "enum": [
+                        "PROJECT_CALCULATE_LIFECYCLE_VERSIONS",
+                        "METADATA_CUSTOM_FIELDS",
+                        "TRANSPORTATION_IMPORT"
+                    ],
+                    "description": "the task type"
+                },
+                "PARAMETERS": {
+                    "type": "string",
+                    "description": "parameters of the task; could be formated as JSON in order to put multiple key-value pairs."
+                },
+                "STATUS": {
+                    "type": "string",
+                    "enum": [
+                        "inactive",
+                        "active",
+                        "completed",
+                        "canceled",
+                        "failed"
+                    ],
+                    "description": "the current status of the task"
+                },
+                "PROGRESS_STEP": {
+                    "type": "integer",
+                    "description": "current progress step of the task"
+                },
+                "PROGRESS_TOTAL": {
+                    "type": "integer",
+                    "description": "total amount of steps to complete the task"
+                },
+                "STARTED": {
+                    "type": "string",
+                    "format": "timestamp",
+                    "description": "Timestamp when the task was started the first time in UTC; if the task was not started yet, the value is null"
+                },
+                "LAST_UPDATED_ON": {
+                    "type": "string",
+                    "format": "timestamp",
+                    "description": "Timestamp when the task status or progress received the last update in UTC; if the task was not started yet, the value is null"
+                },
+                "ERROR_CODE": {
+                    "type": "string",
+                    "description": "the code of the error in case the task status is \"failed\""
+                },
+                "ERROR_DETAILS": {
+                    "type": "string",
+                    "description": "details to the occured error"
+                }
+            }
+        },
+        "TaskResponse": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object"
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "transactionaldata": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TaskModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageCalculationLifecycleVersionsConflict": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "PROJECT_CALCULATE_LIFECYCLEVERSION_CONFLICT"
+                                        ],
+                                        "default": "PROJECT_CALCULATE_LIFECYCLEVERSION_CONFLICT",
+                                        "description": "error code"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "error severity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageProjectNotWritableError": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "enum": [
+                                            "PROJECT_NOT_WRITABLE_ERROR"
+                                        ],
+                                        "default": "PROJECT_NOT_WRITABLE_ERROR",
+                                        "description": "error code"
+                                    },
+                                    "severity": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Error"
+                                        ],
+                                        "default": "Error",
+                                        "description": "error severity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "MessageProjectWithNoAdministrator": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "PROJECT_WITH_NO_ADMINISTRATOR_ERROR"
+                    ],
+                    "default": "PROJECT_WITH_NO_ADMINISTRATOR_ERROR",
+                    "description": "PLC Code PROJECT_WITH_NO_ADMINISTRATOR_ERROR will be returned"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "Error"
+                    ],
+                    "default": "Error",
+                    "description": "PLC severity Error will be returned"
+                },
+                "details": {
+                    "type": "object",
+                    "default": {}
+                }
+            }
+        },
+        "ProjectWithNoAdministratorError": {
+            "type": "object",
+            "properties": {
+                "head": {
+                    "type": "object",
+                    "properties": {
+                        "messages": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/MessageProjectWithNoAdministrator"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object"
+                }
+            }
+        },
+        "BomCalculationsResponse": {
+            "type": "object",
+            "properties": {
+                "d": {
+                    "type": "object",
+                    "properties": {
+                        "results": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CalculationsComparisonModelResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CalculationsComparisonModelResponse": {
+            "type": "object",
+            "properties": {
+                "ACCOUNT_ID": {
+                    "type": "string",
+                    "default": "ex: #AC13"
+                },
+                "ACCOUNT_ID_2": {
+                    "type": "string",
+                    "default": "ex: #AC13"
+                },
+                "ACCOUNT_TYPE_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ACCOUNT_TYPE_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "BASE_QUANTITY": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "BASE_QUANTITY_2": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "BASE_QUANTITY_CALCULATED": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "BASE_QUANTITY_CALCULATED_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "BASE_QUANTITY_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "BASE_QUANTITY_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "BUSINESS_AREA_ID": {
+                    "type": "string",
+                    "default": "#BA1"
+                },
+                "BUSINESS_AREA_ID_2": {
+                    "type": "string",
+                    "default": "#BA1"
+                },
+                "CALCULATION_VERSION_ID": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "CALCULATION_VERSION_ID_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "COMMENT": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "COMMENT_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "COMPANY_CODE_ID": {
+                    "type": "string",
+                    "default": "#C1"
+                },
+                "COMPANY_CODE_ID_2": {
+                    "type": "string",
+                    "default": "#C1"
+                },
+                "CONFIDENCE_LEVEL_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "CONFIDENCE_LEVEL_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "COST_CENTER_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "COST_CENTER_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "CREATED_BY": {
+                    "type": "string",
+                    "default": "#CONTOLLER"
+                },
+                "CREATED_BY_2": {
+                    "type": "string",
+                    "default": "#CONTOLLER"
+                },
+                "CREATED_ON": {
+                    "type": "string",
+                    "default": "/Date(1483261200000)/"
+                },
+                "CREATED_ON_2": {
+                    "type": "string",
+                    "default": "/Date(1483261200000)/"
+                },
+                "DESIGN_OFFICE_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DESIGN_OFFICE_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DETERMINED_ACCOUNT_ID": {
+                    "type": "string",
+                    "default": "#AC13"
+                },
+                "DETERMINED_ACCOUNT_ID_2": {
+                    "type": "string",
+                    "default": "#AC13"
+                },
+                "DOCUMENT_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_PART": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_PART_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_STATUS_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_STATUS_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_TYPE_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_TYPE_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_VERSION": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "DOCUMENT_VERSION_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "EFFICIENCY": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "EFFICIENCY_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ENGINEERING_CHANGE_NUMBER_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ENGINEERING_CHANGE_NUMBER_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "HIGHLIGHT_GREEN": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "HIGHLIGHT_GREEN_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "HIGHLIGHT_ORANGE": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "HIGHLIGHT_ORANGE_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "HIGHLIGHT_YELLOW": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "HIGHLIGHT_YELLOW_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "ID": {
+                    "type": "string",
+                    "default": "16190998402131"
+                },
+                "IS_ACTIVE": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "IS_ACTIVE_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "IS_CONFIGURABLE_MATERIAL": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_CONFIGURABLE_MATERIAL_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_DISABLING_ACCOUNT_DETERMINATION": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_DISABLING_ACCOUNT_DETERMINATION_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_DISABLING_PRICE_DETERMINATION": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_DISABLING_PRICE_DETERMINATION_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_LEAF": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_LEAF_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_PHANTOM_MATERIAL": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_PHANTOM_MATERIAL_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_PRICE_SPLIT_ACTIVE": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_PRICE_SPLIT_ACTIVE_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_RELEVANT_TO_COSTING_IN_ERP": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "IS_RELEVANT_TO_COSTING_IN_ERP_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "ITEM_CATEGORY_ID": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "ITEM_CATEGORY_ID_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "ITEM_default": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ITEM_default_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "ITEM_ID": {
+                    "type": "integer",
+                    "default": "3952"
+                },
+                "ITEM_ID_2": {
+                    "type": "integer",
+                    "default": "3952"
+                },
+                "ITEM_KEY": {
+                    "type": "string",
+                    "default": "Calculation version"
+                },
+                "ITEM_ORDER": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "LAST_MODIFIED_BY": {
+                    "type": "string",
+                    "default": "#CONTROLLER"
+                },
+                "LAST_MODIFIED_BY_2": {
+                    "type": "string",
+                    "default": "#CONTROLLER"
+                },
+                "LAST_MODIFIED_ON": {
+                    "type": "string",
+                    "default": "/Date(1483261200000)/"
+                },
+                "LAST_MODIFIED_ON_2": {
+                    "type": "string",
+                    "default": "/Date(1483261200000)/"
+                },
+                "LEVEL": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "LEVEL_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "LOCAL_CONTENT": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "LOCAL_CONTENT_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "LOT_SIZE": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "LOT_SIZE_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "LOT_SIZE_CALCULATED": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "LOT_SIZE_CALCULATED_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "LOT_SIZE_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "LOT_SIZE_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "null"
+                },
+                "MATERIAL_GROUP_ID": {
+                    "type": "string",
+                    "default": "#MECH"
+                },
+                "MATERIAL_GROUP_ID_2": {
+                    "type": "string",
+                    "default": "#MECH"
+                },
+                "MATERIAL_ID": {
+                    "type": "string",
+                    "default": "#P-100"
+                },
+                "MATERIAL_ID_2": {
+                    "type": "string",
+                    "default": "#P-100"
+                },
+                "MATERIAL_SOURCE": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "MATERIAL_SOURCE_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "MATERIAL_TYPE_ID": {
+                    "type": "string",
+                    "default": "#FIN"
+                },
+                "MATERIAL_TYPE_ID_2": {
+                    "type": "string",
+                    "default": "#FIN"
+                },
+                "NODE_ID": {
+                    "type": "string",
+                    "default": "1-3952"
+                },
+                "NODE_ID_2": {
+                    "type": "string",
+                    "default": "1-3952"
+                },
+                "OTHER_COST": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OTHER_COST_2": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OTHER_COST_FIXED_PORTION": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OTHER_COST_FIXED_PORTION_2": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OTHER_COST_VARIABLE_PORTION": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OTHER_COST_VARIABLE_PORTION_2": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "OVERHEAD_GROUP_ID": {
+                    "type": "string",
+                    "default": "#OG1"
+                },
+                "OVERHEAD_GROUP_ID_2": {
+                    "type": "string",
+                    "default": "#OG1"
+                },
+                "PARENT_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PARENT_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PARENT_ITEM_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PARENT_ITEM_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PARENT_KEY": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PLANT_ID": {
+                    "type": "string",
+                    "default": "#PT1"
+                },
+                "PLANT_ID_2": {
+                    "type": "string",
+                    "default": "#PT1"
+                },
+                "PREDECESSOR_ITEM_ID": {
+                    "type": "string",
+                    "default": "#PT1"
+                },
+                "PREDECESSOR_ITEM_ID_2": {
+                    "type": "string",
+                    "default": "#PT1"
+                },
+                "PRICE": {
+                    "type": "string",
+                    "default": "623.1900000"
+                },
+                "PRICE_2": {
+                    "type": "string",
+                    "default": "623.1900000"
+                },
+                "PRICE_FIXED_PORTION": {
+                    "type": "string",
+                    "default": "623.1900000"
+                },
+                "PRICE_FIXED_PORTION_2": {
+                    "type": "string",
+                    "default": "623.1900000"
+                },
+                "PRICE_FIXED_PORTION_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PRICE_FIXED_PORTION_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY_2": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_2": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_2": {
+                    "type": "string",
+                    "default": "7377.2880000"
+                },
+                "PRICE_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PRICE_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PRICE_SOURCE_ID": {
+                    "type": "string",
+                    "default": "PLC_CALCULATED_PRICE"
+                },
+                "PRICE_SOURCE_ID_2": {
+                    "type": "string",
+                    "default": "PLC_CALCULATED_PRICE"
+                },
+                "PRICE_SOURCE_TYPE_ID": {
+                    "type": "integer",
+                    "default": "4"
+                },
+                "PRICE_SOURCE_TYPE_ID_2": {
+                    "type": "integer",
+                    "default": "4"
+                },
+                "PRICE_UNIT": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "PRICE_UNIT_2": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "PRICE_UNIT_CALCULATED": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "PRICE_UNIT_CALCULATED_2": {
+                    "type": "string",
+                    "default": "1.0000000"
+                },
+                "PRICE_UNIT_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PRICE_UNIT_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PRICE_UNIT_UOM_ID": {
+                    "type": "string",
+                    "default": "PC"
+                },
+                "PRICE_UNIT_UOM_ID_2": {
+                    "type": "string",
+                    "default": "PC"
+                },
+                "PRICE_VARIABLE_PORTION": {
+                    "type": "string",
+                    "default": "396.8700000"
+                },
+                "PRICE_VARIABLE_PORTION_2": {
+                    "type": "string",
+                    "default": "396.8700000"
+                },
+                "PRICE_VARIABLE_PORTION_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PRICE_VARIABLE_PORTION_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "0"
+                },
+                "PROCESS_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PROCESS_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PROFIT_CENTER_ID": {
+                    "type": "string",
+                    "default": "#PC1"
+                },
+                "PROFIT_CENTER_ID_2": {
+                    "type": "string",
+                    "default": "#PC1"
+                },
+                "PURCHASING_DOCUMENT": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PURCHASING_DOCUMENT_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PURCHASING_GROUP": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "PURCHASING_GROUP_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTITY": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTITY_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_CALCULATED": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_CALCULATED_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_IS_MANUAL": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_IS_MANUAL_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_PER_BASE_UNIT": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_PER_BASE_UNIT_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_PER_BASE_UNIT_UOM_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_PER_BASE_UNIT_UOM_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_UOM_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "QUANTIY_UOM_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "RANK": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "RANK_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "REFERENCED_CALCULATION_VERSION_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "REFERENCED_CALCULATION_VERSION_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "SURCHARGE": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "SURCHARGE_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "TARGET_COST": {
+                    "type": "string",
+                    "default": "8000.0000000"
+                },
+                "TARGET_COST_2": {
+                    "type": "string",
+                    "default": "8000.0000000"
+                },
+                "TARGET_COST_CURRENCY_ID": {
+                    "type": "string",
+                    "default": "EUR"
+                },
+                "TARGET_COST_CURRENCY_ID_2": {
+                    "type": "string",
+                    "default": "EUR"
+                },
+                "TARGET_COST_IS_MANUAL": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "TARGET_COST_IS_MANUAL_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "TOTAL_COST": {
+                    "type": "string",
+                    "default": "8115.0168000"
+                },
+                "TOTAL_COST_2": {
+                    "type": "string",
+                    "default": "8115.0168000"
+                },
+                "TOTAL_COST_FIXED_PORTION": {
+                    "type": "string",
+                    "default": "2998.6704000"
+                },
+                "TOTAL_COST_FIXED_PORTION_2": {
+                    "type": "string",
+                    "default": "2998.6704000"
+                },
+                "TOTAL_COST_PER_UNIT": {
+                    "type": "string",
+                    "default": "811.5016800"
+                },
+                "TOTAL_COST_PER_UNIT_2": {
+                    "type": "string",
+                    "default": "811.5016800"
+                },
+                "TOTAL_COST_PER_UNIT_FIXED_PORTION": {
+                    "type": "string",
+                    "default": "299.8670400"
+                },
+                "TOTAL_COST_PER_UNIT_FIXED_PORTION_2": {
+                    "type": "string",
+                    "default": "299.8670400"
+                },
+                "TOTAL_COST_PER_UNIT_VARIABLE_PORTION": {
+                    "type": "string",
+                    "default": "511.6346400"
+                },
+                "TOTAL_COST_PER_UNIT_VARIABLE_PORTION_2": {
+                    "type": "string",
+                    "default": "511.6346400"
+                },
+                "TOTAL_QUANTITY": {
+                    "type": "string",
+                    "default": "10.0000000"
+                },
+                "TOTAL_QUANTITY_2": {
+                    "type": "string",
+                    "default": "10.0000000"
+                },
+                "TOTAL_QUANTITY_DEPENDS_ON": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "TOTAL_QUANTITY_DEPENDS_ON_2": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "TOTAL_QUANTITY_OF_VARIANTS": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "TOTAL_QUANTITY_OF_VARIANTS_2": {
+                    "type": "string",
+                    "default": "0.0000000"
+                },
+                "TOTAL_QUANTITY_UOM_ID": {
+                    "type": "string",
+                    "default": "PC"
+                },
+                "TOTAL_QUANTITY_UOM_ID_2": {
+                    "type": "string",
+                    "default": "PC"
+                },
+                "TRANSACTION_CURRENCY_ID": {
+                    "type": "string",
+                    "default": "EUR"
+                },
+                "TRANSACTION_CURRENCY_ID_2": {
+                    "type": "string",
+                    "default": "EUR"
+                },
+                "VALUATION_CLASS_ID": {
+                    "type": "string",
+                    "default": "#VC1"
+                },
+                "VALUATION_CLASS_ID_2": {
+                    "type": "string",
+                    "default": "#VC1"
+                },
+                "VENDOR_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "VENDOR_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "WORK_CENTER_CATEGORY": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "WORK_CENTER_CATEGORY_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "WORK_CENTER_ID": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "WORK_CENTER_ID_2": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "__metadata": {
+                    "type": "object",
+                    "properties": {
+                        "uri": {
+                            "type": "string",
+                            "default": "http://baseURL/analytics/services.xsodata/V_BOM_COMPARE('10000931202131')"
+                        },
+                        "type": {
+                            "type": "string",
+                            "default": "default.V_BOM_COMPAREType"
+                        }
+                    }
+                }
+            }
+        },
+        "versionSearchResponse": {
+            "type": "object",
+            "properties": {
+                "d": {
+                    "type": "object",
+                    "properties": {
+                        "results": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/versionSearchModelResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "versionSearchModelResponse": {
+            "type": "object",
+            "properties": {
+                "calculation_id": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "calculation_name": {
+                    "type": "string",
+                    "default": "#SAP Example: Pump P-100"
+                },
+                "calculation_version_id": {
+                    "type": "integer",
+                    "default": "1"
+                },
+                "calculation_version_name": {
+                    "type": "string",
+                    "default": "#Version 1"
+                },
+                "project_id": {
+                    "type": "string",
+                    "default": "#P1"
+                },
+                "project_name": {
+                    "type": "string",
+                    "default": "#SAP Example: Pump Project"
+                },
+                "__metadata": {
+                    "type": "object",
+                    "properties": {
+                        "uri": {
+                            "type": "string",
+                            "default": "default.versionsearchType"
+                        },
+                        "type": {
+                            "type": "string",
+                            "default": "http://baseurl/analytics/services.xsodata/versionsearch(1)"
+                        }
+                    }
+                }
+            }
+        },
+        "BadRequest": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string",
+                            "default": "400"
+                        },
+                        "message": {
+                            "type": "object",
+                            "properties": {
+                                "lang": {
+                                    "type": "string",
+                                    "default": "en-US"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "default": "Only system query options '$expand, $filter, $format, $orderby, $skip, $top, $inlinecount, $select' are allowed in the requested URI"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "xsMetadataResponse": {
+            "type": "object",
+            "properties": {
+                "xmlns:edmx": {
+                    "type": "string",
+                    "default": "http://schemas.microsoft.com/ado/2007/06/edmx",
+                    "xml": {
+                        "attribute": "true"
+                    }
+                },
+                "xmlns:sap": {
+                    "type": "string",
+                    "default": "http://www.sap.com/Protocols/SAPData",
+                    "xml": {
+                        "attribute": "true"
+                    }
+                },
+                "DataServices": {
+                    "type": "object",
+                    "properties": {
+                        "xmlns:m": {
+                            "type": "string",
+                            "default": "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata",
+                            "xml": {
+                                "attribute": "true"
+                            }
+                        },
+                        "m:DataServiceVersion": {
+                            "type": "string",
+                            "default": "2.0",
+                            "xml": {
+                                "attribute": "true"
+                            }
+                        },
+                        "Schema": {
+                            "type": "object",
+                            "properties": {
+                                "xmlns:d": {
+                                    "type": "string",
+                                    "default": "http://schemas.microsoft.com/ado/2007/08/dataservices",
+                                    "xml": {
+                                        "attribute": "true"
+                                    }
+                                },
+                                "xmlns:m": {
+                                    "type": "string",
+                                    "default": "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata",
+                                    "xml": {
+                                        "attribute": "true"
+                                    }
+                                },
+                                "xmlns": {
+                                    "type": "string",
+                                    "default": "http://schemas.microsoft.com/ado/2008/09/edm",
+                                    "xml": {
+                                        "attribute": "true"
+                                    }
+                                },
+                                "Namespace": {
+                                    "type": "string",
+                                    "default": "default",
+                                    "xml": {
+                                        "attribute": "true"
+                                    }
+                                },
+                                "EntityType": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Name": {
+                                            "type": "string",
+                                            "xml": {
+                                                "attribute": "true"
+                                            }
+                                        },
+                                        "sap:semantics": {
+                                            "type": "string",
+                                            "xml": {
+                                                "attribute": "true"
+                                            }
+                                        },
+                                        "Key": {
+                                            "type": "object",
+                                            "properties": {
+                                                "PropertyRef": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "Name": {
+                                                            "type": "string",
+                                                            "xml": {
+                                                                "attribute": "true"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "Property": {
+                                            "type": "object",
+                                            "properties": {
+                                                "Name": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "Type": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "Nullable": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "MaxLength": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:filterable": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:display-format": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:label": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:unit": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:parameter": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:creatable": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:semantics": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:filter-restriction": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:updatable": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                },
+                                                "sap:deletable": {
+                                                    "type": "string",
+                                                    "xml": {
+                                                        "attribute": "true"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "xml": {
+                        "prefix": "edmx"
+                    }
+                }
+            },
+            "xml": {
+                "prefix": "edmx",
+                "name": "EDMX"
+            }
+        }
+    }
+}

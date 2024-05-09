@@ -1,0 +1,108 @@
+{
+    "data-protection": {        
+        "delete": {
+            "tags":[
+                "data-protection"
+            ],
+            "summary": "Data Protection: Erase personal data",
+            "description": "Data Protection: Erase personal data when all applicable validity periods have expired.",
+            "operationId": "dataProtectionDelete",
+            "consumes": [
+                "application/json"
+            ],            
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/dataProtectionDeleteRequestBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Data protection update was successful",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/dataProtectionDeleteResponseBody"
+                    }
+                },
+                "400": {
+                    "description": "Project with no administrator",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/ProjectWithNoAdministratorError"
+                    }
+                },  
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                      
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.Personal_Data_Delete": []
+            }]
+
+        },
+        "post": {
+            "tags":[
+                "data-protection"
+            ],
+            "summary": "Data Protection: Read personal data",
+            "description": "Data Protection: Read personal data",
+            "operationId": "dataProtectionPost",
+            "consumes": [
+                "application/json"
+            ],            
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Entity name",
+                    "required": true,
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/dataProtectionPostBody"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Data protection update was successful",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/dataProtectionPostResponseBody"
+                    }
+                },
+                "405": {
+                    "description": "Method Not Allowed",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/MethodNotAllowed"
+                    }
+                },
+                "500": {                      
+                    "description": "General Validation Error",
+                    "schema": {
+                        "$ref": "../definitions/definitions.json#/definitions/GeneralValidationError"
+                    }
+                }
+            },
+            "security": [{
+              "Privileges.Personal_Data_Read": []
+            }]
+
+        }
+    }
+}

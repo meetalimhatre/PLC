@@ -1,0 +1,498 @@
+FUNCTION "sap.plc.analytics.viewsCF.base::TABLE_FUNCTION_v_bom_compare"
+(
+versionId1 INTEGER default 0,
+versionId2 INTEGER default 0,
+languageId NVARCHAR(11) default 'EN'
+)
+RETURNS TABLE(
+    "RANK" INT,
+     "LEVEL" INT,
+     "ITEM_ID" INT,
+     "CALCULATION_VERSION_ID" INT,
+     "ITEM_KEY" NVARCHAR(256),
+     "PARENT_KEY" NVARCHAR(256),
+	 "NODE_ID" NVARCHAR(256),
+	 "PARENT_ID" NVARCHAR(256),
+     "RANK_BOMC2" INT,
+     "LEVEL_BOMC2" INT,
+     "ITEM_ID_BOMC2" INT,
+     "CALCULATION_VERSION_ID_BOMC2" INT,
+	 "NODE_ID_BOMC2" NVARCHAR(256),
+	 "PARENT_ID_BOMC2" NVARCHAR(256),
+     "ITEM_ORDER" INT,
+	 "IS_LEAF" TINYINT,
+	 "PARENT_ITEM_ID" INT,
+	 "PREDECESSOR_ITEM_ID" INT,
+	 "IS_ACTIVE" TINYINT,
+	 "HIGHLIGHT_GREEN" TINYINT,
+	 "HIGHLIGHT_ORANGE" TINYINT,
+	 "HIGHLIGHT_YELLOW" TINYINT,
+	 "ITEM_CATEGORY_ID" INT,
+   	 "CHILD_ITEM_CATEGORY_ID" INT,
+	 "REFERENCED_CALCULATION_VERSION_ID" INT,
+	 "ACCOUNT_ID" NVARCHAR(10),
+	 "DETERMINED_ACCOUNT_ID" NVARCHAR(10),
+	 "DOCUMENT_TYPE_ID" NVARCHAR(3),
+	 "DOCUMENT_ID" NVARCHAR(40),
+	 "DOCUMENT_VERSION" NVARCHAR(2),
+	 "DOCUMENT_PART" NVARCHAR(3),
+	 "DOCUMENT_STATUS_ID" NVARCHAR(2), 
+	 "DESIGN_OFFICE_ID" NVARCHAR(3),
+	 "MATERIAL_ID" NVARCHAR(40),
+	 "MATERIAL_TYPE_ID" NVARCHAR(4),
+	 "MATERIAL_GROUP_ID" NVARCHAR(9),
+	 "IS_PHANTOM_MATERIAL" TINYINT,
+	 "IS_CONFIGURABLE_MATERIAL" TINYINT,
+	 "MATERIAL_SOURCE" TINYINT,
+	 "OVERHEAD_GROUP_ID" NVARCHAR(10),
+	 "VALUATION_CLASS_ID" NVARCHAR(4),
+	 "PURCHASING_GROUP" NVARCHAR(20),
+     "PURCHASING_DOCUMENT" NVARCHAR(10),
+     "LOCAL_CONTENT" DECIMAL(28, 7),
+	 "ACTIVITY_TYPE_ID" NVARCHAR(12),
+	 "PROCESS_ID" NVARCHAR(12),
+	 "LOT_SIZE" DECIMAL(28, 7),
+	 "LOT_SIZE_CALCULATED" DECIMAL(28, 7),
+	 "LOT_SIZE_IS_MANUAL" TINYINT,
+	 "ENGINEERING_CHANGE_NUMBER_ID" NVARCHAR(250),
+	 "COMPANY_CODE_ID" NVARCHAR(4),
+	 "COST_CENTER_ID" NVARCHAR(10),
+	 "PLANT_ID" NVARCHAR(8),
+	 "WORK_CENTER_ID" NVARCHAR(15),
+	 "WORK_CENTER_CATEGORY" NVARCHAR(50),
+	 "EFFICIENCY" DECIMAL(28,7),
+	 "BUSINESS_AREA_ID" NVARCHAR(15),
+	 "PROFIT_CENTER_ID" NVARCHAR(10),
+	 "QUANTITY" DECIMAL(28, 7),
+	 "QUANTITY_CALCULATED" DECIMAL(28, 7),
+	 "QUANTITY_IS_MANUAL" TINYINT,
+	 "QUANTITY_UOM_ID" NVARCHAR(3),
+	 "TOTAL_QUANTITY" DECIMAL(28, 7),
+	 "TOTAL_QUANTITY_UOM_ID" NVARCHAR(3),
+	 "TOTAL_QUANTITY_DEPENDS_ON" INT,
+	 "IS_RELEVANT_TO_COSTING_IN_ERP" TINYINT,
+	 "BASE_QUANTITY" DECIMAL(28, 7),
+     "BASE_QUANTITY_CALCULATED" DECIMAL(28, 7),
+     "BASE_QUANTITY_IS_MANUAL" TINYINT,
+     "QUANTITY_PER_BASE_UNIT" DECIMAL(28, 7),
+     "QUANTITY_PER_BASE_UNIT_UOM_ID" NVARCHAR(3),
+	 "PRICE_FIXED_PORTION" DECIMAL(28, 7),
+	 "PRICE_FIXED_PORTION_IS_MANUAL" TINYINT,
+	 "PRICE_VARIABLE_PORTION" DECIMAL(28, 7),
+	 "PRICE_VARIABLE_PORTION_IS_MANUAL" TINYINT,
+	 "PRICE" DECIMAL(28, 7),
+	 "TRANSACTION_CURRENCY_ID" NVARCHAR(3),
+	 "PRICE_UNIT" DECIMAL(28, 7),
+	 "PRICE_UNIT_CALCULATED" DECIMAL(28, 7),
+	 "PRICE_UNIT_IS_MANUAL" TINYINT,
+	 "PRICE_UNIT_UOM_ID" NVARCHAR(3),
+	 "IS_PRICE_SPLIT_ACTIVE" TINYINT,
+	 "IS_DISABLING_ACCOUNT_DETERMINATION" TINYINT,
+	 "PRICE_ID" NVARCHAR(32),
+	 "CONFIDENCE_LEVEL_ID" INT,
+	 "PRICE_SOURCE_ID" NVARCHAR(20),
+	 "PRICE_SOURCE_TYPE_ID" TINYINT,
+     "SURCHARGE" DECIMAL(28, 7),
+	 "IS_DISABLING_PRICE_DETERMINATION" TINYINT,
+	 "VENDOR_ID" NVARCHAR(10),
+	 "TARGET_COST" DECIMAL(28, 7),
+	 "TARGET_COST_IS_MANUAL" TINYINT,
+	 "TARGET_COST_CURRENCY_ID" NVARCHAR(3),
+	 "CREATED_ON" LONGDATE,
+	 "CREATED_BY" NVARCHAR(256),
+	 "LAST_MODIFIED_ON" LONGDATE,
+	 "LAST_MODIFIED_BY" NVARCHAR(256),
+	 "PRICE_FOR_TOTAL_QUANTITY" DECIMAL(28, 7),
+	 "PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION" DECIMAL(28, 7),
+	 "PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION" DECIMAL(28, 7),
+	 "OTHER_COST" DECIMAL(28, 7),
+	 "OTHER_COST_FIXED_PORTION" DECIMAL(28, 7),
+	 "OTHER_COST_VARIABLE_PORTION" DECIMAL(28, 7),
+	 "TOTAL_COST" DECIMAL(28, 7),
+	 "TOTAL_COST_FIXED_PORTION" DECIMAL(28, 7),
+	 "TOTAL_COST_VARIABLE_PORTION" DECIMAL(28, 7),
+	 "ITEM_DESCRIPTION" NVARCHAR(250),
+	 "COMMENT" NVARCHAR(5000),
+	 "TOTAL_COST_PER_UNIT_FIXED_PORTION" DECIMAL(28, 7),
+	 "TOTAL_COST_PER_UNIT_VARIABLE_PORTION" DECIMAL(28, 7),
+	 "TOTAL_COST_PER_UNIT" DECIMAL(28, 7),
+	 "TOTAL_QUANTITY_OF_VARIANTS" DECIMAL (28, 7)
+	 {{#if Item.customFields}}
+	    {{cv_customFieldsTableFunctListBomCompare Item}}
+	{{/if}},
+	 "IS_LEAF_BOMC2" TINYINT,
+	 "PARENT_ITEM_ID_BOMC2" INT,
+     "PREDECESSOR_ITEM_ID_BOMC2" INT,
+	 "IS_ACTIVE_BOMC2" TINYINT,
+	 "HIGHLIGHT_GREEN_BOMC2" TINYINT,
+	 "HIGHLIGHT_ORANGE_BOMC2" TINYINT,
+	 "HIGHLIGHT_YELLOW_BOMC2" TINYINT,
+	 "ITEM_CATEGORY_ID_BOMC2" INT,
+   	 "CHILD_ITEM_CATEGORY_ID_BOMC2" INT,
+	 "REFERENCED_CALCULATION_VERSION_ID_BOMC2" INT,
+	 "ACCOUNT_ID_BOMC2" NVARCHAR(10),
+	 "DETERMINED_ACCOUNT_ID_BOMC2" NVARCHAR(10),
+	 "DOCUMENT_TYPE_ID_BOMC2" NVARCHAR(3),
+	 "DOCUMENT_ID_BOMC2" NVARCHAR(40),
+	 "DOCUMENT_VERSION_BOMC2" NVARCHAR(2),
+	 "DOCUMENT_PART_BOMC2" NVARCHAR(3),
+	 "DOCUMENT_STATUS_ID_BOMC2" NVARCHAR(2), 
+	 "DESIGN_OFFICE_ID_BOMC2" NVARCHAR(3),
+	 "MATERIAL_ID_BOMC2" NVARCHAR(40),
+	 "MATERIAL_TYPE_ID_BOMC2" NVARCHAR(4),
+	 "MATERIAL_GROUP_ID_BOMC2" NVARCHAR(9),
+	 "IS_PHANTOM_MATERIAL_BOMC2" TINYINT,
+	 "IS_CONFIGURABLE_MATERIAL_BOMC2" TINYINT,
+	 "MATERIAL_SOURCE_BOMC2" TINYINT,
+	 "OVERHEAD_GROUP_ID_BOMC2" NVARCHAR(10),
+	 "VALUATION_CLASS_ID_BOMC2" NVARCHAR(4),
+	 "PURCHASING_GROUP_BOMC2" NVARCHAR(20),
+     "PURCHASING_DOCUMENT_BOMC2" NVARCHAR(10),
+     "LOCAL_CONTENT_BOMC2" DECIMAL(28, 7),
+	 "ACTIVITY_TYPE_ID_BOMC2" NVARCHAR(12),
+	 "PROCESS_ID_BOMC2" NVARCHAR(12),
+	 "LOT_SIZE_BOMC2" DECIMAL(28, 7),
+	 "LOT_SIZE_CALCULATED_BOMC2" DECIMAL(28, 7),
+	 "LOT_SIZE_IS_MANUAL_BOMC2" TINYINT,
+	 "ENGINEERING_CHANGE_NUMBER_ID_BOMC2" NVARCHAR(250),
+	 "COMPANY_CODE_ID_BOMC2" NVARCHAR(4),
+	 "COST_CENTER_ID_BOMC2" NVARCHAR(10),
+	 "PLANT_ID_BOMC2" NVARCHAR(8),
+	 "WORK_CENTER_ID_BOMC2" NVARCHAR(15),
+	 "WORK_CENTER_CATEGORY_BOMC2" NVARCHAR(50),
+	 "EFFICIENCY_BOMC2" DECIMAL(28,7),
+	 "BUSINESS_AREA_ID_BOMC2" NVARCHAR(15),
+	 "PROFIT_CENTER_ID_BOMC2" NVARCHAR(10),
+	 "QUANTITY_BOMC2" DECIMAL(28, 7),
+	 "QUANTITY_CALCULATED_BOMC2" DECIMAL(28, 7),
+	 "QUANTITY_IS_MANUAL_BOMC2" TINYINT,
+	 "QUANTITY_UOM_ID_BOMC2" NVARCHAR(3),
+	 "TOTAL_QUANTITY_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_QUANTITY_UOM_ID_BOMC2" NVARCHAR(3),
+	 "TOTAL_QUANTITY_DEPENDS_ON_BOMC2" INT,
+	 "IS_RELEVANT_TO_COSTING_IN_ERP_BOMC2" TINYINT,
+	 "BASE_QUANTITY_BOMC2" DECIMAL(28, 7),
+     "BASE_QUANTITY_CALCULATED_BOMC2" DECIMAL(28, 7),
+     "BASE_QUANTITY_IS_MANUAL_BOMC2" TINYINT,
+     "QUANTITY_PER_BASE_UNIT_BOMC2" DECIMAL(28, 7),
+     "QUANTITY_PER_BASE_UNIT_UOM_ID_BOMC2" NVARCHAR(3),
+	 "PRICE_FIXED_PORTION_BOMC2" DECIMAL(28, 7),
+	 "PRICE_FIXED_PORTION_IS_MANUAL_BOMC2" TINYINT,
+	 "PRICE_VARIABLE_PORTION_BOMC2" DECIMAL(28, 7),
+	 "PRICE_VARIABLE_PORTION_IS_MANUAL_BOMC2" TINYINT,
+	 "PRICE_BOMC2" DECIMAL(28, 7),
+	 "TRANSACTION_CURRENCY_ID_BOMC2" NVARCHAR(3),
+	 "PRICE_UNIT_BOMC2" DECIMAL(28, 7),
+	 "PRICE_UNIT_CALCULATED_BOMC2" DECIMAL(28, 7),
+	 "PRICE_UNIT_IS_MANUAL_BOMC2" TINYINT,
+	 "PRICE_UNIT_UOM_ID_BOMC2" NVARCHAR(3),
+	 "IS_PRICE_SPLIT_ACTIVE_BOMC2" TINYINT,
+	 "IS_DISABLING_ACCOUNT_DETERMINATION_BOMC2" TINYINT,
+	 "PRICE_ID_BOMC2" NVARCHAR(32),
+	 "CONFIDENCE_LEVEL_ID_BOMC2" INT,
+	 "PRICE_SOURCE_ID_BOMC2" NVARCHAR(20),
+	 "PRICE_SOURCE_TYPE_ID_BOMC2" TINYINT,
+     "SURCHARGE_BOMC2" DECIMAL(28, 7),
+	 "IS_DISABLING_PRICE_DETERMINATION_BOMC2" TINYINT,
+	 "VENDOR_ID_BOMC2" NVARCHAR(10),
+	 "TARGET_COST_BOMC2" DECIMAL(28, 7),
+	 "TARGET_COST_IS_MANUAL_BOMC2" TINYINT,
+	 "TARGET_COST_CURRENCY_ID_BOMC2" NVARCHAR(3),
+	 "CREATED_ON_BOMC2" LONGDATE,
+	 "CREATED_BY_BOMC2" NVARCHAR(256),
+	 "LAST_MODIFIED_ON_BOMC2" LONGDATE,
+	 "LAST_MODIFIED_BY_BOMC2" NVARCHAR(256),
+	 "PRICE_FOR_TOTAL_QUANTITY_BOMC2" DECIMAL(28, 7),
+	 "PRICE_FOR_TOTAL_QUANTITY_FIXED_PORTION_BOMC2" DECIMAL(28, 7),
+	 "PRICE_FOR_TOTAL_QUANTITY_VARIABLE_PORTION_BOMC2" DECIMAL(28, 7),
+	 "OTHER_COST_BOMC2" DECIMAL(28, 7),
+	 "OTHER_COST_FIXED_PORTION_BOMC2" DECIMAL(28, 7),
+	 "OTHER_COST_VARIABLE_PORTION_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_COST_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_COST_FIXED_PORTION_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_COST_VARIABLE_PORTION_BOMC2" DECIMAL(28, 7),
+	 "ITEM_DESCRIPTION_BOMC2" NVARCHAR(250),
+	 "COMMENT_BOMC2" NVARCHAR(5000),
+	 "TOTAL_COST_PER_UNIT_FIXED_PORTION_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_COST_PER_UNIT_VARIABLE_PORTION_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_COST_PER_UNIT_BOMC2" DECIMAL(28, 7),
+	 "TOTAL_QUANTITY_OF_VARIANTS_BOMC2" DECIMAL (28, 7)
+	 {{#if Item.customFields}}
+	    {{cv_customFieldsTableFunctListBomCompareSecondVersion Item}}
+	{{/if}}
+)
+
+LANGUAGE SQLSCRIPT
+SQL SECURITY DEFINER AS
+begin
+        declare language_id nvarchar(11);
+        declare refVersionDescription nvarchar(500);
+        select LANGUAGE into language_id default 'EN' from "sap.plc.db::basis.t_language" where LANGUAGE = UPPER(:languageId) and TEXTS_MAINTAINABLE = 1;
+        select ITEM_CATEGORY_DESCRIPTION into refVersionDescription from "sap.plc.db::basis.t_item_category__text" where item_category_id = 10 and language = UPPER(:language_id);
+
+        lt_item_order1 =
+
+            SELECT
+                hierarchy_rank AS ITEM_ORDER,
+                CALCULATION_VERSION_ID,
+                ITEM_ID
+            FROM HIERARCHY (
+                SOURCE (
+                    SELECT
+                        CONCAT(CALCULATION_VERSION_ID,ITEM_ID) as NODE_ID,
+                        CONCAT(CALCULATION_VERSION_ID,ifnull(PREDECESSOR_ITEM_ID, PARENT_ITEM_ID)) as PARENT_ID,
+                        CALCULATION_VERSION_ID,
+                        ITEM_ID
+                    FROM "sap.plc.db::basis.t_item"
+                    WHERE CALCULATION_VERSION_ID = :versionId1
+                )
+                ORPHAN ROOT );
+
+        lt_item_hierarchy1 =
+
+               SELECT
+
+                                        hierarchy_rank AS rank,
+                                        hierarchy_level AS level,
+                                        CALCULATION_VERSION_ID,
+                                        ITEM_ID,
+                                        concat(ITEM_CATEGORY_CODE, BOM_COMPARE_KEY) as BOM_COMPARE_KEY,
+                                        concat(PARENT_ITEM_CATEGORY_CODE, BOM_COMPARE_PARENT_KEY) as BOM_COMPARE_PARENT_KEY,
+                                        NODE_ID,
+                                        PARENT_ID,
+                                        ITEM_ORDER
+                                    FROM HIERARCHY (
+                                        SOURCE (
+                                            SELECT
+                                                CONCAT(item.CALCULATION_VERSION_ID ,concat('-',item.ITEM_ID)) as NODE_ID,
+                                                CONCAT(item.CALCULATION_VERSION_ID ,concat('-',item.PARENT_ITEM_ID)) as PARENT_ID,
+                                                item.CALCULATION_VERSION_ID,
+                                                item.ITEM_ID,
+								                itemCategory.ITEM_CATEGORY_CODE as ITEM_CATEGORY_CODE,                                                
+                                                case 
+                                                    when item.ITEM_CATEGORY_ID = 0 and item.CALCULATION_VERSION_ID != :versionId1 then concat(itemCategoryParent.ITEM_CATEGORY_CODE, item.CALCULATION_VERSION_ID)
+                                                    else itemCategoryParent.ITEM_CATEGORY_CODE
+                                                end as PARENT_ITEM_CATEGORY_CODE,
+                                                ifnull(item.BOM_COMPARE_KEY, 
+                                                        case item.ITEM_CATEGORY_ID
+                                                            when 0 then  
+                                                                case when item.CALCULATION_VERSION_ID != :versionId1
+                                                                    then to_nvarchar(item.CALCULATION_VERSION_ID)
+                                                                        else ifnull(item.ITEM_DESCRIPTION,'')
+                                                                end
+                                                            when 1 then concat(IFNULL(item.DOCUMENT_TYPE_ID,''),IFNULL(item.DOCUMENT_ID,''))
+                                                            when 2 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                            when 3 then concat(IFNULL(item.COST_CENTER_ID,''),IFNULL(item.ACTIVITY_TYPE_ID,''))
+                                                            when 4 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                            when 5 then concat(IFNULL(item.PROCESS_ID,''),IFNULL(item.WORK_CENTER_ID,''))
+                                                            when 6 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                            when 8 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                            when 10 then ifnull(to_nvarchar(item.REFERENCED_CALCULATION_VERSION_ID),'')
+                                                            else ifnull(item.ITEM_DESCRIPTION,'')
+                                                        end )
+                                                    as BOM_COMPARE_KEY,
+                                                ifnull(parent.BOM_COMPARE_KEY, 
+                                                        case parent.ITEM_CATEGORY_ID
+                                                            when 0 then
+                                                                case when item.CALCULATION_VERSION_ID != :versionId1
+                                                                    then to_nvarchar(item.CALCULATION_VERSION_ID)
+                                                                        else ifnull(parent.ITEM_DESCRIPTION,'')
+                                                                end
+                                                            when 1 then concat(IFNULL(parent.DOCUMENT_TYPE_ID,''),IFNULL(parent.DOCUMENT_ID,''))
+                                                            when 2 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                            when 3 then concat(IFNULL(parent.COST_CENTER_ID,''),IFNULL(parent.ACTIVITY_TYPE_ID,''))
+                                                            when 4 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                            when 5 then concat(IFNULL(parent.PROCESS_ID,''),IFNULL(parent.WORK_CENTER_ID,''))
+                                                            when 6 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                            when 8 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                            when 10 then ifnull(to_nvarchar(parent.REFERENCED_CALCULATION_VERSION_ID),'')
+                                                            else ifnull(parent.ITEM_DESCRIPTION,'')
+                                                        end )
+                                                as BOM_COMPARE_PARENT_KEY,
+                                              itemOrder.ITEM_ORDER
+                                            from "sap.plc.db::basis.t_item" as item
+                                            inner join "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+			                                    on item.calculation_version_id = calcVersion.calculation_version_id
+			                                    and upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+                                            left outer join "sap.plc.db::basis.t_item" as parent
+                                                on item.PARENT_ITEM_ID is not null
+                                                and parent.ITEM_ID = item.PARENT_ITEM_ID
+                                                and parent.CALCULATION_VERSION_ID = item.CALCULATION_VERSION_ID
+                                            inner join :lt_item_order1 as itemOrder
+                                                    on itemOrder.CALCULATION_VERSION_ID = item.CALCULATION_VERSION_ID
+                                                    and itemOrder.ITEM_ID = item.ITEM_ID
+                                            left outer join "sap.plc.db::basis.t_item_category" itemCategory
+                                                on item.ITEM_CATEGORY_ID = itemCategory.ITEM_CATEGORY_ID
+                                                and item.CHILD_ITEM_CATEGORY_ID = itemCategory.CHILD_ITEM_CATEGORY_ID
+                                            left outer join  "sap.plc.db::basis.t_item_category" itemCategoryParent
+                                                on parent.ITEM_CATEGORY_ID = itemCategoryParent.ITEM_CATEGORY_ID
+                                                and parent.CHILD_ITEM_CATEGORY_ID = itemCategoryParent.CHILD_ITEM_CATEGORY_ID
+                                            WHERE item.CALCULATION_VERSION_ID = :versionId1
+                                            ORDER BY itemOrder.ITEM_ORDER )
+                                        START WHERE item.CALCULATION_VERSION_ID = :versionId1
+                                                and item.ITEM_CATEGORY_ID = 0
+                                        ORPHAN IGNORE
+                                );
+
+        lt_item_order2 =
+            SELECT
+                hierarchy_rank AS ITEM_ORDER,
+                CALCULATION_VERSION_ID,
+                ITEM_ID
+            FROM HIERARCHY (
+                SOURCE (
+                    SELECT
+                        CONCAT(CALCULATION_VERSION_ID,ITEM_ID) as NODE_ID,
+                        CONCAT(CALCULATION_VERSION_ID,ifnull(PREDECESSOR_ITEM_ID, PARENT_ITEM_ID)) as PARENT_ID,
+                        CALCULATION_VERSION_ID,
+                        ITEM_ID
+                    FROM "sap.plc.db::basis.t_item"
+                    WHERE CALCULATION_VERSION_ID = :versionId2
+                )
+                ORPHAN ROOT );
+
+        lt_item_hierarchy2 =
+
+                    SELECT
+                        hierarchy_rank AS rank,
+                        hierarchy_level AS level,
+                        CALCULATION_VERSION_ID,
+                        ITEM_ID,
+                        concat(ITEM_CATEGORY_CODE, BOM_COMPARE_KEY) as BOM_COMPARE_KEY,
+                        concat(PARENT_ITEM_CATEGORY_CODE, BOM_COMPARE_PARENT_KEY) as BOM_COMPARE_PARENT_KEY,
+                        NODE_ID,
+                        PARENT_ID,
+                        ITEM_ORDER
+                    FROM HIERARCHY (
+                        SOURCE (
+                            SELECT
+                                CONCAT(item.CALCULATION_VERSION_ID ,concat('-',item.ITEM_ID)) as NODE_ID,
+                                CONCAT(item.CALCULATION_VERSION_ID ,concat('-',item.PARENT_ITEM_ID)) as PARENT_ID,
+                                item.CALCULATION_VERSION_ID,
+                                item.ITEM_ID,
+								itemCategory.ITEM_CATEGORY_CODE as ITEM_CATEGORY_CODE,                                                
+                                case 
+                                    when item.ITEM_CATEGORY_ID = 0 and item.CALCULATION_VERSION_ID != :versionId2 then concat(itemCategoryParent.ITEM_CATEGORY_CODE, item.CALCULATION_VERSION_ID)
+                                    else itemCategoryParent.ITEM_CATEGORY_CODE
+                                end as PARENT_ITEM_CATEGORY_CODE,
+                                ifnull(item.BOM_COMPARE_KEY, 
+                                            case item.ITEM_CATEGORY_ID
+                                                when 0 then
+                                                    case when item.CALCULATION_VERSION_ID != :versionId2
+                                                        then to_nvarchar(item.CALCULATION_VERSION_ID)
+                                                            else ifnull(item.ITEM_DESCRIPTION,'')
+                                                    end
+                                                when 1 then concat(IFNULL(item.DOCUMENT_TYPE_ID,''),IFNULL(item.DOCUMENT_ID,''))
+                                                when 2 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                when 3 then concat(IFNULL(item.COST_CENTER_ID,''),IFNULL(item.ACTIVITY_TYPE_ID,''))
+                                                when 4 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                when 5 then concat(IFNULL(item.PROCESS_ID,''),IFNULL(item.WORK_CENTER_ID,''))
+                                                when 6 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                when 8 then concat(IFNULL(item.PLANT_ID,''),IFNULL(item.MATERIAL_ID,''))
+                                                when 10 then ifnull(to_nvarchar(item.REFERENCED_CALCULATION_VERSION_ID),'')
+                                                else ifnull(item.ITEM_DESCRIPTION,'')
+                                            end )
+                                as BOM_COMPARE_KEY,
+                                ifnull(parent.BOM_COMPARE_KEY, 
+                                            case parent.ITEM_CATEGORY_ID
+                                                when 0 then
+                                                    case when item.CALCULATION_VERSION_ID != :versionId2
+                                                        then to_nvarchar(item.CALCULATION_VERSION_ID)
+                                                        else ifnull(parent.ITEM_DESCRIPTION,'')
+                                                    end
+                                                when 1 then concat(IFNULL(parent.DOCUMENT_TYPE_ID,''),IFNULL(parent.DOCUMENT_ID,''))
+                                                when 2 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                when 3 then concat(IFNULL(parent.COST_CENTER_ID,''),IFNULL(parent.ACTIVITY_TYPE_ID,''))
+                                                when 4 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                when 5 then concat(IFNULL(parent.PROCESS_ID,''),IFNULL(parent.WORK_CENTER_ID,''))
+                                                when 6 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                when 8 then concat(IFNULL(parent.PLANT_ID,''),IFNULL(parent.MATERIAL_ID,''))
+                                                when 10 then ifnull(to_nvarchar(parent.REFERENCED_CALCULATION_VERSION_ID),'')
+                                                else ifnull(parent.ITEM_DESCRIPTION,'')
+                                            end )
+                                as BOM_COMPARE_PARENT_KEY,
+                                itemOrder.ITEM_ORDER
+                            from "sap.plc.db::basis.t_item" as item
+                            inner join "sap.plc.db.authorization::privileges.v_calculation_version_read" calcVersion
+                                on item.calculation_version_id = calcVersion.calculation_version_id
+                                and upper(calcVersion.USER_ID) = upper(SESSION_CONTEXT('XS_APPLICATIONUSER'))
+                            left outer join "sap.plc.db::basis.t_item" as parent
+                                on item.PARENT_ITEM_ID is not null
+                                and parent.ITEM_ID = item.PARENT_ITEM_ID
+                                and parent.CALCULATION_VERSION_ID = item.CALCULATION_VERSION_ID
+                            inner join :lt_item_order2 as itemOrder
+                                on itemOrder.CALCULATION_VERSION_ID = item.CALCULATION_VERSION_ID
+                                and itemOrder.ITEM_ID = item.ITEM_ID
+                            left outer join "sap.plc.db::basis.t_item_category" itemCategory
+                                on item.ITEM_CATEGORY_ID = itemCategory.ITEM_CATEGORY_ID
+                                and item.CHILD_ITEM_CATEGORY_ID = itemCategory.CHILD_ITEM_CATEGORY_ID
+                            left outer join  "sap.plc.db::basis.t_item_category" itemCategoryParent
+                                on parent.ITEM_CATEGORY_ID = itemCategoryParent.ITEM_CATEGORY_ID
+                                and parent.CHILD_ITEM_CATEGORY_ID = itemCategoryParent.CHILD_ITEM_CATEGORY_ID
+                            WHERE item.CALCULATION_VERSION_ID = :versionId2
+                            ORDER BY itemOrder.ITEM_ORDER )
+                        START WHERE item.CALCULATION_VERSION_ID = :versionId2
+                                and item.ITEM_CATEGORY_ID = 0
+                        ORPHAN IGNORE
+                    );
+
+        lt_result =
+                select
+                    h1.RANK as "RANK",
+                    h1.LEVEL as "LEVEL",
+                    h1.ITEM_ID as "ITEM_ID",
+                    h1.CALCULATION_VERSION_ID as "CALCULATION_VERSION_ID",
+                    h1.BOM_COMPARE_KEY as "BOM_COMPARE_KEY",
+                    h1.BOM_COMPARE_PARENT_KEY as "BOM_COMPARE_PARENT_KEY",
+                    h1.NODE_ID as "NODE_ID",
+                    h1.PARENT_ID as "PARENT_ID",
+                    h1.ITEM_ORDER as "ITEM_ORDER",
+                    h2.RANK as "RANK_BOMC2",
+                    h2.LEVEL as "LEVEL_BOMC2",
+                    h2.ITEM_ID as "ITEM_ID_BOMC2",
+                    h2.CALCULATION_VERSION_ID as "CALCULATION_VERSION_ID_BOMC2",
+                    h2.BOM_COMPARE_KEY as "BOM_COMPARE_KEY_BOMC2",
+                    h2.BOM_COMPARE_PARENT_KEY as "BOM_COMPARE_PARENT_KEY_BOMC2",
+                    h2.NODE_ID as "NODE_ID_BOMC2",
+                    h2.PARENT_ID as "PARENT_ID_BOMC2",
+                    h2.ITEM_ORDER as "ITEM_ORDER_BOMC2"
+                from :lt_item_hierarchy1 as h1
+                    left outer join :lt_item_hierarchy2 as h2
+                        on h1.LEVEL = h2.LEVEL
+                        and ifnull(h1.BOM_COMPARE_PARENT_KEY,'') = ifnull(h2.BOM_COMPARE_PARENT_KEY,'')
+                        and h1.BOM_COMPARE_KEY = h2.BOM_COMPARE_KEY
+
+                union all
+
+                select
+                    null as "RANK",
+                    null as "LEVEL",
+                    null as "ITEM_ID",
+                    null  as "CALCULATION_VERSION_ID",
+                    null as "BOM_COMPARE_KEY",
+                    null as "BOM_COMPARE_PARENT_KEY",
+                    null as "NODE_ID",
+                    null as "PARENT_ID",
+                    null as "ITEM_ORDER",
+                    h2."RANK" as "RANK_BOMC2",
+                    h2."LEVEL" as "LEVEL_BOMC2",
+                    h2."ITEM_ID" as "ITEM_ID_BOMC2",
+                    h2."CALCULATION_VERSION_ID" as "CALCULATION_VERSION_ID_BOMC2",
+                    h2."BOM_COMPARE_KEY" as "BOM_COMPARE_KEY_BOMC2",
+                    h2."BOM_COMPARE_PARENT_KEY" as "BOM_COMPARE_PARENT_KEY_BOMC2",
+                    h2."NODE_ID" as "NODE_ID_BOMC2",
+                    h2."PARENT_ID" as "PARENT_ID_BOMC2",
+                    h2."ITEM_ORDER" as "ITEM_ORDER_BOMC2"
+                from :lt_item_hierarchy2 as h2
+                    left outer join :lt_item_hierarchy1 as h1
+                        on h1.LEVEL = h2.LEVEL
+                        and ifnull(h1.BOM_COMPARE_PARENT_KEY,'') = ifnull(h2.BOM_COMPARE_PARENT_KEY,'')
+                        and h1.BOM_COMPARE_KEY = h2.BOM_COMPARE_KEY
+                    where h1.NODE_ID is null;
+
+
+CALL "sap.plc.db.calculationmanager.procedures::p_item_get_bom_compare_items" (:lt_result, :versionId1, :versionId2, finalResult);
+		
+return :finalResult;
+
+end;

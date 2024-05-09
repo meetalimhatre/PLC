@@ -1,0 +1,252 @@
+{
+	"definitions": {
+		"DefaultSettingsGetResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object"
+				},
+				"body": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"DEFAULT_SETTINGS": {
+								"type": "object",
+								"required": [
+									"CONTROLLING_AREA",
+									"CURRENCY"
+								],
+								"properties": {
+									"CONTROLLING_AREA": {
+										 "$ref": "../definitions/administration-definitions.json#/definitions/ControllingAreaModel"
+									},
+									"CURRENCY": {
+										 "$ref": "../definitions/administration-definitions.json#/definitions/AdministrationCurrencyModel"
+									},
+									"LOCK_STATUS": {
+										 "$ref": "../definitions/definitions.json#/definitions/LockStatusModel"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"DefaultSettingsPostBody": {
+			"type": "object",
+			"properties": {
+				"CONTROLLING_AREA_ID": {
+					"type": "string",
+					"description": "ex: #CA1"
+				},
+				"COMPANY_CODE_ID": {
+					"type": "string",
+					"description": "ex: #C1"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "Ex: PT1"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "Ex: #SPLIT_DETAILED"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "#COGSL"
+				}
+			}
+		},
+		"DefaultSettingsPostResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object",
+					"properties": {
+						"metadata": {
+							"type": "object",
+							"properties": {
+								"Default_Settings": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"IS_LOCKED": {
+												"type": "string",
+												"description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+											},
+											"USER_ID": {
+												"type": "string",
+												"description": "User that locked this object. Ex: I072519"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"DEFAULT_SETTINGS": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/DefaultSettingsModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"DefaultSettingsPutBody": {
+			"type": "object",
+			"properties": {
+				"CONTROLLING_AREA_ID": {
+					"type": "string",
+					"description": "ex: #CA1"
+				},
+				"COMPANY_CODE_ID": {
+					"type": "string",
+					"description": "ex: #C1"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "Ex: PT1"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "ex: EUR"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "Ex: #SPLIT_DETAILED"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "Ex: #COGSL"
+				}
+			}
+		},
+		"DefaultSettingsPutResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object",
+					"properties": {
+						"metadata": {
+							"type": "object",
+							"properties": {
+								"Default_Settings": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"IS_LOCKED": {
+												"type": "string",
+												"description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+											},
+											"USER_ID": {
+												"type": "string",
+												"description": "User that locked this object. Ex: I072519"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"body": {
+					"type": "object",
+					"properties": {
+						"DEFAULT_SETTINGS": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/DefaultSettingsModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"DefaultSettingsDeleteResponse": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "object",
+					"properties": {
+						"metadata": {
+							"type": "object",
+							"properties": {
+								"Default_Settings": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"IS_LOCKED": {
+												"type": "string",
+												"description": "value from header tells user that is locked by him ( value 0 ) or by somebody else (value 1 )"
+											},
+											"USER_ID": {
+												"type": "string",
+												"description": "User that locked this object. Ex: I072519"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"body": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"DEFAULT_SETTINGS": {
+								"type": "string",
+								"description": "User id"
+							}
+						}
+					}
+				}
+			}
+		},
+		"DefaultSettingsModel": {
+			"type": "object",
+			"properties": {
+				"CONTROLLING_AREA_ID": {
+					"type": "string",
+					"description": "Ex: #CA1"
+				},
+				"COMPANY_CODE_ID": {
+					"type": "string",
+					"description": "Ex: #C1"
+				},
+				"PLANT_ID": {
+					"type": "string",
+					"description": "Ex: #PT1"
+				},
+				"REPORT_CURRENCY_ID": {
+					"type": "string",
+					"description": "Ex: EUR"
+				},
+				"COMPONENT_SPLIT_ID": {
+					"type": "string",
+					"description": "Ex: #SPLIT_DETAILED"
+				},
+				"COSTING_SHEET_ID": {
+					"type": "string",
+					"description": "Ex: #COGSL"
+				}
+			}
+		}
+	}
+}

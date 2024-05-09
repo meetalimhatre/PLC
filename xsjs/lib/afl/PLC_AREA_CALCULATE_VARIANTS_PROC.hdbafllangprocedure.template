@@ -1,0 +1,107 @@
+{
+    "procedure" : "PLC_AREA_CALCULATE_VARIANTS_PROC",
+    "area" : "PLC_AREA",
+    "function" : "CALCULATE_VARIANTS",
+    "parameters" : [
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_variant_header",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_variant_items",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_calculation_header",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_formula",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_metadata",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_metadata_item_attributes",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_item",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_item_ext",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_account",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_account_group",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_account_account_group",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_row",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_row_dependencies",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_base",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_base_row",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_overhead",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_overhead_row",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_costing_sheet_overhead_row_formula",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_uom",
+            "direction" : "IN"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_currency_conversion",
+            "direction" : "IN"
+        },
+         {
+             "type" : "sap.plc.db.calcengine::calcengine_types.ts_calculate_item_price_components",
+             "direction" : "IN"
+         },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_variant_header_calculated",
+            "direction" : "OUT"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_variant_items_calculated",
+            "direction" : "OUT"
+        },
+        {
+            "type" : "sap.plc.db.calcengine::calcengine_types.ts_variant_errors",
+            "direction" : "OUT"
+        }
+    ]
+}

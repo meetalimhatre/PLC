@@ -1,0 +1,123 @@
+PROCEDURE "sap.plc.db.masterdata_replication.procedures::p_update_t_valuation_class__text" (
+    IN INPUT_TABLE TABLE (
+    	"VALUATION_CLASS_ID" NVARCHAR(4),
+    	"LANGUAGE" NVARCHAR(11),
+    	"VALUATION_CLASS_DESCRIPTION" NVARCHAR(250),
+    	"_SOURCE" TINYINT
+    ),
+    OUT OV_PROCESSED_ROWS INTEGER
+)
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+as
+
+    lv_current_utctimestamp	timestamp;
+    lv_rows_count integer;
+    lv_current_user nvarchar(256);
+    lv_run_id nvarchar(50);
+
+BEGIN
+
+    select current_utctimestamp 
+        into lv_current_utctimestamp 
+        from "sap.plc.db::DUMMY";
+        
+        SELECT SESSION_CONTEXT('APPLICATIONUSER') 
+        INTO lv_current_user 
+        FROM "sap.plc.db::DUMMY";
+    
+        SELECT SESSION_CONTEXT('SCHEDULER_RUN_ID') 
+        INTO lv_run_id 
+        FROM "sap.plc.db::DUMMY";
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+		TABLE_NAME,
+		OPERATION,
+		RUN_ID
+    )-- check if the MAIN OBJECT is existing (no other checks needed, since done on the main object)
+        select 
+            'VALUATION_CLASS_ID'               as FIELD_NAME ,
+            it.VALUATION_CLASS_ID              as FIELD_VALUE,
+            'Unknown Valuation Class ID'       as MESSAGE_TEXT ,
+            :lv_current_utctimestamp             as MESSAGE_TIME ,
+            'ERROR'                                  as MESSAGE_TYPE ,
+            't_valuation_class__text' as TABLE_NAME,
+            'Replication_Update'                     as OPERATION,
+			:lv_run_id                               as RUN_ID
+        from :INPUT_TABLE as it
+        where it.VALUATION_CLASS_ID not in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class")
+    ;
+
+    INSERT INTO "sap.plc.db::map.t_replication_log" (
+        FIELD_NAME ,
+        FIELD_VALUE,
+        MESSAGE_TEXT ,
+        MESSAGE_TIME ,
+        MESSAGE_TYPE ,
+		TABLE_NAME,
+		OPERATION,
+		RUN_ID
+    )
+        select 
+            'LANGUAGE'                                                                  as FIELD_NAME ,
+            it.LANGUAGE                                                                 as FIELD_VALUE,
+            'Unknown Language for Valuation Class ID ' || it.VALUATION_CLASS_ID         as MESSAGE_TEXT ,
+            lv_current_utctimestamp                                                     as MESSAGE_TIME ,
+            'ERROR'                                                                     as MESSAGE_TYPE ,
+            't_valuation_class__text'                                                   as TABLE_NAME,
+            'Replication_Update'                                                        as OPERATION,
+			:lv_run_id                                                                  as RUN_ID
+        from :INPUT_TABLE as it
+        where it.LANGUAGE not in (select LANGUAGE from "sap.plc.db::basis.t_language")
+    ;
+    
+    lt_update_records =
+        select VALUATION_CLASS_ID, LANGUAGE, VALUATION_CLASS_DESCRIPTION, _SOURCE
+        from 
+        --:INPUT_TABLE as it
+        (select *, --ROW_NUMBER()
+            Count(*) OVER (PARTITION BY VALUATION_CLASS_ID, LANGUAGE) AS DUPLICATE_KEY_COUNT
+            from :INPUT_TABLE
+        ) as it
+        where it.DUPLICATE_KEY_COUNT = 1
+          and it.VALUATION_CLASS_ID in (select VALUATION_CLASS_ID from "sap.plc.db::basis.t_valuation_class") 
+          and it.LANGUAGE in (select LANGUAGE from "sap.plc.db::basis.t_language") 
+            -- ignore unchanged records 
+          --and (it.VALUATION_CLASS_ID, it.LANGUAGE, IFNULL(it.VALUATION_CLASS_DESCRIPTION,''), it._SOURCE) 
+          --    not in 
+        except      
+              (select VALUATION_CLASS_ID, LANGUAGE, VALUATION_CLASS_DESCRIPTION, _SOURCE
+                    from "sap.plc.db::basis.t_valuation_class__text" as std
+                    where _VALID_TO IS NULL
+                    AND (std.VALUATION_CLASS_ID, std.LANGUAGE) in (select VALUATION_CLASS_ID, LANGUAGE from :INPUT_TABLE));
+
+    
+    SELECT COUNT(VALUATION_CLASS_ID) into lv_rows_count from :lt_update_records;
+    OV_PROCESSED_ROWS := :lv_rows_count;
+    
+    if (:lv_rows_count > 0) then
+        -- outdate the old timestamp
+    	UPDATE "sap.plc.db::basis.t_valuation_class__text" as tbl
+    		SET _VALID_TO = :lv_current_utctimestamp , _CREATED_BY = :lv_current_user  
+    		WHERE 
+    		      (tbl.VALUATION_CLASS_ID, tbl.LANGUAGE)
+    		      in (select VALUATION_CLASS_ID, LANGUAGE
+    			      from :lt_update_records as upd 
+    			      where upd.VALUATION_CLASS_ID = tbl.VALUATION_CLASS_ID
+    			        and upd.LANGUAGE = tbl.LANGUAGE
+    		      )
+    			  AND tbl._VALID_TO IS NULL;
+    	
+    	-- inser the new entries
+    	INSERT INTO  "sap.plc.db::basis.t_valuation_class__text" 
+    		(VALUATION_CLASS_ID, LANGUAGE, VALUATION_CLASS_DESCRIPTION, _VALID_FROM, _VALID_TO, _SOURCE, _CREATED_BY )
+    		select VALUATION_CLASS_ID, LANGUAGE, VALUATION_CLASS_DESCRIPTION, :lv_current_utctimestamp as _VALID_FROM, null as _VALID_TO, _SOURCE, :lv_current_user as _CREATED_BY 
+    		from :lt_update_records;
+	END IF;	
+	
+END
