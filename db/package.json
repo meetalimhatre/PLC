@@ -1,9 +1,9 @@
 {
-  "name": "deploy",
+"name": "deploy",
   "dependencies": {
-      "@sap/hdi-deploy": "^4"
+    "@sap/hdi-deploy": "^4"
   },
-  "scripts": {
+    "scripts": {
       "start": "node node_modules/@sap/hdi-deploy/deploy.js"
   }
 }

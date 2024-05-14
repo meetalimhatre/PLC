@@ -1,0 +1,60 @@
+update temp_table 
+        set temp_table.ERROR_CODE = CASE 
+										WHEN result._VALID_FROM is null THEN 'GENERAL_ENTITY_NOT_FOUND_ERROR'
+									 	WHEN result._VALID_FROM is not null THEN 'GENERAL_ENTITY_NOT_CURRENT_ERROR'
+									 	ELSE ''
+								    END, 
+	     temp_table.ERROR_DETAILS = CASE 
+										WHEN result._VALID_FROM is null THEN '{"administrationObjType": "MainObj"}'
+										WHEN result._VALID_FROM is not null THEN 
+				                             '{"administrationConflictDetailsObj" : {"newValidFromDate": null ,"userId":"'||result._CREATED_BY||'",
+										     "operationUserId":"Delete", "objType": "MainObj"}}'
+										ELSE ''
+								    END
+	from {{temporaryTextTable MasterdataBusinessObject}} as temp_table,
+	(select {{keyFieldsWithPrefix MasterdataBusinessObject 'entries_without_current_main'}}, entries_without_current_main.LANGUAGE,
+	        main_table_entries._VALID_FROM, main_table_entries._CREATED_BY
+	from
+		( 
+			   select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE
+			  		from {{temporaryTextTable MasterdataBusinessObject}} as temp_table 
+			  		where temp_table.operation in ('Create')
+			  		and ( temp_table.error_code = '' or  temp_table.error_code is null )
+	      		minus
+			  	  ( select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE 
+			        	from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+						inner join {{mainTable MasterdataBusinessObject}} as main_table
+						on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'main_table'}}
+						and main_table._VALID_FROM <= TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) and main_table._VALID_TO is null
+						and temp_table.operation in ('Create')
+						and ( temp_table.error_code = '' or  temp_table.error_code is null ) 
+		                    union 
+		             select {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}}, temp_table.LANGUAGE 
+		                from {{temporaryTextTable MasterdataBusinessObject}} as temp_table
+						inner join {{temporaryTable MasterdataBusinessObject}} as temp_main_table
+						on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'temp_main_table'}}
+						and temp_table.operation in ('Create')
+						and ( temp_table.error_code = '' or  temp_table.error_code is null )
+						and ( temp_main_table.error_code = '' or  temp_main_table.error_code is null )
+		                and temp_main_table.operation in ('Create','Upsert')
+		          )
+		   ) as entries_without_current_main
+
+	   	   left outer join 
+
+           ( select {{keyFieldsWithPrefix MasterdataBusinessObject 'main_table_a'}}, main_table_a._VALID_FROM, main_table_a._CREATED_BY
+                    from {{mainTable MasterdataBusinessObject}} as main_table_a
+                    inner join 
+                    ( select MAX(_VALID_FROM) AS _VALID_FROM, {{keyFields MasterdataBusinessObject}}
+										from {{mainTable MasterdataBusinessObject}} 
+										group by {{keyFields MasterdataBusinessObject}}
+					) AS main_table_b
+					ON main_table_a._VALID_FROM = main_table_b._VALID_FROM 
+                    AND {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'main_table_a' 'main_table_b'}} 
+            ) as main_table_entries
+	        on {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'entries_without_current_main' 'main_table_entries'}}
+    ) as result
+	where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'temp_table' 'result'}}
+    and temp_table.LANGUAGE = result.LANGUAGE 
+	and temp_table.operation = 'Create'
+	and ( temp_table.error_code = '' or  temp_table.error_code is null )

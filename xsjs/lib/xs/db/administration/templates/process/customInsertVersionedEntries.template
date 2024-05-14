@@ -1,0 +1,12 @@
+{{#if MasterdataBusinessObject.fieldsCustom}}
+				insert into {{extTable MasterdataBusinessObject}}
+					({{keyFields MasterdataBusinessObject}}, {{customFieldsMasterdata MasterdataBusinessObject}}, _valid_from )
+					select distinct {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}},
+					                {{customFieldsMasterdataWithPrefix MasterdataBusinessObject 'temp_table'}},
+									TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) as _valid_from
+					from {{temporaryTable MasterdataBusinessObject}} as temp_table,
+					(select count(error_code) as number_of_errors from {{temporaryTable MasterdataBusinessObject}}
+					   where error_code <> '') as error_table
+					where  temp_table.operation in ('Create','Update','Upsert') and (error_table.number_of_errors = 0 OR
+	    			(temp_table.error_code = '' AND {{ignoreBadData MasterdataBusinessObject}} = 'true'))
+				{{/if}}

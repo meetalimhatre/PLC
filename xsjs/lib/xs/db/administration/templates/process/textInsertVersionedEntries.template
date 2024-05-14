@@ -1,0 +1,12 @@
+insert into {{textTable MasterdataBusinessObject}} 
+				    ({{fieldsText MasterdataBusinessObject}}, _valid_from, _valid_to, _source, _created_by )
+					select distinct {{fieldsTextWithPrefix MasterdataBusinessObject 'temp_table'}},
+									TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}) as _valid_from, 
+									null as _valid_to,
+									1 as _source,
+									{{currentUser MasterdataBusinessObject}} as _created_by
+					from {{temporaryTextTable MasterdataBusinessObject}} as temp_table,
+					(select count(error_code) as number_of_errors from {{temporaryTextTable MasterdataBusinessObject}}
+					   where error_code <> '') as error_table
+					where  temp_table.operation in ('Create','Update','Upsert') and (error_table.number_of_errors = 0 OR
+	    (temp_table.error_code = '' AND {{ignoreBadData MasterdataBusinessObject}} = 'true'))

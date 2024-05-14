@@ -1,0 +1,9 @@
+service {
+    "sap.plc.db.views::v_replication_log" as "LogsOdata" keys generate local "GenID"
+        create forbidden 
+        update forbidden
+        delete forbidden;
+}
+annotations {
+   enable OData4SAP;
+}

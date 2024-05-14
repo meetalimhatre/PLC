@@ -24,7 +24,6 @@
     "btoa": "^1.2.1",
     "cf-nodejs-logging-support": "7.1.0",
     "cfenv": "1.2.4",
-    "fibers": "^5.0.3",
     "handlebars": "4.7.7",
     "jsonwebtoken": "9.0.1",
     "lodash": "4.17.21",
@@ -47,7 +46,7 @@
   "files": [],
   "main": "main.js",
   "scripts": {
-    "start": "node --max-http-header-size=16384 main.js",
+    "start": "node --experimental-vm-modules main.js",
     "test": "node --stack_size=5120 testrun.js",
     "test-initialize-local": "node test-initialize-local.js",
     "testmain": "node testmain.js"

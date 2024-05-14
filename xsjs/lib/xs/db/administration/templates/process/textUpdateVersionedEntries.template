@@ -1,0 +1,15 @@
+update main_table 
+					set _VALID_TO = TO_TIMESTAMP({{currentTimestamp MasterdataBusinessObject}}),
+					_created_by = {{currentUser MasterdataBusinessObject}}
+					from {{textTable MasterdataBusinessObject}} as main_table,
+					(select distinct {{keyFieldsWithPrefix MasterdataBusinessObject 'temp_table'}} , temp_table._VALID_FROM, temp_table.LANGUAGE 
+					  from {{temporaryTextTable MasterdataBusinessObject}} as temp_table,
+					  (select count(error_code) as number_of_errors from {{temporaryTextTable MasterdataBusinessObject}}
+					   where error_code <> '') as error_table
+					   where  temp_table.operation in ('Update','Delete') and (error_table.number_of_errors = 0 OR
+						(temp_table.error_code = '' AND {{ignoreBadData MasterdataBusinessObject}} = 'true'))
+					) as result 
+					where {{keyFieldsConditionWithPrefixes MasterdataBusinessObject 'main_table' 'result'}}
+					and main_table._VALID_FROM = result._VALID_FROM
+					and main_table.LANGUAGE = result.LANGUAGE
+				    and main_table._VALID_TO is null
