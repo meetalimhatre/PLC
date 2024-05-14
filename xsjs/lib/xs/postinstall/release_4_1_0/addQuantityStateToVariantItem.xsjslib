@@ -8,14 +8,14 @@ function check(oConnection) {
     return true;
 }
 
-function getCurrentSchemaName(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+async function getCurrentSchemaName(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
     const sCurrentSchema = await getCurrentSchemaName(oConnection);
     // Add data to the new columns
-    oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sVariantItemTable }" SET QUANTITY_STATE = ${ iStateManualValue };`);
+    await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sVariantItemTable }" SET QUANTITY_STATE = ${ iStateManualValue };`);
     await oConnection.commit();
 
     return true;

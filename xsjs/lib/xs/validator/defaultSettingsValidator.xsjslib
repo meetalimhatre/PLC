@@ -150,6 +150,6 @@ function DefaultSettingsValidator(utils) {
     };
 }
 
-DefaultSettingsValidator.prototype = await Object.create(DefaultSettingsValidator.prototype);
+DefaultSettingsValidator.prototype = Object.create(DefaultSettingsValidator.prototype);
 DefaultSettingsValidator.prototype.constructor = DefaultSettingsValidator;
 export default {_,DefaultSettingsMasterDataColumns,MessageLibrary,PlcException,Code,DefaultSettingsValidator};

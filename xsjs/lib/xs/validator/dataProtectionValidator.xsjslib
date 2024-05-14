@@ -67,6 +67,6 @@ function DataProtectionValidator(utils) {
         }
     };
 }
-DataProtectionValidator.prototype = await Object.create(DataProtectionValidator.prototype);
+DataProtectionValidator.prototype = Object.create(DataProtectionValidator.prototype);
 DataProtectionValidator.prototype.constructor = DataProtectionValidator;
 export default {_,MessageLibrary,PlcException,Code,GenericSyntaxValidator,DataProtectionValidator};

@@ -1,8 +1,8 @@
-const task = $.import('xs.postinstall.xslib', 'task');
-const info = $.import('xs.postinstall.xslib', 'installationInfo');
-const driver = $.import('xs.postinstall.xslib', 'driver');
+const task = await $.import('xs.postinstall.xslib', 'task');
+const info = await $.import('xs.postinstall.xslib', 'installationInfo');
+const driver = await $.import('xs.postinstall.xslib', 'driver');
 const sPlatformConnection = $.require('../../../platform/platformSpecificImports.js').getPostinstallConnection().postInstallConnection;
-const oPrivileges = await Object.freeze({ admin: 'Admin' });
+const oPrivileges = Object.freeze({ admin: 'Admin' });
 const dbConnection = await $.import(sPlatformConnection.substr(0, sPlatformConnection.lastIndexOf('.')), sPlatformConnection.substr(sPlatformConnection.lastIndexOf('.') + 1)).getConnection();
 dbConnection.setAutoCommit(true);
 
@@ -41,11 +41,11 @@ async function run(request, response) {
     }
 }
 
-function checkPostinstallPrivilege() {
+async function checkPostinstallPrivilege() {
     return $.session.hasAppPrivilege(oPrivileges.admin);
 }
 
-function redirect() {
+async function redirect() {
     $.response.contentType = 'html/text';
     $.response.status = $.net.http.MOVED_PERMANENTLY;
     $.response.headers.set('location', '/admin/tools/index.html');

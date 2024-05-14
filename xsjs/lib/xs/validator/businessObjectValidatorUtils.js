@@ -35,7 +35,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         if (oBody === undefined || oBody === null) {
             return;
         }
-        var sBodyContent = await _.isFunction(oBody.asString) ? oBody.asString() : oBody.toString();
+        var sBodyContent = _.isFunction(oBody.asString) ? oBody.asString() : oBody.toString();
         if (sBodyContent !== '') {
             const sLogMessage = `Expected an empty body during validation of ${ sBusinessObject }, but the body contained ${ sBodyContent.length } characters.`;
             await logError(sLogMessage);
@@ -97,7 +97,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
             break;
         }
 
-        _.each(aMandatoryProperites, function (sMandatoryProperty) {
+        _.each(aMandatoryProperites, async function (sMandatoryProperty) {
             if (!fChecker(oEntity, sMandatoryProperty)) {
                 const sLogMessage = `Mandatory property ${ sMandatoryProperty } ${ sMode === 'included' ? 'is missing' : 'was set to null' } (business object: ${ sBusinessObject }). The mandatory properties are ${ aMandatoryProperites.toString() }.`;
                 await logError(sLogMessage);
@@ -271,7 +271,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         }
 
         var oValidatedEnity = {};
-        _.each(oInput.entity, function (oPropertyValue, sPropertyKey) {
+        _.each(oInput.entity, async function (oPropertyValue, sPropertyKey) {
             var aPropertyMetadata = null;
             var aPropertyMetadataAttributes = null;
             const sMetadataAttributeKey = that.getMetadataAttributeKey(oInput, sPropertyKey);
@@ -479,7 +479,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
         }
 
-        if (await helpers.isNullOrUndefined(bCheckRegEx))
+        if (helpers.isNullOrUndefined(bCheckRegEx))
             bCheckRegEx = true;
         if (bCheckRegEx) {
             await genericSyntaxValidator.validateValue(oColumnValue, aColumnMetadata[0].SEMANTIC_DATA_TYPE, aColumnMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, false, aColumnMetadata[0].VALIDATION_REGEX_VALUE);

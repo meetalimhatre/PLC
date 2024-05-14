@@ -10,7 +10,7 @@ function ValidatorInput(oRequest, sResourceDefinitionKey) {
     this.method = HttpMethodMapping[oRequest.method];
 }
 
-ValidatorInput.prototype = await Object.create(ValidatorInput.prototype);
+ValidatorInput.prototype = Object.create(ValidatorInput.prototype);
 ValidatorInput.prototype.constructor = ValidatorInput;
 
 /**
@@ -59,7 +59,7 @@ function Validator(oPersistency, sSessionId, Resources) {
         const UrlValidator = $.require('./urlValidator').UrlValidator;
         const mValidatedParameters = (await new UrlValidator(Resources)).validateUrl(oValdiatorInput.request, oValdiatorInput.definitionKey);
         const sBoType = Resources[oValdiatorInput.definitionKey][oValdiatorInput.method].businessObjectType;
-        const BuisnessObjectValidatorFactory = $.import('xs.validator', 'businessObjectValidatorFactory').BusinessObjectValidatorFactory;
+        const BuisnessObjectValidatorFactory = await $.import('xs.validator', 'businessObjectValidatorFactory').BusinessObjectValidatorFactory;
         const oBoValidator = BuisnessObjectValidatorFactory.createBusinessObjectValidator(sBoType, oPersistency, sSessionId);
         const aValidatedBusinessObjects = await oBoValidator.validate(oValdiatorInput.request, mValidatedParameters, oServiceOutput);
 
@@ -72,6 +72,6 @@ function Validator(oPersistency, sSessionId, Resources) {
         return oValidationOutput;
     };
 }
-Validator.prototype = await Object.create(Validator.prototype);
+Validator.prototype =  Object.create(Validator.prototype);
 Validator.prototype.constructor = Validator;
 export default {ValidatorInput,Validator};

@@ -23,7 +23,7 @@ module.exports.Task = function ($) {
         var aTasks;
         if (!helpers.isNullOrUndefined(mParameters.id)) {
             let oTask = taskService.getById(mParameters.id);
-            if (await helpers.isNullOrUndefined(oTask)) {
+            if (helpers.isNullOrUndefined(oTask)) {
                 const sLogMessage = `No tasks exsits for the id ${ mParameters.Id }, or the task does not belong to the requesting user.`;
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage);

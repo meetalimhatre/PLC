@@ -209,6 +209,6 @@ function PrivilegeValidator(oPersistency, utils) {
     };
 }
 
-PrivilegeValidator.prototype = await Object.create(PrivilegeValidator.prototype);
+PrivilegeValidator.prototype = Object.create(PrivilegeValidator.prototype);
 PrivilegeValidator.prototype.constructor = PrivilegeValidator;
 export default {_,MessageLibrary,AuthObjectTypes,PlcException,Code,ValidationInfoCode,PrivilegeValidator};

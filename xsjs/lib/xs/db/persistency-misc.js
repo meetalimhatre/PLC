@@ -10,7 +10,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     calculation: 'sap.plc.db::basis.t_calculation',
     calculation_version: 'sap.plc.db::basis.t_calculation_version',
     calculation_version_temporary: 'sap.plc.db::basis.t_calculation_version_temporary',
@@ -232,7 +232,7 @@ async function Misc($, hQuery, sUserId, dbConnection) {
 
         var stmt = 'select LOCK_OBJECT, USER_ID, LAST_UPDATED_ON from "' + Tables.lock + '" where LOCK_OBJECT = ?';
 
-        if (await helpers.isNullOrUndefined(bIncludingCurrentUser) || bIncludingCurrentUser === false) {
+        if (helpers.isNullOrUndefined(bIncludingCurrentUser) || bIncludingCurrentUser === false) {
             stmt += ' and USER_ID != ?';
             return await hQuery.statement(stmt).execute(sObject, sUserId);
         }
@@ -294,25 +294,25 @@ async function Misc($, hQuery, sUserId, dbConnection) {
             oStatementDelete = `delete from  "${ Tables.session }" where USER_ID in (select USER_ID from "${ Tables.lock }" where LOCK_OBJECT = ?) 
 								and SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)> ( select VALUE_IN_SECONDS from "${ Tables.application_timeout }"  where APPLICATION_TIMEOUT_ID =?) 
 								and USER_ID != ?`;
-            dbConnection.executeUpdate(oStatementDelete, sObject, sessionTimeout, sUserId);
+            await dbConnection.executeUpdate(oStatementDelete, sObject, sessionTimeout, sUserId);
         } else {
 
             oStatementDelete = `delete from  "${ Tables.session }"
 								where SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)> 
 				                ( select VALUE_IN_SECONDS from "${ Tables.application_timeout }" where APPLICATION_TIMEOUT_ID = ?) and USER_ID != ?`;
-            dbConnection.executeUpdate(oStatementDelete, sessionTimeout, sUserId);
+            await dbConnection.executeUpdate(oStatementDelete, sessionTimeout, sUserId);
         }
 
 
         that.session.deleteOutdatedEntries();
 
         var stmt = `select LOCK_OBJECT, USER_ID, LAST_UPDATED_ON from "${ Tables.lock }" where LOCK_OBJECT = ?`;
-        var aLock = dbConnection.executeQuery(stmt, sObject);
+        var aLock = await dbConnection.executeQuery(stmt, sObject);
 
 
         if (aLock.length === 0) {
             var stmtLock = `insert into "${ Tables.lock }" (LOCK_OBJECT, USER_ID, LAST_UPDATED_ON) values(?, ?, ?)`;
-            dbConnection.executeUpdate(stmtLock, sObject, sUserId, new Date());
+            await dbConnection.executeUpdate(stmtLock, sObject, sUserId, new Date());
         }
     };
 
@@ -330,7 +330,7 @@ async function Misc($, hQuery, sUserId, dbConnection) {
         if (iRowCount > 0) {
             try {
                 stmt = `delete from "${ Tables.lock }" where USER_ID = ?`;
-                dbConnection.executeUpdate(stmt, sUserId);
+                await dbConnection.executeUpdate(stmt, sUserId);
             } catch (e) {
                 var oMessageDetails = new MessageDetails();
                 const sLogMessage = `Error during release lock.`;
@@ -338,7 +338,7 @@ async function Misc($, hQuery, sUserId, dbConnection) {
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails, undefined, e);
             }
         }
-        await console.log('successed release lock');
+        console.log('successed release lock');
         return iRowCount;
     };
 
@@ -409,12 +409,12 @@ async function Misc($, hQuery, sUserId, dbConnection) {
         var stmt = `select top ? DISTINCT USER_ID from  "${ Tables.auto_complete_user }" where lower(USER_ID) like lower(?) ORDER BY USER_ID`;
 
 
-        aUsers = dbConnection.executeQuery(stmt, iTop, sSearchAutoComplete + '%');
+        aUsers = await dbConnection.executeQuery(stmt, iTop, sSearchAutoComplete + '%');
 
         return aUsers;
     };
 }
-Misc.prototype = await Object.create(Misc.prototype);
+Misc.prototype = Object.create(Misc.prototype);
 Misc.prototype.constructor = Misc;
 
 

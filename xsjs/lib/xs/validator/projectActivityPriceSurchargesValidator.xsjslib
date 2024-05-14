@@ -158,6 +158,6 @@ function ProjectActivityPriceSurchargesValidator(oPersistency, utils) {
     };
 }
 
-ProjectActivityPriceSurchargesValidator.prototype = await Object.create(ProjectActivityPriceSurchargesValidator.prototype);
+ProjectActivityPriceSurchargesValidator.prototype = Object.create(ProjectActivityPriceSurchargesValidator.prototype);
 ProjectActivityPriceSurchargesValidator.prototype.constructor = ProjectActivityPriceSurchargesValidator;
 export default {_,MessageLibrary,PlcException,Code,SurchargePlaceholders,helpers,ProjectActivityPriceSurchargesValidator};

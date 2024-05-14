@@ -16,34 +16,34 @@ var imps = {
         return $.require('./persistency-misc').Misc;
     },
     get AccountGroup() {
-        return $.import('xs.db.administration', 'api-accountGroup').AccountGroup;
+        return await $.import('xs.db.administration', 'api-accountGroup').AccountGroup;
     },
     get ComponentSplit() {
-        return $.import('xs.db.administration', 'api-componentSplit').ComponentSplit;
+        return await $.import('xs.db.administration', 'api-componentSplit').ComponentSplit;
     },
     get CostingSheet() {
-        return $.import('xs.db.administration', 'api-costingSheet').CostingSheet;
+        return await $.import('xs.db.administration', 'api-costingSheet').CostingSheet;
     },
     get CostingSheetRow() {
-        return $.import('xs.db.administration', 'api-costingSheetRow').CostingSheetRow;
+        return await $.import('xs.db.administration', 'api-costingSheetRow').CostingSheetRow;
     },
     get ExchangeRateTypeImport() {
-        return $.import('xs.db.administration', 'api-exchangeRateType');
+        return await $.import('xs.db.administration', 'api-exchangeRateType');
     },
     get ExchangeRateType() {
         return this.ExchangeRateTypeImport.ExchangeRateType;
     },
     get MasterDataObjectHandlerProxy() {
-        return $.import('xs.db.administration.proxy', 'masterDataProxy').MasterDataObjectHandlerProxy;
+        return await $.import('xs.db.administration.proxy', 'masterDataProxy').MasterDataObjectHandlerProxy;
     }
 };
 
-const Procedures = await Object.freeze({
+const Procedures = Object.freeze({
     calculation_configuration_masterdata_read: 'sap.plc.db.administration.procedures::p_calculation_configuration_masterdata_read',
     check_formulas_costing_sheet_overhead_row: 'sap.plc.db.administration.procedures::p_check_formulas_costing_sheet_overhead_row'
 });
 
-const TempTables = await Object.freeze({ t_item_ids: 'sap.plc.db::temp.t_item_ids' });
+const TempTables = Object.freeze({ t_item_ids: 'sap.plc.db::temp.t_item_ids' });
 
 var sUserId;
 const sSessionId = sUserId = $.getPlcUsername();
@@ -82,7 +82,7 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
                     oLockStatus[ServiceMetaInformation.IsLocked] = 0;
                 }
             }
-            if (await helpers.isNullOrUndefined(oReturnObjects[ServiceMetaInformation.LockStatus])) {
+            if (helpers.isNullOrUndefined(oReturnObjects[ServiceMetaInformation.LockStatus])) {
                 if (_.isEmpty(oLockStatus) === false) {
                     oReturnObjects[ServiceMetaInformation.LockStatus] = oLockStatus;
                 }
@@ -381,7 +381,7 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
                 });
 
                 var sStmt = aStmtBuilder.join(' ');
-                dbConnection.executeUpdate(sStmt, aInsertValues);
+                await dbConnection.executeUpdate(sStmt, aInsertValues);
             }
 
             var oProcResult = procedure(sLanguage, iCvId, sSessionId);
@@ -498,6 +498,6 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
     };
 }
 
-Administration.prototype = await Object.create(Administration.prototype);
+Administration.prototype = Object.create(Administration.prototype);
 Administration.prototype.constructor = Administration;
 export default {_,helpers,BusinessObjectTypes,ServiceMetaInformation,Resources,BusinessObjectsEntities,MessageLibrary,MessageDetails,PlcException,Code,imps,Procedures,TempTables,sUserId,sSessionId,Administration};

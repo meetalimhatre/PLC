@@ -27,7 +27,7 @@ function getBusinessObjectsMetadata() {
 }
 
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     lock: 'sap.plc.db::basis.t_lock',
     log: 'sap.plc.db::basis.t_generation_log',
     metadata: 'sap.plc.db::basis.t_metadata',
@@ -102,13 +102,13 @@ function DbArtefactController($, dbConnection) {
      * @return object with column names as keys and SQL data type name as value
      */
     async function getDbCustomField(sFullTableName) {
-        if (await helpers.isNullOrUndefined(sFullTableName)) {
+        if (helpers.isNullOrUndefined(sFullTableName)) {
             let developerInfo = 'parameter sFullTableName is missing in DbArtefactController.getDbCustomField()';
             $.trace.error(developerInfo);
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
         }
         let mKeys = {};
-        let result = dbConnection.executeQuery('select column_name, data_type_name, length, scale, index_type from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
+        let result = await dbConnection.executeQuery('select column_name, data_type_name, length, scale, index_type from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
 
         for (let row in result) {
             let sDataType = result[row].DATA_TYPE_NAME;
@@ -131,7 +131,7 @@ function DbArtefactController($, dbConnection) {
             let sFieldName = '';
             if (sColumnName.endsWith('_CALCULATED')) {
                 sFieldName = sColumnName.substr(0, sColumnName.lastIndexOf('_CALCULATED'));
-                if (await helpers.isNullOrUndefined(mKeys[sFieldName + '_IS_MANUAL']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL'])) {
+                if (helpers.isNullOrUndefined(mKeys[sFieldName + '_IS_MANUAL']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL'])) {
                     let developerInfo = `${ sColumnName } in ${ sFullTableName } was inconsistent`;
                     $.trace.error(developerInfo);
                     throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -140,7 +140,7 @@ function DbArtefactController($, dbConnection) {
                 bCheckDataType = true;
             } else if (sColumnName.endsWith('_IS_MANUAL')) {
                 sFieldName = sColumnName.substr(0, sColumnName.lastIndexOf('_IS_MANUAL'));
-                if (await helpers.isNullOrUndefined(mKeys[sFieldName + '_CALCULATED']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL']) || mKeys[sColumnName] !== 'TINYINT') {
+                if (helpers.isNullOrUndefined(mKeys[sFieldName + '_CALCULATED']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT']) || await helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL']) || mKeys[sColumnName] !== 'TINYINT') {
                     let developerInfo = `${ sFieldName } in ${ sFullTableName } was inconsistent`;
                     $.trace.error(developerInfo);
                     throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -148,7 +148,7 @@ function DbArtefactController($, dbConnection) {
                 isMasterdataField = false;
             } else if (sColumnName.endsWith('_MANUAL')) {
                 sFieldName = sColumnName.substr(0, sColumnName.lastIndexOf('_MANUAL'));
-                if (await helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT'])) {
+                if (helpers.isNullOrUndefined(mKeys[sFieldName + '_UNIT'])) {
                     let developerInfo = `${ sColumnName } in ${ sFullTableName } was inconsistent`;
                     $.trace.error(developerInfo);
                     throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -156,7 +156,7 @@ function DbArtefactController($, dbConnection) {
                 bCheckDataType = true;
             } else if (sColumnName.endsWith('_UNIT')) {
                 sFieldName = sColumnName.substr(0, sColumnName.lastIndexOf('_UNIT'));
-                if (await helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL']) || mKeys[sColumnName] !== 'NVARCHAR(3)') {
+                if (helpers.isNullOrUndefined(mKeys[sFieldName + '_MANUAL']) || mKeys[sColumnName] !== 'NVARCHAR(3)') {
                     let developerInfo = `${ sColumnName } in ${ sFullTableName } was inconsistent`;
                     $.trace.error(developerInfo);
                     throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -193,13 +193,13 @@ function DbArtefactController($, dbConnection) {
      * @return object with column names as keys and SQL data type name as value
      */
     async function getPrimaryKeys(sFullTableName) {
-        if (await helpers.isNullOrUndefined(sFullTableName)) {
+        if (helpers.isNullOrUndefined(sFullTableName)) {
             const developerInfo = 'parameter sFullTableName is missing in DbArtefactController.getPrimaryKeys()';
             $.trace.error(developerInfo);
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
         }
         let mKeys = {};
-        let result = dbConnection.executeQuery('select columns.column_name, data_type_name, length, scale from sys.table_columns columns inner join sys.index_columns indices ' + 'on columns.column_name = indices.column_name and columns.table_name = indices.table_name and columns.schema_name = indices.schema_name ' + "where columns.schema_name=CURRENT_SCHEMA and columns.table_name=? and constraint='PRIMARY KEY'", sFullTableName);
+        let result = await dbConnection.executeQuery('select columns.column_name, data_type_name, length, scale from sys.table_columns columns inner join sys.index_columns indices ' + 'on columns.column_name = indices.column_name and columns.table_name = indices.table_name and columns.schema_name = indices.schema_name ' + "where columns.schema_name=CURRENT_SCHEMA and columns.table_name=? and constraint='PRIMARY KEY'", sFullTableName);
         for (let row in result) {
             var sDataType = result[row].DATA_TYPE_NAME;
             if (result[row].DATA_TYPE_NAME === 'NVARCHAR') {
@@ -254,7 +254,7 @@ function DbArtefactController($, dbConnection) {
      *   }
      */
     this.createContextObject = async function () {
-        let result = dbConnection.executeQuery('select a.business_object, a.column_id, a.rollup_type_id, a.semantic_data_type, a.semantic_data_type_attributes, a.ref_uom_currency_column_id, b.property_type, c.display_name from "' + Tables.metadata + '" a left outer join "' + Tables.metadata + '" b on b.column_id = a.ref_uom_currency_column_id ' + 'left outer join "' + Tables.metadata_text + '" c on c.column_id = a.column_id and c.path = a.path ' + "where a.is_custom=1 and (a.uom_currency_flag IS NULL or a.uom_currency_flag <> 1) and c.language = 'EN'");
+        let result = await dbConnection.executeQuery('select a.business_object, a.column_id, a.rollup_type_id, a.semantic_data_type, a.semantic_data_type_attributes, a.ref_uom_currency_column_id, b.property_type, c.display_name from "' + Tables.metadata + '" a left outer join "' + Tables.metadata + '" b on b.column_id = a.ref_uom_currency_column_id ' + 'left outer join "' + Tables.metadata_text + '" c on c.column_id = a.column_id and c.path = a.path ' + "where a.is_custom=1 and (a.uom_currency_flag IS NULL or a.uom_currency_flag <> 1) and c.language = 'EN'");
         let context = {};
         // copy static metadata about BOs into context object
         let mBusinessObjectsMetadata = await getBusinessObjectsMetadata();
@@ -274,7 +274,7 @@ function DbArtefactController($, dbConnection) {
         for (let rowName in result) {
             row = result[rowName];
             boMetadata = context[row.BUSINESS_OBJECT]; // get static metadata about the BO
-            if (await helpers.isNullOrUndefined(boMetadata)) {
+            if (helpers.isNullOrUndefined(boMetadata)) {
                 let developerInfo = `Metadata for business object ${ row.BUSINESS_OBJECT } was not found`;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -314,12 +314,12 @@ function DbArtefactController($, dbConnection) {
             }
         }
 
-        let resultAttributes = dbConnection.executeQuery('select distinct meta.path, meta.business_object, meta.column_id, attr.item_category_id, attr.default_value, ' + 'attrUnit.default_value as default_value_unit, metaUnit.property_type  ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.metadataItemAttributes + '" as attr ' + 'on meta.business_object = attr.business_object ' + 'and meta.path = attr.path ' + 'and meta.column_id = attr.column_id ' + 'left outer join "' + Tables.metadata + '" as metaUnit ' + 'on meta.ref_uom_currency_business_object = metaUnit.business_object ' + 'and meta.ref_uom_currency_path = metaUnit.path ' + 'and meta.ref_uom_currency_column_id = metaUnit.column_id ' + 'and metaUnit.is_custom=1 ' + 'left outer join "' + Tables.metadataItemAttributes + '" as attrUnit ' + 'on metaUnit.business_object = attrUnit.business_object ' + 'and metaUnit.path = attrUnit.path ' + 'and metaUnit.column_id = attrUnit.column_id ' + 'where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1)');
+        let resultAttributes = await dbConnection.executeQuery('select distinct meta.path, meta.business_object, meta.column_id, attr.item_category_id, attr.default_value, ' + 'attrUnit.default_value as default_value_unit, metaUnit.property_type  ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.metadataItemAttributes + '" as attr ' + 'on meta.business_object = attr.business_object ' + 'and meta.path = attr.path ' + 'and meta.column_id = attr.column_id ' + 'left outer join "' + Tables.metadata + '" as metaUnit ' + 'on meta.ref_uom_currency_business_object = metaUnit.business_object ' + 'and meta.ref_uom_currency_path = metaUnit.path ' + 'and meta.ref_uom_currency_column_id = metaUnit.column_id ' + 'and metaUnit.is_custom=1 ' + 'left outer join "' + Tables.metadataItemAttributes + '" as attrUnit ' + 'on metaUnit.business_object = attrUnit.business_object ' + 'and metaUnit.path = attrUnit.path ' + 'and metaUnit.column_id = attrUnit.column_id ' + 'where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1)');
 
         for (let rowName in resultAttributes) {
             row = resultAttributes[rowName];
             boMetadata = context[row.BUSINESS_OBJECT]; // get static metadata about the BO
-            if (await helpers.isNullOrUndefined(boMetadata)) {
+            if (helpers.isNullOrUndefined(boMetadata)) {
                 let developerInfo = `Metadata for business object ${ row.BUSINESS_OBJECT } was not found`;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -339,13 +339,13 @@ function DbArtefactController($, dbConnection) {
             field.propertyType = row.PROPERTY_TYPE;
         }
 
-        let resultFormula = dbConnection.executeQuery('select meta.PATH,meta.BUSINESS_OBJECT,meta.COLUMN_ID, formula.ITEM_CATEGORY_ID ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.formula + '" as formula ' + 'on meta.path=formula.path ' + 'and meta.business_object=formula.business_object ' + 'and meta.column_id=formula.column_id ' + ' where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1) ' + 'and formula.is_formula_used = 1');
+        let resultFormula = await dbConnection.executeQuery('select meta.PATH,meta.BUSINESS_OBJECT,meta.COLUMN_ID, formula.ITEM_CATEGORY_ID ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.formula + '" as formula ' + 'on meta.path=formula.path ' + 'and meta.business_object=formula.business_object ' + 'and meta.column_id=formula.column_id ' + ' where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1) ' + 'and formula.is_formula_used = 1');
 
 
         for (let rowName in resultFormula) {
             row = resultFormula[rowName];
             boMetadata = context[row.BUSINESS_OBJECT]; // get static metadata about the BO
-            if (await helpers.isNullOrUndefined(boMetadata)) {
+            if (helpers.isNullOrUndefined(boMetadata)) {
                 let developerInfo = `Metadata for business object ${ row.BUSINESS_OBJECT } was not found`;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -423,14 +423,14 @@ function DbArtefactController($, dbConnection) {
     async function prepareExtensionTables(aUpsertList, bDoDelete) {
         for (let sBusinessObjectName in oContext) {
             let oBusinessObject = oContext[sBusinessObjectName];
-            if (await helpers.isNullOrUndefined(oBusinessObject.tableName)) {
+            if (helpers.isNullOrUndefined(oBusinessObject.tableName)) {
                 let developerInfo = 'extension table name was not defined for business object ' + sBusinessObjectName;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
             }
 
             await $.trace.info('processing extension tables for business object ' + sBusinessObjectName);
-            if (await helpers.isNullOrUndefined(oBusinessObject.primaryKeys)) {
+            if (helpers.isNullOrUndefined(oBusinessObject.primaryKeys)) {
                 let developerInfo = 'extension table was not defined for business object ' + sBusinessObjectName;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -467,7 +467,7 @@ function DbArtefactController($, dbConnection) {
         let mDbArtefactsMetadata = await getDbArtefactsMetadata();
         let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
         await $.trace.info('processing prepare db artefacts ' + sDbArtifactName);
-        if (await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
+        if (helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
             let developerInfo = 'DB artefact ' + sDbArtifactName + ' has no defined template';
             $.trace.error(developerInfo);
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -481,7 +481,7 @@ function DbArtefactController($, dbConnection) {
         if (oDbArtefact.type === 'AFL') {
             sPathInContainer = sContainerSrcRootPath + 'afl/' + oDbArtefact.name + sSuffix;
         } else {
-            if (await helpers.isNullOrUndefined(oDbArtefact.name)) {
+            if (helpers.isNullOrUndefined(oDbArtefact.name)) {
                 sPathInContainer = await getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
             } else {
                 sPathInContainer = await getBetterName(oDbArtefact.name + sSuffix);
@@ -500,7 +500,7 @@ function DbArtefactController($, dbConnection) {
         let mDbArtefactsMetadata = await getDbArtefactsMetadata();
         let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
         await $.trace.info('processing delete db artefacts ' + sDbArtifactName);
-        if (await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
+        if (helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || await helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
             let developerInfo = 'DB artefact ' + sDbArtifactName + ' has no defined template';
             $.trace.error(developerInfo);
             await insertInstallationLogsOnUpgrade('error');
@@ -511,7 +511,7 @@ function DbArtefactController($, dbConnection) {
         if (oDbArtefact.type === 'AFL') {
             sPathInContainer = sContainerSrcRootPath + 'afl/' + oDbArtefact.name + sSuffix;
         } else {
-            if (await helpers.isNullOrUndefined(oDbArtefact.name)) {
+            if (helpers.isNullOrUndefined(oDbArtefact.name)) {
                 sPathInContainer = await getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
             } else {
                 sPathInContainer = await getBetterName(oDbArtefact.name + sSuffix);
@@ -526,20 +526,20 @@ function DbArtefactController($, dbConnection) {
 
     this.clearExtensionTables = async function (oBusinessObject, bDoDelete) {
         let oCusFields = bDoDelete ? oBusinessObject.customFields : oBusinessObject.customFieldsEXT;
-        if (await helpers.isNullOrUndefined(oCusFields) || await helpers.isEmptyObject(oCusFields)) {
+        if (helpers.isNullOrUndefined(oCusFields) || await helpers.isEmptyObject(oCusFields)) {
 
             let sSql = 'delete from "' + oBusinessObject.tableName + '_ext"';
-            dbConnection.executeUpdate(sSql);
+            await dbConnection.executeUpdate(sSql);
 
             if (oBusinessObject.hasTemporaryTable) {
 
                 let sSql = 'delete from "' + oBusinessObject.tableName + '_temporary_ext"';
-                dbConnection.executeUpdate(sSql);
+                await dbConnection.executeUpdate(sSql);
             }
             if (oBusinessObject.hasStagingTable) {
 
                 let sSql = 'delete from "' + oBusinessObject.tableName + '_ext_staging"';
-                dbConnection.executeUpdate(sSql);
+                await dbConnection.executeUpdate(sSql);
             }
         }
     };
@@ -547,7 +547,7 @@ function DbArtefactController($, dbConnection) {
     async function loadAndCheckCustomFields() {
         for (let sBusinessObjectName in oContext) {
             let oBusinessObject = oContext[sBusinessObjectName];
-            if (await helpers.isNullOrUndefined(oBusinessObject.tableName)) {
+            if (helpers.isNullOrUndefined(oBusinessObject.tableName)) {
                 let developerInfo = 'extension table name was not defined for business object ' + sBusinessObjectName;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -581,7 +581,7 @@ function DbArtefactController($, dbConnection) {
 
 
     async function setContext() {
-        if (await helpers.isNullOrUndefined(oContext)) {
+        if (helpers.isNullOrUndefined(oContext)) {
             oContext = that.createContextObject();
         }
     }
@@ -596,7 +596,7 @@ function DbArtefactController($, dbConnection) {
 
 
 
-            dbConnection.executeUpdate('LOCK TABLE "' + Tables.lock + '" IN EXCLUSIVE MODE NOWAIT');
+            await dbConnection.executeUpdate('LOCK TABLE "' + Tables.lock + '" IN EXCLUSIVE MODE NOWAIT');
             bIsLocked = true;
         }
     }
@@ -667,7 +667,7 @@ function DbArtefactController($, dbConnection) {
 
 
     async function openHDIConnection() {
-        if (await helpers.isNullOrUndefined(oHDIClient)) {
+        if (helpers.isNullOrUndefined(oHDIClient)) {
             oHDIClient = await new HDIClient($, await getSchema(), await getHDICredentials());
             oHDIClient.openConnection();
             bHDIOpened = true;
@@ -781,7 +781,7 @@ function DbArtefactController($, dbConnection) {
     }
 
     function getSchema() {
-        return dbConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+        return await dbConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
     }
 
     async function getHDICredentials() {
@@ -820,7 +820,7 @@ function DbArtefactController($, dbConnection) {
 
     async function insertInstallationLogsOnUpgrade(mode) {
         try {
-            let oVersionInfo = dbConnection.executeQuery(`
+            let oVersionInfo = await dbConnection.executeQuery(`
             SELECT 
                 TOP 1 "VERSION",
                 "VERSION_SP",
@@ -831,7 +831,7 @@ function DbArtefactController($, dbConnection) {
                 VERSION DESC, VERSION_SP DESC, VERSION_PATCH DESC, TIME DESC
             `);
 
-            if (await helpers.isNullOrUndefined(oVersionInfo)) {
+            if (helpers.isNullOrUndefined(oVersionInfo)) {
                 throw 'No version was found in "sap.plc.db::basis.t_installation_log"';
             }
 
@@ -839,7 +839,7 @@ function DbArtefactController($, dbConnection) {
                     (VERSION, VERSION_SP, VERSION_PATCH, NAME, TIME, EXECUTED_BY, STEP, STATE)
                     values (?,?,?,?,?,?,?,?)`;
 
-            dbConnection.executeUpdate(sSqlStatement, oVersionInfo[0].VERSION, oVersionInfo[0].VERSION_SP, oVersionInfo[0].VERSION_PATCH, 'PreUpgrade', new Date().toISOString(), $.getPlcUsername(), '', mode);
+            await dbConnection.executeUpdate(sSqlStatement, oVersionInfo[0].VERSION, oVersionInfo[0].VERSION_SP, oVersionInfo[0].VERSION_PATCH, 'PreUpgrade', new Date().toISOString(), $.getPlcUsername(), '', mode);
             await dbConnection.commit();
         } catch (e) {
             $.trace.error('insert data to t_installation_log table failed, can"t log pre upgrade data to database');
@@ -916,7 +916,7 @@ function DbArtefactController($, dbConnection) {
     };
 }
 
-DbArtefactController.prototype = await Object.create(DbArtefactController.prototype);
+DbArtefactController.prototype = Object.create(DbArtefactController.prototype);
 DbArtefactController.prototype.constructor = DbArtefactController;
 
 module.exports.DbArtefactController = DbArtefactController;

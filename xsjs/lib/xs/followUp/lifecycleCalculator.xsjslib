@@ -39,7 +39,7 @@ async function LifecycleVersionCalculator(iTaskId, oPersistency, oConnectionFact
 
         let oCalculationTask = oTaskService.getById(iTaskId);
         try {
-            if (await helpers.isNullOrUndefined(oCalculationTask)) {
+            if (helpers.isNullOrUndefined(oCalculationTask)) {
                 const sLogMessage = `Cannot calculate lifecycle versions for task with id ${ iTaskId } since the task cannot be found.`;
                 $.trace.error(sLogMessage);
                 await setTaskToFailed(oCalculationTask, sLogMessage);
@@ -57,7 +57,7 @@ async function LifecycleVersionCalculator(iTaskId, oPersistency, oConnectionFact
                 await setTaskToFailed(oCalculationTask, sLogMessage);
                 return;
             }
-            if (await helpers.isNullOrUndefined(oCalculationTask.PARAMETERS)) {
+            if (helpers.isNullOrUndefined(oCalculationTask.PARAMETERS)) {
                 const sLogMessage = `Cannot calculation lifecycle versions for task with id ${ iTaskId }, since the task defined has no parameters.`;
                 $.trace.error(sLogMessage);
                 await setTaskToFailed(oCalculationTask, sLogMessage);
@@ -73,7 +73,7 @@ async function LifecycleVersionCalculator(iTaskId, oPersistency, oConnectionFact
                 return;
             }
             var sProjectId = mParameters.PROJECT_ID;
-            if (await helpers.isNullOrUndefined(sProjectId)) {
+            if (helpers.isNullOrUndefined(sProjectId)) {
                 const sLogMessage = `Cannot calculate lifecycle versions for task with id ${ iTaskId }, since the task parameters have no property PROJECT_ID.`;
                 $.trace.error(sLogMessage);
                 await setTaskToFailed(oCalculationTask, sLogMessage);
@@ -158,6 +158,6 @@ async function LifecycleVersionCalculator(iTaskId, oPersistency, oConnectionFact
         await oTaskService.updateTask(oTask, { PROGRESS_STEP: iProgressStep }, oConnectionFactory);
     }
 }
-LifecycleVersionCalculator.prototype = await Object.create(LifecycleVersionCalculator.prototype);
+LifecycleVersionCalculator.prototype = Object.create(LifecycleVersionCalculator.prototype);
 LifecycleVersionCalculator.prototype.constructor = LifecycleVersionCalculator;
 export default {helpers,_,TaskStatus,TaskType,Message,LifecycleVersionCalculator};

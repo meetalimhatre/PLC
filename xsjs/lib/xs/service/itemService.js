@@ -29,13 +29,13 @@ var Severity = MessageLibrary.Severity;
  */
 async function doUpdate(oItemToUpdate, oPersistency, sSessionId, bUpdateOnlyStandardFields, iOldCategoryId, iNewCategoryId) {
 
-    if (await helpers.isNullOrUndefined(bUpdateOnlyStandardFields))
+    if (helpers.isNullOrUndefined(bUpdateOnlyStandardFields))
         bUpdateOnlyStandardFields = false;
 
-    if (await helpers.isNullOrUndefined(iOldCategoryId))
+    if (helpers.isNullOrUndefined(iOldCategoryId))
         iOldCategoryId = 0;
 
-    if (await helpers.isNullOrUndefined(iNewCategoryId))
+    if (helpers.isNullOrUndefined(iNewCategoryId))
         iNewCategoryId = 0;
 
     var iAffectedRows = await oPersistency.Item.update(oItemToUpdate, sSessionId, bUpdateOnlyStandardFields, iOldCategoryId, iNewCategoryId);

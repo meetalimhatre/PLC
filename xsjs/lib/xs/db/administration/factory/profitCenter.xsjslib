@@ -1,12 +1,12 @@
 var _ = $.require('lodash');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function ProfitCenter(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    ProfitCenter.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    ProfitCenter.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
 
         var oFilters = [
@@ -29,7 +29,7 @@ function ProfitCenter(dbConnection, hQuery, sObjectName) {
         ];
 
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
             oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_ENTITIES] = Array.slice(result.OT_PROFIT_CENTER);
             oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = Array.slice(result.OT_CONTROLLING_AREA);
             oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_TEXT_ENTITIES] = Array.slice(result.OT_PROFIT_CENTER_TEXT);
@@ -61,13 +61,13 @@ function ProfitCenter(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by PROFIT_CENTER_ID, CONTROLLING_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;
     };
 }
 
-ProfitCenter.prototype = await Object.create(MasterDataBaseObject.prototype);
+ProfitCenter.prototype = Object.create(MasterDataBaseObject.prototype);
 ProfitCenter.prototype.constructor = ProfitCenter;
 export default {_,BusinessObjectsEntities,MasterDataBaseObject,ProfitCenter};

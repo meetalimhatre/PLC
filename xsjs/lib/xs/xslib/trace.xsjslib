@@ -120,11 +120,11 @@ async function trace(level, group, comment, condition) {
 
     // only use the first letter, e.g. "error" would be mapped to "e"
     var theLevel = level[0];
-    if (await isTraceActive(theLevel, group)) {
+    if (isTraceActive(theLevel, group)) {
         var everythingOK = await isFunction(condition) ? condition() : condition;
         if (!everythingOK) {
             var output;
-            if (await isFunction(comment)) {
+            if (isFunction(comment)) {
                 output = '[' + group + ']: ' + comment();
             } else {
                 output = '[' + group + ']: ' + comment;

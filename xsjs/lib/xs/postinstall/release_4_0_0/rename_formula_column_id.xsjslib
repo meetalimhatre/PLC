@@ -29,7 +29,7 @@ async function run(oCurrentConnection) {
     return true;
 }
 
-function getCurrentSchema(oCurrentConnection) {
+async function getCurrentSchema(oCurrentConnection) {
     return oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
 }
 

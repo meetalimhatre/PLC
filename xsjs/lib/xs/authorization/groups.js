@@ -206,7 +206,7 @@ module.exports.Groups = function ($) {
                         createMultipleErrorsResponse(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR.code, MessageLibrary.Operation.CREATE, userGroupUserGroup, oSubgroup, aResultErrors);
                     });
                 } else {
-                    if (await authorizationUnroller.containsCycle(await oPersistency.getConnection())) {
+                    if (authorizationUnroller.containsCycle(await oPersistency.getConnection())) {
                         const sLogMessage = 'Cycle detected.';
                         $.trace.error(sLogMessage);
                         throw new PlcException(Code.GROUP_CYCLE_ERROR, sLogMessage);

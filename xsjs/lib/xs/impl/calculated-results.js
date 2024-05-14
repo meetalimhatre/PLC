@@ -10,7 +10,7 @@ module.exports.CalculatedResults = function ($) {
     this.get = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
         var iCalculationVersionId = await helpers.toPositiveInteger(mParameters.id);
 
-        if (await helpers.isNullOrUndefined(mParameters.calculate) || mParameters.calculate !== true) {
+        if (helpers.isNullOrUndefined(mParameters.calculate) || mParameters.calculate !== true) {
             const oResult = oPersistency.CalculationVersion.getSavedCalculationResults(iCalculationVersionId);
             let oCalculationResult = {};
             if (mParameters.compressedResult) {

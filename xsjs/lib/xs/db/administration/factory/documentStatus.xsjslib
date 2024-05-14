@@ -1,8 +1,8 @@
 var _ = $.require('lodash');
 var helpers = $.require('../../../util/helpers');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
-var DocumentType = $.import('xs.db.administration.factory', 'documentType');
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var DocumentType = await $.import('xs.db.administration.factory', 'documentType');
 
 function DocumentStatus(dbConnection, hQuery, sObjectName) {
 
@@ -63,7 +63,7 @@ function DocumentStatus(dbConnection, hQuery, sObjectName) {
 
             stmt += ` order by plcTable.DOCUMENT_TYPE_ID, plcTable.DOCUMENT_STATUS_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            const rsDocumentStatusEntities = dbConnection.executeQuery(stmt);
+            const rsDocumentStatusEntities = await dbConnection.executeQuery(stmt);
             oReturnObject[BusinessObjectsEntities.DOCUMENT_STATUS_ENTITIES] = _.values(rsDocumentStatusEntities);
 
             const dependentBusinessObject = await helpers.transposeResultArray(rsDocumentStatusEntities, true);
@@ -74,6 +74,6 @@ function DocumentStatus(dbConnection, hQuery, sObjectName) {
     };
 }
 
-DocumentStatus.prototype = await Object.create(MasterDataBaseObject.prototype);
+DocumentStatus.prototype = Object.create(MasterDataBaseObject.prototype);
 DocumentStatus.prototype.constructor = DocumentStatus;
 export default {_,helpers,BusinessObjectsEntities,MasterDataBaseObject,DocumentType,DocumentStatus};

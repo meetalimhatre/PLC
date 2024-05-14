@@ -6,14 +6,14 @@ const MessageLibrary = $.require('../util/message');
 const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     layout: 'sap.plc.db::basis.t_layout',
     layout_personal: 'sap.plc.db::basis.t_layout_personal',
     layout_columns: 'sap.plc.db::basis.t_layout_column',
     layout_hidden_fields: 'sap.plc.db::basis.t_layout_hidden_field'
 });
 
-const Sequences = await Object.freeze({ layout: 'sap.plc.db.sequence::s_layout' });
+const Sequences = Object.freeze({ layout: 'sap.plc.db.sequence::s_layout' });
 
 /**
  * Provides persistency operations with layouts.
@@ -39,9 +39,9 @@ async function Layout(dbConnection, hQuery) {
         var stmtLayoutHiddenFields = 'select hiddenFields.LAYOUT_ID, hiddenFields.PATH, hiddenFields.BUSINESS_OBJECT, hiddenFields.COLUMN_ID from "' + Tables.layout_hidden_fields + '" hiddenFields ' + 'inner join "' + Tables.layout + '" layout ON hiddenFields.layout_id=layout.layout_id ' + 'left outer join "' + Tables.layout_personal + '" personal on hiddenFields.layout_id=personal.layout_id ' + 'where personal.user_id=? or layout.is_corporate=1';
 
         return {
-            LAYOUT: dbConnection.executeQuery(stmtLayout, sUserId, iLayoutType),
-            LAYOUT_COLUMN: dbConnection.executeQuery(stmtLayoutColumn, sUserId),
-            HIDDEN_FIELDS: dbConnection.executeQuery(stmtLayoutHiddenFields, sUserId)
+            LAYOUT: await dbConnection.executeQuery(stmtLayout, sUserId, iLayoutType),
+            LAYOUT_COLUMN: await dbConnection.executeQuery(stmtLayoutColumn, sUserId),
+            HIDDEN_FIELDS: await dbConnection.executeQuery(stmtLayoutHiddenFields, sUserId)
         };
     };
 
@@ -62,17 +62,17 @@ async function Layout(dbConnection, hQuery) {
 
         var iLayoutId = this.helper.getNextSequenceID(Sequences.layout);
 
-        if (await helpers.isNullOrUndefined(oLayoutData.LAYOUT_TYPE)) {
+        if (helpers.isNullOrUndefined(oLayoutData.LAYOUT_TYPE)) {
             oLayoutData.LAYOUT_TYPE = 1;
         }
 
         var stmtInsertLayout = 'insert into "' + Tables.layout + '" (LAYOUT_ID, LAYOUT_NAME, IS_CORPORATE, LAYOUT_TYPE) values(?,?,?,?)';
-        dbConnection.executeUpdate(stmtInsertLayout, iLayoutId, oLayoutData.LAYOUT_NAME || null, iIsCorporate, oLayoutData.LAYOUT_TYPE);
+        await dbConnection.executeUpdate(stmtInsertLayout, iLayoutId, oLayoutData.LAYOUT_NAME || null, iIsCorporate, oLayoutData.LAYOUT_TYPE);
 
 
         if (iIsCorporate === 0) {
             var stmtInsertLayoutPers = 'insert into "' + Tables.layout_personal + '" (LAYOUT_ID, USER_ID, IS_CURRENT) values(?,?,?)';
-            dbConnection.executeUpdate(stmtInsertLayoutPers, iLayoutId, sUserId, oLayoutData.IS_CURRENT);
+            await dbConnection.executeUpdate(stmtInsertLayoutPers, iLayoutId, sUserId, oLayoutData.IS_CURRENT);
         }
 
         this.createLayoutAdditionalData(oLayoutData, iLayoutId);
@@ -116,10 +116,10 @@ async function Layout(dbConnection, hQuery) {
             aHiddenFields.push(oHiddenField);
         });
         if (aLayoutColumns.length > 0) {
-            dbConnection.executeUpdate('INSERT INTO "' + Tables.layout_columns + '" (LAYOUT_ID, DISPLAY_ORDER, PATH, BUSINESS_OBJECT, COLUMN_ID, COSTING_SHEET_ROW_ID, COST_COMPONENT_ID, COLUMN_WIDTH) VALUES (?,?,?,?,?,?,?,?)', aLayoutColumns);
+            await dbConnection.executeUpdate('INSERT INTO "' + Tables.layout_columns + '" (LAYOUT_ID, DISPLAY_ORDER, PATH, BUSINESS_OBJECT, COLUMN_ID, COSTING_SHEET_ROW_ID, COST_COMPONENT_ID, COLUMN_WIDTH) VALUES (?,?,?,?,?,?,?,?)', aLayoutColumns);
         }
         if (aHiddenFields.length > 0) {
-            dbConnection.executeUpdate('INSERT INTO "' + Tables.layout_hidden_fields + '" (LAYOUT_ID, PATH, BUSINESS_OBJECT, COLUMN_ID) VALUES (?,?,?,?)', aHiddenFields);
+            await dbConnection.executeUpdate('INSERT INTO "' + Tables.layout_hidden_fields + '" (LAYOUT_ID, PATH, BUSINESS_OBJECT, COLUMN_ID) VALUES (?,?,?,?)', aHiddenFields);
         }
     };
 
@@ -142,10 +142,10 @@ async function Layout(dbConnection, hQuery) {
 	 */
     this.update = async function (oLayoutData, sUserId, iIsCorporate) {
         if (!helpers.isNullOrUndefined(oLayoutData.LAYOUT_NAME)) {
-            dbConnection.executeUpdate('update "' + Tables.layout + '" set LAYOUT_NAME = ? where LAYOUT_ID = ?', oLayoutData.LAYOUT_NAME, oLayoutData.LAYOUT_ID);
+            await dbConnection.executeUpdate('update "' + Tables.layout + '" set LAYOUT_NAME = ? where LAYOUT_ID = ?', oLayoutData.LAYOUT_NAME, oLayoutData.LAYOUT_ID);
         }
         if (iIsCorporate === 0 && !helpers.isNullOrUndefined(oLayoutData.IS_CURRENT)) {
-            dbConnection.executeUpdate('update "' + Tables.layout_personal + '" set IS_CURRENT = ? where LAYOUT_ID = ?', oLayoutData.IS_CURRENT, oLayoutData.LAYOUT_ID);
+            await dbConnection.executeUpdate('update "' + Tables.layout_personal + '" set IS_CURRENT = ? where LAYOUT_ID = ?', oLayoutData.IS_CURRENT, oLayoutData.LAYOUT_ID);
         }
 
         this.deleteLayoutAdditionalData(oLayoutData.LAYOUT_ID);
@@ -176,7 +176,7 @@ async function Layout(dbConnection, hQuery) {
 	 */
     this.isNameUnique = function (iLayoutId, sLayoutName, sUserId) {
         var sSelectStmt = 'select count(*) as rowcount from "' + Tables.layout + '" where (IS_CORPORATE = 1 and upper(LAYOUT_NAME) = upper(?)) and LAYOUT_ID != ?' + 'or (IS_CORPORATE = 0 and upper(LAYOUT_NAME) = upper(?) and layout_id in ' + '(select layout_id from "' + Tables.layout_personal + '" where USER_ID = ?) and LAYOUT_ID != ?)';
-        var aCount = dbConnection.executeQuery(sSelectStmt, sLayoutName, iLayoutId, sLayoutName, sUserId, iLayoutId);
+        var aCount = await dbConnection.executeQuery(sSelectStmt, sLayoutName, iLayoutId, sLayoutName, sUserId, iLayoutId);
 
         return parseInt(aCount[0].ROWCOUNT) === 0;
     };
@@ -194,7 +194,7 @@ async function Layout(dbConnection, hQuery) {
 	 */
     this.deleteLayout = async function (iLayoutId, sUserId, iIsCorporate) {
         if (iIsCorporate === 0) {
-            var iPersonalLayoutDeleteResult = dbConnection.executeUpdate('delete  from  "' + Tables.layout_personal + '" where LAYOUT_ID = ? AND USER_ID = ?', iLayoutId, sUserId);
+            var iPersonalLayoutDeleteResult = await dbConnection.executeUpdate('delete  from  "' + Tables.layout_personal + '" where LAYOUT_ID = ? AND USER_ID = ?', iLayoutId, sUserId);
             if (iPersonalLayoutDeleteResult === 0) {
                 const sClientMsg = 'Personal layout id does not exist for user.';
                 const sServerMsg = `${ sClientMsg } Layout id: ${ iLayoutId }, user id: ${ sUserId }.`;
@@ -205,7 +205,7 @@ async function Layout(dbConnection, hQuery) {
 
         this.deleteLayoutAdditionalData(iLayoutId);
 
-        var iLayoutDeleteResult = dbConnection.executeUpdate('delete  from  "' + Tables.layout + '" where LAYOUT_ID = ?', iLayoutId);
+        var iLayoutDeleteResult = await dbConnection.executeUpdate('delete  from  "' + Tables.layout + '" where LAYOUT_ID = ?', iLayoutId);
 
         return iLayoutDeleteResult;
     };
@@ -217,11 +217,11 @@ async function Layout(dbConnection, hQuery) {
 	 *            iLayoutId - the layout id
 	 */
     this.deleteLayoutAdditionalData = function (iLayoutId) {
-        dbConnection.executeUpdate('delete  from  "' + Tables.layout_columns + '" where LAYOUT_ID = ?', iLayoutId);
-        dbConnection.executeUpdate('delete  from  "' + Tables.layout_hidden_fields + '" where LAYOUT_ID = ?', iLayoutId);
+        await dbConnection.executeUpdate('delete  from  "' + Tables.layout_columns + '" where LAYOUT_ID = ?', iLayoutId);
+        await dbConnection.executeUpdate('delete  from  "' + Tables.layout_hidden_fields + '" where LAYOUT_ID = ?', iLayoutId);
     };
 }
 
-Layout.prototype = await Object.create(Layout.prototype);
+Layout.prototype = Object.create(Layout.prototype);
 Layout.prototype.constructor = Layout;
 export default {_,helpers,Helper,MessageLibrary,PlcException,Code,Tables,Sequences,Layout};

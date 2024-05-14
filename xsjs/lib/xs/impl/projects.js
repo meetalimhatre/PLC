@@ -24,8 +24,8 @@ const oSessions = new Map();
 
 module.exports.Projects = async function ($) {
 
-    const ProjectTables = $.import('xs.db', 'persistency-project').Tables;
-    const Tables = await Object.freeze({
+    const ProjectTables = await $.import('xs.db', 'persistency-project').Tables;
+    const Tables = Object.freeze({
         folder: 'sap.plc.db::basis.t_folder',
         project: 'sap.plc.db::basis.t_project',
         entity_relation: 'sap.plc.db::basis.t_entity_relation'
@@ -380,7 +380,7 @@ module.exports.Projects = async function ($) {
 
         var oCurrentProject = oPersistency.Project.getProjectProperties(sProjectId);
 
-        if (await helpers.isNullOrUndefined(oCurrentProject)) {
+        if (helpers.isNullOrUndefined(oCurrentProject)) {
             const sClientMsg = 'Project does not exist and cannot be updated.';
             const sServerMsg = `${ sClientMsg } Project id: ${ sProjectId }`;
             $.trace.error(sServerMsg);
@@ -567,7 +567,7 @@ module.exports.Projects = async function ($) {
                 var oExistingCalcWithVersion = _.find(aExistingCalculationsWithVersions, oExistingCalcWithVersion => {
                     return oQuantityDefinition.CALCULATION_ID === oExistingCalcWithVersion.CALCULATION_ID && oQuantityDefinition.CALCULATION_VERSION_ID === oExistingCalcWithVersion.CALCULATION_VERSION_ID;
                 });
-                if (await helpers.isNullOrUndefined(oExistingCalcWithVersion)) {
+                if (helpers.isNullOrUndefined(oExistingCalcWithVersion)) {
                     const sClientMsg = 'Version does not exist or does not belong to the specified calculation.';
                     const sServerMsg = `${ sClientMsg } Version: ${ oQuantityDefinition.CALCULATION_VERSION_ID }, Calculation: ${ oQuantityDefinition.CALCULATION_ID }.`;
                     $.trace.error(sServerMsg);

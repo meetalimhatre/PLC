@@ -94,7 +94,7 @@ async function FrontendSettingsValidator(oPersistency, utils) {
                             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                         }
 
-                        if (await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION) || await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION.FIELD)) {
+                        if (helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION) || await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION.FIELD)) {
                             const sLogMessage = `Property 'CHANGE_CONFIGURATION' of resource ${ oRequest.queryPath } not filled correctly. NAME: ${ oFrontendSetting.SETTING_NAME }.`;
                             $.trace.error(sLogMessage);
                             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -154,7 +154,7 @@ async function FrontendSettingsValidator(oPersistency, utils) {
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
 
-                if (await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION) || await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION.FIELD)) {
+                if (helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION) || await helpers.isNullOrUndefined(aSettingContentDecoded.CHANGE_CONFIGURATION.FIELD)) {
                     const sLogMessage = `Property 'CHANGE_CONFIGURATION' of resource ${ oRequest.queryPath } not filled correctly. Id: ${ oFrontendSettingId.SETTING_ID }.`;
                     $.trace.error(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -183,6 +183,6 @@ async function FrontendSettingsValidator(oPersistency, utils) {
     };
 }
 
-FrontendSettingsValidator.prototype = await Object.create(FrontendSettingsValidator.prototype);
+FrontendSettingsValidator.prototype = Object.create(FrontendSettingsValidator.prototype);
 FrontendSettingsValidator.prototype.constructor = FrontendSettingsValidator;
 export default {_,MessageLibrary,PlcException,Code,GenericSyntaxValidator,helpers,FrontendSettingsValidator};

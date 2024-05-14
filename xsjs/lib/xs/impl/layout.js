@@ -13,7 +13,7 @@ module.exports.Layout = function ($) {
  *
  */
     this.get = async function (aBodyItems, aParameters, oServiceOutput, oPersistency) {
-        if (await helpers.isNullOrUndefined(aParameters.layout_type)) {
+        if (helpers.isNullOrUndefined(aParameters.layout_type)) {
             aParameters.layout_type = 1;
         }
         var oLayoutInformation = oPersistency.Layout.getLayouts(sUserId, aParameters.layout_type);

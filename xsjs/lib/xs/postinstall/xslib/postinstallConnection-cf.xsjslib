@@ -13,7 +13,7 @@ async function getConnection(oOption, sTenantID) {
     return await TenancyConnection.getConnectionByTenantID(iTenantID, oHanaOption);
 }
 
-function processParameters(request) {
+async function processParameters(request) {
     const params = request.parameters;
     const oParam = {};
     for (let i = 0; i < params.length; i++) {

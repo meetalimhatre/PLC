@@ -7,9 +7,9 @@ var Limits = $.require('../../util/masterdataResources').Limits;
 var Misc = $.require('../persistency-misc').Misc;
 var Helper = $.require('../persistency-helper').Helper;
 var Metadata = $.require('../persistency-metadata').Metadata;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
-var CostingSheetRow = $.import('xs.db.administration', 'api-costingSheetRow').CostingSheetRow;
-var ProjectTables = $.import('xs.db', 'persistency-project').Tables;
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
+var CostingSheetRow = await $.import('xs.db.administration', 'api-costingSheetRow').CostingSheetRow;
+var ProjectTables = await $.import('xs.db', 'persistency-project').Tables;
 var UrlToSqlConverter = $.require('../../util/urlToSqlConverter').UrlToSqlConverter;
 
 const MessageLibrary = $.require('../../util/message');
@@ -23,7 +23,7 @@ var sSessionId;
 var sUserId;
 sSessionId = sUserId = $.getPlcUsername();
 
-var Procedures = await Object.freeze({ costing_sheet_read: 'sap.plc.db.administration.procedures::p_costing_sheet_read' });
+var Procedures = Object.freeze({ costing_sheet_read: 'sap.plc.db.administration.procedures::p_costing_sheet_read' });
 
 async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 
@@ -452,6 +452,6 @@ async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 
 }
 
-CostingSheet.prototype = await Object.create(CostingSheet.prototype);
+CostingSheet.prototype = Object.create(CostingSheet.prototype);
 CostingSheet.prototype.constructor = CostingSheet;
 export default {_,helpers,BusinessObjectTypes,Resources,BusinessObjectsEntities,Limits,Misc,Helper,Metadata,apiHelpers,CostingSheetRow,ProjectTables,UrlToSqlConverter,MessageLibrary,MessageOperation,PlcException,Code,MessageDetails,AdministrationObjType,sSessionId,sUserId,Procedures,CostingSheet};

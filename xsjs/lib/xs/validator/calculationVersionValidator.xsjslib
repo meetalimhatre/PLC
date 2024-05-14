@@ -189,7 +189,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 
         async function validateCopyRequests() {
             utils.checkEmptyBody(oRequest.body);
-            if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = 'ID parameter is missing';
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -282,12 +282,12 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 
         async function validateOpenRequests() {
             utils.checkEmptyBody(oRequest.body);
-            if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = "Parameter 'id' is missing";
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
-            if (await helpers.isNullOrUndefined(mValidatedParameters.calculate)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.calculate)) {
                 const sLogMessage = "Parameter 'calculate' is missing";
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -370,12 +370,12 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             }
 
             if (!helpers.isNullOrUndefined(mValidatedParameters.filter) || !helpers.isNullOrUndefined(mValidatedParameters.sortingColumn) || !helpers.isNullOrUndefined(mValidatedParameters.sortingDirection)) {
-                if (await helpers.isNullOrUndefined(mValidatedParameters.search) || mValidatedParameters.search !== true) {
+                if (helpers.isNullOrUndefined(mValidatedParameters.search) || mValidatedParameters.search !== true) {
                     const sLogMessage = 'Missing search=true parameter when filters or sorting column or direction is present.';
                     $.trace.error(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
-                if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+                if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                     const sLogMessage = 'Missing id for the search for reference versions.';
                     $.trace.error(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);

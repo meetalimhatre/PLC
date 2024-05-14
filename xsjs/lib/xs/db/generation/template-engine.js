@@ -32,7 +32,7 @@ async function TemplateEngine() {
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
-        if (await helpers.isNullOrUndefined(oContext)) {
+        if (helpers.isNullOrUndefined(oContext)) {
             const sLogMessage = 'Context must an object.';
             await logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
@@ -55,7 +55,7 @@ async function TemplateEngine() {
 
 }
 
-TemplateEngine.prototype = await Object.create(TemplateEngine.prototype);
+TemplateEngine.prototype = Object.create(TemplateEngine.prototype);
 TemplateEngine.prototype.constructor = TemplateEngine;
 
 module.exports.TemplateEngine = TemplateEngine;

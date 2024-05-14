@@ -1,6 +1,6 @@
 const _ = $.require('lodash');
 const [target, version, version_sp, version_patch] = MTA_METADATA.version.split('"');
-const driver = $.import('xs.postinstall.xslib', 'driver');
+const driver = await $.import('xs.postinstall.xslib', 'driver');
 const helpers = $.require('../../util/helpers');
 
 async function postInstallationInfo(request, response, oConnection) {
@@ -19,7 +19,7 @@ async function postInstallationInfo(request, response, oConnection) {
 
 function checkPreviousInstallationRun(response, oConnection) {
 
-    let errOrFinishResult = oConnection.executeQuery(`
+    let errOrFinishResult = await oConnection.executeQuery(`
         SELECT 
             TOP 1 "VERSION",
             "VERSION_SP",
@@ -119,7 +119,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
             };
         } else {
             let oLastAction = await driver.readLastAction(oConnection);
-            if (await helpers.isNullOrUndefined(oLastAction)) {
+            if (helpers.isNullOrUndefined(oLastAction)) {
                 var sMessage = 'Could not found any records in installation logs';
                 return {
                     status: 'error',
@@ -194,7 +194,7 @@ async function getUpgradeInfo(request, oConnection) {
             };
         } else {
             let oLastAction = await driver.readLastAction(oConnection);
-            if (await helpers.isNullOrUndefined(oLastAction)) {
+            if (helpers.isNullOrUndefined(oLastAction)) {
                 var sMessage = 'Could not found any records in installation logs';
                 return {
                     status: 'error',
@@ -232,7 +232,7 @@ async function getCurrentStep(aRegister, oConnection) {
 }
 
 function getLatestErrorStep(oConnection) {
-    const aResult = oConnection.executeQuery(`
+    const aResult = await oConnection.executeQuery(`
         select top 1 * 
             from "sap.plc.db::basis.t_installation_log"
             where step != 'clean' and state = 'error'
@@ -248,14 +248,14 @@ function getLatestErrorStep(oConnection) {
 
 // If t_installation_log is empty, return true
 function isLogEmpty(oConnection) {
-    const aResult = oConnection.executeQuery(`
+    const aResult = await oConnection.executeQuery(`
             select * from "sap.plc.db::basis.t_installation_log"
         `);
     return aResult.length === 0;
 }
 
 function copyLog(oConnection) {
-    return oConnection.executeUpdate(`
+    return await oConnection.executeUpdate(`
         insert into "sap.plc.db::basis.t_installation_log"
         select * from "SAP_PLC"."sap.plc.db::basis.t_log"
     `);

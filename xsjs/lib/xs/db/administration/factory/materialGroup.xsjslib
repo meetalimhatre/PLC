@@ -1,12 +1,12 @@
 var _ = $.require('lodash');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function MaterialGroup(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    MaterialGroup.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    MaterialGroup.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
 
 
@@ -26,7 +26,7 @@ function MaterialGroup(dbConnection, hQuery, sObjectName) {
         ];
 
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
 
             oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_ENTITIES] = Array.slice(result.OT_MATERIAL_GROUP);
             oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_TEXT_ENTITIES] = Array.slice(result.OT_MATERIAL_GROUP_TEXT);
@@ -56,13 +56,13 @@ function MaterialGroup(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by MATERIAL_GROUP_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;
     };
 }
 
-MaterialGroup.prototype = await Object.create(MasterDataBaseObject.prototype);
+MaterialGroup.prototype = Object.create(MasterDataBaseObject.prototype);
 MaterialGroup.prototype.constructor = MaterialGroup;
 export default {_,BusinessObjectsEntities,MasterDataBaseObject,MaterialGroup};

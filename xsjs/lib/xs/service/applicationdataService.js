@@ -14,7 +14,7 @@ const BusinessObjectsEntities = require('../util/masterdataResources').BusinessO
  * @param {object} oPersistency - instance of persistency
  * @return {array} aLanguage - the array containing the supported languages
  */
-module.exports.getLanguages = function (sLanguage, oPersistency) {
+module.exports.getLanguages = async function (sLanguage, oPersistency) {
     let oParameters = {};
     let aLanguages = [];
 

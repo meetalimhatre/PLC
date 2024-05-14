@@ -15,12 +15,12 @@ const FormulaInterpreterError = MessageLibrary.FormulaInterpreterErrorMapping;
 const BusinessObjectTypes = constants.BusinessObjectTypes;
 
 
-const Sequences = await Object.freeze({
+const Sequences = Object.freeze({
     formula: 'sap.plc.db.sequence::s_formula',
     field_mapping: 'sap.plc.db.sequence::s_field_mapping'
 });
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     metadata: 'sap.plc.db::basis.t_metadata',
     metadataText: 'sap.plc.db::basis.t_metadata__text',
     metadataItemAttributes: 'sap.plc.db::basis.t_metadata_item_attributes',
@@ -37,7 +37,7 @@ var Tables = await Object.freeze({
     field_mapping: 'sap.plc.db::map.t_field_mapping'
 });
 
-const Procedures = await Object.freeze({ checkFormula: 'sap.plc.db.calcengine.procedures::p_check_formulas' });
+const Procedures = Object.freeze({ checkFormula: 'sap.plc.db.calcengine.procedures::p_check_formulas' });
 
 const BusinessObjectTables = new Map([
     [
@@ -211,7 +211,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 						and item.column_id LIKE_REGEXPR '^(CAPR|CWCE|CMPR|CMPL|CMAT|CCEN)_[A-Z][A-Z0-9_]*$'
 						order by column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
         var aMetadataFields = Array.from(oQueryResult);
 
         _.each(aMetadataFields, function (oMetadataField, iIndex) {
@@ -274,7 +274,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 		and header.is_custom = 1
 		order by item_category_id, column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, sPath, sBusinessObject);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, sPath, sBusinessObject);
 
         return Array.from(oQueryResult);
     };
@@ -375,7 +375,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         var oGetMetadataStatement;
         var whereClauseParams = [];
 
-        if (await helpers.isNullOrUndefined(sWhereClause)) {
+        if (helpers.isNullOrUndefined(sWhereClause)) {
             aStmtBuilder.push(' WHERE 1 = 1 ');
         } else {
             aStmtBuilder.push(sWhereClause);
@@ -433,7 +433,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         // check if referenced UOM exists
         if (oMeta.UOM_CURRENCY_FLAG === 0 && !helpers.isNullOrUndefinedOrEmpty(oMeta.REF_UOM_CURRENCY_PATH) && !helpers.isNullOrUndefinedOrEmpty(oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT) && !helpers.isNullOrUndefinedOrEmpty(oMeta.REF_UOM_CURRENCY_COLUMN_ID)) {
             refMetadata = that.getRefMetadata(oMeta);
-            if (await helpers.isNullOrUndefined(refMetadata)) {
+            if (helpers.isNullOrUndefined(refMetadata)) {
                 var oMessageDetails = new MessageDetails();
                 oMessageDetails.addMetadataObjs(oMeta);
                 const sLogMessage = `Referenced UOM OR CURRENCY doesn't exists. REF_UOM_CURRENCY_PATH: ${ oMeta.REF_UOM_CURRENCY_PATH }, REF_UOM_CURRENCY_BUSINESS_OBJECT: ${ oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT }, REF_UOM_CURRENCY_COLUMN_ID: ${ oMeta.REF_UOM_CURRENCY_COLUMN_ID }.`;
@@ -463,7 +463,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	                                                REF_UOM_CURRENCY_COLUMN_ID, UOM_CURRENCY_FLAG, SEMANTIC_DATA_TYPE, SEMANTIC_DATA_TYPE_ATTRIBUTES, PROPERTY_TYPE, IS_IMMUTABLE_AFTER_SAVE, IS_REQUIRED_IN_MASTERDATA, IS_WILDCARD_ALLOWED,
 	                                                IS_USABLE_IN_FORMULA, RESOURCE_KEY_DISPLAY_NAME, RESOURCE_KEY_DISPLAY_DESCRIPTION, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, VALIDATION_REGEX_ID 
 	                                            from "${ Tables.metadata }" where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ?`;
-        const aRefMetadata = dbConnection.executeQuery(sSelectStatementRefMetadata, oMeta.REF_UOM_CURRENCY_PATH, oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT, oMeta.REF_UOM_CURRENCY_COLUMN_ID);
+        const aRefMetadata = await dbConnection.executeQuery(sSelectStatementRefMetadata, oMeta.REF_UOM_CURRENCY_PATH, oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT, oMeta.REF_UOM_CURRENCY_COLUMN_ID);
         return aRefMetadata[0];
     };
 
@@ -674,7 +674,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         var iMaxValue = await helpers.isNullOrUndefined(aMaxValue[0]) || await helpers.isNullOrUndefined(aMaxValue[0].MAX_DISPLAY_ORDER) ? null : parseInt(aMaxValue[0].MAX_DISPLAY_ORDER, 10);
         var bIsCustomPrevious = await helpers.isNullOrUndefined(aMaxValue[0]) || await helpers.isNullOrUndefined(aMaxValue[0].IS_CUSTOM) ? null : aMaxValue[0].IS_CUSTOM;
 
-        if (await helpers.isNullOrUndefined(iMaxValue)) {
+        if (helpers.isNullOrUndefined(iMaxValue)) {
             if (bIsCustom === 1) {
                 displayOrder = 500;
             }
@@ -709,7 +709,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         var iMaxValue = await helpers.isNullOrUndefined(aMaxValue[0]) || await helpers.isNullOrUndefined(aMaxValue[0].MAX_TABLE_DISPLAY_ORDER) ? null : parseInt(aMaxValue[0].MAX_TABLE_DISPLAY_ORDER, 10);
         var bIsCustomPrevious = await helpers.isNullOrUndefined(aMaxValue[0]) || await helpers.isNullOrUndefined(aMaxValue[0].IS_CUSTOM) ? null : aMaxValue[0].IS_CUSTOM;
 
-        if (await helpers.isNullOrUndefined(iMaxValue)) {
+        if (helpers.isNullOrUndefined(iMaxValue)) {
             tableDisplayOrder = 500;
         } else {
             tableDisplayOrder = bIsCustomPrevious ? iMaxValue + 1 : iMaxValue + 500;
@@ -1066,7 +1066,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         }
 
 
-        if (await helpers.isNullOrUndefined(oFormula.FORMULA_DESCRIPTION)) {
+        if (helpers.isNullOrUndefined(oFormula.FORMULA_DESCRIPTION)) {
             oFormula.FORMULA_DESCRIPTION = null;
         }
     };
@@ -1272,8 +1272,8 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 			);
 		`;
 
-        dbConnection.executeUpdate(stmDeletelayoutColumns);
-        dbConnection.executeUpdate(stmDeletelayoutHiddenFields);
+        await dbConnection.executeUpdate(stmDeletelayoutColumns);
+        await dbConnection.executeUpdate(stmDeletelayoutHiddenFields);
     };
 
 
@@ -1325,7 +1325,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
         var sRegularExpression = '\\$' + customField + '([^0-9a-zA-Z_]|$)';
 
-        return dbConnection.executeQuery(oCheckStatement, sRegularExpression);
+        return await dbConnection.executeQuery(oCheckStatement, sRegularExpression);
     };
 
 
@@ -1339,7 +1339,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 		                          INNER JOIN "${ Tables.costingSheetOverheadRow }" overhead_row
 		                          ON formula.FORMULA_ID = overhead_row.FORMULA_ID 
 								  WHERE overhead_row._VALID_TO IS NULL AND formula.OVERHEAD_CUSTOM LIKE ?`;
-        return dbConnection.executeQuery(oCheckStatement, sColumn);
+        return await dbConnection.executeQuery(oCheckStatement, sColumn);
     };
 
 
@@ -1398,14 +1398,14 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 				                           and item.ITEM_CATEGORY_ID in (select distinct ITEM_CATEGORY_ID from "${ Tables.metadataItemAttributes }" 
                                                                          where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ? ) 
 										   and itemExt.${ oMetaTriggerUnitChange.COLUMN_ID }_UNIT IS NULL`;
-                aResultsItem = dbConnection.executeUpdate(sUpdateStatementItemExt, oMetaTriggerUnitChange.PATH, oMetaTriggerUnitChange.BUSINESS_OBJECT, oMetaTriggerUnitChange.COLUMN_ID);
+                aResultsItem = await dbConnection.executeUpdate(sUpdateStatementItemExt, oMetaTriggerUnitChange.PATH, oMetaTriggerUnitChange.BUSINESS_OBJECT, oMetaTriggerUnitChange.COLUMN_ID);
             } else {
                 if (_.includes(constants.aCustomFieldMasterdataBusinessObjects, oMetaTriggerUnitChange.BUSINESS_OBJECT)) {
                     let sMasterdataExtTable = masterdataResources[oMetaTriggerUnitChange.BUSINESS_OBJECT].dbobjects.plcExtensionTable;
                     sUpdateStatementMasterdataExt = `update "${ sMasterdataExtTable }" set ${ oMetaTriggerUnitChange.COLUMN_ID }_UNIT = 
 			                                        (select distinct DEFAULT_VALUE from "${ Tables.metadataItemAttributes }" where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ?) 
 			                                         where ${ oMetaTriggerUnitChange.COLUMN_ID }_UNIT IS NULL`;
-                    aResultsMasterdata = dbConnection.executeUpdate(sUpdateStatementMasterdataExt, oRefMeta.PATH, oRefMeta.BUSINESS_OBJECT, oRefMeta.COLUMN_ID);
+                    aResultsMasterdata = await dbConnection.executeUpdate(sUpdateStatementMasterdataExt, oRefMeta.PATH, oRefMeta.BUSINESS_OBJECT, oRefMeta.COLUMN_ID);
                 }
                 sUpdateStatementItemExt = `update itemExt set itemExt.${ oMetaTriggerUnitChange.COLUMN_ID }_UNIT = 
 			    								(select distinct DEFAULT_VALUE from "${ Tables.metadataItemAttributes }" where PATH= ?
@@ -1416,7 +1416,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 											and item.ITEM_CATEGORY_ID in (select distinct ITEM_CATEGORY_ID from "${ Tables.metadataItemAttributes }" 
 	                                                                      where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ? ) 
 											and itemExt.${ oMetaTriggerUnitChange.COLUMN_ID }_UNIT IS NULL`;
-                aResultsItem = dbConnection.executeUpdate(sUpdateStatementItemExt, constants.BusinessObjectTypes.Item, constants.BusinessObjectTypes.Item, oRefMeta.COLUMN_ID, constants.BusinessObjectTypes.Item, constants.BusinessObjectTypes.Item, oMetaTriggerUnitChange.COLUMN_ID);
+                aResultsItem = await dbConnection.executeUpdate(sUpdateStatementItemExt, constants.BusinessObjectTypes.Item, constants.BusinessObjectTypes.Item, oRefMeta.COLUMN_ID, constants.BusinessObjectTypes.Item, constants.BusinessObjectTypes.Item, oMetaTriggerUnitChange.COLUMN_ID);
             }
             return _.union(aResultsMasterdata, aResultsItem);
         }
@@ -1484,7 +1484,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 			where (formula.IS_FORMULA_USED IS NULL OR formula.IS_FORMULA_USED = 0) and
 				(item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } = 0
 				or item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } is null)`;
-        const aResults = dbConnection.executeUpdate(sUpdateStatement, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID);
+        const aResults = await dbConnection.executeUpdate(sUpdateStatement, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID);
 
 
         const sUpdateStatementParents = `update item 
@@ -1501,7 +1501,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 			where (item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } = 1
 				or item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } is null)`;
 
-        const aResultsParents = dbConnection.executeUpdate(sUpdateStatementParents, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID);
+        const aResultsParents = await dbConnection.executeUpdate(sUpdateStatementParents, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID);
 
 
         const sUpdateStatementChildren = `update item 
@@ -1522,7 +1522,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 			where (formula.IS_FORMULA_USED IS NULL OR formula.IS_FORMULA_USED = 0) and childitem.item_id is null and
 				(item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } = 0
 				or item.${ MapStandardFieldsWithFormulas.get(oMetaStandardField.COLUMN_ID) } is null)`;
-        const aResultsChildren = dbConnection.executeUpdate(sUpdateStatementChildren, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID, 100);
+        const aResultsChildren = await dbConnection.executeUpdate(sUpdateStatementChildren, oMetaStandardField.PATH, oMetaStandardField.BUSINESS_OBJECT, oMetaStandardField.COLUMN_ID, 100);
 
         return _.union(aResults, _.union(aResultsParents, aResultsChildren));
     };
@@ -1551,7 +1551,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
                 sUpdateStatementMasterdataExt = `update "${ sMasterdataExtTable }" set ${ oMetaTriggerChange.COLUMN_ID }_MANUAL = 
 		                                        (select distinct DEFAULT_VALUE from "${ Tables.metadataItemAttributes }" where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ?) 
 		                                         where ${ oMetaTriggerChange.COLUMN_ID }_MANUAL IS NULL`;
-                aResultsMasterdata = dbConnection.executeUpdate(sUpdateStatementMasterdataExt, oMetaTriggerChange.PATH, oMetaTriggerChange.BUSINESS_OBJECT, oMetaTriggerChange.COLUMN_ID);
+                aResultsMasterdata = await dbConnection.executeUpdate(sUpdateStatementMasterdataExt, oMetaTriggerChange.PATH, oMetaTriggerChange.BUSINESS_OBJECT, oMetaTriggerChange.COLUMN_ID);
             }
         }
         sUpdateStatementItemExt += ` itemExt.${ oMetaTriggerChange.COLUMN_ID }_MANUAL = (select distinct DEFAULT_VALUE from  "${ Tables.metadataItemAttributes }" where PATH = ? 
@@ -1562,7 +1562,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 				                    and item.ITEM_CATEGORY_ID in (select distinct ITEM_CATEGORY_ID from "${ Tables.metadataItemAttributes }" where PATH= ? and BUSINESS_OBJECT= ? and COLUMN_ID= ?) 
 				                    and itemExt.${ oMetaTriggerChange.COLUMN_ID }_MANUAL IS NULL`;
 
-        const aResultsItem = dbConnection.executeUpdate(sUpdateStatementItemExt, sPath, sBusinessObject, oMetaTriggerChange.COLUMN_ID, sPath, sBusinessObject, oMetaTriggerChange.COLUMN_ID);
+        const aResultsItem = await dbConnection.executeUpdate(sUpdateStatementItemExt, sPath, sBusinessObject, oMetaTriggerChange.COLUMN_ID, sPath, sBusinessObject, oMetaTriggerChange.COLUMN_ID);
         return _.union(aResultsMasterdata, aResultsItem);
     };
 
@@ -1577,7 +1577,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 									        select CALCULATION_VERSION_ID, ITEM_ID from "${ Tables.item }"
 									        	where (CALCULATION_VERSION_ID, ITEM_ID) not in 
 									        	(select  CALCULATION_VERSION_ID, ITEM_ID from "${ Tables.itemExt }")`;
-        const aResults = dbConnection.executeUpdate(sInsertStatementItemExt);
+        const aResults = await dbConnection.executeUpdate(sInsertStatementItemExt);
         return aResults;
     };
 
@@ -1595,7 +1595,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         const sInsertStatementMasterdataExt = `insert into "${ sMasterdataExtTable }" (${ aKeyFields.join(', ') }) 
 		                                       select ${ aKeyFields.join(', ') } from "${ sMasterdataTable }"
 				                               where (${ aKeyFields.join(', ') }) not in (select  ${ aKeyFields.join(', ') } from "${ sMasterdataExtTable }")`;
-        const aResults = dbConnection.executeUpdate(sInsertStatementMasterdataExt);
+        const aResults = await dbConnection.executeUpdate(sInsertStatementMasterdataExt);
         return aResults;
     };
 
@@ -1711,7 +1711,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
                 }
             });
         }
-        return dbConnection.executeQuery(query);
+        return await dbConnection.executeQuery(query);
     };
 
 
@@ -1726,7 +1726,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 						and column_id LIKE_REGEXPR '^(CUST|CAPR|CWCE|CMPR|CMPL|CMAT|CCEN)_[A-Z][A-Z0-9_]*$'
 						order by column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
         const aMetadataFields = Array.from(oQueryResult);
 
         _.each(aMetadataFields, function (oMetadataField, iIndex) {
@@ -1748,7 +1748,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         const sStmt = `select formula_id from "${ Tables.formula }"
 						where formula_string like '%${ sString }%'`;
 
-        return dbConnection.executeQuery(sStmt).length > 0;
+        return await dbConnection.executeQuery(sStmt).length > 0;
     };
 
 
@@ -1824,8 +1824,8 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 			`;
 
-            dbConnection.executeUpdate(sInsertStmt);
-            dbConnection.executeUpdate(sInsertUnitsStmt);
+            await dbConnection.executeUpdate(sInsertStmt);
+            await dbConnection.executeUpdate(sInsertUnitsStmt);
 
         }
     };
@@ -1850,7 +1850,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
             });
             let sConcatenatedConditions = aConditionsForDelete.join(' or ');
             sFieldMappingDeleteStmt += sConcatenatedConditions + ';';
-            dbConnection.executeUpdate(sFieldMappingDeleteStmt);
+            await dbConnection.executeUpdate(sFieldMappingDeleteStmt);
         }
     };
 

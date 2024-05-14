@@ -17,7 +17,7 @@ const BatchOperation = $.require('../util/masterdataResources').BatchOperation;
 const BusinessObjectsEntities = $.require('../util/masterdataResources').BusinessObjectsEntities;
 const aNotMaintainableBusinessObjects = $.require('../util/masterdataResources').aNotMaintainableBusinessObjects;
 
-const MasterDataObjectHandlerProxy = $.import('xs.db.administration.proxy', 'masterDataProxy').MasterDataObjectHandlerProxy;
+const MasterDataObjectHandlerProxy = await $.import('xs.db.administration.proxy', 'masterDataProxy').MasterDataObjectHandlerProxy;
 const MasterdataResource = $.require('../util/masterdataResources').MasterdataResource;
 const GenericSyntaxValidator = $.require('./genericSyntaxValidator').GenericSyntaxValidator;
 var genericSyntaxValidator = await new GenericSyntaxValidator();
@@ -234,7 +234,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
 
     async function validateCostingSheetRowFormula(oRecord, isCreate) {
         if (isCreate) {
-            if (await helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && !helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION)) {
+            if (helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && !helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION)) {
                 const sLogMessage = `Formula string is mandatory when comment is added`;
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -246,7 +246,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
 
-            if (await helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && !helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION)) {
+            if (helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && !helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION)) {
                 const sLogMessage = `Missing formula string property`;
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);

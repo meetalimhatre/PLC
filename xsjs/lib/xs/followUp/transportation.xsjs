@@ -1,7 +1,7 @@
 const oConnectionFactory = await new ($.require('../db/connection/connection')).ConnectionFactory($);
-const Persistency = $.import('xs.db', 'persistency').Persistency;
+const Persistency = await $.import('xs.db', 'persistency').Persistency;
 const TaskService = $.require('../service/taskService').TaskService;
-const Transportation = $.import('xs.followUp', 'transportation').Transportation;
+const Transportation = await $.import('xs.followUp', 'transportation').Transportation;
 
 /**
  * Triggers the transportation logic to import data. This function is directly invoked by the WebResponse's Follow-up.

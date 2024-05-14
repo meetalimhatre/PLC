@@ -7,7 +7,7 @@ const PlcException = MessageLibrary.PlcException;
 const ValidationInfoCode = MessageLibrary.ValidationInfoCode;
 const Code = MessageLibrary.Code;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     usergroup: 'sap.plc.db::auth.t_usergroup',
     usergroup_user: 'sap.plc.db::auth.t_usergroup_user',
     usergroup_usergroup: 'sap.plc.db::auth.t_usergroup_usergroup',
@@ -37,17 +37,17 @@ function Group(dbConnection) {
         var stmt = `select USERGROUP_ID as GROUP_ID, DESCRIPTION from "${ Tables.usergroup }"`;
         if (!helpers.isNullOrUndefined(aGroupId)) {
             stmt += ` where USERGROUP_ID in (${ aGroupId }) order by USERGROUP_ID`;
-            return dbConnection.executeQuery(stmt);
+            return await dbConnection.executeQuery(stmt);
         }
 
         if (!helpers.isNullOrUndefined(sFilter)) {
             stmt += ` where UPPER(USERGROUP_ID) like concat(?,'%') order by USERGROUP_ID`;
-            return dbConnection.executeQuery(stmt, sFilter.toUpperCase());
+            return await dbConnection.executeQuery(stmt, sFilter.toUpperCase());
         }
 
         stmt += ` order by USERGROUP_ID`;
 
-        return dbConnection.executeQuery(stmt);
+        return await dbConnection.executeQuery(stmt);
 
     };
 
@@ -68,8 +68,8 @@ function Group(dbConnection) {
 		and subgroups.PARENT_USERGROUP_ID = ?`;
         var stmtUsers = `select USER_ID from "${ Tables.usergroup_user }" where USERGROUP_ID = ?`;
 
-        var aGroupMembers = dbConnection.executeQuery(stmtSubgroups, sGroupId);
-        var aUserMembers = dbConnection.executeQuery(stmtUsers, sGroupId);
+        var aGroupMembers = await dbConnection.executeQuery(stmtSubgroups, sGroupId);
+        var aUserMembers = await dbConnection.executeQuery(stmtUsers, sGroupId);
 
         return {
             'GROUPS': aGroupMembers,
@@ -97,7 +97,7 @@ function Group(dbConnection) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup }" (USERGROUP_ID, DESCRIPTION) VALUES (?,?)`, aUsergroupsColumn);
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup }" (USERGROUP_ID, DESCRIPTION) VALUES (?,?)`, aUsergroupsColumn);
         } catch (e) {
             const sClientMsg = 'Error during inserting of user groups into table';
             const sServerMsg = `${ sClientMsg } Error: ${ e.msg || e.message }`;
@@ -132,7 +132,7 @@ function Group(dbConnection) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup_user }" (USERGROUP_ID, USER_ID) VALUES (?,?)`, aUserMembersColumn);
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup_user }" (USERGROUP_ID, USER_ID) VALUES (?,?)`, aUserMembersColumn);
             for (let groupId of touchedGroups) {
                 await authorizationUnroller.unrollPrivilegesOnGroupUpdate(dbConnection, groupId);
             }
@@ -169,7 +169,7 @@ function Group(dbConnection) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup_usergroup }" (PARENT_USERGROUP_ID, CHILD_USERGROUP_ID) VALUES (?,?)`, aGroupMembersColumn);
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.usergroup_usergroup }" (PARENT_USERGROUP_ID, CHILD_USERGROUP_ID) VALUES (?,?)`, aGroupMembersColumn);
             for (let groupId of touchedGroups) {
                 await authorizationUnroller.unrollPrivilegesOnGroupUpdate(dbConnection, groupId);
             }
@@ -200,7 +200,7 @@ function Group(dbConnection) {
             touchedGroups.add(oGroup.GROUP_ID);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.usergroup }" where USERGROUP_ID = ?`, aGroupColumn);
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.usergroup }" where USERGROUP_ID = ?`, aGroupColumn);
 
         //returns an array with the objects that could not be deleted, 1 means deletion was successful and 0 not successful
         var aGroupsNotDeleted = await helpers.unsuccessfulItemsDbOperation(aGroups, aDeleteResult);
@@ -221,10 +221,10 @@ function Group(dbConnection) {
             await authorizationUnroller.unrollPrivileges(dbConnection, Array.from(objectsFromGroupPrivileges));
 
 
-            dbConnection.executeUpdate(`delete from "${ Tables.usergroup_user }" where USERGROUP_ID = ?`, aGroupColumn);
-            dbConnection.executeUpdate(`delete from "${ Tables.usergroup_usergroup }" where PARENT_USERGROUP_ID = ?`, aGroupColumn);
+            await dbConnection.executeUpdate(`delete from "${ Tables.usergroup_user }" where USERGROUP_ID = ?`, aGroupColumn);
+            await dbConnection.executeUpdate(`delete from "${ Tables.usergroup_usergroup }" where PARENT_USERGROUP_ID = ?`, aGroupColumn);
 
-            dbConnection.executeUpdate(`delete from "${ Tables.group_authorization }" where USERGROUP_ID = ?`, aGroupColumn);
+            await dbConnection.executeUpdate(`delete from "${ Tables.group_authorization }" where USERGROUP_ID = ?`, aGroupColumn);
         }
 
         return aGroupsNotDeleted;
@@ -249,7 +249,7 @@ function Group(dbConnection) {
             touchedGroups.add(oUserMember.GROUP_ID);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.usergroup_user }" where (USERGROUP_ID, USER_ID) = (?,?)`, aUserMembersColumn);
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.usergroup_user }" where (USERGROUP_ID, USER_ID) = (?,?)`, aUserMembersColumn);
         for (let groupId of touchedGroups) {
             await authorizationUnroller.unrollPrivilegesOnGroupUpdate(dbConnection, groupId);
         }
@@ -277,7 +277,7 @@ function Group(dbConnection) {
             touchedGroups.add(oGroupMember.GROUP_ID);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.usergroup_usergroup }" where (PARENT_USERGROUP_ID, CHILD_USERGROUP_ID) = (?,?)`, aGroupMembersColumn);
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.usergroup_usergroup }" where (PARENT_USERGROUP_ID, CHILD_USERGROUP_ID) = (?,?)`, aGroupMembersColumn);
         for (let groupId of touchedGroups) {
             await authorizationUnroller.unrollPrivilegesOnGroupUpdate(dbConnection, groupId);
         }
@@ -303,13 +303,13 @@ function Group(dbConnection) {
             aGroupColumn.push(oGroupColumn);
         });
 
-        var aUpdateResult = dbConnection.executeUpdate(`UPDATE "${ Tables.usergroup }" SET DESCRIPTION = ? where USERGROUP_ID = ?`, aGroupColumn);
+        var aUpdateResult = await dbConnection.executeUpdate(`UPDATE "${ Tables.usergroup }" SET DESCRIPTION = ? where USERGROUP_ID = ?`, aGroupColumn);
 
 
         return await helpers.unsuccessfulItemsDbOperation(aGroups, aUpdateResult);
     };
 }
 
-Group.prototype = await Object.create(Group.prototype);
+Group.prototype = Object.create(Group.prototype);
 Group.prototype.constructor = Group;
 export default {_,helpers,authorizationUnroller,MessageLibrary,PlcException,ValidationInfoCode,Code,Tables,Group};

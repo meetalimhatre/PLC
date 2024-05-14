@@ -4,7 +4,7 @@ var Resources = $.require('../../util/masterdataResources').MasterdataResource;
 var Limits = $.require('../../util/masterdataResources').Limits;
 var Helper = $.require('../persistency-helper').Helper;
 var Metadata = $.require('../persistency-metadata').Metadata;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
 var UrlToSqlConverter = $.require('../../util/urlToSqlConverter').UrlToSqlConverter;
 
 const MessageLibrary = $.require('../../util/message');
@@ -485,7 +485,7 @@ async function MasterdataBase(dbConnection, hQuery, hQueryRepl, oConfiguration) 
             var aFoundPlcRecords = await apiHelpers.findValidEntriesInTable(Resources[oConfiguration.sObjectName].dbobjects.plcTable, aPartialKeyPlcTableColumns, aFieldsValuesMainPlcTable, sMasterDataDate, hQuery);
             if (aFoundPlcRecords.length === 0) {
 
-                if (await helpers.isNullOrUndefined(Resources[oConfiguration.sObjectName].dbobjects.erpTable) || Resources[oConfiguration.sObjectName].dbobjects.erpTable === '') {
+                if (helpers.isNullOrUndefined(Resources[oConfiguration.sObjectName].dbobjects.erpTable) || Resources[oConfiguration.sObjectName].dbobjects.erpTable === '') {
                     const sLogMessage = `ERP table was not specified for business object ${ oConfiguration.sObjectName }.`;
                     $.trace.error(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
@@ -498,6 +498,6 @@ async function MasterdataBase(dbConnection, hQuery, hQueryRepl, oConfiguration) 
 
 }
 
-MasterdataBase.prototype = await Object.create(MasterdataBase.prototype);
+MasterdataBase.prototype = Object.create(MasterdataBase.prototype);
 MasterdataBase.prototype.constructor = MasterdataBase;
 export default {_,helpers,Resources,Limits,Helper,Metadata,apiHelpers,UrlToSqlConverter,MessageLibrary,MessageOperation,PlcException,Code,MasterdataBase};

@@ -5,11 +5,11 @@ const btoa = $.require('btoa');
 const cloudUtil = $.require('../../util/cloudUtil');
 const helpers = $.require('../../util/helpers');
 
-function check(oConnection) {
+async function check(oConnection) {
     return true;
 }
 
-function clean(oConnection) {
+async function clean(oConnection) {
     return true;
 }
 
@@ -33,7 +33,7 @@ async function run(oConnection) {
             await checkAndCreateDataDeletionJob(authToken, jobschedulerCredentials.url, appUrl);
         }
     } catch (e) {
-        await console.log('error:', e.message);
+        console.log('error:', e.message);
         throw new Error(`Failed to create automated jobs: ${ e.message }`);
     }
     return true;
@@ -48,7 +48,7 @@ async function getActiveJobs(authToken, jobSchedulerUrl) {
             Accept: 'application/json'
         },
         json: true
-    }).then(response => response).catch(error => await console.log(error));
+    }).then(response => response).catch(error => console.log(error));
 }
 
 async function checkAndCreateLicenseMeteringJob(authToken, jobSchedulerUrl, appUrl) {

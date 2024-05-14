@@ -8,11 +8,11 @@ var PlcException = MessageLibrary.PlcException;
 
 // TODO: standardize error log format
 async function logError(msg) {
-    await console.error(new Date().toLocaleString(), '[ERROR]', msg);
+    console.error(new Date().toLocaleString(), '[ERROR]', msg);
 }
 ;
 async function logInfo(msg) {
-    await console.log(new Date().toLocaleString(), '[INFO]', msg);
+    console.log(new Date().toLocaleString(), '[INFO]', msg);
 }
 ;
 
@@ -22,14 +22,14 @@ module.exports = {
     logInfo
 };
 
-function isPositiveInteger(value) {
+async function isPositiveInteger(value) {
     if (value === undefined || value === null) {
         return false;
     }
     return /^[1-9]+[0-9]*$/.test(value.toString());
 }
 
-function IsNonNegativeInteger(value) {
+async function IsNonNegativeInteger(value) {
     if (value === undefined || value === null) {
         return false;
     }
@@ -45,11 +45,11 @@ async function toPositiveInteger(sValue) {
     return parseInt(sValue, 10);
 }
 
-function isNullOrUndefined(value) {
+async function isNullOrUndefined(value) {
     return _.isNull(value) || _.isUndefined(value);
 }
 
-function isNullOrUndefinedOrEmpty(value) {
+async function isNullOrUndefinedOrEmpty(value) {
     return _.isNull(value) || _.isUndefined(value) || value === '' || _.isEmpty(value);
 }
 
@@ -64,7 +64,7 @@ async function isEmptyObject(oObject) {
 /** Safe method for getting a value from an object by key
  */
 async function getValueOnKey(oObject, sKey) {
-    if (await isNullOrUndefined(oObject)) {
+    if (isNullOrUndefined(oObject)) {
         return null;
     } else {
         if (_.has(oObject, sKey)) {
@@ -75,7 +75,7 @@ async function getValueOnKey(oObject, sKey) {
     }
 }
 
-function arrayToLowerCase(aStringArray) {
+async function arrayToLowerCase(aStringArray) {
     var aLowerCaseArray = [];
     _.each(aStringArray, function (sValue) {
         aLowerCaseArray.push(sValue.toLowerCase());
@@ -85,7 +85,7 @@ function arrayToLowerCase(aStringArray) {
 
 /** Picks up an object from object of arrays (which are used e.g. for test data)
  */
-function toObject(result, index) {
+async function toObject(result, index) {
     //expect(result).toBeDefined();
 
     var convertedResult = {};
@@ -103,7 +103,7 @@ function setErrorResponse(iStatusCode, sMessage, oResponse) {
 }
 
 async function boolToInt(value) {
-    if (await isNullOrUndefined(value))
+    if (isNullOrUndefined(value))
         return 0;
 
     return value === true ? 1 : 0;
@@ -112,7 +112,7 @@ async function boolToInt(value) {
  * Splits incremental string like: TestVersionName (1) / TestVersionName (2)
  * @param sTextWithIncrement
  */
-function splitIncrementalString(sTextWithIncrement) {
+async function splitIncrementalString(sTextWithIncrement) {
     var sRegexIncremental = '^(.*) \\(([1-9][0-9]*)\\)$';
     var rPattern = new RegExp(sRegexIncremental);
     var aMatches = rPattern.exec(sTextWithIncrement);
@@ -182,7 +182,7 @@ async function validatePath(sPath) {
  * @param {string} sPath - input string that needs to be checked
  * @returns {boolean} true if string contains forward slash, false if it doesn't
  */
-function hasForwardSlash(sPath) {
+async function hasForwardSlash(sPath) {
     return /\//.test(sPath);
 }
 
@@ -198,7 +198,7 @@ async function getEntityIdFromPath(sPath) {
 /**
  * Function used to find first unused numeric suffix (numbers) from a collection of numeric suffixes (numbers)
 */
-function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
+async function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
     /* Filter values smaller than iStartSuffix, then sort the array. */
     var aSuffixes = aAllSuffixes.filter(function (value, index, array) {
         return value > iStartSuffix;
@@ -226,7 +226,7 @@ function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
 async function setNonEmptyProperties(oEntity, oValuesToSet, aPropertiesToSet) {
     // set properties to given values if they are not null
     _.each(aPropertiesToSet, async function (sProperty, iIndex) {
-        if (await isNullOrUndefined(oEntity[sProperty]) && oValuesToSet[sProperty] !== '' && !await isNullOrUndefined(oValuesToSet[sProperty])) {
+        if (isNullOrUndefined(oEntity[sProperty]) && oValuesToSet[sProperty] !== '' && !await isNullOrUndefined(oValuesToSet[sProperty])) {
             oEntity[sProperty] = oValuesToSet[sProperty];
         }
     });
@@ -348,12 +348,12 @@ async function checkStringSQLInjection(sFilter) {
 
 async function deepFreeze(oObject) {
     if (Object.isFrozen(oObject) === false) {
-        await Object.freeze(oObject);
+        Object.freeze(oObject);
     }
     _.each(oObject, (vValue, oProperty) => {
-        var bIsFreezable = vValue !== null && (_.isObject(vValue) || await _.isFunction(vValue));
+        var bIsFreezable = vValue !== null && (_.isObject(vValue) ||  _.isFunction(vValue));
         if (bIsFreezable) {
-            await deepFreeze(vValue);
+             deepFreeze(vValue);
         }
     });
     return oObject;
@@ -364,7 +364,7 @@ async function deepFreeze(oObject) {
 
 
 
-function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
+async function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
     var aItems = _.map(aDbResponse, function (oResult, key) {
 
         if (oResult !== 1) {
@@ -383,7 +383,7 @@ function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
 
 
 
-function arrayHasDuplicates(aArray) {
+async function arrayHasDuplicates(aArray) {
     return aArray.length != _.uniq(aArray).length;
 }
 
@@ -404,7 +404,7 @@ function arrayHasDuplicates(aArray) {
 
 
 
-function transposeResultArray(input, bLeaveNullColumns) {
+async function transposeResultArray(input, bLeaveNullColumns) {
     const output = {};
     if (input.length > 0) {
         const aColumnNames = Object.keys(input[0]);
@@ -432,7 +432,7 @@ function transposeResultArray(input, bLeaveNullColumns) {
     return output;
 }
 
-function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
+async function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
     const output = {};
     if (input.length > 0) {
         const temp = [];
@@ -480,7 +480,7 @@ function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
 
 
 
-function Utf8ArrayToStr(utf8Array) {
+async function Utf8ArrayToStr(utf8Array) {
     var returnString, i, len;
     var char1, char2, char3;
 
@@ -528,7 +528,7 @@ async function arrayBufferToString(oArrayBuffer) {
 
 
 
-function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
+async function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
     _.each(Constants.aRegexSpecialChars, function (oRegexSpecialChar, iIndex) {
         var regex = new RegExp(oRegexSpecialChar.specialCharReplacement, 'g');
         sImputString = sImputString.replace(regex, oRegexSpecialChar.specialCharReplacement);
@@ -546,7 +546,7 @@ function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
 
 
 
-function checkForNonMasterdataValues(sProperty, sValue) {
+async function checkForNonMasterdataValues(sProperty, sValue) {
     const aBusinessObjectsProperty = [
         'ACCOUNT_GROUP_ID',
         'MATERIAL_GROUP_ID',
@@ -597,12 +597,12 @@ async function prepareSurchargesMasterdataValuesForValidation(aPropertiesToBeChe
     oProjectMasterdata = _.pick(oProjectMasterdata, aPropertiesToBeChecked);
     for (property in oProjectMasterdata) {
         oProjectMasterdata[property] = _.uniq(oProjectMasterdata[property]);
-        oProjectMasterdata[property] = _.filter(oProjectMasterdata[property], value => !await checkForNonMasterdataValues(property, value.toString()));
+        oProjectMasterdata[property] = _.filter(oProjectMasterdata[property], value => ! checkForNonMasterdataValues(property, value.toString()));
     }
     return oProjectMasterdata;
 }
 
-function escapeStringForRegExp(sString) {
+async function escapeStringForRegExp(sString) {
     return sString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 

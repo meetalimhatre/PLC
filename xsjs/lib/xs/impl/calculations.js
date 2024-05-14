@@ -87,7 +87,7 @@ module.exports.Calculations = function ($) {
             // get default values from the project
             var oDefaultSettings = oPersistency.Project.getProjectProperties(oCalculation.PROJECT_ID);
 
-            if (await helpers.isNullOrUndefined(oDefaultSettings)) {
+            if (helpers.isNullOrUndefined(oDefaultSettings)) {
                 const sClientMsg = 'Project does not exist or its default settings are missing in calculation.';
                 const sServerMsg = `${ sClientMsg } Project: ${ oCalculation.PROJECT_ID }, calculation; ${ oCalculation.CALCULATION_ID }.`;
                 $.trace.error(sServerMsg);
@@ -97,7 +97,7 @@ module.exports.Calculations = function ($) {
 
                 _.each(oCalculation.CALCULATION_VERSIONS, async function (oCv) {
                     await helpers.setDefaultValuesForCalculationVersion(oCv, oDefaultSettings);
-                    if (await helpers.isNullOrUndefined(oCv.EXCHANGE_RATE_TYPE_ID)) {
+                    if (helpers.isNullOrUndefined(oCv.EXCHANGE_RATE_TYPE_ID)) {
 
                         oCv.EXCHANGE_RATE_TYPE_ID = sDefaultExchangeRateType;
                     }
@@ -252,7 +252,7 @@ module.exports.Calculations = function ($) {
         if (sTargetProjectId !== oCurrentProjectProperties.PROJECT_ID) {
 
             var oTargetProjectProperties = oPersistency.Project.getProjectProperties(sTargetProjectId);
-            if (await helpers.isNullOrUndefined(oTargetProjectProperties)) {
+            if (helpers.isNullOrUndefined(oTargetProjectProperties)) {
                 const sClientMsg = 'Target project does not exist.';
                 const sServerMsg = `${ sClientMsg } Target project id: ${ sTargetProjectId }.`;
                 $.trace.error(sServerMsg);
@@ -459,7 +459,7 @@ module.exports.Calculations = function ($) {
 
 
             var oTargetProjectDefaults = oPersistency.Project.getProjectProperties(oCalculation.PROJECT_ID);
-            if (await helpers.isNullOrUndefined(oTargetProjectDefaults)) {
+            if (helpers.isNullOrUndefined(oTargetProjectDefaults)) {
                 const sClientMsg = 'Project does not exist.';
                 const sServerMsg = `${ sClientMsg } Project id: ${ oCalculation.PROJECT_ID }.`;
                 $.trace.error(sServerMsg);

@@ -16,7 +16,7 @@ module.exports = {
 };
 
 
-var tables = await Object.freeze({ database: 't_tenant' });
+var tables = Object.freeze({ database: 't_tenant' });
 
 /**
  * get all active tenant id which subscribe app
@@ -30,7 +30,7 @@ async function getProvisionedTenants() {
     try {
         aTenants = postGresClient.executeQuery(sSql);
     } catch (err) {
-        await console.log(err);
+        console.log(err);
     } finally {
         await postGresClient.close();
     }
@@ -81,7 +81,7 @@ async function getAllTenantRelatedInfo() {
             }
         ]);
     } catch (err) {
-        await console.log(err);
+        console.log(err);
     }
     return aTenantInfo;
 }

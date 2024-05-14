@@ -31,7 +31,7 @@ async function ServiceOutput() {
     };
     var status;
 
-    var oAllowedStatusCodes = await Object.freeze({
+    var oAllowedStatusCodes = Object.freeze({
         'CONTINUE': 100,
         'SWITCH_PROTOCOL': 101,
         'OK': 200,
@@ -107,7 +107,7 @@ async function ServiceOutput() {
 	 * Body can be set directly to override separation in transactional,
 	 * masterdata, calculated (if not applicable)
 	 */
-    this.setBody = function (oBody) {
+    this.setBody = async function (oBody) {
         payload = payload || {};
 
         /*
@@ -124,7 +124,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.setTransactionalData = function (oTransactional) {
+    this.setTransactionalData = async function (oTransactional) {
         payload = payload || {};
         payload.body = payload.body || {};
 
@@ -139,7 +139,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.addTransactionalData = function (oTransactional) {
+    this.addTransactionalData = async function (oTransactional) {
         payload = payload || {};
         payload.body = payload.body || {};
         payload.body.transactionaldata = payload.body.transactionaldata || [];
@@ -148,7 +148,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.setReferencesData = function (oReference) {
+    this.setReferencesData = async function (oReference) {
         payload = payload || {};
         payload.body = payload.body || {};
         if (oReference !== null && oReference !== undefined) {
@@ -161,7 +161,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.setCalculationResult = function (oCalculationResult) {
+    this.setCalculationResult = async function (oCalculationResult) {
         payload = payload || {};
         payload.body = payload.body || {};
 
@@ -169,7 +169,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.setLayoutData = function (aLayout) {
+    this.setLayoutData = async function (aLayout) {
         payload = payload || {};
         payload.body = payload.body || {};
         if (aLayout !== null && aLayout !== undefined) {
@@ -178,7 +178,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.addMessage = function (oMessage) {
+    this.addMessage = async function (oMessage) {
         payload = payload || {};
         payload.head = payload.head || {};
         payload.head.messages = payload.head.messages || [];
@@ -187,14 +187,14 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.clearMessages = function () {
+    this.clearMessages = async function () {
         if (payload !== undefined && payload.head !== undefined && payload.head.messages !== undefined) {
             payload.head.messages = [];
         }
         return this;
     };
 
-    this.addMasterdata = function (oMasterdata) {
+    this.addMasterdata = async function (oMasterdata) {
         payload = payload || {};
         payload.body = payload.body || {};
         payload.body.masterdata = payload.body.masterdata || {};
@@ -204,7 +204,7 @@ async function ServiceOutput() {
         return this;
     };
 
-    this.setMasterdata = function (oMasterdata) {
+    this.setMasterdata = async function (oMasterdata) {
         payload = payload || {};
         payload.body = payload.body || {};
 
@@ -229,7 +229,7 @@ async function ServiceOutput() {
         payload.head.metadata = payload.head.metadata || {};
 
         var metadata = payload.head.metadata;
-        if (await helpers.isPlainObject(value)) {
+        if (helpers.isPlainObject(value)) {
             if (_.has(metadata, sKey)) {
                 metadata[sKey].push(value);
             } else {
@@ -253,11 +253,11 @@ async function ServiceOutput() {
     };
 
     var oFollowUp;
-    this.setFollowUp = function (oFUp) {
+    this.setFollowUp = async function (oFUp) {
         oFollowUp = oFUp;
     };
 
-    this.getFollowUp = function () {
+    this.getFollowUp = async function () {
         return oFollowUp;
     };
 }

@@ -3,7 +3,7 @@ const axios = $.require('axios');
 const cloudUtil = $.require('../util/cloudUtil');
 const isCloud = $.require('../../platform/platformSpecificImports.js').isCloud;
 const btoa = $.require('btoa');
-var Persistency = $.import('xs.db', 'persistency-dataProtection').DataProtection;
+var Persistency = await $.import('xs.db', 'persistency-dataProtection').DataProtection;
 
 async function erasePersonalDataAfterEndOfValidity(aParameters) {
     try {
@@ -11,7 +11,7 @@ async function erasePersonalDataAfterEndOfValidity(aParameters) {
             const tenantUtil = $.require('../ops/util/tenantUtil-cf');
             const aTenantDBClients = await tenantUtil.getAllProvisionedTenantDBClients();
             if (aTenantDBClients.clients.length === 0) {
-                await console.log(aTenantDBClients.message);
+                console.log(aTenantDBClients.message);
                 return;
             }
             aTenantDBClients.clients.forEach(client => {
@@ -44,10 +44,10 @@ async function erasePersonalDataAfterEndOfValidity(aParameters) {
                 'success': true,
                 'message': 'Successful finished erasing personal data'
             }
-        }).then(response => await console.log(response)).catch(error => await console.log(error));
+        }).then(response => console.log(response)).catch(error => console.log(error));
 
     } catch (e) {
-        await console.log('error:', e.message);
+        console.log('error:', e.message);
         throw new Error(`Failed to execute job: ${ e.message }`);
     }
 }

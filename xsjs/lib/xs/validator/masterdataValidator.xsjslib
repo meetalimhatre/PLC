@@ -18,6 +18,6 @@ function MasterdataValidator(oPersistency, oUtils) {
         }
     };
 }
-MasterdataValidator.prototype = await Object.create(MasterdataValidator.prototype);
+MasterdataValidator.prototype = Object.create(MasterdataValidator.prototype);
 MasterdataValidator.prototype.constructor = MasterdataValidator;
 export default {MessageLibrary,PlcException,MasterdataValidator};

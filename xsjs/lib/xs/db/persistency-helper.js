@@ -6,11 +6,11 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const constants = require('../util/constants');
 
-const Tables = await Object.freeze({
+const Tables = Object.freeze({
     entity_relation: 'sap.plc.db::basis.t_entity_relation',
     regex: 'sap.plc.db::basis.t_regex'
 });
-const Views = await Object.freeze({ entity_relation: 'sap.plc.db.views::v_entity_relation' });
+const Views = Object.freeze({ entity_relation: 'sap.plc.db.views::v_entity_relation' });
 
 
 /**
@@ -289,7 +289,7 @@ function Helper($, hQuery, dbConnection) {
 					and is_nullable = 'TRUE' 
 			order by position; 
 		`;
-        var oResult = dbConnection.executeQuery(sStmt, sTableName);
+        var oResult = await dbConnection.executeQuery(sStmt, sTableName);
         return _.map(oResult, 'COLUMN_NAME');
     };
 
@@ -592,7 +592,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found currencies.
      */
     this.getExistingCurrencies = function (dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select currency_id
             from "sap.plc.db::basis.t_currency"
                         where   _valid_from <= ?
@@ -608,7 +608,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found unit of measures.
      */
     this.getExistingUnitOfMeasures = function (dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select uom_id 
             from "sap.plc.db::basis.t_uom"
             where   _valid_from <= ?
@@ -626,7 +626,7 @@ function Helper($, hQuery, dbConnection) {
      */
     this.getExistingControllingAreas = function () {
         // controlling area entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select controlling_area_id 
             from "sap.plc.db::basis.t_controlling_area"
             union
@@ -642,7 +642,7 @@ function Helper($, hQuery, dbConnection) {
      */
     this.getExistingExchangeRateTypes = function () {
         // exchange rate type entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select exchange_rate_type_id
             from "sap.plc.db::basis.t_exchange_rate_type";
         `);
@@ -655,7 +655,7 @@ function Helper($, hQuery, dbConnection) {
      */
     this.getExistingPriceSources = function () {
         // price sources entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select price_source_id
             from "sap.plc.db::basis.t_price_source";
         `);
@@ -669,7 +669,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingCostingSheets = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select costing_sheet_id
             from "sap.plc.db::basis.t_costing_sheet"
             where       _valid_from <= ?
@@ -686,7 +686,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingComponentSplits = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select component_split_id
             from "sap.plc.db::basis.t_component_split"
             where   _valid_from <= ?
@@ -703,7 +703,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingAccounts = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select account_id
             from "sap.plc.db::basis.t_account"
             where   _valid_from <= ?
@@ -720,7 +720,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingAccountGroups = (sControllingAreaId, dMasterdataTimestamp, iAccountGroupId) => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select account_group_id
             from "sap.plc.db::basis.t_account_group"
             where   _valid_from <= ?
@@ -737,7 +737,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingMaterialGroups = (dMasterdataTimestamp, sMaterialGroupId) => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select material_group_id
             from "sap.plc.db::basis.t_material_group"
             where   _valid_from <= ?
@@ -753,7 +753,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingMaterialTypes = (dMasterdataTimestamp, sMaterialTypeId) => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select material_type_id
             from "sap.plc.db::basis.t_material_type"
             where   _valid_from <= ?
@@ -769,7 +769,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingDocumentTypes = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select document_type_id
             from "sap.plc.db::basis.t_document_type"
             where   _valid_from <= ?
@@ -784,7 +784,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingDocumentStatuses = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select document_status_id
             from "sap.plc.db::basis.t_document_status"
             where   _valid_from <= ?
@@ -799,7 +799,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingOverheadGroups = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select overhead_group_id
             from "sap.plc.db::basis.t_overhead_group"
             where   _valid_from <= ?
@@ -814,7 +814,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingValuationClasses = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select valuation_class_id
             from "sap.plc.db::basis.t_valuation_class"
             where   _valid_from <= ?
@@ -829,7 +829,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingPlants = function (dMasterdataTimestamp, sPlantId) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select plant_id
             from "sap.plc.db::basis.t_plant"
             where   _valid_from <= ?
@@ -846,7 +846,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingCostCenter = function (sControllingAreaId, dMasterdataTimestamp, sCostCenterId) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select cost_center_id
             from "sap.plc.db::basis.t_cost_center"
             where   _valid_from <= ?
@@ -864,7 +864,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingActivityTypes = function (sControllingAreaId, dMasterdataTimestamp, sActivityTypeId) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select activity_type_id
             from "sap.plc.db::basis.t_activity_type"
             where   _valid_from <= ?
@@ -881,7 +881,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingMaterials = function (dMasterdataTimestamp, sMaterialId) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select material_id
             from "sap.plc.db::basis.t_material"
             where   _valid_from <= ?
@@ -896,7 +896,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingMaterialPriceStrategies = function () {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
 			select PRICE_DETERMINATION_STRATEGY_ID
 			from "sap.plc.db::basis.t_price_determination_strategy"
 			where PRICE_DETERMINATION_STRATEGY_TYPE_ID = ?
@@ -909,7 +909,7 @@ function Helper($, hQuery, dbConnection) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingActivityPriceStrategies = function () {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
 			select PRICE_DETERMINATION_STRATEGY_ID
 			from "sap.plc.db::basis.t_price_determination_strategy"
 			where  PRICE_DETERMINATION_STRATEGY_TYPE_ID = ?
@@ -924,7 +924,7 @@ function Helper($, hQuery, dbConnection) {
      */
     this.getRegexValue = function (sRegexId) {
         let sStmt = `SELECT VALIDATION_REGEX_VALUE FROM "${ Tables.regex }" WHERE VALIDATION_REGEX_ID = ?`;
-        let oQueryResult = dbConnection.executeQuery(sStmt, sRegexId);
+        let oQueryResult = await dbConnection.executeQuery(sStmt, sRegexId);
         if (oQueryResult.length > 0) {
             return oQueryResult[0].VALIDATION_REGEX_VALUE || null;
         }
@@ -951,7 +951,7 @@ function Helper($, hQuery, dbConnection) {
      * @return Boolean True if currency exists, false otherwise
      */
     this.currencyExists = function (sCurrencyId, dMasterdataTimestamp) {
-        let oCurrency = dbConnection.executeQuery(`
+        let oCurrency = await dbConnection.executeQuery(`
             select count(currency_id) as count
             from "sap.plc.db::basis.t_currency"
                         where   _valid_from <= ?
@@ -968,7 +968,7 @@ function Helper($, hQuery, dbConnection) {
      * @return Boolean True if uom exists, false otherwise
      */
     this.uomExists = function (sUomId, dMasterdataTimestamp) {
-        let oUom = dbConnection.executeQuery(`
+        let oUom = await dbConnection.executeQuery(`
             select count(uom_id) as count
             from "sap.plc.db::basis.t_uom"
                         where   _valid_from <= ?
@@ -990,7 +990,7 @@ function Helper($, hQuery, dbConnection) {
      * @return Object containing the found entities.
      */
     this.getExistingNonTemporaryMasterdataCombined = function (dMasterdataTimestamp, sControllingAreaId) {
-        let oResultSet = dbConnection.executeQuery(`
+        let oResultSet = await dbConnection.executeQuery(`
 			select *
 			from (
 				select currency_id as col_value, 'CURRENCY_ID' as col_name
@@ -1165,7 +1165,7 @@ function Helper($, hQuery, dbConnection) {
     };
 }
 
-Helper.prototype = await Object.create(Helper.prototype);
+Helper.prototype = Object.create(Helper.prototype);
 Helper.prototype.constructor = Helper;
 
 module.exports.Helper = Helper;

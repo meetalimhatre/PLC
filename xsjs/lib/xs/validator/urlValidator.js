@@ -42,7 +42,7 @@ async function UrlValidator(mResources) {
      */
     this.validateUrl = async function (oRequest, sResourceDefinitionKey) {
         const oDefinition = mResources[sResourceDefinitionKey];
-        if (await Helpers.isNullOrUndefined(oDefinition)) {
+        if (Helpers.isNullOrUndefined(oDefinition)) {
             const sLogMessage = `Cannot find resource definition for definition path ${ sResourceDefinitionKey }.`;
             await logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -86,7 +86,7 @@ async function UrlValidator(mResources) {
         aRequestParameterTuples.forEach(aTuple => {
             if (mRequestParameters.has(aTuple[0])) {
                 const sLogMessage = `Duplicated parameter ${ aTuple[0] }.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
 
@@ -110,18 +110,18 @@ async function UrlValidator(mResources) {
         Array.from(mRequestParameters.keys()).forEach(sRequestParameterName => {
             if (!mAllowedParameters.has(sRequestParameterName)) {
                 const sLogMessage = `Request parameter ${ sRequestParameterName } is not allowed.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
 
             const vParameterValue = mRequestParameters.get(sRequestParameterName);
             const oParameterInfo = mAllowedParameters.get(sRequestParameterName);
-            const vValidatedValue = await genericSyntaxValidator.validateValue(vParameterValue, oParameterInfo.dataType, null, oParameterInfo.isMandatory);
+            const vValidatedValue =  genericSyntaxValidator.validateValue(vParameterValue, oParameterInfo.dataType, null, oParameterInfo.isMandatory);
 
 
             if (!_.isEmpty(oParameterInfo.validValues) && _.values(oParameterInfo.validValues).indexOf(vValidatedValue) < 0) {
                 const sLogMessage = `The value ${ vValidatedValue } is not valid for for parameter ${ oParameterInfo.name }. Valid values are: ${ oParameterInfo.validValues.toString() }`;
-                await logError(sLogMessage);
+                 logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
 
@@ -131,7 +131,7 @@ async function UrlValidator(mResources) {
     }
 }
 
-UrlValidator.prototype = await Object.create(UrlValidator.prototype);
+UrlValidator.prototype =  Object.create(UrlValidator.prototype);
 UrlValidator.prototype.constructor = UrlValidator;
 
 module.exports.UrlValidator = UrlValidator;

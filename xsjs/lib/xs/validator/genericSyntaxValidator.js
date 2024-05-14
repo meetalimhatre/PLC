@@ -496,14 +496,14 @@ async function GenericSyntaxValidator() {
         return oUTCDate;
     }
 
-    var mDataTypeAttributesRegExp = await Object.freeze({
+    var mDataTypeAttributesRegExp = Object.freeze({
         lengthPattern: /length\s*=\s*(\d+)\s*;?/,
         precisionPattern: /precision\s*=\s*(\d+)\s*;?/,
         scalePattern: /scale\s*=\s*(\d+)\s*;?/,
         uppercasePattern: /uppercase\s*=\s*(1|0)\s*;?\s*$/
     });
 
-    var mValueRegExp = await Object.freeze({
+    var mValueRegExp = Object.freeze({
         'Decimal': /^0$|^(?:\-)?[0-9]+[0-9]*(?:\.[0-9]+)?$/,
         'Boolean': /^true$|^false$/,
         'BooleanInt': /^0$|^1$/,
@@ -514,7 +514,7 @@ async function GenericSyntaxValidator() {
         'LocalDate': /^(\d{4})-(\d{2})-(\d{2})(T00:00:00(.000)?([zZ])?)?$/
     });
 }
-GenericSyntaxValidator.prototype = await Object.create(GenericSyntaxValidator.prototype);
+GenericSyntaxValidator.prototype = Object.create(GenericSyntaxValidator.prototype);
 GenericSyntaxValidator.prototype.constructor = GenericSyntaxValidator;
 
 module.exports.GenericSyntaxValidator = GenericSyntaxValidator;

@@ -1,4 +1,4 @@
-const roleTemplateMap = await Object.freeze({
+const roleTemplateMap = Object.freeze({
     'sap.plc.authorizations::Addin_Administrator': 'AddinAdministrator_RT',
     'sap.plc.authorizations::Addin_User': 'AddinUser_RT',
     'sap.plc.authorizations::Admin_Costing_And_Analysis_Administrator': 'AdminCostingAndAnalysisAdministrator_RT',
@@ -34,7 +34,7 @@ const deprecatedPLCRoles = [
 
 
 
-function transformRoletoRT(oRoleName) {
+async function transformRoletoRT(oRoleName) {
     return roleTemplateMap[oRoleName] === undefined ? '-1' : roleTemplateMap[oRoleName];
 }
 
@@ -42,14 +42,14 @@ function transformRoletoRT(oRoleName) {
 function getXSCUsers(oConnection) {
     try {
 
-        var result = oConnection.executeQuery(`SELECT USER_NAME FROM "USERS" 
+        var result = await oConnection.executeQuery(`SELECT USER_NAME FROM "USERS" 
             WHERE USER_NAME NOT LIKE '_SYS_%' 
             AND CREATOR != '_SYS_DI_SU' 
             AND CREATOR != 'SYS_XS_SBSS' 
             AND CREATOR NOT IN (SELECT USER_NAME FROM "SYS"."USER_PARAMETERS" WHERE VALUE = 'XS_USER_ADMIN');`);
         var finalMigrateUsers = [];
         for (var index in result) {
-            var users = oConnection.executeQuery(`SELECT DISTINCT USER_NAME, ROLE_NAME FROM "SYS"."EFFECTIVE_ROLES" WHERE USER_NAME = '${ result[index].USER_NAME }';`);
+            var users = await oConnection.executeQuery(`SELECT DISTINCT USER_NAME, ROLE_NAME FROM "SYS"."EFFECTIVE_ROLES" WHERE USER_NAME = '${ result[index].USER_NAME }';`);
             var validUser = users.filter(function (item, index) {
                 if (deprecatedPLCRoles.includes(item.ROLE_NAME)) {
                     return false;

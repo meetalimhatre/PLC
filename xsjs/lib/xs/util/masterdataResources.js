@@ -1,4 +1,4 @@
-var MasterdataResource = await Object.freeze({
+var MasterdataResource = Object.freeze({
     'Account': {
         dbobjects: {
             plcTable: 'sap.plc.db::basis.t_account',
@@ -1877,7 +1877,7 @@ var MasterdataResource = await Object.freeze({
     }
 });
 
-var CostingSheetResources = await Object.freeze({
+var CostingSheetResources = Object.freeze({
     'Costing_Sheet_Overhead_Row': {
         dbobjects: {
             plcTable: 'sap.plc.db::basis.t_costing_sheet_overhead_row',
@@ -1925,22 +1925,22 @@ var CostingSheetResources = await Object.freeze({
     }
 });
 
-var Source = await Object.freeze([
+var Source = Object.freeze([
     1,
     2
 ]);
-var BatchOperation = await Object.freeze({
+var BatchOperation = Object.freeze({
     CREATE: 'CREATE',
     UPDATE: 'UPDATE',
     DELETE: 'DELETE',
     UPSERT: 'UPSERT'
 });
-var Limits = await Object.freeze({
+var Limits = Object.freeze({
     Top: 100000,
     Skip: 100
 });
 
-var BusinessObjectsEntities = await Object.freeze({
+var BusinessObjectsEntities = Object.freeze({
     ACCOUNT_ENTITIES: 'ACCOUNT_ENTITIES',
     ACCOUNT_TEXT_ENTITIES: 'ACCOUNT_TEXT_ENTITIES',
     ACCOUNT_GROUP_ENTITIES: 'ACCOUNT_GROUP_ENTITIES',
@@ -2021,7 +2021,7 @@ var BusinessObjectsEntities = await Object.freeze({
     WORK_CENTER_ACTIVITY_ENTITIES: 'WORK_CENTER_ACTIVITY_ENTITIES'
 });
 
-var MasterdataReadProcedures = await Object.freeze({
+var MasterdataReadProcedures = Object.freeze({
     'Account': 'sap.plc.db.administration.procedures::p_account_read',
     'Account_Group': 'sap.plc.db.administration.procedures::p_account_group_read',
     'Activity_Price': 'sap.plc.db.administration.procedures::p_activity_price_read',
@@ -2060,7 +2060,7 @@ var MasterdataReadProcedures = await Object.freeze({
     'Work_Center': 'sap.plc.db.administration.procedures::p_work_center_read'
 });
 
-var aNotMaintainableBusinessObjects = await Object.freeze([
+var aNotMaintainableBusinessObjects = Object.freeze([
     'Confidence_Level',
     'Dimension',
     'Document',

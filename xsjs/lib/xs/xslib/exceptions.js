@@ -16,7 +16,7 @@
 async function ExceptionBase() {
     this.stack = new Error().stack;
 }
-ExceptionBase.prototype = await Object.create(Error.prototype);
+ExceptionBase.prototype = Object.create(Error.prototype);
 ExceptionBase.prototype.constructor = ExceptionBase;
 
 /**
@@ -33,7 +33,7 @@ async function DatabaseException(sMessage) {
     this.name = 'DatabaseException';
     this.message = sMessage;
 }
-DatabaseException.prototype = await Object.create(ExceptionBase.prototype);
+DatabaseException.prototype = Object.create(ExceptionBase.prototype);
 DatabaseException.prototype.constructor = DatabaseException;
 module.exports.DatabaseException = DatabaseException;
 
@@ -42,7 +42,7 @@ async function ArgumentException(sMessage) {
     this.name = 'ArgumentException';
     this.message = sMessage;
 }
-ArgumentException.prototype = await Object.create(ExceptionBase.prototype);
+ArgumentException.prototype = Object.create(ExceptionBase.prototype);
 ArgumentException.prototype.constructor = ArgumentException;
 module.exports.ArgumentException = ArgumentException;
 
@@ -52,7 +52,7 @@ async function InvalidRequestException(sMessage, iErrorCode) {
     this.message = sMessage;
     this.errorCode = iErrorCode ? iErrorCode : 400;
 }
-InvalidRequestException.prototype = await Object.create(ExceptionBase.prototype);
+InvalidRequestException.prototype = Object.create(ExceptionBase.prototype);
 InvalidRequestException.prototype.constructor = InvalidRequestException;
 module.exports.InvalidRequestException = InvalidRequestException;
 
@@ -61,7 +61,7 @@ async function ValidationException(sMessage) {
     this.name = 'ValidationException';
     this.message = sMessage;
 }
-ValidationException.prototype = await Object.create(ValidationException.prototype);
+ValidationException.prototype = Object.create(ValidationException.prototype);
 ValidationException.prototype.constructor = ValidationException;
 module.exports.ValidationException = ValidationException;
 
@@ -71,7 +71,7 @@ async function InternalException(sMessage) {
     this.message = sMessage;
 }
 
-InternalException.prototype = await Object.create(InternalException.prototype);
+InternalException.prototype = Object.create(InternalException.prototype);
 InternalException.prototype.constructor = InternalException;
 module.exports.InternalException = InternalException;
 export default {ExceptionBase,DatabaseException,ArgumentException,InvalidRequestException,ValidationException,InternalException};

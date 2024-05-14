@@ -24,7 +24,7 @@ function UrlParameterInfo(sName, sDataType, bMandatory, oServiceParameterValues)
     this.validValues = oServiceParameterValues || {};
 }
 
-UrlParameterInfo.prototype = await Object.create(UrlParameterInfo.prototype);
+UrlParameterInfo.prototype =  Object.create(UrlParameterInfo.prototype);
 UrlParameterInfo.prototype.constructor = UrlParameterInfo;
 
 module.exports.UrlParameterInfo = UrlParameterInfo;

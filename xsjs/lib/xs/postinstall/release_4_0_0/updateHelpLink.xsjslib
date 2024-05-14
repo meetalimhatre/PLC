@@ -7,13 +7,13 @@ function check(oConnection) {
     return true;
 }
 
-function getCurrentSchemaName(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+async function getCurrentSchemaName(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
     const sCurrentSchema = await getCurrentSchemaName(oConnection);
-    oConnection.executeUpdate(`update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = '${ sProvidedHelpLink }' where SETTING_TYPE = '${ sSettingType }' and SETTING_NAME= '${ sSettingName }'`);
+    await oConnection.executeUpdate(`update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = '${ sProvidedHelpLink }' where SETTING_TYPE = '${ sSettingType }' and SETTING_NAME= '${ sSettingName }'`);
     await oConnection.commit();
     return true;
 }

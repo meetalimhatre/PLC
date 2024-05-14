@@ -1,7 +1,7 @@
 const _ = $.require('lodash');
 const BusinessObjectTypes = $.require('../../../util/constants').BusinessObjectTypes;
 const BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-const MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+const MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 const MessageCode = $.require('../../../util/message').Code;
 
 function CostCenter(dbConnection, hQuery, sObjectName) {

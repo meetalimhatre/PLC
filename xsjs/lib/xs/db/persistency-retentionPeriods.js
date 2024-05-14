@@ -3,7 +3,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-var Tables = await Object.freeze({ retention_periods: 'sap.plc.db::basis.t_personal_data_validity' });
+var Tables = Object.freeze({ retention_periods: 'sap.plc.db::basis.t_personal_data_validity' });
 
 function RetentionPeriods($, dbConnection) {
     /**
@@ -27,7 +27,7 @@ function RetentionPeriods($, dbConnection) {
         ]));
         let aInsertResult;
         try {
-            aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.retention_periods }" (ENTITY, SUBJECT, VALID_TO, VALID_FOR) VALUES (?,?,?,?)`, aRetentionPeriodsValues);
+            aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.retention_periods }" (ENTITY, SUBJECT, VALID_TO, VALID_FOR) VALUES (?,?,?,?)`, aRetentionPeriodsValues);
         } catch (e) {
             if (e.code === 301) {
                 let sClientMsg = 'The record already exists in personal data validity table.';
@@ -51,7 +51,7 @@ function RetentionPeriods($, dbConnection) {
 	 *
 	 */
     this.getAllRetentionData = function () {
-        return dbConnection.executeQuery(`select ENTITY, SUBJECT, VALID_TO, VALID_FOR from "${ Tables.retention_periods }"`);
+        return await dbConnection.executeQuery(`select ENTITY, SUBJECT, VALID_TO, VALID_FOR from "${ Tables.retention_periods }"`);
     };
 
     /**
@@ -73,7 +73,7 @@ function RetentionPeriods($, dbConnection) {
         ]));
         let aDeleteResult;
         try {
-            aDeleteResult = dbConnection.executeUpdate(`DELETE FROM "${ Tables.retention_periods }" where (ENTITY, SUBJECT) = (?,?)`, aRetentionPeriodsValues);
+            aDeleteResult = await dbConnection.executeUpdate(`DELETE FROM "${ Tables.retention_periods }" where (ENTITY, SUBJECT) = (?,?)`, aRetentionPeriodsValues);
         } catch (e) {
             let sClientMsg = 'Error during deletion of retention periods from table.';
             let sServerMsg = `${ sClientMsg } Error: ${ e.msg || e.message }`;
@@ -104,7 +104,7 @@ function RetentionPeriods($, dbConnection) {
         ]));
         let aUpdateResult;
         try {
-            aUpdateResult = dbConnection.executeUpdate(`UPDATE "${ Tables.retention_periods }" set VALID_TO = ?, VALID_FOR =? where (ENTITY, SUBJECT) = (?,?)`, aRetentionPeriodsValues);
+            aUpdateResult = await dbConnection.executeUpdate(`UPDATE "${ Tables.retention_periods }" set VALID_TO = ?, VALID_FOR =? where (ENTITY, SUBJECT) = (?,?)`, aRetentionPeriodsValues);
         } catch (e) {
             let sClientMsg = 'Error during the update of retention periods.';
             let sServerMsg = `${ sClientMsg } Error: ${ e.msg || e.message }`;
@@ -115,7 +115,7 @@ function RetentionPeriods($, dbConnection) {
     };
 
 }
-RetentionPeriods.prototype = await Object.create(RetentionPeriods.prototype);
+RetentionPeriods.prototype = Object.create(RetentionPeriods.prototype);
 RetentionPeriods.prototype.constructor = RetentionPeriods;
 
 module.exports.RetentionPeriods = RetentionPeriods;

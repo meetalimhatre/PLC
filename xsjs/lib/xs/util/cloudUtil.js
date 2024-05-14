@@ -19,7 +19,7 @@ async function getAuthorizationToken(serviceCredentials) {
             Accept: 'application/json'
         },
         json: true
-    }).then(response => 'Bearer ' + response.body.access_token).catch(error => await console.log(error));
+    }).then(response => 'Bearer ' + response.body.access_token).catch(error => console.log(error));
 }
 
 /**
@@ -42,7 +42,7 @@ async function createJob(authToken, jobSchedulerUrl, jobOptions) {
         },
         data: jobOptions,
         json: true
-    }).then(response => response.statusCode === 201 ? true : false).catch(error => await console.log(error));
+    }).then(response => response.statusCode === 201 ? true : false).catch(error => console.log(error));
 }
 ;
 
@@ -66,7 +66,7 @@ async function updateJobByName(authToken, jobSchedulerUrl, jobOptions) {
         },
         data: jobOptions,
         json: true
-    }).then(response => response.statusCode === 200 ? true : false).catch(error => await console.log(error));
+    }).then(response => response.statusCode === 200 ? true : false).catch(error => console.log(error));
 }
 ;
 

@@ -1,7 +1,7 @@
 const _ = $.require('lodash');
-var oForeignKeyRelationships = $.import('xs.db', 'db-model-constraints').mForeignKeyConstraints;
-const oSpecialForeignKeyRelationships = $.import('xs.db', 'db-model-constraints').mSpecialForeignKeyConstraints;
-const mDataModel = $.import('xs.db', 'db-model-tables').mDataModel;
+var oForeignKeyRelationships = await $.import('xs.db', 'db-model-constraints').mForeignKeyConstraints;
+const oSpecialForeignKeyRelationships = await $.import('xs.db', 'db-model-constraints').mSpecialForeignKeyConstraints;
+const mDataModel = await $.import('xs.db', 'db-model-tables').mDataModel;
 const BusinessObjectTypes = $.require('../util/constants').BusinessObjectTypes;
 
 const MessageLibrary = $.require('../util/message');
@@ -30,7 +30,7 @@ const aAddinTables = [
     't_addin_version'
 ];
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     metadata: 'sap.plc.db::basis.t_metadata',
     layout_columns: 'sap.plc.db::basis.t_layout_column',
     layout_hidden_fields: 'sap.plc.db::basis.t_layout_hidden_field'
@@ -323,7 +323,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
     async function isUnlockStatus() {
         var fullTableNameLock = await getFullTableName(sTableNameLock);
         var query = 'select lock_object from "' + fullTableNameLock + '" where lock_object=?';
-        var result = dbConnection.executeQuery(query, sLockObject);
+        var result = await dbConnection.executeQuery(query, sLockObject);
 
         if (_.isNull(result) || _.isUndefined(result)) {
             const sLogMessage = `Error during checking lock status of import tool.`;
@@ -352,7 +352,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 	 */
     async function hasActiveUsers() {
         var sQuery = 'select a.USER_ID' + ' FROM  "sap.plc.db::basis.t_session" AS a,' + ' "sap.plc.db::basis.t_application_timeout" AS b' + " WHERE   b.APPLICATION_TIMEOUT_ID = 'SessionTimeout' AND" + ' SECONDS_BETWEEN ( a.LAST_ACTIVITY_TIME , CURRENT_UTCTIMESTAMP ) < b.VALUE_IN_SECONDS AND' + ' a.LAST_ACTIVITY_TIME < CURRENT_UTCTIMESTAMP';
-        var result = dbConnection.executeQuery(sQuery);
+        var result = await dbConnection.executeQuery(sQuery);
         if (_.isNull(result) || _.isUndefined(result)) {
             const sLogMessage = `Error during the checking of active users in the system.`;
             $.trace.error(sLogMessage);
@@ -380,7 +380,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
     async function lockImportTool() {
         var fullTableNameLock = await getFullTableName(sTableNameLock);
         var query = 'INSERT INTO "' + fullTableNameLock + '" (LOCK_OBJECT,USER_ID) VALUES (?,?)';
-        dbConnection.executeUpdate(query, sLockObject, $.getPlcUsername());
+        await dbConnection.executeUpdate(query, sLockObject, $.getPlcUsername());
     }
 
     /** after finishing to import data, delete object import in lock table to inform that there is noone using import tool
@@ -390,7 +390,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
     async function unlockImportTool() {
         var fullTableNameLock = await getFullTableName(sTableNameLock);
         var query = 'DELETE FROM "' + fullTableNameLock + '" WHERE lock_object=?';
-        dbConnection.executeUpdate(query, sLockObject);
+        await dbConnection.executeUpdate(query, sLockObject);
     }
 
     /**
@@ -401,7 +401,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
         Object.keys(mDataModel).forEach(async function (sTableName) {
             if (mDataModel[sTableName].hasStagingTable) {
                 var query = 'delete from "' + await getFullStagingTableName(sTableName) + '"';
-                dbConnection.executeUpdate(query);
+                await dbConnection.executeUpdate(query);
             }
         });
     }
@@ -437,8 +437,8 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 			);
 	    `;
 
-        dbConnection.executeUpdate(stmDeletelayoutColumns);
-        dbConnection.executeUpdate(stmDeletelayoutHiddenFields);
+        await dbConnection.executeUpdate(stmDeletelayoutColumns);
+        await dbConnection.executeUpdate(stmDeletelayoutHiddenFields);
     }
 
     /**
@@ -479,7 +479,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             sParametersInsert = '"sap.plc.db.sequence::s_' + sTableName.substring(2) + '".nextval,' + sParametersInsert;
         }
         var query = 'INSERT INTO "' + await getFullStagingTableName(sTableName) + '" (' + sColumnsInsert + ')' + ' VALUES (' + sParametersInsert + ')';
-        dbConnection.executeUpdate(query, aAllRowsData);
+        await dbConnection.executeUpdate(query, aAllRowsData);
     }
 
     /**
@@ -540,7 +540,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
         if (mParameters.mode !== 'replace') {
             // use an inner join to figure out which custom fields already exists; if the the import is not 'replace' it would only be allowed to add new custom fields;
             // if this query has results, it would mean that existing custom fields would be updated (which is not allowed)
-            var oModifiedCustomFieldsResult = dbConnection.executeQuery("	select db.column_id as column_id 					from \"sap.plc.db::basis.t_metadata\" as db 					  inner join  \"sap.plc.db::basis.t_metadata_staging\" as staging 					  	on 	db.path = staging.path						  	and db.business_object = staging.business_object 					  	and db.column_id = staging.column_id 				  	where 		db.is_custom = 1 					  		and staging.is_custom = 1 							and ( 									ifnull(db.rollup_type_id, -1) <> ifnull(staging.rollup_type_id, -1) 								or ifnull(db.side_panel_group_id, -1) <> ifnull(staging.side_panel_group_id, -1) 								or ifnull(db.display_order, -1) <> ifnull(staging.display_order, -1) 								or ifnull(db.table_display_order, -1) <> ifnull(staging.table_display_order, -1) 								or ifnull(db.ref_uom_currency_path, '') <> ifnull(staging.ref_uom_currency_path, '') 								or ifnull(db.ref_uom_currency_business_object, '') <> ifnull(staging.ref_uom_currency_business_object, '') 								or ifnull(db.ref_uom_currency_column_id, '') <> ifnull(staging.ref_uom_currency_column_id, '') 								or ifnull(db.uom_currency_flag, -1) <> ifnull(staging.uom_currency_flag, -1) 								or ifnull(db.semantic_data_type, '') <> ifnull(staging.semantic_data_type, '') 								or ifnull(db.semantic_data_type_attributes, '') <> ifnull(staging.semantic_data_type_attributes, '') 								or ifnull(db.property_type, -1) <> ifnull(staging.property_type, -1) 								or ifnull(db.is_usable_in_formula, -1) <> ifnull(staging.is_usable_in_formula, -1) 							);");
+            var oModifiedCustomFieldsResult = await dbConnection.executeQuery("	select db.column_id as column_id 					from \"sap.plc.db::basis.t_metadata\" as db 					  inner join  \"sap.plc.db::basis.t_metadata_staging\" as staging 					  	on 	db.path = staging.path						  	and db.business_object = staging.business_object 					  	and db.column_id = staging.column_id 				  	where 		db.is_custom = 1 					  		and staging.is_custom = 1 							and ( 									ifnull(db.rollup_type_id, -1) <> ifnull(staging.rollup_type_id, -1) 								or ifnull(db.side_panel_group_id, -1) <> ifnull(staging.side_panel_group_id, -1) 								or ifnull(db.display_order, -1) <> ifnull(staging.display_order, -1) 								or ifnull(db.table_display_order, -1) <> ifnull(staging.table_display_order, -1) 								or ifnull(db.ref_uom_currency_path, '') <> ifnull(staging.ref_uom_currency_path, '') 								or ifnull(db.ref_uom_currency_business_object, '') <> ifnull(staging.ref_uom_currency_business_object, '') 								or ifnull(db.ref_uom_currency_column_id, '') <> ifnull(staging.ref_uom_currency_column_id, '') 								or ifnull(db.uom_currency_flag, -1) <> ifnull(staging.uom_currency_flag, -1) 								or ifnull(db.semantic_data_type, '') <> ifnull(staging.semantic_data_type, '') 								or ifnull(db.semantic_data_type_attributes, '') <> ifnull(staging.semantic_data_type_attributes, '') 								or ifnull(db.property_type, -1) <> ifnull(staging.property_type, -1) 								or ifnull(db.is_usable_in_formula, -1) <> ifnull(staging.is_usable_in_formula, -1) 							);");
 
             if (oModifiedCustomFieldsResult.length > 0) {
                 var aModifiedCustomFields = _.map(oModifiedCustomFieldsResult, function (oRow) {
@@ -552,7 +552,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             }
 
             // if mode is not 'replace', it must not be possible to delete custom fields 
-            var oDeletedCustomFieldsResult = dbConnection.executeQuery('select column_id 				from "sap.plc.db::basis.t_metadata" 				where is_custom = 1 								except 								select column_id  				from "sap.plc.db::basis.t_metadata_staging" 				where is_custom = 1');
+            var oDeletedCustomFieldsResult = await dbConnection.executeQuery('select column_id 				from "sap.plc.db::basis.t_metadata" 				where is_custom = 1 								except 								select column_id  				from "sap.plc.db::basis.t_metadata_staging" 				where is_custom = 1');
             if (oDeletedCustomFieldsResult.length > 0) {
                 var aDeletedCustomFields = _.map(oDeletedCustomFieldsResult, function (oRow) {
                     return oRow.COLUMN_ID;
@@ -563,7 +563,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             }
 
             // if mode is not 'replace', it must not be possible to modify existing formulas 
-            var oModifiedFormulasResult = dbConnection.executeQuery('	select db.column_id as column_id 						from "sap.plc.db::basis.t_formula" as db 						  inner join  "sap.plc.db::basis.t_formula_staging" as staging 						  	on 	db.path = staging.path							  	and db.business_object = staging.business_object 						  	and db.column_id = staging.column_id 							and db.item_category_id = staging.item_category_id 					  	where  db.is_formula_used <> staging.is_formula_used 							or HASH_SHA256(to_binary(db.formula_string)) <> HASH_SHA256(to_binary(staging.formula_string)) 							or ifnull(db.formula_description, \'\') <> ifnull(staging.formula_description, \'\')');
+            var oModifiedFormulasResult = await dbConnection.executeQuery('	select db.column_id as column_id 						from "sap.plc.db::basis.t_formula" as db 						  inner join  "sap.plc.db::basis.t_formula_staging" as staging 						  	on 	db.path = staging.path							  	and db.business_object = staging.business_object 						  	and db.column_id = staging.column_id 							and db.item_category_id = staging.item_category_id 					  	where  db.is_formula_used <> staging.is_formula_used 							or HASH_SHA256(to_binary(db.formula_string)) <> HASH_SHA256(to_binary(staging.formula_string)) 							or ifnull(db.formula_description, \'\') <> ifnull(staging.formula_description, \'\')');
             if (oModifiedFormulasResult.length > 0) {
                 var aModifiedFormulasResult = _.map(oModifiedFormulasResult, function (oRow) {
                     return oRow.COLUMN_ID;
@@ -574,7 +574,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             }
 
             // if mode is not 'replace', it must not be possible to delete existing formulas 
-            var oDeletedFormulasResult = dbConnection.executeQuery('select path, business_object, column_id, item_category_id 				from "sap.plc.db::basis.t_formula" 				except 				select path, business_object, column_id, item_category_id 				from "sap.plc.db::basis.t_formula_staging"');
+            var oDeletedFormulasResult = await dbConnection.executeQuery('select path, business_object, column_id, item_category_id 				from "sap.plc.db::basis.t_formula" 				except 				select path, business_object, column_id, item_category_id 				from "sap.plc.db::basis.t_formula_staging"');
             if (oDeletedFormulasResult.length > 0) {
                 var aDeletedFormulasResult = _.map(oDeletedFormulasResult, function (oRow) {
                     return oRow.COLUMN_ID;
@@ -586,7 +586,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
             // use except operator to figure out which custom fields attributes have been changed between source and target system; if the import mode is 'append' it is not allowed to modify any item attribute
             // if this query has results, it would mean that existing custom field attributes would be updated (which is not allowed)
-            var oModifiedCustomFieldItemAttributes = dbConnection.executeQuery('	( 							SELECT attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 								attributes.is_read_only, attributes.is_transferable, attributes.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes" as attributes 									on attributes.path = metadata.path	 									and attributes.business_object = metadata.business_object 									and attributes.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT attributes_staging.path, attributes_staging.business_object, attributes_staging.column_id, attributes_staging.item_category_id, attributes_staging.subitem_state, attributes_staging.is_mandatory, 								attributes_staging.is_read_only, attributes_staging.is_transferable, attributes_staging.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes_staging 									on 	attributes_staging.path = metadata.path	 									and attributes_staging.business_object = metadata.business_object 									and attributes_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					) 					UNION ALL 					( 							SELECT attributes_staging.path, attributes_staging.business_object, attributes_staging.column_id, attributes_staging.item_category_id, attributes_staging.subitem_state, attributes_staging.is_mandatory, 								attributes_staging.is_read_only, attributes_staging.is_transferable, attributes_staging.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes_staging 									on 	attributes_staging.path = metadata.path	 									and attributes_staging.business_object = metadata.business_object 									and attributes_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 								attributes.is_read_only, attributes.is_transferable, attributes.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes" as attributes 									on attributes.path = metadata.path	 									and attributes.business_object = metadata.business_object 									and attributes.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					);');
+            var oModifiedCustomFieldItemAttributes = await dbConnection.executeQuery('	( 							SELECT attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 								attributes.is_read_only, attributes.is_transferable, attributes.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes" as attributes 									on attributes.path = metadata.path	 									and attributes.business_object = metadata.business_object 									and attributes.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT attributes_staging.path, attributes_staging.business_object, attributes_staging.column_id, attributes_staging.item_category_id, attributes_staging.subitem_state, attributes_staging.is_mandatory, 								attributes_staging.is_read_only, attributes_staging.is_transferable, attributes_staging.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes_staging 									on 	attributes_staging.path = metadata.path	 									and attributes_staging.business_object = metadata.business_object 									and attributes_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					) 					UNION ALL 					( 							SELECT attributes_staging.path, attributes_staging.business_object, attributes_staging.column_id, attributes_staging.item_category_id, attributes_staging.subitem_state, attributes_staging.is_mandatory, 								attributes_staging.is_read_only, attributes_staging.is_transferable, attributes_staging.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes_staging 									on 	attributes_staging.path = metadata.path	 									and attributes_staging.business_object = metadata.business_object 									and attributes_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 								attributes.is_read_only, attributes.is_transferable, attributes.default_value 							FROM "sap.plc.db::basis.t_metadata" as metadata 								INNER JOIN "sap.plc.db::basis.t_metadata_item_attributes" as attributes 									on attributes.path = metadata.path	 									and attributes.business_object = metadata.business_object 									and attributes.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					);');
             if (oModifiedCustomFieldItemAttributes.length > 0) {
                 var aModifiedCustomFieldItemAttributes = _.map(oModifiedCustomFieldItemAttributes, function (oRow) {
                     return oRow.COLUMN_ID;
@@ -599,7 +599,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             // use except operator to figure out which custom fields texts have been changed between source and target system; 
             // if the import mode is 'append' it is not allowed to modify any texts (neither display name nor description)
             // if this query has results, it would mean that existing custom field texts would be updated (which is not allowed)
-            var oModifiedCustomFieldTexts = dbConnection.executeQuery('	( 							SELECT texts.path, texts.column_id, texts.language, texts.display_name, texts.display_description 							FROM "sap.plc.db::basis.t_metadata__text" as texts 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts.path = metadata.path 									AND texts.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT texts_staging.path, texts_staging.column_id, texts_staging.language, texts_staging.display_name, texts_staging.display_description 							FROM "sap.plc.db::basis.t_metadata__text_staging" as texts_staging 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts_staging.path = metadata.path 									AND texts_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					) 					UNION ALL 					( 							SELECT texts_staging.path, texts_staging.column_id, texts_staging.language, texts_staging.display_name, texts_staging.display_description 							FROM "sap.plc.db::basis.t_metadata__text_staging" as texts_staging 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts_staging.path = metadata.path 									AND texts_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT texts.path, texts.column_id, texts.language, texts.display_name, texts.display_description 							FROM "sap.plc.db::basis.t_metadata__text" as texts 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts.path = metadata.path 									AND texts.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					);');
+            var oModifiedCustomFieldTexts = await dbConnection.executeQuery('	( 							SELECT texts.path, texts.column_id, texts.language, texts.display_name, texts.display_description 							FROM "sap.plc.db::basis.t_metadata__text" as texts 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts.path = metadata.path 									AND texts.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT texts_staging.path, texts_staging.column_id, texts_staging.language, texts_staging.display_name, texts_staging.display_description 							FROM "sap.plc.db::basis.t_metadata__text_staging" as texts_staging 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts_staging.path = metadata.path 									AND texts_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					) 					UNION ALL 					( 							SELECT texts_staging.path, texts_staging.column_id, texts_staging.language, texts_staging.display_name, texts_staging.display_description 							FROM "sap.plc.db::basis.t_metadata__text_staging" as texts_staging 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts_staging.path = metadata.path 									AND texts_staging.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 						EXCEPT 							SELECT texts.path, texts.column_id, texts.language, texts.display_name, texts.display_description 							FROM "sap.plc.db::basis.t_metadata__text" as texts 								INNER JOIN "sap.plc.db::basis.t_metadata" as metadata 									ON texts.path = metadata.path 									AND texts.column_id = metadata.column_id 								WHERE metadata.is_custom = 1 					);');
             if (oModifiedCustomFieldTexts.length > 0) {
                 var aModifiedCustomFieldTexts = _.map(oModifiedCustomFieldTexts, function (oRow) {
                     return oRow.COLUMN_ID;
@@ -614,7 +614,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
         // Impl. Information: 
         //  - use a inner join to determine currently existing custom fields and the where-clause to limit to rows with changed data type information
         //  - since semantic_data_type_attributes is a nullable-column the comparison must be made using the nullif()-function
-        var oChangedDataTypeCustomFieldsResult = dbConnection.executeQuery('	select db.column_id as column_id 				from "sap.plc.db::basis.t_metadata" as db 				  inner join  "sap.plc.db::basis.t_metadata_staging" as staging 					on 	db.path = staging.path						and db.business_object = staging.business_object 					and db.column_id = staging.column_id 				where 	(	db.semantic_data_type <> staging.semantic_data_type 							or	nullif(db.semantic_data_type_attributes, staging.semantic_data_type_attributes) is not null 						) 						and staging.is_custom = 1;');
+        var oChangedDataTypeCustomFieldsResult = await dbConnection.executeQuery('	select db.column_id as column_id 				from "sap.plc.db::basis.t_metadata" as db 				  inner join  "sap.plc.db::basis.t_metadata_staging" as staging 					on 	db.path = staging.path						and db.business_object = staging.business_object 					and db.column_id = staging.column_id 				where 	(	db.semantic_data_type <> staging.semantic_data_type 							or	nullif(db.semantic_data_type_attributes, staging.semantic_data_type_attributes) is not null 						) 						and staging.is_custom = 1;');
         if (oChangedDataTypeCustomFieldsResult.length > 0) {
             var aModifiedDataTypeCustomFields = _.map(oChangedDataTypeCustomFieldsResult, function (oRow) {
                 return oRow.COLUMN_ID;
@@ -625,7 +625,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
         }
 
         // check for invalid entries in t_metadata
-        const oInvalidMetadataResult = dbConnection.executeQuery(`SELECT path, business_object, column_id FROM "sap.plc.db::basis.t_metadata_staging"
+        const oInvalidMetadataResult = await dbConnection.executeQuery(`SELECT path, business_object, column_id FROM "sap.plc.db::basis.t_metadata_staging"
 			WHERE business_object not in ('Item', 'Cost_Center', 'Material', 'Material_Plant', 'Material_Price', 'Work_Center', 'Activity_Price') or
 				path not in ('Item', 'Cost_Center', 'Material', 'Material_Plant', 'Material_Price', 'Work_Center', 'Activity_Price') or
 				business_object <> path or
@@ -656,14 +656,14 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
         // metadata is only complete if there is at least 1 row for the path, business_object, column_id in t_metadata_item_attributes_staging in order to define a category 
         // for the custom field an other contraints (mandatory, ...)
-        var oMissingItemAttributesResult = dbConnection.executeQuery('select path, business_object, column_id from "sap.plc.db::basis.t_metadata_staging" 			where (path, business_object, column_id) not in ( 					select path, business_object, column_id from "sap.plc.db::basis.t_metadata_item_attributes_staging" 			);');
+        var oMissingItemAttributesResult = await dbConnection.executeQuery('select path, business_object, column_id from "sap.plc.db::basis.t_metadata_staging" 			where (path, business_object, column_id) not in ( 					select path, business_object, column_id from "sap.plc.db::basis.t_metadata_item_attributes_staging" 			);');
         if (oMissingItemAttributesResult.length > 0) {
             const sLogMessage = `Found invalid contents in t_metadata for which no data in t_metadata_item_attributes or t_metadata_item_attributes_staging exist: ${ JSON.stringify(oMissingItemAttributesResult) }`;
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
 
-        var oInvalidMetadataAttributesResult = dbConnection.executeQuery('SELECT path, business_object, column_id, item_category_id FROM "sap.plc.db::basis.t_metadata_item_attributes_staging" where  			item_category_id < -1 or item_category_id > (SELECT MAX(item_category_id) FROM "sap.plc.db::basis.t_item_category") or  			subitem_state not in (-1,0,1)');
+        var oInvalidMetadataAttributesResult = await dbConnection.executeQuery('SELECT path, business_object, column_id, item_category_id FROM "sap.plc.db::basis.t_metadata_item_attributes_staging" where  			item_category_id < -1 or item_category_id > (SELECT MAX(item_category_id) FROM "sap.plc.db::basis.t_item_category") or  			subitem_state not in (-1,0,1)');
 
         if (oInvalidMetadataAttributesResult.length > 0) {
             const sLogMessage = `Found invalid contents in t_metadata_item_attributes_staging for the following rows: ${ JSON.stringify(oInvalidMetadataAttributesResult) }`;
@@ -697,35 +697,35 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             await deleteLayoutData();
 
 
-            dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata" 					where 	is_custom = 1');
+            await dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata" 					where 	is_custom = 1');
 
-            dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata__text" 					where  (path, column_id) not in ( 							select path, column_id from "sap.plc.db::basis.t_metadata" 						)');
-
-
-
-            dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata_item_attributes" 					where  (path, business_object, column_id) not in ( 							select path, business_object, column_id from "sap.plc.db::basis.t_metadata" 						)');
+            await dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata__text" 					where  (path, column_id) not in ( 							select path, column_id from "sap.plc.db::basis.t_metadata" 						)');
 
 
 
-            dbConnection.executeUpdate('delete from "sap.plc.db::basis.t_formula" 										where (path, business_object, column_id, item_category_id) not in ( 											select path, business_object, column_id, item_category_id from "sap.plc.db::basis.t_formula_staging" 										)');
+            await dbConnection.executeUpdate('	delete from "sap.plc.db::basis.t_metadata_item_attributes" 					where  (path, business_object, column_id) not in ( 							select path, business_object, column_id from "sap.plc.db::basis.t_metadata" 						)');
 
 
-            dbConnection.executeUpdate('update "sap.plc.db::basis.t_formula" formula set 						is_formula_used = staging.is_formula_used, formula_string = staging.formula_string, formula_description = staging.formula_description 					from "sap.plc.db::basis.t_formula_staging" as staging inner join "sap.plc.db::basis.t_formula" as formula 						on formula.path = staging.path AND formula.business_object = staging.business_object AND 						formula.column_id = staging.column_id AND formula.item_category_id = staging.item_category_id');
+
+            await dbConnection.executeUpdate('delete from "sap.plc.db::basis.t_formula" 										where (path, business_object, column_id, item_category_id) not in ( 											select path, business_object, column_id, item_category_id from "sap.plc.db::basis.t_formula_staging" 										)');
+
+
+            await dbConnection.executeUpdate('update "sap.plc.db::basis.t_formula" formula set 						is_formula_used = staging.is_formula_used, formula_string = staging.formula_string, formula_description = staging.formula_description 					from "sap.plc.db::basis.t_formula_staging" as staging inner join "sap.plc.db::basis.t_formula" as formula 						on formula.path = staging.path AND formula.business_object = staging.business_object AND 						formula.column_id = staging.column_id AND formula.item_category_id = staging.item_category_id');
         }
 
 
 
 
 
-        dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata" ' + '(path, business_object, column_id, rollup_type_id, side_panel_group_id, display_order, table_display_order, ' + 'ref_uom_currency_path, ref_uom_currency_business_object, ref_uom_currency_column_id, uom_currency_flag, ' + 'semantic_data_type, semantic_data_type_attributes, property_type, is_usable_in_formula, is_custom) ' + 'select path, business_object, column_id, rollup_type_id, side_panel_group_id, display_order, table_display_order, ' + 'ref_uom_currency_path, ref_uom_currency_business_object, ref_uom_currency_column_id, uom_currency_flag, ' + 'semantic_data_type, semantic_data_type_attributes, property_type, 1 as is_usable_in_formula, is_custom ' + 'from "sap.plc.db::basis.t_metadata_staging" where is_custom = 1;');
+        await dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata" ' + '(path, business_object, column_id, rollup_type_id, side_panel_group_id, display_order, table_display_order, ' + 'ref_uom_currency_path, ref_uom_currency_business_object, ref_uom_currency_column_id, uom_currency_flag, ' + 'semantic_data_type, semantic_data_type_attributes, property_type, is_usable_in_formula, is_custom) ' + 'select path, business_object, column_id, rollup_type_id, side_panel_group_id, display_order, table_display_order, ' + 'ref_uom_currency_path, ref_uom_currency_business_object, ref_uom_currency_column_id, uom_currency_flag, ' + 'semantic_data_type, semantic_data_type_attributes, property_type, 1 as is_usable_in_formula, is_custom ' + 'from "sap.plc.db::basis.t_metadata_staging" where is_custom = 1;');
 
-        dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata_item_attributes" 					(path, business_object, column_id, item_category_id, subitem_state, is_mandatory, 					is_read_only, is_transferable, default_value) 				select attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 				attributes.is_read_only, attributes.is_transferable, attributes.default_value 				from "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes					inner join "sap.plc.db::basis.t_metadata_staging" as metadata 						on 	metadata.path = attributes.path 						and metadata.business_object = attributes.business_object 						and metadata.column_id = attributes.column_id 				where metadata.is_custom = 1;');
+        await dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata_item_attributes" 					(path, business_object, column_id, item_category_id, subitem_state, is_mandatory, 					is_read_only, is_transferable, default_value) 				select attributes.path, attributes.business_object, attributes.column_id, attributes.item_category_id, attributes.subitem_state, attributes.is_mandatory, 				attributes.is_read_only, attributes.is_transferable, attributes.default_value 				from "sap.plc.db::basis.t_metadata_item_attributes_staging" as attributes					inner join "sap.plc.db::basis.t_metadata_staging" as metadata 						on 	metadata.path = attributes.path 						and metadata.business_object = attributes.business_object 						and metadata.column_id = attributes.column_id 				where metadata.is_custom = 1;');
 
-        dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata__text" 				(path, column_id, language, display_name, display_description) 			select text.path, text.column_id, text.language, text.display_name, text.display_description 			from "sap.plc.db::basis.t_metadata__text_staging" as text 				inner join "sap.plc.db::basis.t_metadata_staging" as metadata 					on 	metadata.path = text.path 					and metadata.column_id = text.column_id 					where metadata.is_custom = 1;');
+        await dbConnection.executeUpdate('upsert "sap.plc.db::basis.t_metadata__text" 				(path, column_id, language, display_name, display_description) 			select text.path, text.column_id, text.language, text.display_name, text.display_description 			from "sap.plc.db::basis.t_metadata__text_staging" as text 				inner join "sap.plc.db::basis.t_metadata_staging" as metadata 					on 	metadata.path = text.path 					and metadata.column_id = text.column_id 					where metadata.is_custom = 1;');
 
 
 
-        dbConnection.executeUpdate('insert into "sap.plc.db::basis.t_formula" 					(formula_id,path,business_object,column_id,item_category_id,is_formula_used,formula_string,formula_description) 				select  staging.new_id as formula_id, 						staging.path, staging.business_object, staging.column_id, staging.item_category_id, staging.is_formula_used, 						staging.formula_string, staging.formula_description 				from "sap.plc.db::basis.t_formula_staging" as staging left outer join "sap.plc.db::basis.t_formula" as formula 						on formula.path = staging.path AND formula.business_object = staging.business_object AND 						formula.column_id = staging.column_id AND formula.item_category_id = staging.item_category_id 				where formula.formula_id is null');
+        await dbConnection.executeUpdate('insert into "sap.plc.db::basis.t_formula" 					(formula_id,path,business_object,column_id,item_category_id,is_formula_used,formula_string,formula_description) 				select  staging.new_id as formula_id, 						staging.path, staging.business_object, staging.column_id, staging.item_category_id, staging.is_formula_used, 						staging.formula_string, staging.formula_description 				from "sap.plc.db::basis.t_formula_staging" as staging left outer join "sap.plc.db::basis.t_formula" as formula 						on formula.path = staging.path AND formula.business_object = staging.business_object AND 						formula.column_id = staging.column_id AND formula.item_category_id = staging.item_category_id 				where formula.formula_id is null');
 
 
         if (mParameters.mode === 'replace') {
@@ -744,7 +744,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
         oMetadataPersistency.copyMasterdataToMasterdataExt(BusinessObjectTypes.WorkCenter);
         oMetadataPersistency.copyMasterdataToMasterdataExt(BusinessObjectTypes.ActivityPrice);
 
-        var aNewCustomFieldResult = dbConnection.executeQuery(`select staging.path as path, staging.business_object as business_object, staging.column_id as column_id, staging.rollup_type_id as rollup_type_id, staging.UOM_CURRENCY_FLAG as UOM_CURRENCY_FLAG, staging.REF_UOM_CURRENCY_PATH as REF_UOM_CURRENCY_PATH, staging.REF_UOM_CURRENCY_BUSINESS_OBJECT as REF_UOM_CURRENCY_BUSINESS_OBJECT, staging.REF_UOM_CURRENCY_COLUMN_ID as REF_UOM_CURRENCY_COLUMN_ID, staging.SEMANTIC_DATA_TYPE as SEMANTIC_DATA_TYPE
+        var aNewCustomFieldResult = await dbConnection.executeQuery(`select staging.path as path, staging.business_object as business_object, staging.column_id as column_id, staging.rollup_type_id as rollup_type_id, staging.UOM_CURRENCY_FLAG as UOM_CURRENCY_FLAG, staging.REF_UOM_CURRENCY_PATH as REF_UOM_CURRENCY_PATH, staging.REF_UOM_CURRENCY_BUSINESS_OBJECT as REF_UOM_CURRENCY_BUSINESS_OBJECT, staging.REF_UOM_CURRENCY_COLUMN_ID as REF_UOM_CURRENCY_COLUMN_ID, staging.SEMANTIC_DATA_TYPE as SEMANTIC_DATA_TYPE
 				from "sap.plc.db::basis.t_metadata_staging" as staging 
 					left outer join "sap.plc.db::basis.t_metadata" as db 
 						on	staging.path = db.path 
@@ -799,7 +799,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
 
                 var query = 'delete from "' + await getFullStagingTableName(sTableName) + '" where (' + sPrimaryKeyList + ') in (select ' + sPrimaryKeyListWithPrefix + ' from "' + await getFullTableName(sTableName) + '" t1 inner join "' + await getFullStagingTableName(sTableName) + '" t2 on ' + sJoinCondition + sWhereCondition;
-                dbConnection.executeUpdate(query);
+                await dbConnection.executeUpdate(query);
             }
         });
     }
@@ -829,7 +829,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
                     try {
                         var query = await buildQueryCheckReferenceKey(sTableName, constraint);
                         if (query.length > 0) {
-                            var result = dbConnection.executeQuery(query);
+                            var result = await dbConnection.executeQuery(query);
                             if (result.length > 0) {
                                 aErrors.push('data is inconsistent between ' + sTableName + ' and ' + constraint.targetTable);
                             }
@@ -875,7 +875,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
             return;
         }
 
-        dbConnection.executeUpdate(sQuery);
+        await dbConnection.executeUpdate(sQuery);
     }
 
 
@@ -898,7 +898,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
         var sUpsertStmt = 'UPSERT "' + await getFullTableName(sTableName) + '"' + ' (' + sFromField + ',' + sColumns + ') ' + 'Select (Select NEW_ID' + ' FROM "' + toStagingTableName + '" T1 WHERE T1.' + sToField + '= T2.' + sFromField + ') AS ' + sFromField + ',' + sColumns + ' FROM "' + fromStagingTableName + '" T2';
 
-        dbConnection.executeUpdate(sUpsertStmt);
+        await dbConnection.executeUpdate(sUpsertStmt);
     }
 
 
@@ -927,7 +927,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
             var sUpdateStmt = 'UPDATE "' + await getFullTableName(sTableName) + '" T1' + ' SET _VALID_TO=? FROM "' + await getFullTableName(sTableName) + '" T1 INNER JOIN "' + await getFullStagingTableName(sTableName) + '" T2 ON ' + aOnCondition.join(' AND ') + ' WHERE T1._VALID_TO IS NULL';
 
-            dbConnection.executeUpdate(sUpdateStmt, oCurrentDate);
+            await dbConnection.executeUpdate(sUpdateStmt, oCurrentDate);
 
 
             var aDefaultColumnsInsert = [];
@@ -951,12 +951,12 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
 
             var sInsertStmt = 'INSERT INTO "' + await getFullTableName(sTableName) + '"' + ' (' + sColumnsInsert + ',' + aDefaultColumnsInsert[0] + ') ' + ' SELECT ' + sColumnsInsert + ',' + aDefaultColumnsInsert[1] + ' FROM "' + await getFullStagingTableName(sTableName) + '"';
 
-            dbConnection.executeUpdate(sInsertStmt);
+            await dbConnection.executeUpdate(sInsertStmt);
         } else {
 
             var sUpsertStmt = 'UPSERT "' + await getFullTableName(sTableName) + '"' + ' (' + sColumnsInsert + ') ' + ' SELECT ' + sColumnsInsert + ' FROM "' + await getFullStagingTableName(sTableName) + '"';
 
-            dbConnection.executeUpdate(sUpsertStmt);
+            await dbConnection.executeUpdate(sUpsertStmt);
         }
     }
 
@@ -1109,7 +1109,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
                 }
             }
 
-            var result = dbConnection.executeQuery(query);
+            var result = await dbConnection.executeQuery(query);
             var tableData = [];
             var tableRow = [];
             if (result.length > 0) {
@@ -1165,7 +1165,7 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
     this.getTableColumns = function (sTableName) {
         var aTableColumns = [];
         var sFullTableName = 'sap.plc.db::basis.' + sTableName;
-        var result = dbConnection.executeQuery('select column_name from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
+        var result = await dbConnection.executeQuery('select column_name from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
         for (var row in result) {
             if (!_.includes(aFilteredExportColumns, result[row].COLUMN_NAME)) {
                 aTableColumns.push(result[row].COLUMN_NAME);
@@ -1175,6 +1175,6 @@ function Transportation(dbConnection, oDbArtefactController, oMetadataPersistenc
     };
 }
 
-Transportation.prototype = await Object.create(Transportation.prototype);
+Transportation.prototype = Object.create(Transportation.prototype);
 Transportation.prototype.constructor = Transportation;
 export default {_,oForeignKeyRelationships,oSpecialForeignKeyRelationships,mDataModel,BusinessObjectTypes,MessageLibrary,PlcException,Code,MessageDetails,aClobTables,aCffTables,aSettingTables,aAddinTables,Tables,aCustomizingTables,mMasterDataBusinessObjects,MasterdataResources,oReplicationMapping,aMasterDataTables,aAllTables,Procedures,Transportation};

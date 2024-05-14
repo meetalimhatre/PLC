@@ -165,7 +165,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
 
 
-        function getMetadataForSupportedBussinesObjects() {
+        async function getMetadataForSupportedBussinesObjects() {
             let oItemMetadata = metadataProvider.get(BusinessObjectTypes.Item, BusinessObjectTypes.Item, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             let oMaterialMetadata = metadataProvider.get(BusinessObjectTypes.Material, BusinessObjectTypes.Material, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             let oMaterialPriceMetadata = metadataProvider.get(BusinessObjectTypes.MaterialPrice, BusinessObjectTypes.MaterialPrice, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
@@ -289,22 +289,22 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                 sScoreFunctionName = DefaultScoreFunction;
             }
 
-            if (await validateNumericValue(oOption.scoreFunctionScale, 'Option.scoreFunctionScale')) {
+            if (validateNumericValue(oOption.scoreFunctionScale, 'Option.scoreFunctionScale')) {
                 if ((SupportedScoreFunctions.Linear === sScoreFunctionName || SupportedScoreFunctions.Gaussian === sScoreFunctionName) && oOption.scoreFunctionScale <= 0) {
                     await throwNumericErrors(oOption.scoreFunctionScale, 'Option.scoreFunctionScale', 'scale > 0', sScoreFunctionName);
                 }
             }
-            if (await validateNumericValue(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay')) {
+            if (validateNumericValue(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay')) {
                 if (SupportedScoreFunctions.Linear === sScoreFunctionName && (oOption.scoreFunctionDecay < 0 || oOption.scoreFunctionDecay >= 1)) {
                     await throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 <= decay < 1', sScoreFunctionName);
                 } else if (SupportedScoreFunctions.Gaussian === sScoreFunctionName && (oOption.scoreFunctionDecay <= 0 || oOption.scoreFunctionDecay >= 1)) {
                     await throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 < decay < 1', sScoreFunctionName);
                 }
             }
-            if (await validateNumericValue(oOption.scoreFunctionBase, 'Option.scoreFunctionBase') && (SupportedScoreFunctions.Logarithmic === sScoreFunctionName && oOption.scoreFunctionBase <= 1)) {
+            if (validateNumericValue(oOption.scoreFunctionBase, 'Option.scoreFunctionBase') && (SupportedScoreFunctions.Logarithmic === sScoreFunctionName && oOption.scoreFunctionBase <= 1)) {
                 await throwNumericErrors(oOption.scoreFunctionBase, 'Option.scoreFunctionBase', 'base > 1', sScoreFunctionName);
             }
-            if (await validateNumericValue(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset') && oOption.scoreFunctionOffset < 0) {
+            if (validateNumericValue(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset') && oOption.scoreFunctionOffset < 0) {
                 await throwNumericErrors(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset', 'offset >= 0', sScoreFunctionName);
             }
 
@@ -348,7 +348,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                 }
             } else if (oAttribute.Option.scoreFunction == SupportedScoreFunctions.Gaussian || oAttribute.Option.scoreFunction == SupportedScoreFunctions.Linear) {
                 _.defaults(oAttribute.Option, { 'scoreFunctionDecay': 0.5 });
-                if (await helpers.isNullOrUndefined(oAttribute.Option.scoreFunctionScale)) {
+                if (helpers.isNullOrUndefined(oAttribute.Option.scoreFunctionScale)) {
                     if (oAttribute.Value <= 0) {
                         const sLogMessage = `Input search value ${ oAttribute.Value } must > 0 (when scoreFunctionScale is unset) for linear or gaussian score function.`;
                         await throwErrors(oAttribute.Value, ['Attribute.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
@@ -397,7 +397,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
         async function validateMasterData(oMasterData) {
             if (!helpers.isNullOrUndefined(oMasterData)) {
-                if (await helpers.isPlainObject(oMasterData)) {
+                if (helpers.isPlainObject(oMasterData)) {
                     let aMasterDataFields = [
                         {
                             'Name': 'MaterialTypes',
@@ -426,7 +426,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
         async function validateCalculationVersions(oCalculationVersions, oSearchRequest) {
             if (!helpers.isNullOrUndefined(oCalculationVersions)) {
-                if (await helpers.isPlainObject(oCalculationVersions)) {
+                if (helpers.isPlainObject(oCalculationVersions)) {
                     let aCalculationVersionsFields = [
                         {
                             'Name': 'ProjectIds',
@@ -470,7 +470,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
         }
 
         async function validateDuplicatedAttributeNames(aArray) {
-            if (await hasRepeatedItems(aArray)) {
+            if (hasRepeatedItems(aArray)) {
                 const sLogMessage = 'Attributes Name and Groups Name should not be duplicated.';
                 await throwErrors(aArray, [
                     'Attributes.Name',
@@ -564,6 +564,6 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
     };
 }
 
-SimilarPartsSearchValidator.prototype = await Object.create(SimilarPartsSearchValidator.prototype);
+SimilarPartsSearchValidator.prototype =  Object.create(SimilarPartsSearchValidator.prototype);
 SimilarPartsSearchValidator.prototype.constructor = SimilarPartsSearchValidator;
 export default {_,GenericSyntaxValidator,helpers,MessageLibrary,PlcException,Code,MessageDetails,ValidationInfoCode,PersistencySimilarParts,aMandatoryPropertiesMetadata,aMandatoryPropertiesMetadataAttributes,aMandatoryPropertiesMetadataPattern,aMandatoryPropertiesMetadataGroup,aMandatoryPropertiesMetadataDict,aMandatoryPropertiesMetadataTimeRange,SimilarPartsSearchValidator};

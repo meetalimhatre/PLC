@@ -119,7 +119,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
         }
 
         async function checkURLParameters() {
-            if (await helpers.isNullOrUndefined(mValidatedParameters.getPrices)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.getPrices)) {
                 const sLogMessage = 'Missing the getItems parameter.';
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -128,7 +128,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                 await genericSyntaxValidator.validateValue(mValidatedParameters.getPrices, 'Boolean', undefined, true);
             }
 
-            if (await helpers.isNullOrUndefined(mValidatedParameters.calculation_version_id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.calculation_version_id)) {
                 const sLogMessage = 'Missing the calculation version id of the item parameter.';
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -136,7 +136,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                 await genericSyntaxValidator.validateValue(mValidatedParameters.calculation_version_id, 'PositiveInteger', undefined, true);
             }
 
-            if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = 'Missing the item id parameter.';
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
@@ -148,7 +148,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
         }
         async function checkCalculationVersion(aBodyItems) {
             var aItemsRefDifferentCv = _.filter(aBodyItems, async function (oBodyItem) {
-                if (await helpers.isNullOrUndefined(oBodyItem.CALCULATION_VERSION_ID)) {
+                if (helpers.isNullOrUndefined(oBodyItem.CALCULATION_VERSION_ID)) {
                     const sClientMsg = `Missing mandatory property "CALCULATION_VERSION_ID" during validation.`;
                     $.trace.error(sClientMsg);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
@@ -214,7 +214,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
             if (aItemsRefCalcVers.length > 0) {
                 // get controlling area of current opened calculation version
                 var oDefaultSettings = persistency.CalculationVersion.getProjectPropertiesForCalculationVersion(aBodyItems[0].CALCULATION_VERSION_ID, true);
-                if (await helpers.isNullOrUndefined(oDefaultSettings)) {
+                if (helpers.isNullOrUndefined(oDefaultSettings)) {
                     const sClientMsg = 'Default settings for calculation version not found in project.';
                     const sServerMsg = `${ sClientMsg } Calculation Version Id: ${ aBodyItems[0].CALCULATION_VERSION_ID }.`;
                     $.trace.error(sServerMsg);
@@ -424,7 +424,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
             const sClientMsg = 'Item must not change its position on import.';
             const sServerMsg = `${ sClientMsg } Item Id: ${ oNewItem.ITEM_ID }; Calculation Version Id: ${ oNewItem.CALCULATION_VERSION_ID }.`;
 
-            if (await helpers.isNullOrUndefined(oNewItem.PARENT_ITEM_ID) !== await helpers.isNullOrUndefined(oExistingRootItem.PARENT_ITEM_ID) || await helpers.isNullOrUndefined(oNewItem.PREDECESSOR_ITEM_ID) !== await helpers.isNullOrUndefined(oExistingRootItem.PREDECESSOR_ITEM_ID)) {
+            if (helpers.isNullOrUndefined(oNewItem.PARENT_ITEM_ID) !== await helpers.isNullOrUndefined(oExistingRootItem.PARENT_ITEM_ID) || await helpers.isNullOrUndefined(oNewItem.PREDECESSOR_ITEM_ID) !== await helpers.isNullOrUndefined(oExistingRootItem.PREDECESSOR_ITEM_ID)) {
                 $.trace.error(sServerMsg);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
             }
@@ -818,7 +818,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
     };
 }
 
-ItemValidator.prototype = await Object.create(ItemValidator.prototype);
+ItemValidator.prototype = Object.create(ItemValidator.prototype);
 ItemValidator.prototype.constructor = ItemValidator;
 
 

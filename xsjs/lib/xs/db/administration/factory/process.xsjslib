@@ -1,12 +1,12 @@
 var _ = $.require('lodash');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function Process(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    Process.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    Process.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
         var oFilters = [
             [
@@ -35,7 +35,7 @@ function Process(dbConnection, hQuery, sObjectName) {
             ]
         ];
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
             oReturnObject[BusinessObjectsEntities.PROCESS_ENTITIES] = Array.slice(result.OT_PROCESS);
             oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = Array.slice(result.OT_CONTROLLING_AREA);
             oReturnObject[BusinessObjectsEntities.ACCOUNT_ENTITIES] = Array.slice(result.OT_ACCOUNTS);
@@ -71,13 +71,13 @@ function Process(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.PROCESS_ID, plcTable.CONTROLLING_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.PROCESS_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.PROCESS_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;
     };
 }
 
-Process.prototype = await Object.create(MasterDataBaseObject.prototype);
+Process.prototype = Object.create(MasterDataBaseObject.prototype);
 Process.prototype.constructor = Process;
 export default {_,BusinessObjectsEntities,MasterDataBaseObject,Process};

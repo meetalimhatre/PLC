@@ -1,5 +1,5 @@
 const _ = $.require('lodash');
-const PersistencyTransportation = $.import('xs.db', 'persistency-transportation');
+const PersistencyTransportation = await $.import('xs.db', 'persistency-transportation');
 const aAllValidTables = PersistencyTransportation.aAllTables;
 const aValidBusinessObjects = PersistencyTransportation.mMasterDataBusinessObjects;
 
@@ -85,7 +85,7 @@ function TransportationValidator(oPersistency, sSessionId, utils) {
             return mValidatedParameters;
         }
 
-        function validateImportRequest() {
+        async function validateImportRequest() {
 
             var aBodyItems = utils.tryParseJson(oRequest.body.asString());
             _.each(aBodyItems, async function (oBody, tableName) {
@@ -124,6 +124,6 @@ function TransportationValidator(oPersistency, sSessionId, utils) {
         }
     };
 }
-TransportationValidator.prototype = await Object.create(TransportationValidator.prototype);
+TransportationValidator.prototype =  Object.create(TransportationValidator.prototype);
 TransportationValidator.prototype.constructor = TransportationValidator;
 export default {_,PersistencyTransportation,aAllValidTables,aValidBusinessObjects,MessageLibrary,PlcException,Code,TransportationValidator};

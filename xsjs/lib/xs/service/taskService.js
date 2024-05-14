@@ -23,7 +23,7 @@ async function TaskService($, oPersistency) {
 	 * Get all tasks of a specific user.
 	 */
     this.getByUser = (sUserId, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(sUserId, null, null, null));
     };
 
@@ -31,7 +31,7 @@ async function TaskService($, oPersistency) {
 	 * Get all tasks for a certain type (ex. project).
 	 */
     this.getByType = (sType, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(null, sType, null, null));
     };
 
@@ -39,7 +39,7 @@ async function TaskService($, oPersistency) {
 	 * Get all tasks for a certain type (ex. project) with a certain status (ex. Active).
 	 */
     this.getByTypeAndStatus = (sType, sTaskStatus, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(null, sType, null, sTaskStatus));
     };
 
@@ -47,7 +47,7 @@ async function TaskService($, oPersistency) {
 	 * Get a certain task by id for the current user.
 	 */
     this.getById = (iTypeId, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
         return oPersistencyToUse.get(null, null, iTypeId, null)[0];
     };
 
@@ -57,7 +57,7 @@ async function TaskService($, oPersistency) {
 	 */
 
     this.updateInactiveTasksOnTimeout = (sUserId, oProjectParameters, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
         oPersistencyToUse.updateInactiveTasksOnTimeout(sUserId, oProjectParameters);
     };
 
@@ -72,12 +72,12 @@ async function TaskService($, oPersistency) {
 	 * @return {type}               The created task  
 	 */
     this.createInactiveTaskForCurrentUser = (oTask, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
+        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
 
         oTask.SESSION_ID = $.getPlcUsername();
         oTask.STATUS = TaskStatus.INACTIVE;
         oTask.PROGRESS_STEP = 0;
-        return await oPersistencyToUse.create(oTask);
+        return  oPersistencyToUse.create(oTask);
     };
 
     /** 
@@ -95,9 +95,9 @@ async function TaskService($, oPersistency) {
         ]);
         _.extend(oUpdateSet, mPropertiesToUpdate);
 
-        var oConnectionToUpdateTask = await helpers.isNullOrUndefined(oConnectionFactory) ? await oPersistency.getConnection() : await oConnectionFactory.getConnection();
-        await update(oUpdateSet, oConnectionToUpdateTask);
-        await oConnectionToUpdateTask.commit();
+        var oConnectionToUpdateTask =  helpers.isNullOrUndefined(oConnectionFactory) ?  oPersistency.getConnection() :  oConnectionFactory.getConnection();
+         update(oUpdateSet, oConnectionToUpdateTask);
+         oConnectionToUpdateTask.commit();
     };
 
     /**
@@ -108,7 +108,7 @@ async function TaskService($, oPersistency) {
 	 * @param  {type} oDbConnection   The connection acquiring the lock
 	 */
     this.lock = oDbConnection => {
-        let oPersistencyToUse = oDbConnection == null ? oDefaultPersistency : await createPersistency(oDbConnection);
+        let oPersistencyToUse = oDbConnection == null ? oDefaultPersistency :  createPersistency(oDbConnection);
 
         oPersistencyToUse.lockTaskTable();
     };
@@ -143,7 +143,7 @@ async function TaskService($, oPersistency) {
     }
 
 }
-TaskService.prototype = await Object.create(TaskService.prototype);
+TaskService.prototype =  Object.create(TaskService.prototype);
 TaskService.prototype.constructor = TaskService;
 
 module.exports.TaskService = TaskService;

@@ -2,8 +2,8 @@ var _ = $.require('lodash');
 var helpers = $.require('../../util/helpers');
 var BusinessObjectTypes = $.require('../../util/constants').BusinessObjectTypes;
 var BusinessObjectsEntities = $.require('../../util/masterdataResources').BusinessObjectsEntities;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
-var MasterdataBaseImport = $.import('xs.db.administration', 'api-base');
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
+var MasterdataBaseImport = await $.import('xs.db.administration', 'api-base');
 
 const MessageLibrary = $.require('../../util/message');
 const MessageOperation = MessageLibrary.Operation;
@@ -13,7 +13,7 @@ const AdministrationObjType = MessageLibrary.AdministrationObjType;
 const ValidationInfoCode = MessageLibrary.ValidationInfoCode;
 const Severity = MessageLibrary.Severity;
 
-var Procedures = await Object.freeze({ exchange_rate_type_read: 'sap.plc.db.administration.procedures::p_exchange_rate_type_read' });
+var Procedures = Object.freeze({ exchange_rate_type_read: 'sap.plc.db.administration.procedures::p_exchange_rate_type_read' });
 
 var oConfiguration = {
     sObjectName: BusinessObjectTypes.ExchangeRateType,
@@ -111,7 +111,7 @@ function ExchangeRateType(dbConnection, hQuery, hQueryRepl, oConfiguration) {
             }
             sStmt += ` order by EXCHANGE_RATE_TYPE_ID`;
             sStmt += ` limit ${ iNoRecords } offset ${ iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(sStmt));
+            oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_ENTITIES] = _.values(await dbConnection.executeQuery(sStmt));
         }
         return oReturnObject;
     };
@@ -175,6 +175,6 @@ function ExchangeRateType(dbConnection, hQuery, hQueryRepl, oConfiguration) {
     };
 }
 
-ExchangeRateType.prototype = await Object.create(MasterdataBaseImport.MasterdataBase.prototype);
+ExchangeRateType.prototype = Object.create(MasterdataBaseImport.MasterdataBase.prototype);
 ExchangeRateType.prototype.constructor = ExchangeRateType;
 export default {_,helpers,BusinessObjectTypes,BusinessObjectsEntities,apiHelpers,MasterdataBaseImport,MessageLibrary,MessageOperation,PlcException,Code,AdministrationObjType,ValidationInfoCode,Severity,Procedures,oConfiguration,ExchangeRateType};

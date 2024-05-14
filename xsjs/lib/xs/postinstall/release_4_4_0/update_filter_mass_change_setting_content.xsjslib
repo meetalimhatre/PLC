@@ -88,7 +88,7 @@ async function findFieldsToReplace(aDatabaseFrontendSettings) {
  * @param mSettingsToUpdate - map that contains all the changes that need to be done for the t_frontend_settings table
  *                            this map has as a key SETTING_ID and as a value the modified SETTING_CONTENT encoded in base64
  */
-function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
+async function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
     let sUpdateStatement = `update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = case `;
     mSettingsToUpdate.forEach((sSettingContent, iSettingId) => {
         sUpdateStatement += `when SETTING_ID = ${ iSettingId } then '${ sSettingContent }' `;
@@ -98,7 +98,7 @@ function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
     return sUpdateStatement;
 }
 
-function check(oCurrentConnection) {
+async function check(oCurrentConnection) {
     return true;
 }
 /**
@@ -119,7 +119,7 @@ async function run(oCurrentConnection) {
     return true;
 }
 
-function getCurrentSchema(oCurrentConnection) {
+async function getCurrentSchema(oCurrentConnection) {
     return oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
 }
 

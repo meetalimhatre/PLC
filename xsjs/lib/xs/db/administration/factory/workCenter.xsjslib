@@ -3,7 +3,7 @@ var helpers = $.require('../../../util/helpers');
 var BusinessObjectTypes = $.require('../../../util/constants').BusinessObjectTypes;
 var Resources = $.require('../../../util/masterdataResources').MasterdataResource;
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 var Helper = $.require('../../persistency-helper').Helper;
 var Metadata = $.require('../../persistency-metadata').Metadata;
 var WorkCenterCategories = $.require('../../../util/constants').WorkCenterCategories;
@@ -36,9 +36,9 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     var helper = await new Helper($, hQuery, dbConnection);
     var metadata = await new Metadata($, hQuery, null, currentUser);
 
-    WorkCenter.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    WorkCenter.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
-        var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sAutocompleteText, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+        var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sAutocompleteText, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
         oReturnObject[BusinessObjectsEntities.WORK_CENTER_ENTITIES] = Array.slice(result.OT_WORK_CENTER);
         oReturnObject[BusinessObjectsEntities.WORK_CENTER_TEXT_ENTITIES] = Array.slice(result.OT_WORK_CENTER_TEXT);
         oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = Array.slice(result.OT_CONTROLLING_AREA);
@@ -162,7 +162,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
                         and temp_table.operation in ('Create', 'Upsert', 'Update') 
     					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     }
 
 
@@ -189,7 +189,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
                                 where temp_process.WORK_CENTER_ID is null and temp_process.CONTROLLING_AREA_ID is null and temp_process.PROCESS_ID is null
                                 and temp_process.PLANT_ID is null and temp_process._VALID_FROM is null and temp_process._VALID_FROM is null;`;
 
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     }
 
 
@@ -216,7 +216,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
                                 where temp_activity.WORK_CENTER_ID is null and temp_activity.ACTIVITY_TYPE_ID is null and temp_activity.CONTROLLING_AREA_ID is null and temp_activity.PROCESS_ID is null
                                 and temp_activity.PLANT_ID is null and temp_activity._VALID_FROM is null;`;
 
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     }
 
 
@@ -354,7 +354,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
         					and temp_table.operation in ('Create', 'Upsert') 
         					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -396,7 +396,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
         					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -421,7 +421,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -447,7 +447,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -484,7 +484,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     				temp_table.operation in ('Create', 'Upsert') 
     				and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -519,7 +519,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     				and temp_table.operation in ('Delete', 'Update') 
     				and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -547,7 +547,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
 					and temp_table.operation in ('Delete', 'Update') 
 					and (temp_table.error_code = '' or  temp_table.error_code is null);`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -566,7 +566,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
                 			and temp_table.operation in ('Update', 'Create', 'Upsert')
                 			and ( temp_table.error_code = '' or  temp_table.error_code is null )`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -600,7 +600,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     				    and temp_table.operation in ('Delete') 
     					and ( temp_table.error_code = '' or  temp_table.error_code is null );`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -658,7 +658,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     				where  temp_table.operation in ('Create', 'Upsert', 'Update') and (error_table.number_of_errors = 0 OR
         (temp_table.error_code = '' AND '${ ignoreBadData }' = 'true'));`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -686,7 +686,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
                     and main_table._VALID_TO is null
                     and main_table._SOURCE = 1;`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -710,7 +710,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
     				where  ${ oCurrentObject.oKeyColumnsJoin.joinMainResult } and main_table._VALID_FROM = result._VALID_FROM
     			    and main_table._VALID_TO is null;`;
 
-        dbConnection.executeUpdate(sql);
+        await dbConnection.executeUpdate(sql);
     }
 
 
@@ -764,7 +764,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
         });
 
         var sStmt = aStmtBuilder.join(' ');
-        dbConnection.executeUpdate(sStmt, aInsertValues);
+        await dbConnection.executeUpdate(sStmt, aInsertValues);
     }
 
 
@@ -829,12 +829,12 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
 
     function deleteTemporaryTablesEntries() {
         var sStmt = `DELETE FROM "${ Resources.Work_Center_Process.dbobjects.tempTable }"`;
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
 
         sStmt = `DELETE FROM "${ Resources.Work_Center_Activity.dbobjects.tempTable }"`;
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     }
 }
-WorkCenter.prototype = await Object.create(MasterDataBaseObject.prototype);
+WorkCenter.prototype = Object.create(MasterDataBaseObject.prototype);
 WorkCenter.prototype.constructor = WorkCenter;
 export default {_,helpers,BusinessObjectTypes,Resources,BusinessObjectsEntities,MasterDataBaseObject,Helper,Metadata,WorkCenterCategories,MessageLibrary,BatchOperation,PlcException,MessageDetails,MessageCode,ValidationInfoCode,Operation,BusinessObjectValidatorUtils,aAuditFieldsForVersionedEntries,aErrorFieldsInTemporaryTables,currentUser,WorkCenter};

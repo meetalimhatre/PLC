@@ -15,7 +15,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-module.exports.Tables = await Object.freeze({
+module.exports.Tables = Object.freeze({
     calculation: 'sap.plc.db::basis.t_calculation',
     calculation_version_temporary: 'sap.plc.db::basis.t_calculation_version_temporary',
     calculation_version: 'sap.plc.db::basis.t_calculation_version',
@@ -41,9 +41,9 @@ module.exports.Tables = await Object.freeze({
     variant_item_temporary: 'sap.plc.db::basis.t_variant_item_temporary'
 });
 
-const Views = await Object.freeze({ calculation_version_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_version_read' });
+const Views = Object.freeze({ calculation_version_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_version_read' });
 
-module.exports.Procedures = await Object.freeze({
+module.exports.Procedures = Object.freeze({
     calculation_version_copy: 'sap.plc.db.calculationmanager.procedures::p_calculation_version_copy',
     calculation_version_open: 'sap.plc.db.calculationmanager.procedures::p_calculation_version_open',
     calculations_versions_read: 'sap.plc.db.calculationmanager.procedures::p_calculations_versions_read',
@@ -63,9 +63,9 @@ module.exports.Procedures = await Object.freeze({
     item_custom_fields_currency_get: 'sap.plc.db.calculationmanager.procedures::p_item_custom_fields_currency_get'
 });
 
-const Sequences = await Object.freeze({ calculation_version: 'sap.plc.db.sequence::s_calculation_version' });
+const Sequences = Object.freeze({ calculation_version: 'sap.plc.db.sequence::s_calculation_version' });
 
-const DefaultValues = await Object.freeze({
+const DefaultValues = Object.freeze({
     newEntityIsDirty: 1,
     newEntityIsWriteable: 1
 });
@@ -83,7 +83,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
     Object.defineProperties(this, {
         item: {
             get: () => {
-                return (() => {
+                return (async () => {
                     if (undefined === this._item) {
                         var Item = require('./persistency-item').Item;
                         this._item = await new Item($, dbConnection, hQuery, sUserId);
@@ -94,9 +94,9 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         },
         administration: {
             get: () => {
-                return (() => {
+                return (async () => {
                     if (undefined === this._administration) {
-                        var Administration = $.import('xs.db', 'persistency-administration').Administration;
+                        var Administration = await $.import('xs.db', 'persistency-administration').Administration;
                         this._administration = await new Administration(dbConnection, hQuery);
                     }
                     return this._administration;
@@ -105,7 +105,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         },
         variant: {
             get: () => {
-                return (() => {
+                return (async () => {
                     if (undefined === this._variant) {
                         var Variant = require('./persistency-variant').Variant;
                         this._variant = await new Variant($, dbConnection, hQuery);
@@ -217,7 +217,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         var iIsWriteable = DefaultValues.newEntityIsWriteable;
         var sUpsertOpenCv = `upsert "${ Tables.open_calculation_versions }" (session_id, calculation_version_id, is_writeable)
 			values (?, ?, ?) where session_id = ? and calculation_version_id = ?`;
-        dbConnection.executeUpdate(sUpsertOpenCv, sSessionId, iCalculationVersionId, iIsWriteable, sSessionId, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpsertOpenCv, sSessionId, iCalculationVersionId, iIsWriteable, sSessionId, iCalculationVersionId);
 
         // Create items from nested item objects and update their CalculationVersionId
         var oItemCreateResult = await this.item.create(oCalculationVersion.ITEMS, sSessionId, iCalculationVersionId, 0, 1, 0);
@@ -372,16 +372,16 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 	 *
 	 * @returns {string} - default STATUS_ID or null if it does not exist
 	 */
-    this.getDefaultStatusId = function () {
+    this.getDefaultStatusId = async function () {
         let sStmt = `SELECT STATUS_ID FROM "${ Tables.status }" WHERE IS_DEFAULT = 1`;
-        let result = dbConnection.executeQuery(sStmt);
+        let result = await dbConnection.executeQuery(sStmt);
         return _.get(_.find(result, 'STATUS_ID'), 'STATUS_ID', null);
     };
 
     /**
 	 * Sets properties of copied Manual or Lifecycle Version to make it a base ("normal") version
 	 */
-    this.setLifecycleVersionPropertiesToBaseProperties = function (oUpdatedVersion, oOldVersion, aProtectedColumns, sSessionId) {
+    this.setLifecycleVersionPropertiesToBaseProperties = async function (oUpdatedVersion, oOldVersion, aProtectedColumns, sSessionId) {
         if (oOldVersion.CALCULATION_VERSION_TYPE === constants.CalculationVersionType.Lifecycle || oOldVersion.CALCULATION_VERSION_TYPE === constants.CalculationVersionType.ManualLifecycleVersion) {
             // Proceed only with a lifecycle version
 
@@ -410,7 +410,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 				    	AND calcVersion.CALCULATION_VERSION_TYPE = 2 OR calcVersion.CALCULATION_VERSION_TYPE = 16
 					    AND item.PRICE_SOURCE_ID = 'OUTDATED_PRICE';
 			`;
-            var aOpenVersions = dbConnection.executeUpdate(sStmt, oUpdatedVersion.CALCULATION_VERSION_ID, sSessionId);
+            var aOpenVersions = await dbConnection.executeUpdate(sStmt, oUpdatedVersion.CALCULATION_VERSION_ID, sSessionId);
         }
         return aProtectedColumns;
     };
@@ -418,7 +418,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
     /**
 	 * When a lifecycle version is saved it changes its type to manual lifecycle version (16).
 	 */
-    this.setLifecycleVersionTypeToManual = function (oCalculationVersion, sSessionId) {
+    this.setLifecycleVersionTypeToManual = async function (oCalculationVersion, sSessionId) {
         const iCalculationVersionType = this.getVersionType(oCalculationVersion.CALCULATION_VERSION_ID, sSessionId);
         if (iCalculationVersionType === constants.CalculationVersionType.Lifecycle) {
             // Proceed only with a lifecycle version and set calculation version type as Manual lifecycle version
@@ -427,7 +427,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 				                              "CALCULATION_VERSION_TYPE" = ?
 				                        WHERE "CALCULATION_VERSION_ID" = ?  AND SESSION_ID =? ;
 			                        `;
-            dbConnection.executeUpdate(sUpdateStatement, constants.CalculationVersionType.ManualLifecycleVersion, oCalculationVersion.CALCULATION_VERSION_ID, sSessionId);
+            await dbConnection.executeUpdate(sUpdateStatement, constants.CalculationVersionType.ManualLifecycleVersion, oCalculationVersion.CALCULATION_VERSION_ID, sSessionId);
         }
     };
 
@@ -439,7 +439,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 	 *             If anything went wrong in database
 	 * @returns {array} ids of users that opened the calculation versions of the project
 	 */
-    this.getOpenVersionsForProject = function (sProjectId) {
+    this.getOpenVersionsForProject = async function (sProjectId) {
         var sStmt = `	select 	sessions.user_id, 
 								open_versions.calculation_version_id, 
 								versions.calculation_version_name,
@@ -454,7 +454,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 								on versions.calculation_id = calculations.calculation_id 
 						where calculations.project_id = ?;
 					`;
-        var aOpenVersions = dbConnection.executeQuery(sStmt, sProjectId);
+        var aOpenVersions = await dbConnection.executeQuery(sStmt, sProjectId);
         return Array.slice(aOpenVersions);
     };
 
@@ -466,7 +466,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 	 *             If anything went wrong in database
 	 * @returns {array} ids of users and users that opened the lifecycle calculation versions of the given base version
 	 */
-    this.getOpenLifecycleVersionsForBaseVersion = function (iCalculationVersionId) {
+    this.getOpenLifecycleVersionsForBaseVersion = async function (iCalculationVersionId) {
         var sStmt = `	select 	sessions.user_id, 
 								versions.calculation_version_name,
 								versions.calculation_version_id
@@ -479,7 +479,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 						 or versions.calculation_version_type = 16 )     -- both lifecycle and manual versions needed 
 								and versions.base_version_id = ?;
 					`;
-        var aOpenVersions = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        var aOpenVersions = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
         return Array.slice(aOpenVersions);
     };
     /**
@@ -489,7 +489,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 	 * @throws {PlcException} -
 	 *             If the version is pending to be re-generated it will throw an error
 	 */
-    this.checkLockCalculatingLifecycle = iCalculationVersionId => {
+    this.checkLockCalculatingLifecycle = async iCalculationVersionId => {
         let stmt = `select versions.CALCULATION_VERSION_ID,
                            versions.CALCULATION_VERSION_NAME,
                            calculation.PROJECT_ID
@@ -498,7 +498,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
                       on versions.CALCULATION_ID = calculation.CALCULATION_ID and (versions.CALCULATION_VERSION_type = ? or versions.CALCULATION_VERSION_type = ? ) 
 					where versions.CALCULATION_VERSION_ID = ?     
                     `;
-        let aLifecycleVersionsLock = dbConnection.executeQuery(stmt, constants.CalculationVersionType.Lifecycle, constants.CalculationVersionType.ManualLifecycleVersion, iCalculationVersionId);
+        let aLifecycleVersionsLock = await dbConnection.executeQuery(stmt, constants.CalculationVersionType.Lifecycle, constants.CalculationVersionType.ManualLifecycleVersion, iCalculationVersionId);
         if (aLifecycleVersionsLock && aLifecycleVersionsLock.length > 0) {
             let sLockedVersionId = aLifecycleVersionsLock[0].CALCULATION_VERSION_ID;
             let sLockedProject = aLifecycleVersionsLock[0].PROJECT_ID;
@@ -511,7 +511,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 						    and parameters = ?
     	                    and status not in (?, ?, ?);  
 						`;
-            let aLifecycleTask = dbConnection.executeQuery(sGetTaskstmt, constants.TaskType.CALCULATE_LIFECYCLE_VERSIONS, sParameterName, constants.TaskStatus.COMPLETED, constants.TaskStatus.FAILED, constants.TaskStatus.CANCELED);
+            let aLifecycleTask = await dbConnection.executeQuery(sGetTaskstmt, constants.TaskType.CALCULATE_LIFECYCLE_VERSIONS, sParameterName, constants.TaskStatus.COMPLETED, constants.TaskStatus.FAILED, constants.TaskStatus.CANCELED);
             if (aLifecycleTask && aLifecycleTask.length > 0) {
 
                 let oMessageDetails = new MessageDetails().addCalculationVersionObjs({ name: sLockedVersionName });
@@ -635,7 +635,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 	 */
     this.getReferencedVersionDetails = async function (oReturnObject, sLanguage) {
         var sSelectStmt = `select count(*) as rowcount from "${ Tables.gtt_calculation_version_ids }"`;
-        var aCountReferences = dbConnection.executeQuery(sSelectStmt);
+        var aCountReferences = await dbConnection.executeQuery(sSelectStmt);
         //check if there are refrences, and if yes return all the related information
         if (parseInt(aCountReferences[0].ROWCOUNT) > 0) {
             try {
@@ -748,7 +748,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
                     sRequestedLockContext
                 ]);
             }
-            dbConnection.executeUpdate(stmtInsertOpenVersion, aValues);
+            await dbConnection.executeUpdate(stmtInsertOpenVersion, aValues);
         } else {
 
 
@@ -783,10 +783,10 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.unlockVersion = function (iCalculationVersionId, sSessionId, sRequestedUnlockContext) {
+    this.unlockVersion = async function (iCalculationVersionId, sSessionId, sRequestedUnlockContext) {
         var sStmt = `delete from "${ Tables.open_calculation_versions }" 
 			where SESSION_ID = ? and CALCULATION_VERSION_ID = ? and CONTEXT = ? `;
-        var iUpdatedCount = dbConnection.executeUpdate(sStmt, sSessionId, iCalculationVersionId, sRequestedUnlockContext);
+        var iUpdatedCount = await dbConnection.executeUpdate(sStmt, sSessionId, iCalculationVersionId, sRequestedUnlockContext);
 
 
 
@@ -803,11 +803,11 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.emptyVariantMatrixTemporaryTables = iCalcVersionId => {
+    this.emptyVariantMatrixTemporaryTables = async iCalcVersionId => {
         const sStmtDeleteVariantTemp = `DELETE FROM "${ Tables.variant_temporary }" WHERE "CALCULATION_VERSION_ID" = ${ iCalcVersionId };`;
-        dbConnection.executeUpdate(sStmtDeleteVariantTemp);
+        await dbConnection.executeUpdate(sStmtDeleteVariantTemp);
         const sStmtDeleteItemsTemp = `DELETE FROM "${ Tables.variant_item_temporary }" WHERE "VARIANT_ID" NOT IN (SELECT VARIANT_ID FROM "${ Tables.variant_temporary }");`;
-        dbConnection.executeUpdate(sStmtDeleteItemsTemp);
+        await dbConnection.executeUpdate(sStmtDeleteItemsTemp);
     };
 
 
@@ -816,10 +816,10 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.unlockVariantMatrixVersionsForSession = function (sSessionId) {
+    this.unlockVariantMatrixVersionsForSession = async function (sSessionId) {
         const sStmt = `delete from "${ Tables.open_calculation_versions }" 
                             where SESSION_ID = ? and CONTEXT = '${ constants.CalculationVersionLockContext.VARIANT_MATRIX }' `;
-        dbConnection.executeUpdate(sStmt, sSessionId);
+        await dbConnection.executeUpdate(sStmt, sSessionId);
     };
 
 
@@ -828,10 +828,10 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.unlockVariantMatrixVersionsForSession = function (sSessionId) {
+    this.unlockVariantMatrixVersionsForSession = async function (sSessionId) {
         const sStmt = `delete from "${ Tables.open_calculation_versions }" 
                             where SESSION_ID = ? and CONTEXT = '${ constants.CalculationVersionLockContext.VARIANT_MATRIX }' `;
-        dbConnection.executeUpdate(sStmt, sSessionId);
+        await dbConnection.executeUpdate(sStmt, sSessionId);
     };
 
 
@@ -889,10 +889,10 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getLockingContext = function (iCalculationVersionId) {
+    this.getLockingContext = async function (iCalculationVersionId) {
         var sStmt = `select CONTEXT from "${ Tables.open_calculation_versions }" 
 				where CALCULATION_VERSION_ID = ? and IS_WRITEABLE = 1 LIMIT 1`;
-        var oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        var oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
 
         if (oResult.length === 1) {
             return oResult[0].CONTEXT;
@@ -924,7 +924,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.areFrozen = aCvIds => {
+    this.areFrozen = async aCvIds => {
         var sIdPlaceHolder = _.map(aCvIds, () => '?').join(', ');
 
         var sStmt = `
@@ -935,7 +935,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 		`;
 
         var aQueryParameters = [sStmt].concat(aCvIds, [constants.isFrozen]);
-        var oResult = dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
+        var oResult = await dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
 
         var aFrozenCvIds = _.map(oResult, oFrozenCv => oFrozenCv.CALCULATION_VERSION_ID);
         return aFrozenCvIds;
@@ -950,7 +950,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.isLifecycleVersion = function (iCalculationVersionId, bCheckTemporaryTable) {
+    this.isLifecycleVersion = async function (iCalculationVersionId, bCheckTemporaryTable) {
         bCheckTemporaryTable = bCheckTemporaryTable ? bCheckTemporaryTable : false;
         let sTable;
         if (bCheckTemporaryTable === true) {
@@ -962,7 +962,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         var iLifecycleVersionTypeId = 2;
         var sStmt = `select count(*) as rowcount from "${ sTable }" 
 						where CALCULATION_VERSION_ID = ? and CALCULATION_VERSION_TYPE = 2`;
-        var oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        var oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
 
         return parseInt(oResult[0].ROWCOUNT) === 1;
     };
@@ -976,7 +976,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.isManualLifecycleVersion = function (iCalculationVersionId, bCheckTemporaryTable) {
+    this.isManualLifecycleVersion = async function (iCalculationVersionId, bCheckTemporaryTable) {
         bCheckTemporaryTable = bCheckTemporaryTable ? bCheckTemporaryTable : false;
         let sTable;
         if (bCheckTemporaryTable === true) {
@@ -986,7 +986,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         }
         let sStmt = `select count(*) as rowcount from "${ sTable }" 
 						where CALCULATION_VERSION_ID = ? and CALCULATION_VERSION_TYPE = ?`;
-        let oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, constants.CalculationVersionType.ManualLifecycleVersion);
+        let oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, constants.CalculationVersionType.ManualLifecycleVersion);
 
         return parseInt(oResult[0].ROWCOUNT) === 1;
     };
@@ -1000,14 +1000,14 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getVersionType = (iCalculationVersionId, sSessionId) => {
+    this.getVersionType = async (iCalculationVersionId, sSessionId) => {
         let oResult = null;
         if (!helpers.isNullOrUndefined(sSessionId)) {
             let sStmt = `select calculation_version_type from "${ Tables.calculation_version_temporary }" where calculation_version_id = ? and session_id = ?;`;
-            oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, sSessionId);
+            oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, sSessionId);
         } else {
             let sStmt = `select calculation_version_type from "${ Tables.calculation_version }" where calculation_version_id = ?;`;
-            oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+            oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
         }
 
         return parseInt(oResult[0].CALCULATION_VERSION_TYPE);
@@ -1105,7 +1105,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getSavedCalculationResults = function (iCalculationVersionId) {
+    this.getSavedCalculationResults = async function (iCalculationVersionId) {
 
 
 
@@ -1119,7 +1119,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         });
 
 
-        var oResultCalculatedFields = dbConnection.executeQuery(`SELECT item.item_id, item.base_quantity_calculated as base_quantity, item.quantity_calculated as quantity, item.total_quantity, item.total_quantity_uom_id,
+        var oResultCalculatedFields = await dbConnection.executeQuery(`SELECT item.item_id, item.base_quantity_calculated as base_quantity, item.quantity_calculated as quantity, item.total_quantity, item.total_quantity_uom_id,
 				 item.price_unit_calculated as price_unit, item.target_cost_calculated as target_cost, item.lot_size_calculated as lot_size,
 		         item.price_fixed_portion_calculated as price_fixed_portion, item.price_variable_portion_calculated as price_variable_portion,
 				 item.price_for_total_quantity, item.price_for_total_quantity_fixed_portion, item.price_for_total_quantity_variable_portion,
@@ -1138,14 +1138,14 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 		         WHERE item.calculation_version_id = ?`, iCalculationVersionId);
 
 
-        var oResultCostingSheetValues = dbConnection.executeQuery(`SELECT item_id, costing_sheet_row_id, is_rolled_up_value, has_subitems, 
+        var oResultCostingSheetValues = await dbConnection.executeQuery(`SELECT item_id, costing_sheet_row_id, is_rolled_up_value, has_subitems, 
 						sum(cost_fixed_portion) as cost_fixed_portion, sum(cost_variable_portion) as cost_variable_portion,
 						sum(cost2_fixed_portion) as cost2_fixed_portion, sum(cost2_variable_portion) as cost2_variable_portion,
 						sum(cost3_fixed_portion) as cost3_fixed_portion, sum(cost3_variable_portion) as cost3_variable_portion
 		         FROM "${ Tables.item_calculated_values_costing_sheet }" WHERE calculation_version_id = ? GROUP BY item_id, costing_sheet_row_id, is_rolled_up_value, has_subitems`, iCalculationVersionId);
 
 
-        var oResultComponentSplitValues = dbConnection.executeQuery(`SELECT item_id, component_split_id, cost_component_id, 
+        var oResultComponentSplitValues = await dbConnection.executeQuery(`SELECT item_id, component_split_id, cost_component_id, 
 						sum(cost_fixed_portion) as cost_fixed_portion, sum(cost_variable_portion) as cost_variable_portion,
 						sum(cost2_fixed_portion) as cost2_fixed_portion, sum(cost2_variable_portion) as cost2_variable_portion,
 						sum(cost3_fixed_portion) as cost3_fixed_portion, sum(cost3_variable_portion) as cost3_variable_portion
@@ -1183,7 +1183,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 			from "${ Tables.calculation_version_temporary }"
 			where session_id = ? and calculation_version_id = ?;
 		`;
-        var oResult = dbConnection.executeQuery(sStmt, sSessionId, iCvId);
+        var oResult = await dbConnection.executeQuery(sStmt, sSessionId, iCvId);
         if (oResult.length !== 1) {
             const sLogMessage = `Reading updated fields for saved (or saved-as) calculation versions failed. Reason: Found ${ oResult.length } calculation versions with the given id opened in the current session.`;
             $.trace.error(sLogMessage);
@@ -1273,7 +1273,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         oMessageDetails.addCalculationVersionObjs({ id: iCalcVersionId });
 
 
-        var aOpenCalculation = dbConnection.executeQuery(`select session_id, calculation_version_id, is_writeable from "${ Tables.open_calculation_versions }" 
+        var aOpenCalculation = await dbConnection.executeQuery(`select session_id, calculation_version_id, is_writeable from "${ Tables.open_calculation_versions }" 
 			where session_id = ? and calculation_version_id = ? and context = ?`, sSessionId, iCalcVersionId, sLockContext);
         if (aOpenCalculation.length > 1) {
             const sClientMsg = 'Corrupted query or database state: found more than 1 open calculation version.';
@@ -1544,15 +1544,15 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.setFrozenFlag = function (iCalculationVersionId, sSessionId) {
+    this.setFrozenFlag = async function (iCalculationVersionId, sSessionId) {
         var sUpdateCalcVers = 'update "' + Tables.calculation_version + '" set IS_FROZEN = 1 where calculation_version_id = ?';
-        dbConnection.executeUpdate(sUpdateCalcVers, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateCalcVers, iCalculationVersionId);
 
         var sUpdateCalcVersTemp = 'update "' + Tables.calculation_version_temporary + '" set IS_FROZEN = 1 where session_id = ? and calculation_version_id = ?';
-        dbConnection.executeUpdate(sUpdateCalcVersTemp, sSessionId, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateCalcVersTemp, sSessionId, iCalculationVersionId);
 
         var sUpdateOpenCalcVers = 'update "' + Tables.open_calculation_versions + '" set IS_WRITEABLE = 0 where session_id = ? and calculation_version_id = ?';
-        dbConnection.executeUpdate(sUpdateOpenCalcVers, sSessionId, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateOpenCalcVers, sSessionId, iCalculationVersionId);
     };
 
 
@@ -1569,24 +1569,24 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.setFrozenFlags = function (iCalculationVersionId, sSessionId, aLifecycleVersionsIds) {
+    this.setFrozenFlags = async function (iCalculationVersionId, sSessionId, aLifecycleVersionsIds) {
         var sUpdateCalcVers = `update "${ Tables.calculation_version }" set IS_FROZEN = 1 where calculation_version_id = ?`;
-        dbConnection.executeUpdate(sUpdateCalcVers, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateCalcVers, iCalculationVersionId);
 
         var sUpdateCalcVersTemp = `update "${ Tables.calculation_version_temporary }" set IS_FROZEN = 1 where session_id = ? and calculation_version_id = ?`;
-        dbConnection.executeUpdate(sUpdateCalcVersTemp, sSessionId, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateCalcVersTemp, sSessionId, iCalculationVersionId);
 
         var sUpdateOpenCalcVers = `update "${ Tables.open_calculation_versions }" set IS_WRITEABLE = 0 where session_id = ? and calculation_version_id = ?`;
-        dbConnection.executeUpdate(sUpdateOpenCalcVers, sSessionId, iCalculationVersionId);
+        await dbConnection.executeUpdate(sUpdateOpenCalcVers, sSessionId, iCalculationVersionId);
 
         if (aLifecycleVersionsIds.length > 0) {
             var sUpdateLifecycleVers = `update "${ Tables.calculation_version }" set IS_FROZEN = 1 
 				where calculation_version_id in ( ${ _.map(aLifecycleVersionsIds, iId => ' ? ').join(',') } )`;
-            dbConnection.executeUpdate(sUpdateLifecycleVers, [aLifecycleVersionsIds]);
+            await dbConnection.executeUpdate(sUpdateLifecycleVers, [aLifecycleVersionsIds]);
 
             var sUpdateLifecycleVersTemp = `update "${ Tables.calculation_version_temporary }" set IS_FROZEN = 1 
 				where calculation_version_id in ( ${ _.map(aLifecycleVersionsIds, iId => ' ? ').join(',') } )`;
-            dbConnection.executeUpdate(sUpdateLifecycleVersTemp, [aLifecycleVersionsIds]);
+            await dbConnection.executeUpdate(sUpdateLifecycleVersTemp, [aLifecycleVersionsIds]);
         }
     };
 
@@ -1789,14 +1789,14 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.persistUpdatedColumns = (iCvId, sSessionId, mTriggerColumnsChanged) => {
+    this.persistUpdatedColumns = async (iCvId, sSessionId, mTriggerColumnsChanged) => {
         const aUpdatedColums = [...mTriggerColumnsChanged.keys()];
         const aValuesAfterUpdate = [...mTriggerColumnsChanged.values()];
         aValuesAfterUpdate.push(iCvId);
         aValuesAfterUpdate.push(sSessionId);
         const sUpdateStmt = `update  "${ Tables.calculation_version_temporary }"
 								set ${ aUpdatedColums.join(' = ?, ') } = ? where CALCULATION_VERSION_ID = ? and SESSION_ID = ?`;
-        dbConnection.executeUpdate(sUpdateStmt, [aValuesAfterUpdate]);
+        await dbConnection.executeUpdate(sUpdateStmt, [aValuesAfterUpdate]);
     };
 
 
@@ -1848,7 +1848,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         let sControllingAreaId = null;
 
         if (mParameters['calculation_version_id'] && mParameters['session_id']) {
-            let oResult = dbConnection.executeQuery(`
+            let oResult = await dbConnection.executeQuery(`
                     select  prj.controlling_area_id as controlling_area_id,
                             cvTemp.master_data_timestamp as master_data_timestamp
                     from "sap.plc.db::basis.t_project" as prj
@@ -1866,7 +1866,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
             sControllingAreaId = oResult[0] ? oResult[0].CONTROLLING_AREA_ID : '';
             dMasterdataTimestamp = oResult[0] ? oResult[0].MASTER_DATA_TIMESTAMP : new Date();
         } else if (mParameters['calculation_id']) {
-            let oResult = dbConnection.executeQuery(`
+            let oResult = await dbConnection.executeQuery(`
                 select controlling_area_id
                 from "sap.plc.db::basis.t_project" as project 
                     inner join "sap.plc.db::basis.t_calculation"  as calculation
@@ -1876,7 +1876,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
             sControllingAreaId = oResult[0] ? oResult[0].CONTROLLING_AREA_ID : '';
             dMasterdataTimestamp = new Date();
         } else if (mParameters['project_id']) {
-            let oResult = dbConnection.executeQuery(`
+            let oResult = await dbConnection.executeQuery(`
                     select controlling_area_id
                     from "sap.plc.db::basis.t_project" 
                     where   project_id = ? 
@@ -1937,9 +1937,9 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getStatusById = function (sStatusId) {
+    this.getStatusById = async function (sStatusId) {
         var sStmt = `SELECT * FROM "${ Tables.status }" WHERE STATUS_ID = ?`;
-        return dbConnection.executeQuery(sStmt, sStatusId)[0];
+        return await dbConnection.executeQuery(sStmt, sStatusId)[0];
     };
 
 
@@ -2104,7 +2104,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
                 return [parseInt(oCalcId)];
             });
             var sInsertStmt = `insert into "${ Tables.gtt_calculation_ids }" values(?)`;
-            dbConnection.executeUpdate(sInsertStmt, aCalculation);
+            await dbConnection.executeUpdate(sInsertStmt, aCalculation);
         }
 
         var result = calculationVersionGet(iTop, bRecentlyUsed, iId, bLoadMasterdata, sUserId, sLanguage, bCurrent, bReturnLifecycle, bGetOnlyLifecycles, bReturnOnlyRoot);
@@ -2373,9 +2373,9 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getLifecycleVersionsIds = function (iCalculationVersionId) {
+    this.getLifecycleVersionsIds = async function (iCalculationVersionId) {
         var sStmt = `select CALCULATION_VERSION_ID from "${ Tables.calculation_version }" where BASE_VERSION_ID = ?`;
-        var oResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        var oResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
 
         return _.map(oResult, 'CALCULATION_VERSION_ID');
     };
@@ -2435,7 +2435,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getLifecycleMasterVersionsForBaseVersion = function (iCalculationVersionId) {
+    this.getLifecycleMasterVersionsForBaseVersion = async function (iCalculationVersionId) {
         var sStmt = `	select  
 							item.calculation_version_id as referencing_version_id,
 							versions.calculation_version_id as lifecycle_version_id,
@@ -2458,7 +2458,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 								on referencing_versions.calculation_version_id = item_temp.calculation_version_id 
 						where versions.base_version_id = ?;
 					`;
-        var aOpenVersions = dbConnection.executeQuery(sStmt, iCalculationVersionId, iCalculationVersionId);
+        var aOpenVersions = await dbConnection.executeQuery(sStmt, iCalculationVersionId, iCalculationVersionId);
         return Array.slice(aOpenVersions);
     };
 
@@ -2467,21 +2467,21 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.updateCalculationVersionType = (iCalculationVersionId, iCalculationVersionType) => {
+    this.updateCalculationVersionType = async (iCalculationVersionId, iCalculationVersionType) => {
         const sStmt = ` UPDATE "${ Tables.calculation_version }"
 					SET CALCULATION_VERSION_TYPE = ?
 					WHERE CALCULATION_VERSION_ID = ?`;
-        return dbConnection.executeUpdate(sStmt, iCalculationVersionType, iCalculationVersionId);
+        return await dbConnection.executeUpdate(sStmt, iCalculationVersionType, iCalculationVersionId);
     };
 
 
 
 
 
-    this.getVersionRootItemId = iCalculationVersionId => {
+    this.getVersionRootItemId = async iCalculationVersionId => {
         const sStmt = ` SELECT ROOT_ITEM_ID FROM "${ Tables.calculation_version }"
 					WHERE CALCULATION_VERSION_ID = ?`;
-        return Array.from(dbConnection.executeQuery(sStmt, iCalculationVersionId));
+        return Array.from(await dbConnection.executeQuery(sStmt, iCalculationVersionId));
 
     };
 
@@ -2494,7 +2494,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.addCurrencyUnitsToCalculationResults = (iCalculationVersionId, oItemCalc, oPersistency, bCompressed) => {
+    this.addCurrencyUnitsToCalculationResults = async (iCalculationVersionId, oItemCalc, oPersistency, bCompressed) => {
         if (oPersistency.Metadata.getAllCustomFieldsNamesAsArray().length > 0) {
 
             const fnDetermination = dbConnection.loadProcedure(Procedures.item_custom_fields_currency_get);
@@ -2535,7 +2535,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 
 
 
-    this.getLifecyclePeriodDescription = iCalculationVersionId => {
+    this.getLifecyclePeriodDescription = async iCalculationVersionId => {
 
         let sGetStmt = `select 
 		case
@@ -2559,7 +2559,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
 		where calc_vers.CALCULATION_VERSION_ID = ${ iCalculationVersionId }
 		and calc_vers.CALCULATION_VERSION_TYPE in (${ constants.CalculationVersionType.Lifecycle }, ${ constants.CalculationVersionType.ManualLifecycleVersion });`;
 
-        let aResult = dbConnection.executeQuery(sGetStmt);
+        let aResult = await dbConnection.executeQuery(sGetStmt);
 
         if (aResult.length === 1) {
             return aResult[0].LIFECYCLE_PERIOD_FROM_DESCRIPTION;
@@ -2568,7 +2568,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         }
     };
 }
-CalculationVersion.prototype = await Object.create(CalculationVersion.prototype);
+CalculationVersion.prototype = Object.create(CalculationVersion.prototype);
 CalculationVersion.prototype.constructor = CalculationVersion;
 
 module.exports.CalculationVersion = CalculationVersion;

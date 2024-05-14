@@ -7,7 +7,7 @@ const Limits = $.require('../../util/masterdataResources').Limits;
 const Helper = $.require('../../db/persistency-helper').Helper;
 const Metadata = $.require('../persistency-metadata').Metadata;
 const Misc = $.require('../persistency-misc').Misc;
-const apiHelpers = $.import('xs.db.administration', 'api-helper');
+const apiHelpers = await $.import('xs.db.administration', 'api-helper');
 const UrlToSqlConverter = $.require('../../util/urlToSqlConverter').UrlToSqlConverter;
 
 const MessageLibrary = $.require('../../util/message');
@@ -20,7 +20,7 @@ const AdministrationObjType = MessageLibrary.AdministrationObjType;
 
 var sUserId = $.getPlcUsername();
 
-var Procedures = await Object.freeze({ account_group_read: 'sap.plc.db.administration.procedures::p_account_group_read' });
+var Procedures = Object.freeze({ account_group_read: 'sap.plc.db.administration.procedures::p_account_group_read' });
 
 async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
 
@@ -486,6 +486,6 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
     };
 }
 
-AccountGroup.prototype = await Object.create(AccountGroup.prototype);
+AccountGroup.prototype = Object.create(AccountGroup.prototype);
 AccountGroup.prototype.constructor = AccountGroup;
 export default {_,helpers,BusinessObjectTypes,Resources,BusinessObjectsEntities,Limits,Helper,Metadata,Misc,apiHelpers,UrlToSqlConverter,MessageLibrary,Operation,PlcException,Code,MessageDetails,ValidationInfoCode,AdministrationObjType,sUserId,Procedures,AccountGroup};

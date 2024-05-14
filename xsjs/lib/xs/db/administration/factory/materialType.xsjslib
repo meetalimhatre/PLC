@@ -1,12 +1,12 @@
 var _ = $.require('lodash');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function MaterialType(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    MaterialType.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    MaterialType.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
 
         var oFilters = [
@@ -25,7 +25,7 @@ function MaterialType(dbConnection, hQuery, sObjectName) {
         ];
 
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
             oReturnObject[BusinessObjectsEntities.MATERIAL_TYPE_ENTITIES] = Array.slice(result.OT_MATERIAL_TYPE);
             oReturnObject[BusinessObjectsEntities.MATERIAL_TYPE_TEXT_ENTITIES] = Array.slice(result.OT_MATERIAL_TYPE_TEXT);
         } else {
@@ -54,7 +54,7 @@ function MaterialType(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by MATERIAL_TYPE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.MATERIAL_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.MATERIAL_TYPE_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
 
         }
 
@@ -62,6 +62,6 @@ function MaterialType(dbConnection, hQuery, sObjectName) {
     };
 }
 
-MaterialType.prototype = await Object.create(MasterDataBaseObject.prototype);
+MaterialType.prototype = Object.create(MasterDataBaseObject.prototype);
 MaterialType.prototype.constructor = MaterialType;
 export default {_,BusinessObjectsEntities,MasterDataBaseObject,MaterialType};

@@ -11,7 +11,7 @@ const helpers = $.require('../../util/helpers');
  */
 
 async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
-    if (await helpers.isNullOrUndefined(oConnection)) {
+    if (helpers.isNullOrUndefined(oConnection)) {
         const oConnectionFactory = await new ($.require('../../db/connection/connection')).ConnectionFactory($);
         oConnection = await oConnectionFactory.getConnection();
     }
@@ -27,8 +27,8 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @param  {string} sTableName Name of the table
      * @return {array}    Returns an array to combine 3 different return values: 1. all columns, 2. all key columns, 3. all key columns without _VALID_FROM
      */
-    function getTableColumns(sTableName) {
-        const aColumns = Array.from(oConnection.executeQuery(`select column_name,
+    async function getTableColumns(sTableName) {
+        const aColumns = Array.from(await oConnection.executeQuery(`select column_name,
                 is_nullable,
                 index_type
          from "SYS"."TABLE_COLUMNS" as columns
@@ -51,7 +51,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @return {boolean}         True if the table exists, false otherwise.
      */
     function existsTable(sTableName) {
-        return oConnection.executeQuery(`
+        return await oConnection.executeQuery(`
             select count(*) as count
             from "SYS"."TABLES"
             where schema_name = CURRENT_SCHEMA and table_name = '${ sTableName }'
@@ -68,14 +68,14 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
     async function backupTable(sTableName) {
         const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = await getTableColumns(sTableName);
         const sBackupTableName = `${ sTableName }${ MasterdataOverlapFixer.BACKUP_SUFFIX }`;
-        if (await existsTable(sBackupTableName) === true) {
+        if (existsTable(sBackupTableName) === true) {
             $.trace.error(`Dropping table ${ sBackupTableName } because it already exists`);
-            oConnection.executeUpdate(`drop table "${ sBackupTableName }"`);
+            await oConnection.executeUpdate(`drop table "${ sBackupTableName }"`);
         }
 
         $.trace.error(`Creating backup table ${ sBackupTableName }...`);
         oOutputData[sTableName].backupTable = `"${ sBackupTableName }"`;
-        oConnection.executeUpdate(`
+        await oConnection.executeUpdate(`
             create column table "${ sBackupTableName }" as
                 (
                     select * 
@@ -171,7 +171,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
         `;
         const oTableOutputData = oOutputData[sTableName];
         oTableOutputData.updateStatement = sStmt;
-        oTableOutputData.numberOfFixedOverlaps = oConnection.executeUpdate(sStmt);
+        oTableOutputData.numberOfFixedOverlaps = await oConnection.executeUpdate(sStmt);
 
         $.trace.error(`Repair attempt completed: fixed ${ oTableOutputData.numberOfFixedOverlaps } overlaps`);
     }
@@ -256,7 +256,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @return {array}  String array of all mastedata table names. 
      */
     this.getMasterdataTables = () => {
-        return Array.from(oConnection.executeQuery(`select distinct columns.table_name 
+        return Array.from(await oConnection.executeQuery(`select distinct columns.table_name 
              from "SYS"."TABLE_COLUMNS" as columns 
              inner join "SYS"."TABLES"  as  tables
                  on  columns.schema_name =  tables.schema_name 
@@ -290,7 +290,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
                                    (a._valid_to > b._valid_from)
                                 or (a._valid_to is null)  
                         )`;
-        const aOverlaps = Array.from(oConnection.executeQuery(sStmt));
+        const aOverlaps = Array.from(await oConnection.executeQuery(sStmt));
         $.trace.error(`${ aOverlaps.length } overlaps retrieved`);
         return aOverlaps;
     };
@@ -343,7 +343,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
         }
     };
 }
-MasterdataOverlapFixer.prototype = await Object.create(MasterdataOverlapFixer.prototype);
+MasterdataOverlapFixer.prototype = Object.create(MasterdataOverlapFixer.prototype);
 MasterdataOverlapFixer.prototype.constructor = MasterdataOverlapFixer;
 MasterdataOverlapFixer.BACKUP_SUFFIX = '__backup';
 export default {helpers,MasterdataOverlapFixer};

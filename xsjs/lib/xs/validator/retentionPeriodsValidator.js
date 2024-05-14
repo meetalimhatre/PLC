@@ -116,7 +116,7 @@ async function RetentionPeriodsValidator($, utils) {
         }
     };
 }
-RetentionPeriodsValidator.prototype = await Object.create(RetentionPeriodsValidator.prototype);
+RetentionPeriodsValidator.prototype =  Object.create(RetentionPeriodsValidator.prototype);
 RetentionPeriodsValidator.prototype.constructor = RetentionPeriodsValidator;
 
 module.exports.RetentionPeriodsValidator = RetentionPeriodsValidator;

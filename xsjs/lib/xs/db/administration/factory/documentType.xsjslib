@@ -1,13 +1,13 @@
 var _ = $.require('lodash');
 var helpers = $.require('../../../util/helpers');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function DocumentType(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    DocumentType.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    DocumentType.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
         var oFilters = [
             [
@@ -24,7 +24,7 @@ function DocumentType(dbConnection, hQuery, sObjectName) {
             ]
         ];
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
 
             oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_ENTITIES] = Array.slice(result.OT_DOCUMENT_TYPE);
             oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_TEXT_ENTITIES] = Array.slice(result.OT_DOCUMENT_TYPE_TEXT);
@@ -54,7 +54,7 @@ function DocumentType(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by DOCUMENT_TYPE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
         }
         return oReturnObject;
     };
@@ -84,11 +84,11 @@ async function getDocumentTypeEntities(aDocumentTypeIds, masterdataTimestamp, oP
 						where plcTable._VALID_FROM <= '${ masterdataTimestamp }'
 							and ( plcTable._VALID_TO > '${ masterdataTimestamp }' or plcTable._VALID_TO is null)
                	        AND plcTable.DOCUMENT_TYPE_ID in ('${ aDocumentTypeIds }')`;
-        return _.values(dbConnection.executeQuery(stmt));
+        return _.values(await bConnection.executeQuery(stmt));
     }
     return [];
 }
 
-DocumentType.prototype = await Object.create(MasterDataBaseObject.prototype);
+DocumentType.prototype = Object.create(MasterDataBaseObject.prototype);
 DocumentType.prototype.constructor = DocumentType;
 export default {_,helpers,BusinessObjectsEntities,MasterDataBaseObject,DocumentType,getDocumentTypeEntities};

@@ -1,10 +1,10 @@
 const constants = $.require('../../util/constants');
 
-function check(oConnection) {
+async function check(oConnection) {
     return true;
 }
 
-function clean(oConnection) {
+async function clean(oConnection) {
     return true;
 }
 
@@ -18,7 +18,7 @@ async function run(oConnection) {
 
     try {
         // create CFs `_MANUAL` columns
-        oConnection.executeUpdate(`
+        await oConnection.executeUpdate(`
             INSERT INTO "${ sFieldMappingTable }" ("ID", "TABLE_NAME", "COLUMN_NAME", "IS_PK", "IS_MANDATORY", "IS_NULLABLE", "VALIDATION_REGEX", "FIELD_TYPE", "FIELD_ORDER", "IS_CUSTOM", "IS_UPPERCASE", "LENGTH", "SCALE", "PRECISION")
             SELECT  "${ sFieldMappingSequence }".NEXTVAL AS "ID",
                     CONCAT('t_', LOWER("BUSINESS_OBJECT")) AS "TABLE_NAME",
@@ -54,7 +54,7 @@ async function run(oConnection) {
          `);
 
         // create CFs `_UNIT` columns
-        oConnection.executeUpdate(`
+        await oConnection.executeUpdate(`
             INSERT INTO "${ sFieldMappingTable }" ("ID", "TABLE_NAME", "COLUMN_NAME", "IS_PK", "IS_MANDATORY", "IS_NULLABLE", "VALIDATION_REGEX", "FIELD_TYPE", "FIELD_ORDER", "IS_CUSTOM", "IS_UPPERCASE", "LENGTH", "SCALE", "PRECISION")
             SELECT  "${ sFieldMappingSequence }".NEXTVAL AS "ID",
                     CONCAT('t_', LOWER("BUSINESS_OBJECT")) AS "TABLE_NAME",
@@ -77,7 +77,7 @@ async function run(oConnection) {
          `);
 
     } catch (e) {
-        await console.log('error:', e.message);
+        console.log('error:', e.message);
         throw new Error(`Failed to add custom fields to firld mappings for replication tool: ${ e.message }`);
     }
 

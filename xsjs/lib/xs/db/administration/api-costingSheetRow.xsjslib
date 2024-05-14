@@ -8,7 +8,7 @@ var aSource = $.require('../../util/masterdataResources').Source;
 var Helper = $.require('../persistency-helper').Helper;
 var Metadata = $.require('../persistency-metadata').Metadata;
 var Misc = $.require('../persistency-misc').Misc;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
 var UrlToSqlConverter = $.require('../../util/urlToSqlConverter').UrlToSqlConverter;
 
 const MessageLibrary = $.require('../../util/message');
@@ -25,13 +25,13 @@ var sSessionId;
 var sUserId;
 sSessionId = sUserId = $.getPlcUsername();
 
-const Procedures = await Object.freeze({
+const Procedures = Object.freeze({
     costing_sheet_row_read: 'sap.plc.db.administration.procedures::p_costing_sheet_row_read',
     set_lock: 'sap.plc.db.administration.procedures::p_set_lock',
     checkFormula: 'sap.plc.db.administration.procedures::p_check_formulas_costing_sheet_overhead_row'
 });
 
-const Tables = await Object.freeze({
+const Tables = Object.freeze({
     costing_sheet_overhead_row_formula: 'sap.plc.db::basis.t_costing_sheet_overhead_row_formula',
     costing_sheet_overhead_row: 'sap.plc.db::basis.t_costing_sheet_overhead_row',
     costing_sheet: 'sap.plc.db::basis.t_costing_sheet',
@@ -40,7 +40,7 @@ const Tables = await Object.freeze({
     item_category: 'sap.plc.db::basis.t_item_category'
 });
 
-const Sequences = await Object.freeze({
+const Sequences = Object.freeze({
     costing_sheet_overhead: 'sap.plc.db.sequence::s_costing_sheet_overhead',
     costing_sheet_overhead_row: 'sap.plc.db.sequence::s_costing_sheet_overhead_row',
     costing_sheet_base: 'sap.plc.db.sequence::s_costing_sheet_base',
@@ -549,7 +549,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             try {
                 let oCostingSheetOverheadRowFormulaRecord;
 
-                if (await helpers.isNullOrUndefined(oRecord.FORMULA_ID) && await helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && await helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION) && await helpers.isNullOrUndefined(oRecord.OVERHEAD_CUSTOM)) {
+                if (helpers.isNullOrUndefined(oRecord.FORMULA_ID) && await helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && await helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION) && await helpers.isNullOrUndefined(oRecord.OVERHEAD_CUSTOM)) {
 
                     that.deleteCostingSheetOverheadRowFormula(oRecord);
 
@@ -573,7 +573,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
                         that.checkOverheadCustomField(oRecord);
                     }
 
-                    if (await helpers.isNullOrUndefined(oRecord.FORMULA_ID)) {
+                    if (helpers.isNullOrUndefined(oRecord.FORMULA_ID)) {
 
                         oRecord.FORMULA_ID = that.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row_formula);
                         oCostingSheetOverheadRowFormulaRecord.FORMULA_ID = oRecord.FORMULA_ID;
@@ -1123,7 +1123,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             return costingSheetRow.COSTING_SHEET_OVERHEAD_ID === oRecord.COSTING_SHEET_OVERHEAD_ID;
         });
 
-        const oCostingSheet = dbConnection.executeQuery(`select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_costing_sheet" where COSTING_SHEET_ID = '${ oCostingSheetRow.COSTING_SHEET_ID }' and (_VALID_TO is null or _VALID_TO > '${ sMasterDataDate }')`);
+        const oCostingSheet = await dbConnection.executeQuery(`select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_costing_sheet" where COSTING_SHEET_ID = '${ oCostingSheetRow.COSTING_SHEET_ID }' and (_VALID_TO is null or _VALID_TO > '${ sMasterDataDate }')`);
         oRecord.CONTROLLING_AREA_ID = oCostingSheet.length > 0 && !helpers.isNullOrUndefined(oCostingSheet[0].CONTROLLING_AREA_ID) ? oCostingSheet[0].CONTROLLING_AREA_ID : null;
         return oRecord;
     }
@@ -1209,7 +1209,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 					AND _VALID_FROM <= ?
 			`;
 
-            var aCostingSheetRowsResults = dbConnection.executeQuery(sStmt, sMasterDataDate, sMasterDataDate);
+            var aCostingSheetRowsResults = await dbConnection.executeQuery(sStmt, sMasterDataDate, sMasterDataDate);
 
             try {
                 await checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
@@ -1232,7 +1232,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 					AND _VALID_FROM <= ?
 			`;
 
-            var aCostingSheetRowDependencies = dbConnection.executeQuery(sStmtDependencies, sMasterDataDate, sMasterDataDate);
+            var aCostingSheetRowDependencies = await dbConnection.executeQuery(sStmtDependencies, sMasterDataDate, sMasterDataDate);
 
             var aUniqueRowsFromDependencies = new Set();
             aCostingSheetRowDependencies.forEach(oDependecy => {
@@ -1251,7 +1251,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 						AND _VALID_FROM <= ?
 				`;
 
-                var aCostingSheetRowsResults = dbConnection.executeQuery(sStmtRows, sMasterDataDate, sMasterDataDate);
+                var aCostingSheetRowsResults = await dbConnection.executeQuery(sStmtRows, sMasterDataDate, sMasterDataDate);
 
                 try {
                     await checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
@@ -1501,7 +1501,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         let aCustomFieldFormulas = [];
 
         aMetadataCustomFieldResult = this.metadata.getMetadataFields(sCostingSheetOverheadCustomField, sCostingSheetOverheadCustomField, oRecord.OVERHEAD_CUSTOM, true)[0];
-        if (await helpers.isNullOrUndefined(aMetadataCustomFieldResult)) {
+        if (helpers.isNullOrUndefined(aMetadataCustomFieldResult)) {
             const sClientMsg = 'Custom field entity not found!';
             const sServerMsg = `${ sClientMsg } Costing sheet overhead id id: ${ oRecord.COSTING_SHEET_OVERHEAD_ID }, OVERHEAD_CUSTOM id: ${ oRecord.OVERHEAD_CUSTOM }.`;
             $.trace.error(sServerMsg);
@@ -1552,7 +1552,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 			(FORMULA_ID, FORMULA_STRING, FORMULA_DESCRIPTION, OVERHEAD_CUSTOM )
 			VALUES (?, ?, ?, ? )`;
 
-        dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_ID, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM);
+        await dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_ID, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM);
     };
 
 
@@ -1567,7 +1567,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 			SET FORMULA_DESCRIPTION = ?, FORMULA_STRING = ?, OVERHEAD_CUSTOM = ?
 			WHERE FORMULA_ID = ? `;
 
-        dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM, oCostingSheetOverheadRowFormula.FORMULA_ID);
+        await dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM, oCostingSheetOverheadRowFormula.FORMULA_ID);
     };
 
 
@@ -1604,7 +1604,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 				_VALID_TO IS NULL AND
 				COSTING_SHEET_OVERHEAD_ID = ?)`;
 
-        dbConnection.executeUpdate(sStmt, iCostingSheetOverheadId);
+        await dbConnection.executeUpdate(sStmt, iCostingSheetOverheadId);
     };
 
 
@@ -1622,7 +1622,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 			 COSTING_SHEET_OVERHEAD_ROW_ID = ? AND
 			 COSTING_SHEET_OVERHEAD_ID = ?`;
 
-        return dbConnection.executeQuery(sCostingSheetOverheadRowStmt, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ROW_ID, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ID)[0].FORMULA_ID;
+        return await dbConnection.executeQuery(sCostingSheetOverheadRowStmt, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ROW_ID, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ID)[0].FORMULA_ID;
     };
 
 
@@ -1954,7 +1954,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
     this.getItemCategories = async function () {
         try {
             const sStmt = ` SELECT ITEM_CATEGORY_ID, CHILD_ITEM_CATEGORY_ID FROM "${ Tables.item_category }"`;
-            const oResult = await helpers.transposeResultArray(dbConnection.executeQuery(sStmt));
+            const oResult = await helpers.transposeResultArray(await dbConnection.executeQuery(sStmt));
             return _.zipObject(oResult.CHILD_ITEM_CATEGORY_ID, oResult.ITEM_CATEGORY_ID);
         } catch (e) {
             const sClientMsg = 'Error while getting item categories.';
@@ -1966,6 +1966,6 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 }
 
-CostingSheetRow.prototype = await Object.create(CostingSheetRow.prototype);
+CostingSheetRow.prototype = Object.create(CostingSheetRow.prototype);
 CostingSheetRow.prototype.constructor = CostingSheetRow;
 export default {_,helpers,BusinessObjectTypes,Resources,BusinessObjectsEntities,CostingSheetResources,aSource,Helper,Metadata,Misc,apiHelpers,UrlToSqlConverter,MessageLibrary,ValidationInfoCode,MessageOperation,PlcException,Code,MessageDetails,AdministrationObjType,FormulaInterpreterError,GenericSyntaxValidator,sSessionId,sUserId,Procedures,Tables,Sequences,CostingSheetRow};

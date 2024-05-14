@@ -4,7 +4,7 @@ const helpers = $.require('../util/helpers');
 const BusinessObjectTypes = $.require('../util/constants').BusinessObjectTypes;
 
 var GenericSyntaxValidator = $.require('./genericSyntaxValidator').GenericSyntaxValidator;
-const CalculationVersionValidator = $.import('xs.validator', 'calculationVersionValidator').CalculationVersionValidator;
+const CalculationVersionValidator = await $.import('xs.validator', 'calculationVersionValidator').CalculationVersionValidator;
 const ItemValidator = $.require('./itemValidator').ItemValidator;
 
 const MessageLibrary = $.require('../util/message');
@@ -176,7 +176,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
         }
 
         async function validateCopyVersionRequest() {
-            if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = "Parameter 'id' is missing.";
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);

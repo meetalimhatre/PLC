@@ -14,7 +14,7 @@ const Severity = MessageLibrary.Severity;
 const oValidItemCustFieldNameRegexp = /^CUST_[A-Z][A-Z0-9_]*$/;
 const aFrontendOnlyMetadata = ['PRICE_SPLIT_COMPONENTS'];
 
-var Procedures = await Object.freeze({ p_metadata_get_for_item: 'sap.plc.db.administration.procedures::p_metadata_get_for_item' });
+var Procedures = Object.freeze({ p_metadata_get_for_item: 'sap.plc.db.administration.procedures::p_metadata_get_for_item' });
 
 async function logError(msg) {
     await helpers.logError(msg);
@@ -66,7 +66,7 @@ function MetadataProvider() {
         }
 
         // if metadata are not returned, fall back to default handlings
-        if (await helpers.isNullOrUndefined(aMetadataFields)) {
+        if (helpers.isNullOrUndefined(aMetadataFields)) {
             sPath = sPath === undefined ? null : sPath;
             sBusinessObject = sBusinessObject === undefined ? null : sBusinessObject;
             sColumnId = sColumnId === undefined ? null : sColumnId;
@@ -135,7 +135,7 @@ function MetadataProvider() {
                 return oMetadaAttribute.COLUMN_ID === metadataObj.COLUMN_ID && oMetadaAttribute.PATH === metadataObj.PATH && oMetadaAttribute.BUSINESS_OBJECT === metadataObj.BUSINESS_OBJECT;
             });
             metadataObj.ATTRIBUTES = bPathStartsWithItem || await bVariantItemWithQuantity() ? await computeCompleteItemMetadataAttributes(aDbAttributes) : aDbAttributes;
-            if (await bVariantItemWithQuantity()) {
+            if (bVariantItemWithQuantity()) {
                 metadataObj.ATTRIBUTES.push(aDbAttributes[0]);
             }
 
@@ -467,7 +467,7 @@ function MetadataProvider() {
         });
 
         if (isBatchSuccess === true) {
-            if (await helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
+            if (helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
                 aResult.CREATE = aResultSetCreateSuccess;
                 aResult.UPDATE = aResultSetUpdateSucess;
                 aResult.DELETE = aResultSetDeleteSucess;
@@ -479,7 +479,7 @@ function MetadataProvider() {
         oResult.isBatchSuccess = isBatchSuccess;
         oResult.batchResults = aResult;
 
-        if (await helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
+        if (helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
 
             if (isBatchSuccess) {
                 try {
@@ -805,7 +805,7 @@ function MetadataProvider() {
         await checkIsUsedInCostingSheetFormula(oMeta, oPersistency);
         await checkIsUsedAsOverheadCustom(oMeta, oPersistency);
 
-        if (await helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
+        if (helpers.isNullOrUndefined(checkCanExecute) || checkCanExecute === false) {
             oPersistency.Metadata.remove(oMeta);
         }
         return oMeta;
@@ -896,7 +896,7 @@ function MetadataProvider() {
         return oFieldsWithRollup;
     };
 }
-MetadataProvider.prototype = await Object.create(MetadataProvider.prototype);
+MetadataProvider.prototype = Object.create(MetadataProvider.prototype);
 MetadataProvider.prototype.constructor = MetadataProvider;
 
 module.exports.MetadataProvider = MetadataProvider;

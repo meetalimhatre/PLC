@@ -155,7 +155,7 @@ async function checkQuantityStateValues(oPersistency, aVariantsItems, iCalculati
                 const oMessageDetails = new MessageDetails().addItemObjs({ id: oItem.ITEM_ID });
                 const sClientMsg = 'Quantity state value is not valid for category text or root for';
                 const sServerMsg = `${ sClientMsg } ITEM_ID: ${ oItem.ITEM_ID }.`;
-                await logError(sServerMsg);
+                 logError(sServerMsg);
                 throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientMsg, oMessageDetails);
             }
         } else {
@@ -164,7 +164,7 @@ async function checkQuantityStateValues(oPersistency, aVariantsItems, iCalculati
                 const oMessageDetails = new MessageDetails().addItemObjs({ id: oItem.ITEM_ID });
                 const sClientMsg = 'Quantity state value is not valid for';
                 const sServerMsg = `${ sClientMsg } ITEM_ID: ${ oItem.ITEM_ID }.`;
-                await logError(sServerMsg);
+                 logError(sServerMsg);
                 throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientMsg, oMessageDetails);
             }
         }

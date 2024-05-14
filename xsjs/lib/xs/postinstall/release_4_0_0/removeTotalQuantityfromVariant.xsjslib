@@ -27,7 +27,7 @@ async function check(oCurrentConnection) {
 
 async function run(oCurrentConnection) {
     let oConnection = await getConnection();
-    let aOldValues = oConnection.executeQuery(`select 
+    let aOldValues = await oConnection.executeQuery(`select 
                     variant.VARIANT_ID, variant.TOTAL_QUANTITY, variant.TOTAL_QUANTITY_UOM_ID, calculation_version.ROOT_ITEM_ID 
                     from "${ sXSCSchema }"."${ oTables.Variant }" as variant 
                     inner join 
@@ -51,7 +51,7 @@ async function run(oCurrentConnection) {
             return aItemValues;
         });
 
-        const output = oConnection.executeUpdate(sStmt, aValues);
+        const output = await oConnection.executeUpdate(sStmt, aValues);
         await oConnection.commit();
     }
 

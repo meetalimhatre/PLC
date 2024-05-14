@@ -1,6 +1,6 @@
 /* eslint no-var: 0, no-unused-vars: 0 */
-const Administration = $.import('xs.db', 'persistency-administration').Administration;
-const Procedures = await Object.freeze({ p_calculation_version_get_masterdata: 'sap.plc.db.calculationmanager.procedures::p_calculation_version_get_masterdata' });
+const Administration = await $.import('xs.db', 'persistency-administration').Administration;
+const Procedures = Object.freeze({ p_calculation_version_get_masterdata: 'sap.plc.db.calculationmanager.procedures::p_calculation_version_get_masterdata' });
 let administration;
 
 /**
@@ -28,6 +28,6 @@ async function Masterdata(dbConnection, hQuery) {
     };
 }
 
-Masterdata.prototype = await Object.create(Masterdata.prototype);
+Masterdata.prototype = Object.create(Masterdata.prototype);
 Masterdata.prototype.constructor = Masterdata;
 export default {Administration,Procedures,administration,Masterdata};

@@ -2,17 +2,17 @@
 //This script reads the register.xsjslib file and executes the scripts in the given order.
 //The execution status of each script in maitained in "SAP_PLC"."sap.plc.db::basis.t_installation_log" table
 //In case of failure of any script the execution stops and a log is written into the "SAP_PLC"."sap.plc.db::basis.t_installation_log" table
-const task = $.import('xs.postinstall.xslib', 'task');
+const task = await $.import('xs.postinstall.xslib', 'task');
 const oTask = $.require('../../db/persistency-task');
 const isCloud = $.require('../../../platform/platformSpecificImports.js').isCloud;
 
 const target = MTA_METADATA.version;
 var [version, version_sp, version_patch] = target.split('.').map(d => +d);
 
-var {aDatabaseSetup, aPreDatabaseSetUpUpgradeSteps, aPostDatabaseSetupUpgradeSteps, aOptionalUpgradeSteps, aPreDatabaseSetupInstallSteps, aPostDatabaseSetupInstallSteps, aOptionalInstallSteps, oRegisterDescription} = isCloud() ? $.import('xs.postinstall.xslib', 'register-cf') : $.import('xs.postinstall.xslib', 'register-xsa');
+var {aDatabaseSetup, aPreDatabaseSetUpUpgradeSteps, aPostDatabaseSetupUpgradeSteps, aOptionalUpgradeSteps, aPreDatabaseSetupInstallSteps, aPostDatabaseSetupInstallSteps, aOptionalInstallSteps, oRegisterDescription} = isCloud() ? await $.import('xs.postinstall.xslib', 'register-cf') : await $.import('xs.postinstall.xslib', 'register-xsa');
 
 function getConnectionUsername(oConnection) {
-    return oConnection.executeQuery('select current_user from DUMMY')[0].CURRENT_USER;
+    return await oConnection.executeQuery('select current_user from DUMMY')[0].CURRENT_USER;
 }
 
 function setRegister(name, register) {
@@ -32,8 +32,8 @@ async function overrideRegister(register, oConnection) {
 }
 
 
-const traceWrapper = $.import('xs.postinstall.xslib', 'traceWrapper');
-const trace = $.import('xs.postinstall.xslib', 'trace');
+const traceWrapper = await $.import('xs.postinstall.xslib', 'traceWrapper');
+const trace = await $.import('xs.postinstall.xslib', 'trace');
 const whoAmI = 'xs.postinstall.xslib.driver';
 const lockError = 'Lock for current schema cannot be obtained';
 
@@ -53,24 +53,24 @@ async function rollback(oConnection) {
     await oConnection.rollback();
 }
 
-function createSessionID(oConnection) {
-    return oConnection.executeQuery('SELECT TO_VARCHAR(SYSUUID) as SESSIONID FROM DUMMY')[0].SESSIONID;
+async function createSessionID(oConnection) {
+    return await oConnection.executeQuery('SELECT TO_VARCHAR(SYSUUID) as SESSIONID FROM DUMMY')[0].SESSIONID;
 }
 
-function getCurrentTimestamp(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_TIMESTAMP FROM DUMMY')[0].CURRENT_TIMESTAMP;
+async function getCurrentTimestamp(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_TIMESTAMP FROM DUMMY')[0].CURRENT_TIMESTAMP;
 }
 
-function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState, oConnection) {
+async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState, oConnection) {
     var sLogStatement = 'insert into "sap.plc.db::basis.t_installation_log" (version, version_sp, version_patch, name, time, executed_by, step, state)' + '    values (?, ?, ?, ?, current_utctimestamp, ?, ?, ?)';
-    oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, $.getPlcUsername(), sStep, sState);
+    await oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, $.getPlcUsername(), sStep, sState);
 }
 
 async function readBaseRelease(oConnection) {
     // determine last successfully upgraded path or default to 0.0.0
     const sBaseReleaseQuery = 'select top 1' + '    VERSION       as "version",' + '    VERSION_SP    as "version_sp",' + '    VERSION_PATCH as "version_patch"' + 'from "sap.plc.db::basis.t_installation_log"' + "where name like '%xs.postinstall.release_independent.99_setup_completed' and state = 'finished'" + 'order by "version" desc, "version_sp" desc, "version_patch" desc';
 
-    const aResult = oConnection.executeQuery(sBaseReleaseQuery);
+    const aResult = await oConnection.executeQuery(sBaseReleaseQuery);
     var oResult;
     if (aResult.length) {
         oResult = {
@@ -101,7 +101,7 @@ async function readLastAction(oConnection) {
         ORDER BY 
             VERSION DESC, VERSION_SP DESC, VERSION_PATCH DESC, TIME DESC`;
 
-    const aResult = oConnection.executeQuery(sLastActionQuery);
+    const aResult = await oConnection.executeQuery(sLastActionQuery);
     var oResult;
     if (aResult.length) {
         oResult = {
@@ -117,7 +117,7 @@ async function readLastAction(oConnection) {
 
 
 
-function setResponse(response, status, contentType, body) {
+async function setResponse(response, status, contentType, body) {
     response.status = status;
     response.contentType = contentType;
     response.setBody(body);
@@ -162,7 +162,7 @@ async function wrap(request, response, sMethod, bRunInBackground, oConnection) {
 
 }
 
-function driver(request, response) {
+async function driver(request, response) {
     processRequest(request, response);
 }
 
@@ -216,7 +216,7 @@ async function runBackgroundTask(response, register, oFollowUp, sMethod, bTrace,
 
 }
 
-function processParameters(request) {
+async function processParameters(request) {
     const params = request.parameters;
     const oParam = {};
     for (let i = 0; i < params.length; i++) {
@@ -234,7 +234,7 @@ async function isFreshInstallation(request) {
     return oParam.mode === 'freshInstallation';
 }
 
-function getFreshInstallationRegister() {
+async function getFreshInstallationRegister() {
     return [
         ...aPreDatabaseSetupInstallSteps,
         ...aDatabaseSetup,
@@ -261,8 +261,8 @@ async function getCurrentStep(aRegister, oConnection) {
     return aRegister.map(oRigister => oRigister.library_full_name).indexOf(sErrorStepName) + 1;
 }
 
-function getLatestErrorStep(oConnection) {
-    const oRes = oConnection.executeQuery(`
+async function getLatestErrorStep(oConnection) {
+    const oRes = await oConnection.executeQuery(`
         select top 1 * 
             from "sap.plc.db::basis.t_installation_log"
             where step != 'clean' and state = 'error'
@@ -300,7 +300,7 @@ async function getMappedRegister(bIsFreshInstallation, oConnection) {
     return bIsFreshInstallation ? await getFreshInstallationRegister(oConnection) : await getUpgradeRegisters(oConnection);
 }
 
-function mapUpgradeRegister(steps) {
+async function mapUpgradeRegister(steps) {
     if (steps.length === 0) {
         return steps;
     }
@@ -356,7 +356,7 @@ async function getOptionalRegister(aOptionID, bIsFreshInstallation) {
 }
 
 
-function getMappedOptionalRegister(steps, aOptionID) {
+async function getMappedOptionalRegister(steps, aOptionID) {
     if (aOptionID === undefined) {
         return steps.reduce((prev, next) => {
             return [

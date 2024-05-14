@@ -17,7 +17,7 @@ const FollowUp = Constants.FollowUp;
 module.exports.Metadata = function($) {
 
 let oConnectionFactory = new (require("../db/connection/connection")).ConnectionFactory($);
-let lPersistency = $.import("xs.db", "persistency").Persistency;
+let lPersistency = await $.import("xs.db", "persistency").Persistency;
 let localPersistency = new lPersistency(oConnectionFactory.getConnection());
 
 var metadataProvider = new Provider();

@@ -1,10 +1,10 @@
 const constants = $.require('../../util/constants');
 
-function check(oConnection) {
+async function check(oConnection) {
     return true;
 }
 
-function clean(oConnection) {
+async function clean(oConnection) {
     return true;
 }
 
@@ -16,7 +16,7 @@ async function run(oConnection) {
 
     try {
         // create CFs `_MANUAL` columns
-        var aCustomFieldsNotDecimal = oConnection.executeQuery(`
+        var aCustomFieldsNotDecimal = await oConnection.executeQuery(`
             SELECT  UPPER(COLUMN_ID) as COLUMN_ID
             FROM "${ sMetadataTable }" WHERE "IS_CUSTOM" = 1 AND "UOM_CURRENCY_FLAG" = 0 
                     AND "PATH" IN (${ sCustomFieldMasterdataBusinessObjects })
@@ -27,13 +27,13 @@ async function run(oConnection) {
         var aCustomUnitFieldsNotDecimal = aCustomFieldsNotDecimal.map(customField => "'" + customField['COLUMN_ID'] + "_UNIT'");
 
         // create CFs `_UNIT` columns
-        oConnection.executeUpdate(`
+        await oConnection.executeUpdate(`
             DELETE FROM "${ sFieldMappingTable }"
             WHERE UPPER(COLUMN_NAME) IN (${ aCustomUnitFieldsNotDecimal.join(',') });
          `);
 
     } catch (e) {
-        await console.log('error:', e.message);
+        console.log('error:', e.message);
         throw new Error(`Failed to remove unit fields where parent custom fields are not decimals: ${ e.message }`);
     }
 

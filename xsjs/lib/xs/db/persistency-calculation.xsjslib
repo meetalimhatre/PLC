@@ -9,7 +9,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     calculation: 'sap.plc.db::basis.t_calculation',
     calculation_version: 'sap.plc.db::basis.t_calculation_version',
     status: 'sap.plc.db::basis.t_status',
@@ -23,19 +23,19 @@ var Tables = await Object.freeze({
     lifecycle_period_value: 'sap.plc.db::basis.t_project_lifecycle_period_quantity_value'
 });
 
-const Views = await Object.freeze({ calculation_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_read' });
+const Views = Object.freeze({ calculation_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_read' });
 
-const Procedures = await Object.freeze({
+const Procedures = Object.freeze({
     calculation_create_as_copy: 'sap.plc.db.calculationmanager.procedures::p_calculation_create_as_copy',
     calculation_delete: 'sap.plc.db.calculationmanager.procedures::p_calculation_delete'
 });
 
-const Sequences = await Object.freeze({
+const Sequences = Object.freeze({
     calculation: 'sap.plc.db.sequence::s_calculation',
     calculation_version: 'sap.plc.db.sequence::s_calculation_version'
 });
 
-const DefaultValues = await Object.freeze({
+const DefaultValues = Object.freeze({
     newEntityIsDirty: 1,
     newEntityLock: 1
 });
@@ -65,7 +65,7 @@ async function Calculation(dbConnection, hQuery) {
             get: () => {
                 return (() => {
                     if (undefined === this._project) {
-                        var Project = $.import('xs.db', 'persistency-project').Project;
+                        var Project = await $.import('xs.db', 'persistency-project').Project;
                         this._project = await new Project(dbConnection, hQuery);
                     }
                     return this._project;
@@ -113,7 +113,7 @@ async function Calculation(dbConnection, hQuery) {
 	 * @returns {object} output - An object that contains all found calculations
 	 */
     this.get = async function (aProjects, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations) {
-        if (await helpers.isNullOrUndefined(itopPerProject)) {
+        if (helpers.isNullOrUndefined(itopPerProject)) {
             itopPerProject = constants.parameterCalculationTopValues.defaultTopPerProject;
         } else if (itopPerProject > constants.parameterCalculationTopValues.maximumTopPerProject) {
             itopPerProject = constants.parameterCalculationTopValues.maximumTopPerProject;
@@ -209,7 +209,7 @@ async function Calculation(dbConnection, hQuery) {
 	 * @returns {object} output - An object that contains all found calculations
 	 */
     this.getSaved = async function (aProjects, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations) {
-        if (await helpers.isNullOrUndefined(itopPerProject)) {
+        if (helpers.isNullOrUndefined(itopPerProject)) {
             itopPerProject = 100;
         }
 
@@ -517,7 +517,7 @@ async function Calculation(dbConnection, hQuery) {
 					on open_versions.calculation_version_id = versions_temporary.calculation_version_id
 			where versions.calculation_id = ? or versions_temporary.calculation_id = ?;
 		`;
-        const oResult = dbConnection.executeQuery(sStmt, iCalculationId, iCalculationId);
+        const oResult = await dbConnection.executeQuery(sStmt, iCalculationId, iCalculationId);
         return Array.from(oResult);
     };
 
@@ -609,7 +609,7 @@ async function Calculation(dbConnection, hQuery) {
     };
 
     this.IsCalculationVersionInCalculation = (iCalcVersionId, iCalcId) => {
-        const rsCalculationVersion = dbConnection.executeQuery(`select CALCULATION_VERSION_ID from "${ Tables.calculation_version }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId } union
+        const rsCalculationVersion = await dbConnection.executeQuery(`select CALCULATION_VERSION_ID from "${ Tables.calculation_version }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId } union
 		                                  select CALCULATION_VERSION_ID from "${ Tables.calculation_version_temporary }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId }`);
         return !helpers.isNullOrUndefined(rsCalculationVersion.length) && rsCalculationVersion.length >= 1 ? true : false;
     };
@@ -666,7 +666,7 @@ async function Calculation(dbConnection, hQuery) {
 			where
 				calculation_version_id = ?`;
 
-        var oResultCalculationName = dbConnection.executeQuery(sStmtGetCalculationName, iCalculationVersionId);
+        var oResultCalculationName = await dbConnection.executeQuery(sStmtGetCalculationName, iCalculationVersionId);
         var sNewCalculationName = this.getUniqueNameForCalculation(oResultCalculationName[0].CALCULATION_NAME, iNewCalcID);
 
         if (sNewCalculationName.length > constants.CalculationNameMaxLength) {
@@ -802,6 +802,6 @@ async function Calculation(dbConnection, hQuery) {
     };
 }
 
-Calculation.prototype = await Object.create(Calculation.prototype);
+Calculation.prototype = Object.create(Calculation.prototype);
 Calculation.prototype.constructor = Calculation;
 export default {_,Helper,Misc,helpers,constants,MessageLibrary,PlcException,Code,MessageDetails,Tables,Views,Procedures,Sequences,DefaultValues,Calculation};

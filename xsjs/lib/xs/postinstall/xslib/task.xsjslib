@@ -1,6 +1,6 @@
 //this file create background task to execute register library
 const HQuery = $.require('../../xslib/hQuery').HQuery;
-const installTrace = $.import('xs.postinstall.xslib', 'trace');
+const installTrace = await $.import('xs.postinstall.xslib', 'trace');
 const pTask = $.require('../../db/persistency-task');
 const whoAmI = 'xs.postinstall.xslib.task';
 const _ = $.require('lodash');
@@ -48,17 +48,17 @@ function getTask() {
     return taskObj;
 }
 
-function resetData() {
+async function resetData() {
     taskObj = null;
     currentLibCount = 0;
 }
 
-function getConnectionUsername(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_USER FROM DUMMY')[0].CURRENT_USER;
+async function getConnectionUsername(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_USER FROM DUMMY')[0].CURRENT_USER;
 }
 
-function getCurrentTimestamp(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_TIMESTAMP FROM DUMMY')[0].CURRENT_TIMESTAMP;
+async function getCurrentTimestamp(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_TIMESTAMP FROM DUMMY')[0].CURRENT_TIMESTAMP;
 }
 
 async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState) {
@@ -68,7 +68,7 @@ async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState) {
     try {
         oConnection = await getConnection(sTenantID);
         var sLogStatement = `insert into "sap.plc.db::basis.t_installation_log" (version, version_sp, version_patch, name, time, executed_by, step, state) values (?, ?, ?, ?, current_utctimestamp, ?, ?, ?)`;
-        oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, sNameTechnicalUser, sStep, sState);
+        await oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, sNameTechnicalUser, sStep, sState);
         await commit();
     } catch (e) {
         await error('insert data to t_installation_log table failed, can"t log post-install data to database');
@@ -80,7 +80,7 @@ async function getConnection(sTenantid) {
     return await $.import(sPlatformConnection.substr(0, sPlatformConnection.lastIndexOf('.')), sPlatformConnection.substr(sPlatformConnection.lastIndexOf('.') + 1)).getConnection(null, sTenantid);
 }
 
-function lockLog(sUserId) {
+async function lockLog(sUserId) {
     try {
         oMisc.lockTableTLockExclusive();
         oMisc.setLock(sBusinessObjectTypes.Customfieldsformula, sUserId);
@@ -89,7 +89,7 @@ function lockLog(sUserId) {
     }
 }
 
-function deleteLogEntry(sUserId) {
+async function deleteLogEntry(sUserId) {
     if (sUserId) {
         oMisc.releaseLock(sUserId);
     }
@@ -103,7 +103,7 @@ async function updateTaskStatus(oTask, oConnection) {
     await oConnection.close();
 }
 
-function padLeft(sString) {
+async function padLeft(sString) {
     return (sString + '     ').slice(0, 16);
 }
 
@@ -189,7 +189,7 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
  * @param {Date} Date format timestamp
  * @returns {Object} return string format timestamp
  */
-function convertDateToString(oDate) {
+async function convertDateToString(oDate) {
     if (oDate && typeof oDate !== 'string') {
         return oDate.toJSON();
     }
@@ -198,7 +198,7 @@ function convertDateToString(oDate) {
 
 
 async function resetLockTable(oConnection, sUserId) {
-    var sSchema = oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    var sSchema = await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
     oHQuerySecondary = new HQuery(oConnection).setSchema(sSchema);
     oMisc = await new Misc($, oHQuerySecondary, sUserId, oConnection);
 }
@@ -268,7 +268,7 @@ async function runBackgroundTask(args) {
     try {
         args.filterLibs.forEach(function (lib) {
             release.push({
-                library: $.import(lib.library_package, lib.library_name),
+                library: await $.import(lib.library_package, lib.library_name),
                 library_full_name: lib.library_full_name,
                 version: lib.version,
                 version_sp: lib.version_sp,
@@ -304,7 +304,7 @@ async function taskInfo(request) {
 async function getTaskInfo(request) {
     const oParam = await processParameters(request);
     const odbConnection = await getConnection(request.parameters.get('tenantid'));
-    const oRes = odbConnection.executeQuery(`
+    const oRes = await odbConnection.executeQuery(`
         select * 
         from "sap.plc.db::basis.t_task"
         where TASK_ID=${ oParam.id }
@@ -325,7 +325,7 @@ async function getTaskInfo(request) {
     };
 }
 
-function processParameters(request) {
+async function processParameters(request) {
     const params = request.parameters;
     const oParam = {};
     for (let i = 0; i < params.length; i++) {

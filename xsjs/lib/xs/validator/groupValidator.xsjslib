@@ -232,6 +232,6 @@ async function GroupValidator(oPersistency, oMetadataProvider, utils) {
     };
 }
 
-GroupValidator.prototype = await Object.create(GroupValidator.prototype);
+GroupValidator.prototype = Object.create(GroupValidator.prototype);
 GroupValidator.prototype.constructor = GroupValidator;
 export default {_,MessageLibrary,AuthObjectTypes,PlcException,Code,validationCode,GenericSyntaxValidator,GroupValidator};

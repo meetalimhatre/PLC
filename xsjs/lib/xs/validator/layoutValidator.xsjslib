@@ -6,7 +6,7 @@ const constants = $.require('../util/constants');
 const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 
-var Tables = await Object.freeze({ costing_sheet_row: 'sap.plc.db::basis.t_costing_sheet_row' });
+var Tables = Object.freeze({ costing_sheet_row: 'sap.plc.db::basis.t_costing_sheet_row' });
 
 /**
  * This class constructs BusinessObjectValidator instances for the  business object type. It
@@ -118,7 +118,7 @@ function LayoutValidator(oPersistency, utils) {
                             }
                             utils.checkInvalidProperties(oLayoutColumn, validProps);
                             //add object only if it is not already the array, same path, business_object, column_id can appear multiple times in the layout_columns
-                            if (await helpers.isNullOrUndefined(_.find(aColumnsMetadataFields, _.omit(oLayoutColumn, 'DISPLAY_ORDER')))) {
+                            if (helpers.isNullOrUndefined(_.find(aColumnsMetadataFields, _.omit(oLayoutColumn, 'DISPLAY_ORDER')))) {
                                 aColumnsMetadataFields.push(oLayoutColumn);
                             }
                         } else if (!helpers.isNullOrUndefined(oLayoutColumn.COSTING_SHEET_ROW_ID)) {
@@ -143,7 +143,7 @@ function LayoutValidator(oPersistency, utils) {
                                 'COLUMN_WIDTH',
                                 'COST_COMPONENT_ID'
                             ]);
-                        } else if (await helpers.isNullOrUndefined(oLayoutColumn.COLUMN_ID)) {
+                        } else if (helpers.isNullOrUndefined(oLayoutColumn.COLUMN_ID)) {
 
                             await utils.checkMandatoryProperties(oLayoutColumn, ['DISPLAY_ORDER']);
                             utils.checkInvalidProperties(oLayoutColumn, [
@@ -235,6 +235,6 @@ function LayoutValidator(oPersistency, utils) {
     };
 }
 
-LayoutValidator.prototype = await Object.create(LayoutValidator.prototype);
+LayoutValidator.prototype = Object.create(LayoutValidator.prototype);
 LayoutValidator.prototype.constructor = LayoutValidator;
 export default {_,helpers,Constants,MessageLibrary,constants,PlcException,Code,Tables,LayoutValidator};

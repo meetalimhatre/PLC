@@ -4,20 +4,20 @@ function check(oConnection) {
     return true;
 }
 
-function getCurrentSchemaName(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+async function getCurrentSchemaName(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
-function addCustomAnalyticsSetting(oConnection, sCurrentSchema, sFrontendSettingsTable) {
+async function addCustomAnalyticsSetting(oConnection, sCurrentSchema, sFrontendSettingsTable) {
 
     const sStmt = `select * from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"
                     where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME= 'CustomAnalysisForOfficeAnalyticViews'`;
-    if (oConnection.executeQuery(sStmt).length === 0) {
-        oConnection.executeUpdate(`insert into "${ sCurrentSchema }"."${ sFrontendSettingsTable }"(SETTING_ID, SETTING_NAME, SETTING_TYPE, SETTING_CONTENT) VALUES("sap.plc.db.sequence::s_frontend_settings".nextval, 'CustomAnalysisForOfficeAnalyticViews', 'ANALYTICSINTEGRATION','{"DynamicRibbonEntries":[]}')`);
+    if (await oConnection.executeQuery(sStmt).length === 0) {
+        await oConnection.executeUpdate(`insert into "${ sCurrentSchema }"."${ sFrontendSettingsTable }"(SETTING_ID, SETTING_NAME, SETTING_TYPE, SETTING_CONTENT) VALUES("sap.plc.db.sequence::s_frontend_settings".nextval, 'CustomAnalysisForOfficeAnalyticViews', 'ANALYTICSINTEGRATION','{"DynamicRibbonEntries":[]}')`);
     }
 }
 
-function mergeAnalyticsConfiguration(aAnalyticsFrontendSettings, oDefaultCustomSettings) {
+async function mergeAnalyticsConfiguration(aAnalyticsFrontendSettings, oDefaultCustomSettings) {
     const oCustomerSettings = JSON.parse(oDefaultCustomSettings.SETTING_CONTENT);
     let aDynamicRibbonEntries = oCustomerSettings.DynamicRibbonEntries;
     aAnalyticsFrontendSettings.forEach(oAnalyticsConfig => {
@@ -35,17 +35,17 @@ async function run(oConnection) {
     //check if custom analytics setting exists and if not, create it
     await addCustomAnalyticsSetting(oConnection, sCurrentSchema, sFrontendSettingsTable);
 
-    const aAnalyticsFrontendSettings = Array.from(oConnection.executeQuery(`select *
+    const aAnalyticsFrontendSettings = Array.from(await oConnection.executeQuery(`select *
                                                         from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"
                                                         where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME not in ('AnalysisForOfficeAnalyticViews', 'CustomAnalysisForOfficeAnalyticViews') order by SETTING_ID`));
-    const aCustomSettingContent = oConnection.executeQuery(`select *
+    const aCustomSettingContent = await oConnection.executeQuery(`select *
                                                             from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"
                                                             where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME= 'CustomAnalysisForOfficeAnalyticViews'`);
 
     if (aAnalyticsFrontendSettings.length > 0) {
         await mergeAnalyticsConfiguration(aAnalyticsFrontendSettings, aCustomSettingContent[0]);
-        oConnection.executeUpdate(`delete from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"  where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME not in ('CustomAnalysisForOfficeAnalyticViews', 'AnalysisForOfficeAnalyticViews')`);
-        oConnection.executeUpdate(`update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = '${ aCustomSettingContent[0].SETTING_CONTENT }' where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME= 'CustomAnalysisForOfficeAnalyticViews'`);
+        await oConnection.executeUpdate(`delete from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"  where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME not in ('CustomAnalysisForOfficeAnalyticViews', 'AnalysisForOfficeAnalyticViews')`);
+        await oConnection.executeUpdate(`update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = '${ aCustomSettingContent[0].SETTING_CONTENT }' where SETTING_TYPE = 'ANALYTICSINTEGRATION' and SETTING_NAME= 'CustomAnalysisForOfficeAnalyticViews'`);
         await oConnection.commit();
     }
     return true;

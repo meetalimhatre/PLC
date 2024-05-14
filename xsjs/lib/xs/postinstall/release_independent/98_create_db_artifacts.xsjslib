@@ -2,11 +2,11 @@
 This is a mandatory step in every version as it creates DB Artifacts and updates the database with latest version.
  */
 
-var pers = $.import('xs.db', 'persistency');
+var pers = await $.import('xs.db', 'persistency');
 
 var runOnFreshInstallation = true;
 
-function check(oConnection) {
+async function check(oConnection) {
     return true;
 }
 
@@ -28,7 +28,7 @@ async function run(oConnection) {
     return true;
 }
 
-function clean(oConnection) {
+async function clean(oConnection) {
     return true;
 }
 export default {pers,runOnFreshInstallation,check,run,clean};

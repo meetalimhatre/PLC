@@ -43,7 +43,7 @@ module.exports.InitSession = async function ($) {
         var aLanguages = ApplicationDataService.getLanguages(sLanguage, oPersistency);
 
         var oLanguage = _.find(aLanguages, { LANGUAGE: sLanguage });
-        if (await helpers.isNullOrUndefined(oLanguage)) {
+        if (helpers.isNullOrUndefined(oLanguage)) {
             const sLogMessage = `Language parameter is not supported: ${ sLanguage }.`;
             $.trace.error(sLogMessage);
             throw new PlcException(Code.LOGON_LANGUAGE_NOT_SUPPORTED_ERROR, sLogMessage);

@@ -11,7 +11,7 @@ const PlcException = MessageLibrary.PlcException;
 const Message = MessageLibrary.Message;
 const Code = MessageLibrary.Code;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     calculation: 'sap.plc.db::basis.t_calculation',
     calculation_version: 'sap.plc.db::basis.t_calculation_version',
     project: 'sap.plc.db::basis.t_project',
@@ -19,7 +19,7 @@ var Tables = await Object.freeze({
     item: 'sap.plc.db::basis.t_item'
 });
 
-const Views = await Object.freeze({
+const Views = Object.freeze({
     calculation_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_read',
     calculation_version_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_version_read',
     project_with_privileges: 'sap.plc.db.authorization::privileges.v_project_read',
@@ -60,7 +60,7 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
         sSortedDirection = !helpers.isNullOrUndefined(sSortedDirection) ? await getSortedDirection(sSortedDirection) : GlobalSearchDefaultValues.SortedDirection;
         sFilter = await getFilter(sFilter);
 
-        if (await helpers.isNullOrUndefinedOrEmpty(sFilter)) {
+        if (helpers.isNullOrUndefinedOrEmpty(sFilter)) {
             return [];
         }
 
@@ -169,7 +169,7 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
 	 * @returns {string} prepared string for contains function
 	 */
     async function getFilter(sFilter) {
-        if (await helpers.isNullOrUndefined(sFilter)) {
+        if (helpers.isNullOrUndefined(sFilter)) {
             return '';
         }
 
@@ -249,6 +249,6 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
     }
 }
 
-GlobalSearch.prototype = await Object.create(GlobalSearch.prototype);
+GlobalSearch.prototype = Object.create(GlobalSearch.prototype);
 GlobalSearch.prototype.constructor = GlobalSearch;
 export default {Helper,_,helpers,GlobalSearchDefaultValues,GlobalSearchTypeValues,GlobalSearchDirection,MessageLibrary,PlcException,Message,Code,Tables,Views,GlobalSearch};

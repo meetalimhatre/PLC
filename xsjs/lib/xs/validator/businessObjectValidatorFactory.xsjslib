@@ -15,7 +15,7 @@ let importValidator = function (libfilename, objectname) {
                     if (libfilename.endsWith('.js')) {
                         this[_objectname] = $.require('./' + libfilename)[objectname];
                     } else {
-                        this[_objectname] = $.import('xs.validator', libfilename)[objectname];
+                        this[_objectname] = await $.import('xs.validator', libfilename)[objectname];
                     }
                 }
                 return this[_objectname];
@@ -57,7 +57,7 @@ importValidator('variantGeneratorValidator', 'VariantGeneratorValidator');
 /**
  * Static factory object that provides a function to create a BusinessObjectValidator based on a given sObjectType
  */
-var BusinessObjectValidatorFactory = await Object.freeze({
+var BusinessObjectValidatorFactory = Object.freeze({
     async createBusinessObjectValidator(sObjectType, oPersistency, sSessionId) {
         let getUtils = async function () {
             return await new BusinessObjectValidatorUtils(sObjectType);

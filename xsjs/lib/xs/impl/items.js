@@ -77,7 +77,7 @@ module.exports.Items = function ($) {
     async function updateReferencedCalculationVersions(aItemToUpdateReferencedVersion, mItemsForPayload, oPersistency) {
 
         //return if no items are to be updated
-        if (await helpers.isNullOrUndefined(aItemToUpdateReferencedVersion) || aItemToUpdateReferencedVersion.length === 0) {
+        if (helpers.isNullOrUndefined(aItemToUpdateReferencedVersion) || aItemToUpdateReferencedVersion.length === 0) {
             return mItemsForPayload;
         }
 
@@ -185,7 +185,7 @@ module.exports.Items = function ($) {
 
     async function checkItemsForUpdate(aBodyItems, iCvId, oPersistency, aCachedOldItems) {
         var aOldItems = aCachedOldItems;
-        if (await helpers.isNullOrUndefined(aOldItems)) {
+        if (helpers.isNullOrUndefined(aOldItems)) {
 
 
             aOldItems = oPersistency.Item.getItems(_.map(aBodyItems, function (item) {
@@ -1094,7 +1094,7 @@ module.exports.Items = function ($) {
                 }
 
                 let iIsManualValue = oItem[sIsManualFieldName];
-                if (await helpers.isNullOrUndefined(iIsManualValue) && !helpers.isNullOrUndefined(mDbItems[oItem.ITEM_ID]) && mDbItems[oItem.ITEM_ID].ITEM_CATEGORY_ID === iItemCategory) {
+                if (helpers.isNullOrUndefined(iIsManualValue) && !helpers.isNullOrUndefined(mDbItems[oItem.ITEM_ID]) && mDbItems[oItem.ITEM_ID].ITEM_CATEGORY_ID === iItemCategory) {
                     iIsManualValue = mDbItems[oItem.ITEM_ID][sIsManualFieldName];
                     if (oItem[sIsManualFieldName] === null) {
 

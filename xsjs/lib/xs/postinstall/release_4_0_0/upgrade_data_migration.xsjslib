@@ -63,10 +63,10 @@ const aDeletedTables = [
     'sap.plc.db::basis.t_price'
 ];
 //const aInstanceBasedTables = ["sap.plc.db::auth.t_auth_project", "sap.plc.db::auth.t_auth_user", "sap.plc.db::auth.t_usergroup_user"];
-const {tableNotRemoved, getTargetTableName, getDeletedColumns, getRenamedColumns, getRenameColumn} = $.import('xs.postinstall.xslib', 'upgradeSchemaMapping');
-const {migrateMaterialPrice} = $.import('xs.postinstall.release_4_0_0', 'migrateMaterialPrice');
-const {migrateActivityPrice} = $.import('xs.postinstall.release_4_0_0', 'migrateActivityPrice');
-const {migrateMetadataCustomFields} = $.import('xs.postinstall.release_4_0_0', 'migrateCustomFieldsMetadata');
+const {tableNotRemoved, getTargetTableName, getDeletedColumns, getRenamedColumns, getRenameColumn} = await $.import('xs.postinstall.xslib', 'upgradeSchemaMapping');
+const {migrateMaterialPrice} = await $.import('xs.postinstall.release_4_0_0', 'migrateMaterialPrice');
+const {migrateActivityPrice} = await $.import('xs.postinstall.release_4_0_0', 'migrateActivityPrice');
+const {migrateMetadataCustomFields} = await $.import('xs.postinstall.release_4_0_0', 'migrateCustomFieldsMetadata');
 
 const plcSchema = 'SAP_PLC';
 const excludeTables = [
@@ -110,8 +110,8 @@ function getCurrentConnection() {
  * @param oConnection {object}
  * @return current schema
  */
-function getSchemaName(oConnection) {
-    return oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"`)[0].CURRENT_SCHEMA;
+async function getSchemaName(oConnection) {
+    return await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"`)[0].CURRENT_SCHEMA;
 }
 
 
@@ -137,7 +137,7 @@ async function compareTableColumns(tableName, currentSchemaName) {
  * @param currentSchemaName {string} current schema name
  * return {array} the columns collection
  */
-function getSchemaTableColumns(tableName, currentSchemaName) {
+async function getSchemaTableColumns(tableName, currentSchemaName) {
     return oSqlccConnection.executeQuery(`SELECT COLUMN_NAME FROM SYS.COLUMNS WHERE SCHEMA_NAME = '${ currentSchemaName }' AND TABLE_NAME = '${ tableName }' ORDER BY POSITION`).map(function (item, index) {
         return item.COLUMN_NAME;
     });
@@ -237,7 +237,7 @@ async function run(oConnection, oLibraryMeta, oRequestArgs) {
  */
 async function executeMigration(sTableName, oMappingUserList, currentSchemaName) {
     //TODO: here may need performance test
-    await console.log(sTableName);
+    console.log(sTableName);
     if (sTableName === 'sap.plc.db.calcengine::calcengine_signatures.t_afl_signature') {
 //the table t_afl_signature is a no primary key table which can't use upsert..select.. sql
         oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sTableName }"`);
@@ -286,7 +286,7 @@ async function executeMigration(sTableName, oMappingUserList, currentSchemaName)
  * @param oConnection {object} current connection
  */
 async function removeOldVersionData(sTableName, oConnection) {
-    oConnection.executeUpdate(`TRUNCATE TABLE "${ plcSchema }"."${ sTableName }"`);
+    await oConnection.executeUpdate(`TRUNCATE TABLE "${ plcSchema }"."${ sTableName }"`);
     await oConnection.commit();
 }
 
@@ -296,8 +296,8 @@ async function removeOldVersionData(sTableName, oConnection) {
  * @param oConnection {object} current connection
  * @return {integer} table size
  */
-function checkTableSize(sTableName, oConnection) {
-    return oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`)[0].RECORDNUMBER;
+async function checkTableSize(sTableName, oConnection) {
+    return await oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`)[0].RECORDNUMBER;
 }
 
 /**
@@ -308,7 +308,7 @@ function checkTableSize(sTableName, oConnection) {
  * @param currentSchemaName {string} current schema name
  */
 function createUserReplaceSql(sTableName, oConnection, sColumnName, currentSchemaName) {
-    var oResult = oConnection.executeQuery(`SELECT COLUMN_NAME FROM "SYS"."COLUMNS" WHERE SCHEMA_NAME='${ currentSchemaName }' AND TABLE_NAME='${ sTableName }' AND COLUMN_NAME='${ sColumnName }'`);
+    var oResult = await oConnection.executeQuery(`SELECT COLUMN_NAME FROM "SYS"."COLUMNS" WHERE SCHEMA_NAME='${ currentSchemaName }' AND TABLE_NAME='${ sTableName }' AND COLUMN_NAME='${ sColumnName }'`);
     var sSql = '';
     if (!oResult || !oResult.length) {
         return sSql;

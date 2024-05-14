@@ -91,11 +91,11 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
         });
 
         // Check if the version is opened and locked.
-        await oCalculationVersionService.isOpenedAndLockedInSession(oPersistency, sSessionId, iCalcVersionId, oMessageDetails);
+         oCalculationVersionService.isOpenedAndLockedInSession(oPersistency, sSessionId, iCalcVersionId, oMessageDetails);
 
-        await oCalculationVersionService.checkIsVersionFrozen(oPersistency, iCalcVersionId);
+         oCalculationVersionService.checkIsVersionFrozen(oPersistency, iCalcVersionId);
 
-        await oCalculationVersionService.isNameUnique(oPersistency, iCalcId, iCalcVersionId, sCalcVersionName, oMessageDetails);
+         oCalculationVersionService.isNameUnique(oPersistency, iCalcId, iCalcVersionId, sCalcVersionName, oMessageDetails);
 
         bSaveChecked = true;
         return this;
@@ -120,9 +120,9 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
 
         if (!oPersistency.CalculationVersion.exists(iCalcVersionId)) {
 
-            await oCalculationVersionService.checkIfCalculationExists(oPersistency, iCalcId, oMessageDetails);
+             oCalculationVersionService.checkIfCalculationExists(oPersistency, iCalcId, oMessageDetails);
 
-            await oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsSave, sSessionId);
+             oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsSave, sSessionId);
         }
 
         oPersistency.CalculationVersion.setLifecycleVersionTypeToManual(oCalculationVersion, sSessionId);
@@ -197,7 +197,7 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
             aProtectedColumnsSaveAs = _.difference(aProtectedColumnsSaveAs, ['CALCULATION_VERSION_TYPE']);
         }
 
-        await oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsSaveAs, sSessionId);
+         oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsSaveAs, sSessionId);
 
 
         iCalcVersionId = oPersistency.CalculationVersion.setNewId(iCalcVersionId, sSessionId);
@@ -218,13 +218,13 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
         }
         oPersistency.Item.deleteItems(sSessionId, iCalcVersionId);
         oPersistency.CalculationVersion.saveCalculationResults(iCalcVersionId, sSessionId);
-        await oPersistency.CalculationVersion.save(iCalcVersionId, sSessionId, sSessionId);
+         oPersistency.CalculationVersion.save(iCalcVersionId, sSessionId, sSessionId);
 
         let oCvRelevantFields = oPersistency.CalculationVersion.getSaveRelevantFields(sSessionId, iCalcVersionId);
 
 
         let aItemsRelevantFields = oPersistency.Item.getSaveRelevantFields(aDirtyItems, sSessionId, iCalcVersionId);
-        var oOutput = await oCalculationVersionService.prepareOutput({
+        var oOutput =  oCalculationVersionService.prepareOutput({
             version: oCvRelevantFields,
             items: aItemsRelevantFields
         }, bOmitItems);
@@ -234,7 +234,7 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
 
 
 
-        const aCopiedVariantsToSave = await oPersistency.Variant.getCopiedVariants(iCalcVersionId);
+        const aCopiedVariantsToSave =  oPersistency.Variant.getCopiedVariants(iCalcVersionId);
         if (aCopiedVariantsToSave.length > 0) {
             const aValidCopiedVariants = aCopiedVariantsToSave.map(oCopiedVariant => {
                 const oValidCopiedVariant = _.clone(oCopiedVariant);
@@ -242,14 +242,14 @@ async function CalculationVersionSaveHandler($, oCalculationVersion, oCalculatio
                 oValidCopiedVariant.LAST_REMOVED_MARKINGS_ON = oOutput.LAST_MODIFIED_ON;
                 return oValidCopiedVariant;
             });
-            await oPersistency.Variant.update(aValidCopiedVariants, aCopiedVariantsToSave, iCalcVersionId);
+             oPersistency.Variant.update(aValidCopiedVariants, aCopiedVariantsToSave, iCalcVersionId);
         }
         oOutput[MetaInformation.IsDirty] = 0;
         oOutput[MetaInformation.IsWritable] = 1;
         oServiceOutput.setTransactionalData(oOutput);
     };
 }
-CalculationVersionSaveHandler.prototype = await Object.create(CalculationVersionSaveHandler.prototype);
+CalculationVersionSaveHandler.prototype =  Object.create(CalculationVersionSaveHandler.prototype);
 CalculationVersionSaveHandler.prototype.constructor = CalculationVersionSaveHandler;
 
 module.exports.CalculationVersionSaveHandler = CalculationVersionSaveHandler;

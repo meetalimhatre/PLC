@@ -76,7 +76,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             });
             return aValidatedVariantIds;
         }
-        function changeMandatoryMetadataAttribute(aVariantMetadata, sAttribute, bIsMandatory) {
+        async function changeMandatoryMetadataAttribute(aVariantMetadata, sAttribute, bIsMandatory) {
             const aVariantMetadataAdapted = aVariantMetadata;
             if (aVariantMetadataAdapted) {
                 const iIndex = aVariantMetadata.indexOf(_.find(aVariantMetadata, oMetadata => oMetadata.COLUMN_ID === sAttribute));
@@ -171,7 +171,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             // check to see if is_selected is on the request, if it is null -> decline request
             return oSyntacticallyCorrectVariant;
         }
-        function validateDeleteRequest() {
+        async function validateDeleteRequest() {
             oUtils.checkEmptyBody(oRequest.body);
         }
 
@@ -192,6 +192,6 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
         }
     };
 }
-VariantValidator.prototype = await Object.create(VariantValidator.prototype);
+VariantValidator.prototype = Object.create(VariantValidator.prototype);
 VariantValidator.prototype.constructor = VariantValidator;
 export default {MessageLibrary,PlcException,BusinessObjectTypes,_,GenericSyntaxValidator,helpers,VariantValidator};

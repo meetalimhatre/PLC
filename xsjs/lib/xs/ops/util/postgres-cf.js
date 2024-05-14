@@ -45,7 +45,7 @@ Postgres.prototype.execute = function () {
                 ...arguments,
                 async function (err, res) {
                     if (err) {
-                        await console.log(err);
+                        console.log(err);
                         return fCallback(err);
                     }
                     return fCallback(null, res);
@@ -105,7 +105,7 @@ Postgres.prototype.executeUpdate = async function () {
         this.begin();
         return this.execute.apply(this, arguments).rowCount;
     } catch (err) {
-        await console.log(err);
+        console.log(err);
         await this.rollback();
         throw err;
     }

@@ -4,12 +4,12 @@ const BusinessObjectsEntities = require('./masterdataResources').BusinessObjects
 // The function from other lib is copied here to avoid circular imports
 async function deepFreeze(oObject) {
     if (Object.isFrozen(oObject) === false) {
-        await Object.freeze(oObject);
+        Object.freeze(oObject);
     }
     _.each(oObject, vValue => {
-        var bIsFreezable = vValue !== null && (_.isObject(vValue) || await _.isFunction(vValue));
+        var bIsFreezable = vValue !== null && (_.isObject(vValue) ||  _.isFunction(vValue));
         if (bIsFreezable) {
-            await deepFreeze(vValue);
+             deepFreeze(vValue);
         }
     });
     return oObject;
@@ -311,11 +311,11 @@ _.extend(BusinessObjectTypes, MasterDataObjectTypes, HelperObjectTypes, Tansacti
 await deepFreeze(BusinessObjectTypes);
 module.exports.BusinessObjectTypes = BusinessObjectTypes;
 
-module.exports.FallbackLanguages = await Object.freeze([
+module.exports.FallbackLanguages = Object.freeze([
     'EN',
     'DE'
 ]);
-module.exports.LanguageFields = await Object.freeze([
+module.exports.LanguageFields = Object.freeze([
     'LANGU',
     'LANGUAGE'
 ]);
@@ -390,12 +390,12 @@ module.exports.CalculationServiceParameters = await deepFreeze({
     Create: 'create',
     CopyVersion: 'copy-version'
 });
-module.exports.parameterCalculationActionValidValues = await Object.freeze([
+module.exports.parameterCalculationActionValidValues = Object.freeze([
     'create',
     'copy-version'
 ]);
 
-module.exports.parameterActionValidValues = await Object.freeze([
+module.exports.parameterActionValidValues = Object.freeze([
     'save',
     'save-as',
     'close',
@@ -424,7 +424,7 @@ module.exports.DefaultSettings = await deepFreeze({
     COSTING_SHEET: 'COSTING_SHEET'
 });
 
-module.exports.DefaultSettingsMasterDataColumns = await Object.freeze({
+module.exports.DefaultSettingsMasterDataColumns =  Object.freeze({
     controllingAreaId: 'CONTROLLING_AREA_ID',
     companyCodeId: 'COMPANY_CODE_ID',
     plantId: 'PLANT_ID',
@@ -511,7 +511,7 @@ module.exports.ProjectSurchargeStrategies = {
     IfNoPriceFound: 'IF_NO_PRICE_FOUND'
 };
 
-module.exports.RegularExpressions = await Object.freeze({
+module.exports.RegularExpressions = Object.freeze({
     FilterString: '^[\\w_]+(!=|=|<=|>=|<|>)[\\pL\\dT:Z_#+`)(|/.%\\s-]+(&[\\w_]+(!=|=|<=|>=|<|>)[\\pL\\dT:Z_#+`)(|/.%\\s-]+)*$',
     FieldNames: /([\w]*)?(!=|=|<=|>=|<|>)[^&?]*/g,
     AutoComplete: '^[\\pL\\d_#/. +`:|)(%-]*$'
@@ -525,7 +525,7 @@ var globalSearchTypeValues = await deepFreeze({
 });
 module.exports.globalSearchTypeValues = globalSearchTypeValues;
 
-module.exports.globalSearchSortedColumns = await Object.freeze([
+module.exports.globalSearchSortedColumns =  Object.freeze([
     'ENTITY_TYPE',
     'ENTITY_NAME',
     'ENTITY_ID',
@@ -537,11 +537,11 @@ module.exports.globalSearchSortedColumns = await Object.freeze([
     'LAST_MODIFIED_ON',
     'LAST_MODIFIED_BY'
 ]);
-module.exports.globalSearchDirection = await Object.freeze([
+module.exports.globalSearchDirection =  Object.freeze([
     'Ascending',
     'Descending'
 ]);
-module.exports.globalSearchEntityType = await Object.freeze([
+module.exports.globalSearchEntityType =  Object.freeze([
     globalSearchTypeValues.All,
     globalSearchTypeValues.Calculation,
     globalSearchTypeValues.CalculationVersion,
@@ -637,7 +637,7 @@ module.exports.maxQueryResults = 100;
 
 
 
-module.exports.aRegexSpecialChars = await Object.freeze([
+module.exports.aRegexSpecialChars = Object.freeze([
     {
         'specialChar': '\\',
         'specialCharReplacement': '\\\\'
@@ -688,7 +688,7 @@ module.exports.aRegexSpecialChars = await Object.freeze([
     }
 ]);
 
-module.exports.aCustomFieldMasterdataBusinessObjects = await Object.freeze([
+module.exports.aCustomFieldMasterdataBusinessObjects = Object.freeze([
     'Material',
     'Material_Price',
     'Material_Plant',
@@ -839,7 +839,7 @@ module.exports.MaxNoOfVariantsSettingType = 'VARIANTSSETTINGS';
 module.exports.OneTimeCostItemDescription = 'Distributed Costs';
 
 
-module.exports.CalculationVersionCostingSheetTotals = await Object.freeze([
+module.exports.CalculationVersionCostingSheetTotals =  Object.freeze([
     'TOTAL_COST',
     'TOTAL_COST2',
     'TOTAL_COST3'

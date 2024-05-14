@@ -1,4 +1,4 @@
-var errorInfo = await Object.freeze({
+var errorInfo = Object.freeze({
     'SUCCESS': 0,
     'EXCEPTION': 1,
     'UNEXPECT': 2

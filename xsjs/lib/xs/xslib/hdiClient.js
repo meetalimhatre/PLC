@@ -218,7 +218,7 @@ async function HDIClient($, sContainer, oCredentials) {
      * @param bRecursive {boolean} 
      */
     this.readDeployed = async (aPath, bRecursive) => {
-        if (await helpers.isNullOrUndefined(aPath)) {
+        if (helpers.isNullOrUndefined(aPath)) {
             throw 'readDeployed(): Invalid aPath: ' + aPath;
         }
 
@@ -247,7 +247,7 @@ async function HDIClient($, sContainer, oCredentials) {
      * @param sRoot {string} path
      */
     this.make = async sRoot => {
-        if (await helpers.isNullOrUndefined(sRoot)) {
+        if (helpers.isNullOrUndefined(sRoot)) {
             throw 'make(): Invalid sRoot: ' + sRoot;
         }
 
@@ -295,7 +295,7 @@ async function HDIClient($, sContainer, oCredentials) {
      * @param sRoot {string} path
      */
     this.restore = async sRoot => {
-        if (await helpers.isNullOrUndefined(sRoot)) {
+        if (helpers.isNullOrUndefined(sRoot)) {
             throw 'restore(): Invalid sRoot: ' + sRoot;
         }
 
@@ -338,7 +338,7 @@ async function HDIClient($, sContainer, oCredentials) {
     };
 }
 
-HDIClient.prototype = await Object.create(HDIClient.prototype);
+HDIClient.prototype = Object.create(HDIClient.prototype);
 HDIClient.prototype.constructor = HDIClient;
 
 module.exports.HDIClient = HDIClient;

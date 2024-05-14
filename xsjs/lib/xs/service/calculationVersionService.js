@@ -97,7 +97,7 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
 
         async function tryGetVersionFromRequestBody() {
             if (oValidatedRequestContent.data !== undefined && oValidatedRequestContent.data[0] !== undefined) {
-                if (await tryGetExistingCalculationVersionId(oValidatedRequestContent.data[0].CALCULATION_VERSION_ID) === true) {
+                if (tryGetExistingCalculationVersionId(oValidatedRequestContent.data[0].CALCULATION_VERSION_ID) === true) {
                     return true;
                 }
             }
@@ -107,18 +107,18 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
         // Central logic on selecting the version id from different parts of request or response
         if (oValidatedRequestContent.parameters.action !== ServiceParameters.Copy && oValidatedRequestContent.parameters.action !== CalculationServiceParameters.CopyVersion && await tryGetExistingCalculationVersionId(oValidatedRequestContent.parameters.id) === true) {
             return iValidVersionId;
-        } else if (await tryGetVersionFromRequestBody() === true) {
+        } else if (tryGetVersionFromRequestBody() === true) {
             return iValidVersionId;
         } else if (oServiceOutput.payload.body !== undefined) {
             if (oServiceOutput.payload.body.transactionaldata !== undefined) {
                 var oTransactionalData = oServiceOutput.payload.body.transactionaldata;
                 if (oTransactionalData[0] !== undefined) {
                     if (oTransactionalData[0].CALCULATION_VERSIONS !== undefined) {
-                        if (await tryGetExistingCalculationVersionId(oTransactionalData[0].CALCULATION_VERSIONS[0].CALCULATION_VERSION_ID) === true) {
+                        if (tryGetExistingCalculationVersionId(oTransactionalData[0].CALCULATION_VERSIONS[0].CALCULATION_VERSION_ID) === true) {
                             return iValidVersionId;
                         }
                     } else {
-                        if (await tryGetExistingCalculationVersionId(oTransactionalData[0].CALCULATION_VERSION_ID) === true) {
+                        if (tryGetExistingCalculationVersionId(oTransactionalData[0].CALCULATION_VERSION_ID) === true) {
                             return iValidVersionId;
                         }
                     }

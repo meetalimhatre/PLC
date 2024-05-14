@@ -1,7 +1,7 @@
 const oConnectionFactory = await new ($.require('../db/connection/connection')).ConnectionFactory($);
-const Persistency = $.import('xs.db', 'persistency').Persistency;
+const Persistency = await $.import('xs.db', 'persistency').Persistency;
 const TaskService = $.require('../service/taskService').TaskService;
-const LifecycleCalculator = $.import('xs.followUp', 'lifecycleCalculator').LifecycleVersionCalculator;
+const LifecycleCalculator = await $.import('xs.followUp', 'lifecycleCalculator').LifecycleVersionCalculator;
 const helpers = $.require('../util/helpers');
 const Constants = $.require('../util/constants');
 

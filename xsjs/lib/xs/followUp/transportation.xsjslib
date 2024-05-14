@@ -12,7 +12,7 @@ async function Transportation(iTaskId, oPersistency, oConnectionFactory, oTaskSe
 
         const oTransportationTask = oTaskService.getById(iTaskId);
 
-        if (await helpers.isNullOrUndefined(oTransportationTask)) {
+        if (helpers.isNullOrUndefined(oTransportationTask)) {
             const sLogMessage = `Cannot perform transportation import. Task with id ${ iTaskId } cannot be found`;
             $.trace.error(sLogMessage);
             await setTaskToFailed(oTransportationTask, sLogMessage);
@@ -30,7 +30,7 @@ async function Transportation(iTaskId, oPersistency, oConnectionFactory, oTaskSe
             await setTaskToFailed(oTransportationTask, sLogMessage);
             return;
         }
-        if (await helpers.isNullOrUndefined(oTransportationTask.PARAMETERS)) {
+        if (helpers.isNullOrUndefined(oTransportationTask.PARAMETERS)) {
             const sLogMessage = `Cannot import data to transportation tool for task with id ${ iTaskId }, ` + `since the task defined has no parameters`;
             $.trace.error(sLogMessage);
             await setTaskToFailed(oTransportationTask, sLogMessage);

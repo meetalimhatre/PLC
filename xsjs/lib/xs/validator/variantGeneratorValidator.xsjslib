@@ -33,6 +33,6 @@ function VariantGeneratorValidator(oPersistency, oMetadataProvider, oUtils) {
         }
     };
 }
-VariantGeneratorValidator.prototype = await Object.create(VariantGeneratorValidator.prototype);
+VariantGeneratorValidator.prototype = Object.create(VariantGeneratorValidator.prototype);
 VariantGeneratorValidator.prototype.constructor = VariantGeneratorValidator;
 export default {MessageLibrary,PlcException,helpers,GenericSyntaxValidator,VariantGeneratorValidator};

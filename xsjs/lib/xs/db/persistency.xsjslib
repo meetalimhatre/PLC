@@ -22,7 +22,7 @@ async function Persistency(dbConnection) {
         Addin: {
             get: () => {
                 if (undefined === this._Addin) {
-                    var Addin = $.import('xs.db', 'persistency-addin').Addin;
+                    var Addin = await $.import('xs.db', 'persistency-addin').Addin;
                     this._Addin = await new Addin(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._Addin;
@@ -41,7 +41,7 @@ async function Persistency(dbConnection) {
             get: async function () {
                 return (() => {
                     if (undefined === this._Calculation) {
-                        var Calculation = $.import('xs.db', 'persistency-calculation').Calculation;
+                        var Calculation = await $.import('xs.db', 'persistency-calculation').Calculation;
                         this._Calculation = await new Calculation(await this.getConnection(), this.getHQueryPlc());
                     }
                     return this._Calculation;
@@ -69,7 +69,7 @@ async function Persistency(dbConnection) {
         Project: {
             get: () => {
                 if (undefined === this._Project) {
-                    var Project = $.import('xs.db', 'persistency-project').Project;
+                    var Project = await $.import('xs.db', 'persistency-project').Project;
                     this._Project = await new Project(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._Project;
@@ -78,7 +78,7 @@ async function Persistency(dbConnection) {
         Administration: {
             get: () => {
                 if (undefined === this._Administration) {
-                    var Administration = $.import('xs.db', 'persistency-administration').Administration;
+                    var Administration = await $.import('xs.db', 'persistency-administration').Administration;
                     this._Administration = await new Administration(await this.getConnection(), this.getHQueryPlc(), this.getHQueryRepl());
                 }
                 return this._Administration;
@@ -96,7 +96,7 @@ async function Persistency(dbConnection) {
         DefaultSettings: {
             get: () => {
                 if (undefined === this._DefaultSettings) {
-                    var DefaultSettings = $.import('xs.db', 'persistency-defaultSettings').DefaultSettings;
+                    var DefaultSettings = await $.import('xs.db', 'persistency-defaultSettings').DefaultSettings;
                     this._DefaultSettings = await new DefaultSettings(await this.getConnection(), this.getHQueryPlc(), this.getHQueryRepl());
                 }
                 return this._DefaultSettings;
@@ -123,7 +123,7 @@ async function Persistency(dbConnection) {
         GlobalSearch: {
             get: () => {
                 if (undefined === this._GlobalSearch) {
-                    var GlobalSearch = $.import('xs.db', 'persistency-globalSearch').GlobalSearch;
+                    var GlobalSearch = await $.import('xs.db', 'persistency-globalSearch').GlobalSearch;
                     this._GlobalSearch = await new GlobalSearch(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._GlobalSearch;
@@ -132,7 +132,7 @@ async function Persistency(dbConnection) {
         Transportation: {
             get: () => {
                 if (undefined === this._Transportation) {
-                    var Transportation = $.import('xs.db', 'persistency-transportation').Transportation;
+                    var Transportation = await $.import('xs.db', 'persistency-transportation').Transportation;
                     this._Transportation = await new Transportation(dbConnection, this.DbArtefactController, this.Metadata);
                 }
                 return this._Transportation;
@@ -159,7 +159,7 @@ async function Persistency(dbConnection) {
         Layout: {
             get: () => {
                 if (undefined === this._Layout) {
-                    var Layout = $.import('xs.db', 'persistency-layout').Layout;
+                    var Layout = await $.import('xs.db', 'persistency-layout').Layout;
                     this._Layout = await new Layout(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._Layout;
@@ -177,7 +177,7 @@ async function Persistency(dbConnection) {
         Privilege: {
             get: () => {
                 if (undefined === this._Privilege) {
-                    var Privilege = $.import('xs.db', 'persistency-privilege').Privilege;
+                    var Privilege = await $.import('xs.db', 'persistency-privilege').Privilege;
                     this._Privilege = await new Privilege(await this.getConnection());
                 }
                 return this._Privilege;
@@ -186,7 +186,7 @@ async function Persistency(dbConnection) {
         Group: {
             get: () => {
                 if (undefined === this._Group) {
-                    var Group = $.import('xs.db', 'persistency-group').Group;
+                    var Group = await $.import('xs.db', 'persistency-group').Group;
                     this._Group = await new Group(await this.getConnection());
                 }
                 return this._Group;
@@ -195,7 +195,7 @@ async function Persistency(dbConnection) {
         FrontendSettings: {
             get: () => {
                 if (undefined === this._FrontendSettings) {
-                    var FrontendSettings = $.import('xs.db', 'persistency-frontendSettings').FrontendSettings;
+                    var FrontendSettings = await $.import('xs.db', 'persistency-frontendSettings').FrontendSettings;
                     this._FrontendSettings = await new FrontendSettings(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._FrontendSettings;
@@ -204,7 +204,7 @@ async function Persistency(dbConnection) {
         DataProtection: {
             get: () => {
                 if (undefined === this._DataProtection) {
-                    var DataProtection = $.import('xs.db', 'persistency-dataProtection').DataProtection;
+                    var DataProtection = await $.import('xs.db', 'persistency-dataProtection').DataProtection;
                     this._DataProtection = await new DataProtection(await this.getConnection());
                 }
                 return this._DataProtection;
@@ -222,7 +222,7 @@ async function Persistency(dbConnection) {
         Masterdata: {
             get: () => {
                 if (undefined === this._Masterdata) {
-                    var Masterdata = $.import('xs.db', 'persistency-masterdata').Masterdata;
+                    var Masterdata = await $.import('xs.db', 'persistency-masterdata').Masterdata;
                     this._Masterdata = await new Masterdata(await this.getConnection(), this.getHQueryPlc());
                 }
                 return this._Masterdata;
@@ -280,6 +280,6 @@ async function Persistency(dbConnection) {
 
 
 }
-Persistency.prototype = await Object.create(Persistency.prototype);
+Persistency.prototype = Object.create(Persistency.prototype);
 Persistency.prototype.constructor = Persistency;
 export default {HQuery,ERP_LANGUAGE_FIELD_LENGTH,CLIENT_FIELD_LENGTH,Persistency};

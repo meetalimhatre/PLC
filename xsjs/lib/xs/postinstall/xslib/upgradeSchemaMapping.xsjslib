@@ -3,7 +3,7 @@
  column renaming
 " table removal: the mappingTable is null
 " column removal: the mappingColumn is null*/
-var aSchemaMapping = await Object.freeze([{
+var aSchemaMapping = Object.freeze([{
         'version': 4,
         'version_sp': 0,
         'version_patch': 0,

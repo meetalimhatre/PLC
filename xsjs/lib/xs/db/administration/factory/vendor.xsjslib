@@ -1,6 +1,6 @@
 var _ = $.require('lodash');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 var MessageLibrary = $.require('../../../util/message');
 var Operation = MessageLibrary.Operation;
 var MessageCode = MessageLibrary.Code;
@@ -11,7 +11,7 @@ function Vendor(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    Vendor.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    Vendor.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
 
         var oFilters = [
@@ -50,7 +50,7 @@ function Vendor(dbConnection, hQuery, sObjectName) {
         ];
 
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
             oReturnObject[BusinessObjectsEntities.VENDOR_ENTITIES] = Array.slice(result.OT_VENDOR);
 
         } else {
@@ -79,20 +79,20 @@ function Vendor(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by VENDOR_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.VENDOR_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.VENDOR_ENTITIES] = _.values(await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;
     };
 
-    Vendor.prototype.validateBefore = function () {
+    Vendor.prototype.validateBefore = async function () {
 
         var sqlMain = 'update temp_table' + " set temp_table.ERROR_CODE = '" + MessageCode.GENERAL_VALIDATION_ERROR.code + "'," + ' temp_table.ERROR_DETAILS = \'{"validationObj": { "columnIds": [{"columnId":"VENDOR_ID' + '"}],"validationInfoCode": "' + ValidationInfoCode.VALUE_ERROR + '"}}\'' + ' from "' + Resources[sObjectName].dbobjects.tempTable + '" as temp_table' + "    where temp_table.VENDOR_ID in ('DELETED')" + "    and temp_table.operation in ('" + Operation.CREATE + "')" + "    and (temp_table.error_code = '' or  temp_table.error_code is null)";
 
-        dbConnection.executeUpdate(sqlMain);
+        await dbConnection.executeUpdate(sqlMain);
     };
 }
 
-Vendor.prototype = await Object.create(MasterDataBaseObject.prototype);
+Vendor.prototype = Object.create(MasterDataBaseObject.prototype);
 Vendor.prototype.constructor = Vendor;
 export default {_,BusinessObjectsEntities,MasterDataBaseObject,MessageLibrary,Operation,MessageCode,Resources,ValidationInfoCode,Vendor};

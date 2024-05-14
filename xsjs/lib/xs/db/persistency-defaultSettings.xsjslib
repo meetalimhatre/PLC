@@ -1,7 +1,7 @@
 const Helper = $.require('./persistency-helper').Helper;
 const _ = $.require('lodash');
 const helpers = $.require('../util/helpers');
-const apiHelpers = $.import('xs.db.administration', 'api-helper');
+const apiHelpers = await $.import('xs.db.administration', 'api-helper');
 const DefaultSettingsEntities = $.require('../util/constants').DefaultSettings;
 const BusinessObjectTypes = $.require('../util/constants').BusinessObjectTypes;
 
@@ -10,9 +10,9 @@ const PlcException = MessageLibrary.PlcException;
 const Message = MessageLibrary.Message;
 const Code = MessageLibrary.Code;
 
-var Tables = await Object.freeze({ defaultSettings: 'sap.plc.db::basis.t_default_settings' });
+var Tables = Object.freeze({ defaultSettings: 'sap.plc.db::basis.t_default_settings' });
 
-const Procedures = await Object.freeze({ default_settings_read: 'sap.plc.db.defaultsettings.procedures::p_default_settings_read' });
+const Procedures = Object.freeze({ default_settings_read: 'sap.plc.db.defaultsettings.procedures::p_default_settings_read' });
 
 async function DefaultSettings(dbConnection, hQuery, hQueryRepl) {
     var that = this;
@@ -289,6 +289,6 @@ async function DefaultSettings(dbConnection, hQuery, hQueryRepl) {
     }
 }
 
-DefaultSettings.prototype = await Object.create(DefaultSettings.prototype);
+DefaultSettings.prototype = Object.create(DefaultSettings.prototype);
 DefaultSettings.prototype.constructor = DefaultSettings;
 export default {Helper,_,helpers,apiHelpers,DefaultSettingsEntities,BusinessObjectTypes,MessageLibrary,PlcException,Message,Code,Tables,Procedures,DefaultSettings};

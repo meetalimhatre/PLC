@@ -1,15 +1,15 @@
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function OverheadGroup(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    OverheadGroup.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    OverheadGroup.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
         var sSqlFilter = oProcedureParameters.sSqlFilter;
 
-        var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sAutocompleteText, sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+        var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sAutocompleteText, sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
 
         oReturnObject[BusinessObjectsEntities.OVERHEAD_GROUP_ENTITIES] = Array.slice(result.OT_OVERHEAD_GROUP);
         oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES] = Array.slice(result.OT_PLANT);
@@ -22,6 +22,6 @@ function OverheadGroup(dbConnection, hQuery, sObjectName) {
     };
 }
 
-OverheadGroup.prototype = await Object.create(MasterDataBaseObject.prototype);
+OverheadGroup.prototype = Object.create(MasterDataBaseObject.prototype);
 OverheadGroup.prototype.constructor = OverheadGroup;
 export default {BusinessObjectsEntities,MasterDataBaseObject,OverheadGroup};

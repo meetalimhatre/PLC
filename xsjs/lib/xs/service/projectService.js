@@ -26,7 +26,7 @@ async function logInfo(msg) {
 async function checkProjectTimes(sProjectId, sStart, sEnd) {
 
     // do following checks only if both inputs are dates
-    if (await helpers.isNullOrUndefined(sStart) === true || await helpers.isNullOrUndefined(sEnd) === true) {
+    if (helpers.isNullOrUndefined(sStart) === true || await helpers.isNullOrUndefined(sEnd) === true) {
         return;
     }
 
@@ -60,7 +60,7 @@ async function checkLifecycleCalculationRunningForProject(oPersistency, sProject
 /**
  * Checks if the list of existing calculation tasks contains the given project.
  */
-function getCalculationTasksForProject(aExistingCalculationTasks, sProjectId) {
+async function getCalculationTasksForProject(aExistingCalculationTasks, sProjectId) {
     if (aExistingCalculationTasks.length > 0) {
         let oRunningTasksForProject = _.find(aExistingCalculationTasks, oExistingTask => {
             var bIsInactive = oExistingTask.STATUS === TaskStatus.INACTIVE;
@@ -116,7 +116,7 @@ async function getCalculationTaskForProjectSplitedByUsers(aExistingCalculationTa
  * @param  {type} iLifecycleInterval The {@link LifecycleInterval} for which the lifecycle_period_from shall be calculated
  * @return {number}    The lifecycle_period_from value (integer with the number of months from 1900-01-01)
  */
-function calculateLifecyclePeriodFrom(dDate, iLifecycleInterval) {
+async function calculateLifecyclePeriodFrom(dDate, iLifecycleInterval) {
     iLifecycleInterval = iLifecycleInterval || LifecycleInterval.YEARLY;
     var iPeriodForFirstOfJanuary = (dDate.getFullYear() - 1900) * 12;
     switch (iLifecycleInterval) {
@@ -177,7 +177,7 @@ async function checkIsWritable(sProjectId, sUserId, oPersistency) {
  */
 async function checkLifetimeLimitsForProjectDetails(aBodyData, sProjectId, oPersistency) {
     var oDbProject = oPersistency.Project.getProjectProperties(sProjectId);
-    if (await helpers.isNullOrUndefined(oDbProject.START_OF_PROJECT) || await helpers.isNullOrUndefined(oDbProject.END_OF_PROJECT)) {
+    if (helpers.isNullOrUndefined(oDbProject.START_OF_PROJECT) || await helpers.isNullOrUndefined(oDbProject.END_OF_PROJECT)) {
         const sClientMsg = 'Values for total quantities can only be defined if START_OF_PROJECT and END_OF_PROJECT are set. Currently at least one is undefined for project.';
         const sServerMsg = `${ sClientMsg } Project id: ${ sProjectId }`;
         await logError(sServerMsg);

@@ -207,7 +207,7 @@ function SimilarPartsSearch($, dbConnection) {
         oDbArtefactController = await new DbArtefactController($, dbConnection);
         try {
             // Set 'autocommit' to 'off' in one transaction.
-            dbConnection.executeUpdate('SET TRANSACTION AUTOCOMMIT DDL OFF');
+            await dbConnection.executeUpdate('SET TRANSACTION AUTOCOMMIT DDL OFF');
             // build search components and create similar parts search procedure
             let oProcedureObject = await buildSearchProcedure(oSearchParameter, sUserId, sLanguage, iCalculationVersionId);
 
@@ -1490,7 +1490,7 @@ function SimilarPartsSearch($, dbConnection) {
     }
 }
 
-SimilarPartsSearch.prototype = await Object.create(SimilarPartsSearch.prototype);
+SimilarPartsSearch.prototype = Object.create(SimilarPartsSearch.prototype);
 SimilarPartsSearch.prototype.constructor = SimilarPartsSearch;
 
 module.exports = {

@@ -5,9 +5,9 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const TaskStatus = require('../util/constants.js').TaskStatus;
 
-var Tables = await Object.freeze({ task: 'sap.plc.db::basis.t_task' });
+var Tables = Object.freeze({ task: 'sap.plc.db::basis.t_task' });
 
-var Sequences = await Object.freeze({ task_id: 'sap.plc.db.sequence::s_task_id' });
+var Sequences = Object.freeze({ task_id: 'sap.plc.db.sequence::s_task_id' });
 
 /**
  * Provides persistency operations with tasks.
@@ -63,7 +63,7 @@ async function Task(dbConnection) {
         // unshift (=add as first element) sStmt in order to use apply() to pass all arguments as array to the JS function
         aQueryParameters.unshift(sStmt);
 
-        return dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
+        return await dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
     };
 
     /**
@@ -82,8 +82,8 @@ async function Task(dbConnection) {
         var aModifiableColumns = _.keys(oSafeTask);
         var aValues = _.values(oSafeTask);
         // it's in-lined here in order to cut of dependency to persistency-helper, since this would cause dependency issues for TaskService (RF)
-        var sequenceTaskId = await helpers.toPositiveInteger(dbConnection.executeQuery(`select "${ Sequences.task_id }".nextval as task_id from dummy`)[0].TASK_ID);
-        var maxTaskId = await helpers.toPositiveInteger(dbConnection.executeQuery(`select ifnull(max(TASK_ID)+1, 1) as task_id from "${ Tables.task }"`)[0].TASK_ID);
+        var sequenceTaskId = await helpers.toPositiveInteger(await dbConnection.executeQuery(`select "${ Sequences.task_id }".nextval as task_id from dummy`)[0].TASK_ID);
+        var maxTaskId = await helpers.toPositiveInteger(await dbConnection.executeQuery(`select ifnull(max(TASK_ID)+1, 1) as task_id from "${ Tables.task }"`)[0].TASK_ID);
         var iTaskId = await _.max([
             sequenceTaskId,
             maxTaskId
@@ -91,7 +91,7 @@ async function Task(dbConnection) {
         aValues.unshift(iTaskId);
 
         var stmt = `INSERT INTO "${ Tables.task }" (TASK_ID, ${ aModifiableColumns.join(',') }) VALUES (?, ${ _.map(aModifiableColumns, c => '?').join(',') })`;
-        dbConnection.executeUpdate(stmt, [aValues]);
+        await dbConnection.executeUpdate(stmt, [aValues]);
 
         oTask.TASK_ID = iTaskId;
         return oTask;
@@ -125,7 +125,7 @@ async function Task(dbConnection) {
         aValues.push(oTask.TASK_ID);
         aValues.push(oTask.SESSION_ID);
         try {
-            dbConnection.executeUpdate(stmt, [aValues]);
+            await dbConnection.executeUpdate(stmt, [aValues]);
         } catch (e) {
             const sClientMsg = 'Error during the update of task.';
             const sServerMsg = `${ sClientMsg } Error:  ${ e.msg || e.message }`;
@@ -139,7 +139,7 @@ async function Task(dbConnection) {
     this.updateInactiveTasksOnTimeout = (sUserId, oProjectParameters) => {
 
         try {
-            var iTimeoutSeconds = dbConnection.executeQuery(`SELECT VALUE_IN_SECONDS FROM "sap.plc.db::basis.t_application_timeout"`)[0].VALUE_IN_SECONDS;
+            var iTimeoutSeconds = await dbConnection.executeQuery(`SELECT VALUE_IN_SECONDS FROM "sap.plc.db::basis.t_application_timeout"`)[0].VALUE_IN_SECONDS;
             if (!helpers.isNullOrUndefined(oProjectParameters)) {
 
                 var sStmt = `UPDATE "` + Tables.task + `" SET STATUS='CANCELED', STARTED = CURRENT_UTCTIMESTAMP
@@ -149,7 +149,7 @@ async function Task(dbConnection) {
 						 (STATUS = 'ACTIVE' OR STATUS = 'INACTIVE') AND
 						 seconds_between(CREATED_ON, CURRENT_UTCTIMESTAMP) > ?`;
 
-                dbConnection.executeUpdate(sStmt, oProjectParameters.TASK_TYPE, oProjectParameters.PARAMETERS, iTimeoutSeconds);
+                await dbConnection.executeUpdate(sStmt, oProjectParameters.TASK_TYPE, oProjectParameters.PARAMETERS, iTimeoutSeconds);
             }
             if (!helpers.isNullOrUndefined(sUserId)) {
                 var sStmt = `UPDATE "` + Tables.task + `" SET STATUS='CANCELED', STARTED = CURRENT_UTCTIMESTAMP
@@ -159,7 +159,7 @@ async function Task(dbConnection) {
 						 STATUS = 'INACTIVE' AND
 						 seconds_between(CREATED_ON, CURRENT_UTCTIMESTAMP) > ?`;
 
-                dbConnection.executeUpdate(sStmt, sUserId, iTimeoutSeconds);
+                await dbConnection.executeUpdate(sStmt, sUserId, iTimeoutSeconds);
             }
 
 
@@ -171,7 +171,7 @@ async function Task(dbConnection) {
     };
 
     this.lockTaskTable = () => {
-        dbConnection.executeUpdate(`lock table "${ Tables.task }" in exclusive mode`);
+        await dbConnection.executeUpdate(`lock table "${ Tables.task }" in exclusive mode`);
     };
 
     /**
@@ -182,7 +182,7 @@ async function Task(dbConnection) {
 	 * and the session of the task in progress
 	 */
     this.isTaskInProgress = taskType => {
-        var countTasksInProgress = dbConnection.executeQuery(`SELECT SESSION_ID as sessionID, count(*) as taskcount
+        var countTasksInProgress = await dbConnection.executeQuery(`SELECT SESSION_ID as sessionID, count(*) as taskcount
 									FROM "${ Tables.task }"
 									WHERE STATUS = 'ACTIVE'
 									AND TASK_TYPE = ? GROUP BY SESSION_ID`, taskType);
@@ -206,7 +206,7 @@ async function Task(dbConnection) {
 	 */
     this.cancelTasksWithStatusAndLastUpdatedOlderThan = (sStatus, sTaskType, iMinutes) => {
         let sLastUpdatedBefore = new Date(Date.now() - 1000 * (60 * iMinutes));
-        let aInactiveTasks = dbConnection.executeQuery(`SELECT TASK_ID, SESSION_ID, TASK_TYPE, STATUS, PARAMETERS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS 
+        let aInactiveTasks = await dbConnection.executeQuery(`SELECT TASK_ID, SESSION_ID, TASK_TYPE, STATUS, PARAMETERS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS 
 										from "${ Tables.task }"
 									WHERE STATUS = ?
 									AND TASK_TYPE = ? AND LAST_UPDATED_ON <= ?`, sStatus, sTaskType, sLastUpdatedBefore);
@@ -219,7 +219,7 @@ async function Task(dbConnection) {
     };
 }
 
-Task.prototype = await Object.create(Task.prototype);
+Task.prototype = Object.create(Task.prototype);
 Task.prototype.constructor = Task;
 
 async function logError(msg) {

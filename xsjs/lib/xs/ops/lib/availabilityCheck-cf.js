@@ -37,7 +37,7 @@ async function checkAvailability($, oRequest, oResponse) {
         }
     });
     if (aDisconnectedTenants.length > 0) {
-        await console.log({
+        console.log({
             message: 'Connection to some tenant HDI container failed',
             disconnectedTenants: aDisconnectedTenants
         });

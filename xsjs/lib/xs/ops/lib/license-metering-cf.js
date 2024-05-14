@@ -25,7 +25,7 @@ async function getTenantUserCount(oClient) {
     try {
         result = oClient.executeQuery(sqlStatement);
     } catch (e) {
-        await console.log(e);
+        console.log(e);
     }
     // Because of DPP/GDPR the personal data is deleted after 3 years 
     let resultDeleteData = null;
@@ -38,7 +38,7 @@ async function getTenantUserCount(oClient) {
     try {
         resultDeleteData = oClient.executeQuery(sqlStatementDeleteData);
     } catch (e) {
-        await console.log(e);
+        console.log(e);
     }
 
     if (Array.isArray(result) && result[0].hasOwnProperty('USERCOUNT')) {
@@ -81,7 +81,7 @@ async function sendUsageData(oParameters) {
                 }]
         },
         json: true
-    }).then(response => response).catch(error => await console.log(error));
+    }).then(response => response).catch(error => console.log(error));
 }
 
 /**
@@ -107,7 +107,7 @@ async function getAuthorizationToken(clientId, clientSecret, tokenURL) {
             Accept: 'application/json'
         },
         json: true
-    }).then(response => response.body.access_token).catch(error => await console.log(error));
+    }).then(response => response.body.access_token).catch(error => console.log(error));
 }
 
 /**
@@ -139,7 +139,7 @@ async function collectUsageData($, req, res) {
 
     const aTenantDBClients = await tenantUtil.getAllProvisionedTenantDBClients();
     if (aTenantDBClients.clients.length === 0) {
-        await console.log(aTenantDBClients.message);
+        console.log(aTenantDBClients.message);
         res.status = $.net.http.OK;
         res.setBody(JSON.stringify({ message: aTenantDBClients.message }));
         return;
@@ -162,7 +162,7 @@ async function collectUsageData($, req, res) {
                 message: 'can not get the user count from tenant DB'
             });
         } else {
-            await console.log('tenantId and UserCount: ', sTenantId, iUserCount);
+            console.log('tenantId and UserCount: ', sTenantId, iUserCount);
             try {
                 let oResult = await module.exports.sendUsageData({
                     'sAuthToken': sAuthToken,
@@ -192,11 +192,11 @@ async function collectUsageData($, req, res) {
 
 
     if (aFailedTenantInfo.length === 0) {
-        await console.log('all tenants usage data sent successfully');
+        console.log('all tenants usage data sent successfully');
         res.status = $.net.http.OK;
         res.setBody(JSON.stringify({ message: 'all tenants usage data sent successfully' }));
     } else {
-        await console.log('some tenants usage data sent failed :', aFailedTenantInfo);
+        console.log('some tenants usage data sent failed :', aFailedTenantInfo);
         res.status = $.net.http.INTERNAL_SERVER_ERROR;
         res.setBody(JSON.stringify({
             err_message: 'some tenants usage data sent failed ',

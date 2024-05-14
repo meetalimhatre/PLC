@@ -1,5 +1,5 @@
 // this file wraps the request handler and manages the outpu displayed to the end user
-const trace = $.import('xs.postinstall.xslib', 'trace');
+const trace = await $.import('xs.postinstall.xslib', 'trace');
 const _ = $.require('lodash');
 const whoAmI = 'xs.postinstall.xslib.traceWrapper';
 async function fatal(line) {
@@ -10,7 +10,7 @@ async function debug(line) {
 }
 
 
-function stringify_exception(ex) {
+async function stringify_exception(ex) {
     var eString = '';
     if (ex.constructor === Array) {
         _.each(ex, function (ex_it) {

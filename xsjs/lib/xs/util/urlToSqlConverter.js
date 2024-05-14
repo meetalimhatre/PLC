@@ -2,7 +2,7 @@ var _ = require('lodash');
 var BusinessObjectValidatorUtils = require('../validator/businessObjectValidatorUtils').BusinessObjectValidatorUtils;
 var helpers = require('./helpers');
 
-function excludeLowerForDates(sProperty) {
+async function excludeLowerForDates(sProperty) {
     const aDateProperties = [
         '_VALID_FROM',
         '_VALID_TO',
@@ -57,9 +57,9 @@ async function UrlToSqlConverter() {
         aStrSplit.sort();
 
         // build matrix with columns FIELD , VALUE and OPERATOR
-        oResult.FieldValueOperator = (await buildStringMatrixAndValidate(aStrSplit, aMetadata)).aFieldValueOperator;
-        oResult.FieldValueOperatorExclude = (await buildStringMatrixAndValidate(aStrSplit, aMetadata)).aFieldValueOperatorExclude;
-        oResult.FieldValueOperatorExcludeLength = (await buildStringMatrixAndValidate(aStrSplit, aMetadata)).iFieldValueOperatorExcludeLength;
+        oResult.FieldValueOperator = (buildStringMatrixAndValidate(aStrSplit, aMetadata)).aFieldValueOperator;
+        oResult.FieldValueOperatorExclude = (buildStringMatrixAndValidate(aStrSplit, aMetadata)).aFieldValueOperatorExclude;
+        oResult.FieldValueOperatorExcludeLength = (buildStringMatrixAndValidate(aStrSplit, aMetadata)).iFieldValueOperatorExcludeLength;
 
         return oResult;
     }
@@ -127,7 +127,7 @@ async function UrlToSqlConverter() {
         }
         //		add final entries where condition was != ( NOT LIKE ) with AND aOperator	
         for (var m = 0; m < iFieldValueOperatorExcludeLength; m++) {
-            if (await isNumber(aFieldValueOperatorExclude[m][3]) === true) {
+            if (isNumber(aFieldValueOperatorExclude[m][3]) === true) {
                 if (aFieldValueOperatorExclude[m][2] == '!=') {
                     aFieldValueOperatorExclude[m][2] = '<>';
                 }
@@ -137,7 +137,7 @@ async function UrlToSqlConverter() {
                 }
             }
             if (m == 0 && iFieldValueOperatorExcludeLength == iStrSplitLength) {
-                if (await isNumber(aFieldValueOperatorExclude[m][3]) === true) {
+                if (isNumber(aFieldValueOperatorExclude[m][3]) === true) {
                     aFieldValueOperatorExclude[m][1] = await parseDecimal(aFieldValueOperatorExclude[m][1]);
                     sResult = sResult.concat(`(lower(${ aFieldValueOperatorExclude[m][0] }) ${ aFieldValueOperatorExclude[m][2] } ${ aFieldValueOperatorExclude[m][1] }`);
                 } else {
@@ -148,7 +148,7 @@ async function UrlToSqlConverter() {
                     }
                 }
             } else {
-                if (await isNumber(aFieldValueOperatorExclude[m][3]) === true) {
+                if (isNumber(aFieldValueOperatorExclude[m][3]) === true) {
                     aFieldValueOperatorExclude[m][1] = await parseDecimal(aFieldValueOperatorExclude[m][1]);
                     sResult = sResult.concat(` AND (lower(${ aFieldValueOperatorExclude[m][0] }) ${ aFieldValueOperatorExclude[m][2] } ${ aFieldValueOperatorExclude[m][1] }`);
                 } else {
@@ -243,7 +243,7 @@ async function UrlToSqlConverter() {
 	 * @param  sValue  {string}             - string containing number
 	 * @returns   {string}                  - string containing number with decimal
 	 */
-    function parseDecimal(sValue) {
+    async function parseDecimal(sValue) {
         if (sValue.indexOf('.') == -1) {
             sValue = sValue + '.0';
         }
@@ -258,7 +258,7 @@ async function UrlToSqlConverter() {
 	 * @param  sColumnName  {string}        - column name
 	 * @returns   {string}                  - semantic data type of a field
 	 */
-    function getMetadataType(aMetadata, sColumnName) {
+    async function getMetadataType(aMetadata, sColumnName) {
         var sSemantincDataType;
         var aColumnMetadata = _.filter(aMetadata, function (oMetadataEntry) {
             return oMetadataEntry.COLUMN_ID === sColumnName;
@@ -272,11 +272,11 @@ async function UrlToSqlConverter() {
 	 * @param sPropertyType {string}	- property type of the value to be checked
 	 * @returns {boolean}				- true if the value used is a number, false otherwise
 	 */
-    function isNumber(sPropertyType) {
+    async function isNumber(sPropertyType) {
         return sPropertyType === 'Decimal' || sPropertyType.indexOf('Integer') !== -1;
     }
 }
-UrlToSqlConverter.prototype = await Object.create(UrlToSqlConverter.prototype);
+UrlToSqlConverter.prototype = Object.create(UrlToSqlConverter.prototype);
 UrlToSqlConverter.prototype.constructor = UrlToSqlConverter;
 
 module.exports.UrlToSqlConverter = UrlToSqlConverter;

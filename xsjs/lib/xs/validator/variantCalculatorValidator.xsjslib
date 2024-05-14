@@ -59,7 +59,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             return aSyntacticallyCorrectVariantItems;
         }
 
-        function changeMandatoryMetadataAttribute(aVariantMetadata, aAttributes, bIsMandatory) {
+        async function changeMandatoryMetadataAttribute(aVariantMetadata, aAttributes, bIsMandatory) {
             const aVariantMetadataAdapted = aVariantMetadata;
             if (aVariantMetadataAdapted) {
                 aAttributes.forEach(sAttribute => {
@@ -72,7 +72,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             return aVariantMetadata;
         }
 
-        function getVariantItemTableTypeTemplate(iVariantId) {
+        async function getVariantItemTableTypeTemplate(iVariantId) {
             return {
                 VARIANT_ID: iVariantId,
                 ITEM_ID: null,
@@ -82,7 +82,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             };
         }
 
-        function getVariantTableTypeTemplate(iCalculationVersionId) {
+        async function getVariantTableTypeTemplate(iCalculationVersionId) {
             return {
                 VARIANT_ID: null,
                 CALCULATION_VERSION_ID: iCalculationVersionId,
@@ -199,7 +199,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 VARIANT_ITEMS: aSyntacticallyCorrectVariantItems
             };
         }
-        function validatePutRequest() {
+        async function validatePutRequest() {
             oUtils.checkEmptyBody(oRequest.body);
         }
 
@@ -245,6 +245,6 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
         }
     };
 }
-VariantCalculatorValidator.prototype = await Object.create(VariantCalculatorValidator.prototype);
+VariantCalculatorValidator.prototype = Object.create(VariantCalculatorValidator.prototype);
 VariantCalculatorValidator.prototype.constructor = VariantCalculatorValidator;
 export default {MessageLibrary,PlcException,BusinessObjectTypes,_,MessageDetails,SQLMaximumInteger,VariantCalculatorValidator};

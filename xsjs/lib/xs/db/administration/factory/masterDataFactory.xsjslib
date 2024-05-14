@@ -4,11 +4,11 @@ let imps = {};
 // lazy load xsjslib files in factory
 let lazyImport = function (libfilename, objectname) {
     Object.defineProperty(imps, objectname, {
-        get: function () {
-            return (() => {
+        get: async function () {
+            return await (async () => {
                 let _objectname = '_' + objectname;
                 if (!(_objectname in this)) {
-                    this[_objectname] = $.import('xs.db.administration.factory', libfilename)[objectname];
+                    this[_objectname] = await $.import('xs.db.administration.factory', libfilename)[objectname];
                 }
                 return this[_objectname];
             })();
@@ -122,6 +122,6 @@ function MasterDataObjectHandlerFactory(dbConnection, hQuery) {
     };
 }
 
-MasterDataObjectHandlerFactory.prototype = await Object.create(MasterDataObjectHandlerFactory.prototype);
+MasterDataObjectHandlerFactory.prototype = Object.create(MasterDataObjectHandlerFactory.prototype);
 MasterDataObjectHandlerFactory.prototype.constructor = MasterDataObjectHandlerFactory;
 export default {BusinessObjectTypes,imps,lazyImport,MasterDataObjectHandlerFactory};

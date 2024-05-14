@@ -148,14 +148,14 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
         }
 
         async function validateCalculateLifecycleRequest() {
-            if (await helpers.isNullOrUndefined(mValidatedParameters.id)) {
+            if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = `If parameter ${ Constants.ProjectServiceParameters.action.name } is set to ${ mValidatedParameters.action }, also the parameter ${ Constants.ProjectServiceParameters.id.name } must be set.`;
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
             }
 
-            if (await helpers.isNullOrUndefinedOrEmpty(oRequest.body) != true) {
-                if (await helpers.isNullOrUndefinedOrEmpty(oRequest.body.asString()) != true) {
+            if (helpers.isNullOrUndefinedOrEmpty(oRequest.body) != true) {
+                if (helpers.isNullOrUndefinedOrEmpty(oRequest.body.asString()) != true) {
                     var oProj = utils.tryParseJson(oRequest.body.asString());
                     return oProj;
                 }
@@ -222,6 +222,6 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
     };
 }
 
-ProjectValidator.prototype = await Object.create(ProjectValidator.prototype);
+ProjectValidator.prototype = Object.create(ProjectValidator.prototype);
 ProjectValidator.prototype.constructor = ProjectValidator;
 export default {_,helpers,ProjectService,Constants,BusinessObjectTypes,MessageLibrary,PlcException,Code,XRegExp,GenericSyntaxValidator,ProjectValidator};

@@ -2,8 +2,8 @@ const helpers = $.require('../../util/helpers');
 const sStatusTableName = 'sap.plc.db::basis.t_status';
 var oConnection = null;
 
-function getCurrentSchemaName(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+async function getCurrentSchemaName(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 
@@ -26,7 +26,7 @@ async function run(oConnection) {
 
     const sCurrentSchema = await getCurrentSchemaName(oConnection);
     const sCurrentUser = $.getPlcUsername();
-    const oStatuses = oConnection.executeQuery(`SELECT STATUS_ID, DISPLAY_ORDER FROM "${ sCurrentSchema }"."${ sStatusTableName }" ORDER BY DISPLAY_ORDER,STATUS_ID ASC`);
+    const oStatuses = await oConnection.executeQuery(`SELECT STATUS_ID, DISPLAY_ORDER FROM "${ sCurrentSchema }"."${ sStatusTableName }" ORDER BY DISPLAY_ORDER,STATUS_ID ASC`);
     const aDisplayOrders = (await helpers.transposeResultArrayOfObjects(oStatuses)).DISPLAY_ORDER;
 
     if (oStatuses.length > 0 && new Set(aDisplayOrders).size !== oStatuses.length) {
@@ -72,7 +72,7 @@ async function run(oConnection) {
             currIndex = nextIndex;
         }
 
-        oConnection.executeUpdate(`UPSERT "${ sCurrentSchema }"."${ sStatusTableName }" (STATUS_ID, DISPLAY_ORDER, LAST_MODIFIED_ON, LAST_MODIFIED_BY) VALUES(?,?,?,?) WITH PRIMARY KEY`, aStatusesToUpsert);
+        await oConnection.executeUpdate(`UPSERT "${ sCurrentSchema }"."${ sStatusTableName }" (STATUS_ID, DISPLAY_ORDER, LAST_MODIFIED_ON, LAST_MODIFIED_BY) VALUES(?,?,?,?) WITH PRIMARY KEY`, aStatusesToUpsert);
         await oConnection.commit();
     }
 

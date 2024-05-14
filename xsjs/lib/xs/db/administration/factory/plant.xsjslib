@@ -1,10 +1,10 @@
 var _ = $.require('lodash');
 var helpers = $.require('../../../util/helpers');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
-var CompanyCode = $.import('xs.db.administration.factory', 'companyCode');
-var ControllingArea = $.import('xs.db.administration.factory', 'controllingArea');
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
+var CompanyCode = await $.import('xs.db.administration.factory', 'companyCode');
+var ControllingArea = await $.import('xs.db.administration.factory', 'controllingArea');
 
 function Plant(dbConnection, hQuery, sObjectName) {
 
@@ -63,7 +63,7 @@ function Plant(dbConnection, hQuery, sObjectName) {
         sSqlFilter = oProcedureParameters.sSqlFilter;
 
         if (oProcedureParameters.bAutocompleteIsNullOrUndefined === true) {
-            var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+            var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
 
             oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES] = Array.slice(result.OT_PLANT);
             oReturnObject[BusinessObjectsEntities.COMPANY_CODE_ENTITIES] = Array.slice(result.OT_COMPANY_CODE);
@@ -127,7 +127,7 @@ function Plant(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.PLANT_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            const rsPlant = dbConnection.executeQuery(stmt);
+            const rsPlant = await dbConnection.executeQuery(stmt);
             oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES] = _.values(rsPlant);
 
             const dependentPlants = await helpers.transposeResultArrayOfObjects(oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES], true);
@@ -142,6 +142,6 @@ function Plant(dbConnection, hQuery, sObjectName) {
     };
 }
 
-Plant.prototype = await Object.create(MasterDataBaseObject.prototype);
+Plant.prototype = Object.create(MasterDataBaseObject.prototype);
 Plant.prototype.constructor = Plant;
 export default {_,helpers,BusinessObjectsEntities,MasterDataBaseObject,apiHelpers,CompanyCode,ControllingArea,Plant};

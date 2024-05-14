@@ -102,7 +102,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         }
 
         try {
-            var fnProcedure = dbConnection.loadProcedure(MasterdataReadProcedures[sObjectName]);
+            var fnProcedure = await dbConnection.loadProcedure(MasterdataReadProcedures[sObjectName]);
             oReturnObject = this.getDataUsingSqlProcedure(fnProcedure, oDeterminedParameters);
         } catch (e) {
             const sLogMessage = `Error when procedure ${ MasterdataReadProcedures[sObjectName] } is called.`;
@@ -120,7 +120,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 	 * @param   {object} oProcedureParameters  - object with parameters - used to store parameters that will be sent to the procedures
 	 * @returns {object} oReturnObject         - object containing the main entities, referenced entities and texts
 	 */
-    MasterDataBaseObject.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    MasterDataBaseObject.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         return {};
     };
 
@@ -134,23 +134,23 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         this.currentMainOperations = [];
         this.currentTextOperations = [];
 
-        if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.CREATE, AdministrationObjType.MAIN_OBJ))
+        if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.CREATE, AdministrationObjType.MAIN_OBJ))
             this.currentMainOperations.push(Operation.CREATE);
-        if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPDATE, AdministrationObjType.MAIN_OBJ))
+        if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPDATE, AdministrationObjType.MAIN_OBJ))
             this.currentMainOperations.push(Operation.UPDATE);
-        if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.DELETE, AdministrationObjType.MAIN_OBJ))
+        if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.DELETE, AdministrationObjType.MAIN_OBJ))
             this.currentMainOperations.push(Operation.DELETE);
-        if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPSERT, AdministrationObjType.MAIN_OBJ))
+        if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPSERT, AdministrationObjType.MAIN_OBJ))
             this.currentMainOperations.push(Operation.UPSERT);
 
-        if (await hasBusinessObjectText(sObjectName)) {
-            if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.CREATE, AdministrationObjType.TEXT_OBJ))
+        if (hasBusinessObjectText(sObjectName)) {
+            if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.CREATE, AdministrationObjType.TEXT_OBJ))
                 this.currentTextOperations.push(Operation.CREATE);
-            if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPDATE, AdministrationObjType.TEXT_OBJ))
+            if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPDATE, AdministrationObjType.TEXT_OBJ))
                 this.currentTextOperations.push(Operation.UPDATE);
-            if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.DELETE, AdministrationObjType.TEXT_OBJ))
+            if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.DELETE, AdministrationObjType.TEXT_OBJ))
                 this.currentTextOperations.push(Operation.DELETE);
-            if (await isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPSERT, AdministrationObjType.TEXT_OBJ))
+            if (isOperationRequested(oBatchItems, sObjectName, BatchOperation.UPSERT, AdministrationObjType.TEXT_OBJ))
                 this.currentTextOperations.push(Operation.UPSERT);
         }
 
@@ -164,7 +164,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     /**
 	 * Add the templates used for validation in an array, in order to process them in a defined order
 	 */
-    MasterDataBaseObject.prototype.registerValidationTemplates = function () {
+    MasterDataBaseObject.prototype.registerValidationTemplates = async function () {
 
         // validation scripts for main entities
         if (_.includes(this.currentMainOperations, Operation.CREATE)) {
@@ -276,7 +276,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     async function fillFieldsReadOnlyContextProperty(aReadOnlyColumns) {
         var aFieldsReadOnlyProperty = [];
 
-        if (await helpers.isNullOrUndefined(aReadOnlyColumns))
+        if (helpers.isNullOrUndefined(aReadOnlyColumns))
             return aFieldsReadOnlyProperty;
 
         return aReadOnlyColumns;
@@ -290,18 +290,18 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     async function fillUsedInBusinessObjectsContextProperty(aUsedInBusinessObjects) {
         var aUsedInBusinessObjectsProperty = [];
 
-        if (await helpers.isNullOrUndefined(aUsedInBusinessObjects))
+        if (helpers.isNullOrUndefined(aUsedInBusinessObjects))
             return aUsedInBusinessObjectsProperty;
 
         _.each(aUsedInBusinessObjects, async function (oBusinessObject) {
             var oUsedInBusinessObjects = {};
             oUsedInBusinessObjects.BusinessObjectName = oBusinessObject.BusinessObjectName;
             oUsedInBusinessObjects.FieldsName = oBusinessObject.FieldsName;
-            if (await helpers.isNullOrUndefined(oBusinessObject.TableName))
+            if (helpers.isNullOrUndefined(oBusinessObject.TableName))
                 oUsedInBusinessObjects.TableName = Resources[oBusinessObject.BusinessObjectName].dbobjects.plcTable;
             else
                 oUsedInBusinessObjects.TableName = oBusinessObject.TableName;
-            if (await helpers.isNullOrUndefined(oBusinessObject.IsVersioned))
+            if (helpers.isNullOrUndefined(oBusinessObject.IsVersioned))
                 oUsedInBusinessObjects.IsVersioned = true;
             else
                 oUsedInBusinessObjects.IsVersioned = oBusinessObject.IsVersioned;
@@ -319,21 +319,21 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     async function fillReferencedObjectsContextProperty(aReferencedObjects) {
         var aReferencedObjectsProperty = [];
 
-        if (await helpers.isNullOrUndefined(aReferencedObjects))
+        if (helpers.isNullOrUndefined(aReferencedObjects))
             return aReferencedObjectsProperty;
 
         _.each(aReferencedObjects, async function (oBusinessObject) {
             var oRefObj = {};
             oRefObj.RefBusinessObjectName = oBusinessObject.BusinessObjectName;
             oRefObj.FieldsNameForMainObj = oBusinessObject.FieldsName;
-            if (await helpers.isNullOrUndefined(oBusinessObject.TableName)) {
+            if (helpers.isNullOrUndefined(oBusinessObject.TableName)) {
                 oRefObj.TableName = Resources[oBusinessObject.BusinessObjectName].dbobjects.plcTable;
                 oRefObj.FieldsNameForRefObj = Resources[oBusinessObject.BusinessObjectName].configuration.aKeyColumns;
             } else {
                 oRefObj.TableName = oBusinessObject.TableName;
                 oRefObj.FieldsNameForRefObj = oBusinessObject.FieldsName[0];
             }
-            if (await helpers.isNullOrUndefined(oBusinessObject.IsVersioned))
+            if (helpers.isNullOrUndefined(oBusinessObject.IsVersioned))
                 oRefObj.IsVersioned = true;
             else
                 oRefObj.IsVersioned = oBusinessObject.IsVersioned;
@@ -440,7 +440,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
             errors: []
         };
         await createResponseWithErrors(oResultObject, sObjectName, AdministrationObjType.MAIN_OBJ);
-        if (await hasBusinessObjectText(sObjectName)) {
+        if (hasBusinessObjectText(sObjectName)) {
             await createResponseWithErrors(oResultObject, sObjectName, AdministrationObjType.TEXT_OBJ);
         }
         if (sObjectName === BusinessObjectTypes.WorkCenter) {
@@ -482,7 +482,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         };
 
         await createResponseAfterProcessingEntries(oResultObject, sObjectName, AdministrationObjType.MAIN_OBJ, this.context.MasterdataBusinessObject.currentTimestamp, this.currentMainOperations, this.context.MasterdataBusinessObject.fieldsCustom);
-        if (await hasBusinessObjectText(sObjectName)) {
+        if (hasBusinessObjectText(sObjectName)) {
             await createResponseAfterProcessingEntries(oResultObject, sObjectName, AdministrationObjType.TEXT_OBJ, this.context.MasterdataBusinessObject.currentTimestamp, this.currentTextOperations, []);
         }
         if (sObjectName === BusinessObjectTypes.WorkCenter) {
@@ -520,7 +520,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         const sTemplate = fs.readFileSync(templatePath, { encoding: 'utf8' });
         sql = oTemplateEngine.compile(sTemplate, oContext);
         if (sql != '') {
-            dbConnection.executeUpdate(sql);
+            await dbConnection.executeUpdate(sql);
         }
     }
 
@@ -586,7 +586,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         });
 
         var sStmt = aStmtBuilder.join(' ');
-        dbConnection.executeUpdate(sStmt, aInsertValues);
+        await dbConnection.executeUpdate(sStmt, aInsertValues);
     }
 
 
@@ -597,11 +597,11 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     async function deleteTemporaryTableContent(sObjectName) {
 
         var sStmt = 'DELETE FROM "' + Resources[sObjectName].dbobjects.tempTable + '"';
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
 
-        if (await hasBusinessObjectText(sObjectName)) {
+        if (hasBusinessObjectText(sObjectName)) {
             sStmt = 'DELETE FROM "' + Resources[sObjectName].dbobjects.tempTextTable + '"';
-            dbConnection.executeUpdate(sStmt);
+            await dbConnection.executeUpdate(sStmt);
         }
     }
 
@@ -795,9 +795,9 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 
         var sStmt = aStmtBuilder.join(' ');
         if (sOperation === Operation.DELETE) {
-            aMaintainedEntries = dbConnection.executeQuery(sStmt, '', sOperation);
+            aMaintainedEntries = await dbConnection.executeQuery(sStmt, '', sOperation);
         } else {
-            aMaintainedEntries = dbConnection.executeQuery(sStmt, sMasterDataDate, '', sOperation);
+            aMaintainedEntries = await dbConnection.executeQuery(sStmt, sMasterDataDate, '', sOperation);
         }
 
         return Array.slice(aMaintainedEntries);
@@ -824,7 +824,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         }
 
         var sSelectStatement = 'select * from "' + sTempTable + "\" where ERROR_CODE <> ''";
-        var aErrorEntries = dbConnection.executeQuery(sSelectStatement);
+        var aErrorEntries = await dbConnection.executeQuery(sSelectStatement);
 
         _.each(aErrorEntries, async function (oErrorEntry, iIndex) {
             var oResult = {};
@@ -936,6 +936,6 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 
 }
 
-MasterDataBaseObject.prototype = await Object.create(MasterDataBaseObject.prototype);
+MasterDataBaseObject.prototype = Object.create(MasterDataBaseObject.prototype);
 MasterDataBaseObject.prototype.constructor = MasterDataBaseObject;
 export default {fs,path,appRoot,_,helpers,BusinessObjectTypes,Resources,MasterdataReadProcedures,Limits,Helper,Metadata,UrlToSqlConverter,MessageLibrary,MessageOperation,PlcException,MessageCode,MessageDetails,ValidationInfoCode,Severity,AdministrationObjType,Operation,BatchOperation,BusinessObjectValidatorUtils,TemplateEngine,oTemplateEngine,aAuditFieldsForVersionedEntries,aErrorFieldsInTemporaryTables,MasterDataBaseObject};

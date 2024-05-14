@@ -43,7 +43,7 @@ let checkGetRuntimeCredentials = async function () {
         try {
             oRuntimeCredentialsXsaOp = xsenv.getServices({ hana: { tag: 'hana' } });
         } catch (err) {
-            await console.log('[WARN]', err.message);
+            console.log('[WARN]', err.message);
             oRuntimeCredentialsXsaOp = null;
             let msg = 'ensureXsaRuntimeCredentials() error: ' + err.message;
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, msg);

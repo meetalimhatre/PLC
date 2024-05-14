@@ -1,14 +1,14 @@
 var _ = require('lodash');
 
 /* types of message severity */
-var Severity = await Object.freeze({
+var Severity = Object.freeze({
     INFO: 'Info',
     WARNING: 'Warning',
     ERROR: 'Error'
 });
 
 /* types of the methods. We can have CREATE, READ, UPDATE, DELETE, */
-var Operation = await Object.freeze({
+var Operation = Object.freeze({
     CREATE: 'Create',
     READ: 'Read',
     UPDATE: 'Update',
@@ -21,7 +21,7 @@ var Operation = await Object.freeze({
  * types of the messages code following naming pattern: <category>_<error_name>_<severity> =>
  * CALCULATION_UOM_NOT_FOUND_WARNING
  */
-var Code = await Object.freeze({
+var Code = Object.freeze({
     GENERAL_VALIDATION_ERROR: {
         code: 'GENERAL_VALIDATION_ERROR',
         responseCode: 500
@@ -492,7 +492,7 @@ var Code = await Object.freeze({
 
 
 
-var FormulaInterpreterErrorMapping = await Object.freeze({
+var FormulaInterpreterErrorMapping = Object.freeze({
     '1': Code.CALCULATIONENGINE_UOM_NOT_FOUND_WARNING,
     '2': Code.CALCULATIONENGINE_DIMENSION_NOT_FOUND_WARNING,
     '3': Code.CALCULATIONENGINE_DIMENSIONS_DO_NOT_MATCH_WARNING,
@@ -522,7 +522,7 @@ var FormulaInterpreterErrorMapping = await Object.freeze({
     '27': Code.CALCULATIONENGINE_COSTING_SHEET_OVERHEAD_ROW_FORMULA_DIVISION_BY_ZERO_WARNING
 });
 
-var ValidationInfoCode = await Object.freeze({
+var ValidationInfoCode = Object.freeze({
     SYNTACTIC_ERROR: 'SYNTACTIC_ERROR',
     MISSING_MANDATORY_ENTRY: 'MISSING_MANDATORY_ENTRY',
     SEMANTIC_ERROR: 'SEMANTIC_ERROR',
@@ -538,12 +538,12 @@ var ValidationInfoCode = await Object.freeze({
     MISSING_MANDATORY_PROPERTY: 'MISSING_MANDATORY_PROPERTY'
 });
 
-var AdministrationObjType = await Object.freeze({
+var AdministrationObjType = Object.freeze({
     MAIN_OBJ: 'MainObj',
     TEXT_OBJ: 'TextObj'
 });
 
-var NotWriteableEntityDetailsCode = await Object.freeze({
+var NotWriteableEntityDetailsCode = Object.freeze({
     IS_FROZEN: 'IS_FROZEN',
     IS_OPENED_BY_ANOTHER_USER: 'IS_OPENED_BY_ANOTHER_USER',
     IS_OPENED_IN_ANOTHER_CONTEXT: 'IS_OPENED_IN_ANOTHER_CONTEXT',
@@ -555,7 +555,7 @@ var NotWriteableEntityDetailsCode = await Object.freeze({
 
 
 
-function Details() {
+async function Details() {
     var messageTextObj;
 
     var userObjs;
@@ -756,13 +756,13 @@ function Details() {
         }
     });
 
-    this.setMessageText = function (sMessageText) {
+    this.setMessageText = async function (sMessageText) {
         messageTextObj = sMessageText;
         return this;
     };
 
 
-    this.addUserObj = function (oUserObj) {
+    this.addUserObj = async function (oUserObj) {
         if (userObjs === undefined) {
             userObjs = [];
         }
@@ -770,7 +770,7 @@ function Details() {
         return this;
     };
 
-    this.addCalculationObjs = function (oCalculationObj) {
+    this.addCalculationObjs = async function (oCalculationObj) {
         if (calculationObjs === undefined) {
             calculationObjs = [];
         }
@@ -778,7 +778,7 @@ function Details() {
         return this;
     };
 
-    this.addCalculationReferenceObjs = function (oCalculationObj) {
+    this.addCalculationReferenceObjs = async function (oCalculationObj) {
         if (calculationReferenceObjs === undefined) {
             calculationReferenceObjs = [];
         }
@@ -786,7 +786,7 @@ function Details() {
         return this;
     };
 
-    this.addVariantObjs = function (oVariantObj) {
+    this.addVariantObjs = async function (oVariantObj) {
         if (variantObjs === undefined) {
             variantObjs = [];
         }
@@ -794,7 +794,7 @@ function Details() {
         return this;
     };
 
-    this.addCalculationVersionObjs = function (oCalculationVersionObj) {
+    this.addCalculationVersionObjs = async function (oCalculationVersionObj) {
         if (calculationVersionObjs === undefined) {
             calculationVersionObjs = [];
         }
@@ -802,7 +802,7 @@ function Details() {
         return this;
     };
 
-    this.addCalculationVersionReferenceObjs = function (oCalculationVersionObj) {
+    this.addCalculationVersionReferenceObjs = async function (oCalculationVersionObj) {
         if (calculationVersionReferenceObjs === undefined) {
             calculationVersionReferenceObjs = [];
         }
@@ -810,7 +810,7 @@ function Details() {
         return this;
     };
 
-    this.addLifecycleCalculationVersionReferenceObjs = function (oCalculationVersionObj) {
+    this.addLifecycleCalculationVersionReferenceObjs = async function (oCalculationVersionObj) {
         if (lifecycleCalculationVersionReferenceObjs === undefined) {
             lifecycleCalculationVersionReferenceObjs = [];
         }
@@ -818,12 +818,12 @@ function Details() {
         return this;
     };
 
-    this.setLifecycleSurchargeDetailsObj = function (oOverlaps) {
+    this.setLifecycleSurchargeDetailsObj = async function (oOverlaps) {
         lifecycleSurchargeDetailsObj = oOverlaps;
         return this;
     };
 
-    this.addItemObjs = function (oItemObjs) {
+    this.addItemObjs = async function (oItemObjs) {
         if (itemObjs === undefined) {
             itemObjs = [];
         }
@@ -831,7 +831,7 @@ function Details() {
         return this;
     };
 
-    this.addProjectObjs = function (oProjectObjs) {
+    this.addProjectObjs = async function (oProjectObjs) {
         if (projectObjs === undefined) {
             projectObjs = [];
         }
@@ -839,7 +839,7 @@ function Details() {
         return this;
     };
 
-    this.addProjectReferenceObjs = function (oProjectObjs) {
+    this.addProjectReferenceObjs = async function (oProjectObjs) {
         if (projectReferenceObjs === undefined) {
             projectReferenceObjs = [];
         }
@@ -847,7 +847,7 @@ function Details() {
         return this;
     };
 
-    this.addFormulaObjs = function (oFormulaObjs) {
+    this.addFormulaObjs = async function (oFormulaObjs) {
         if (formulaObjs === undefined) {
             formulaObjs = [];
         }
@@ -855,7 +855,7 @@ function Details() {
         return this;
     };
 
-    this.addMetadataObjs = function (oMetadataObjs) {
+    this.addMetadataObjs = async function (oMetadataObjs) {
         if (metadataObjs === undefined) {
             metadataObjs = [];
         }
@@ -863,27 +863,27 @@ function Details() {
         return this;
     };
 
-    this.setPriceDeterminationObj = function (oPriceDeterminationObj) {
+    this.setPriceDeterminationObj = async function (oPriceDeterminationObj) {
         priceDeterminationObj = oPriceDeterminationObj;
         return this;
     };
 
-    this.setAccountDeterminationObj = function (oAccountDeterminationObj) {
+    this.setAccountDeterminationObj = async function (oAccountDeterminationObj) {
         accountDeterminationObj = oAccountDeterminationObj;
         return this;
     };
 
-    this.setDependentFieldDeterminationObj = function (oDependentFieldDeterminationObj) {
+    this.setDependentFieldDeterminationObj = async function (oDependentFieldDeterminationObj) {
         dependentFieldDeterminationObj = oDependentFieldDeterminationObj;
         return this;
     };
 
-    this.setNotWriteableEntityDetailsObj = function (oNotWriteableEntityDetailsObj) {
+    this.setNotWriteableEntityDetailsObj = async function (oNotWriteableEntityDetailsObj) {
         notWriteableEntityDetailsObj = oNotWriteableEntityDetailsObj;
         return this;
     };
 
-    this.addSettingsObj = function (oFrontendSettingsObj) {
+    this.addSettingsObj = async function (oFrontendSettingsObj) {
         if (settingsObj === undefined) {
             settingsObj = [];
         }
@@ -903,18 +903,18 @@ function Details() {
 
 
 
-function Message(oCode, sSeverity, oDetails, sOperation) {
+async function Message(oCode, sSeverity, oDetails, sOperation) {
 
     this.code = oCode.code;
     this.severity = sSeverity;
     this.details = oDetails;
     this.operation = sOperation;
 }
-Message.prototype = await Object.create(Message.prototype);
+Message.prototype = Object.create(Message.prototype);
 Message.prototype.constructor = Message;
 
 Message.fromPlcException = async function (oPlcException) {
-    return await new Message(oPlcException.code, Severity.ERROR, oPlcException.details, oPlcException.operation);
+    return  new Message(oPlcException.code, Severity.ERROR, oPlcException.details, oPlcException.operation);
 };
 
 
@@ -949,7 +949,7 @@ async function PlcException(oCode, sMessage, oDetails, sOperation, oInnerExcepti
         this.stack = oInnerException.stack;
     }
 }
-PlcException.prototype = await Object.create(Error.prototype);
+PlcException.prototype = Object.create(Error.prototype);
 PlcException.prototype.constructor = PlcException;
 
 

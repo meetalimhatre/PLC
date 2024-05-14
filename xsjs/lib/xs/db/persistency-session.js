@@ -4,7 +4,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     item_temporary: 'sap.plc.db::basis.t_item_temporary',
     item_temporary_ext: 'sap.plc.db::basis.t_item_temporary_ext',
     calculation_version_temporary: 'sap.plc.db::basis.t_calculation_version_temporary',
@@ -170,7 +170,7 @@ function Session($, dbConnection, hQuery) {
     };
 
     this.releaseLockTable = sObject => {
-        dbConnection.executeUpdate(`DELETE FROM "${ Tables.lock }"
+        await dbConnection.executeUpdate(`DELETE FROM "${ Tables.lock }"
                                WHERE LOCK_OBJECT = ?`, sObject);
     };
 
@@ -275,7 +275,7 @@ function Session($, dbConnection, hQuery) {
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
-        const iAffectedRows = dbConnection.executeUpdate(`update "${ Tables.session }" set LAST_ACTIVITY_TIME = CURRENT_UTCTIMESTAMP where SESSION_ID = ? and USER_ID = ?`, sSessionId, sUserId);
+        const iAffectedRows = await dbConnection.executeUpdate(`update "${ Tables.session }" set LAST_ACTIVITY_TIME = CURRENT_UTCTIMESTAMP where SESSION_ID = ? and USER_ID = ?`, sSessionId, sUserId);
         if (iAffectedRows === 0) {
             const sClientMsg = 'Session not found in the database.';
             const sServerMsg = `${ sClientMsg } Session id: ${ sSessionId }.`;
@@ -305,7 +305,7 @@ function Session($, dbConnection, hQuery) {
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
-        const iAffectedRows = dbConnection.executeUpdate(`upsert "${ Tables.user_activity }" (USER_ID, LAST_ACTIVITY_TIME)
+        const iAffectedRows = await dbConnection.executeUpdate(`upsert "${ Tables.user_activity }" (USER_ID, LAST_ACTIVITY_TIME)
             values (?, ?) 
             where USER_ID = ? and LAST_ACTIVITY_TIME between (ADD_MONTHS(NEXT_DAY(LAST_DAY(?)),-1))
             and (ADD_NANO100(NEXT_DAY(LAST_DAY(?)),-1))`, sUserId, sCurrentDate, sUserId, sCurrentDate, sCurrentDate);
@@ -329,26 +329,26 @@ function Session($, dbConnection, hQuery) {
      *             whenever sSessionId or sUserId is not a string
      */
     this.deleteOutdatedEntries = function () {
-        dbConnection.executeUpdate(`delete from "${ Tables.lock }" where USER_ID not in (select USER_ID FROM "${ Tables.session }")`);
-        dbConnection.executeUpdate(`delete from "${ Tables.open_projects }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
-        dbConnection.executeUpdate(`delete from "${ Tables.open_calculation_versions }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
-        dbConnection.executeUpdate(`delete from "${ Tables.item_temporary }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
-        dbConnection.executeUpdate(`delete from "${ Tables.calculation_version_temporary }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.lock }" where USER_ID not in (select USER_ID FROM "${ Tables.session }")`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.open_projects }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.open_calculation_versions }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.item_temporary }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.calculation_version_temporary }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
 
         // this function is removing all temporary versions without a valid session_id; if a new calculation was created but clients don't close nor save the initially  
         // created temporary version, a calculation without any version is remaining in t_calculation; this happens if calculations get created but clients don't call
         // "close" for the initial version (external clients/AddIns); it's important to check t_calculation_version_temporary because if now, intial versions of calculations
         // created by other user, will also be deleted
-        dbConnection.executeUpdate(`delete from "${ Tables.calculation }" 
+        await dbConnection.executeUpdate(`delete from "${ Tables.calculation }" 
 		            where CALCULATION_ID not in (
 		                select CALCULATION_ID from "${ Tables.calculation_version }"
 		                union
 		                select CALCULATION_ID from "${ Tables.calculation_version_temporary }"
 		           )`);
 
-        var bItemExtExists = dbConnection.executeQuery(`select table_name from "SYS"."TABLES" where schema_name=CURRENT_SCHEMA and table_name=? and is_user_defined_type=?`, Tables.item_temporary_ext, 'FALSE').length === 1;
+        var bItemExtExists = await dbConnection.executeQuery(`select table_name from "SYS"."TABLES" where schema_name=CURRENT_SCHEMA and table_name=? and is_user_defined_type=?`, Tables.item_temporary_ext, 'FALSE').length === 1;
         if (bItemExtExists) {
-            dbConnection.executeUpdate(`delete from "${ Tables.item_temporary_ext }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.item_temporary_ext }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
         }
     };
 
@@ -376,14 +376,14 @@ function Session($, dbConnection, hQuery) {
             var deleteGttItemTemporaryWithMasterDataCustomFieldsStatement = hQuery.statement(`delete from "${ Tables.gtt_item_temporary_with_masterdata_custom_fields }" WHERE SESSION_ID = ?`);
             await deleteGttItemTemporaryWithMasterDataCustomFieldsStatement.execute(sSessionId);
 
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_item_changed_active_state }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_reference_calculation_version_items }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_changed_items }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.t_item_ids }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_calculation_ids }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_calculation_version_ids }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_item_ids }"`);
-            dbConnection.executeUpdate(`delete from "${ Tables.gtt_masterdata_validator }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_item_changed_active_state }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_reference_calculation_version_items }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_changed_items }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.t_item_ids }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_calculation_ids }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_calculation_version_ids }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_item_ids }"`);
+            await dbConnection.executeUpdate(`delete from "${ Tables.gtt_masterdata_validator }"`);
         } catch (e) {
             // when running fresh installation from web interface
             // it will throw an error since the tables do not exist   
@@ -392,7 +392,7 @@ function Session($, dbConnection, hQuery) {
     };
 }
 
-Session.prototype = await Object.create(Session.prototype);
+Session.prototype = Object.create(Session.prototype);
 Session.prototype.constructor = Session;
 
 

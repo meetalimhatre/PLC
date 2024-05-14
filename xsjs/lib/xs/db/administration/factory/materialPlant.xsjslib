@@ -1,13 +1,13 @@
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 
 function MaterialPlant(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    MaterialPlant.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    MaterialPlant.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
-        var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+        var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
         oReturnObject[BusinessObjectsEntities.MATERIAL_PLANT_ENTITIES] = Array.slice(result.OT_MATERIAL_PLANT);
         oReturnObject[BusinessObjectsEntities.MATERIAL_ENTITIES] = Array.slice(result.OT_MATERIAL);
         oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES] = Array.slice(result.OT_PLANT);
@@ -20,6 +20,6 @@ function MaterialPlant(dbConnection, hQuery, sObjectName) {
     };
 }
 
-MaterialPlant.prototype = await Object.create(MasterDataBaseObject.prototype);
+MaterialPlant.prototype = Object.create(MasterDataBaseObject.prototype);
 MaterialPlant.prototype.constructor = MaterialPlant;
 export default {BusinessObjectsEntities,MasterDataBaseObject,MaterialPlant};

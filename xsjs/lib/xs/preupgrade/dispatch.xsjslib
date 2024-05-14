@@ -3,12 +3,12 @@ const MessageLibrary = $.require('../util/message');
 
 const PlcException = MessageLibrary.PlcException;
 const messageCode = MessageLibrary.Code;
-const Persistency = $.import('xs.db', 'persistency').Persistency;
+const Persistency = await $.import('xs.db', 'persistency').Persistency;
 const constants = $.require('../util/constants');
 const BusinessObjectTypes = constants.BusinessObjectTypes;
 
 const sPlatformConnection = $.require('../../platform/platformSpecificImports.js').getPostinstallConnection().postInstallConnection;
-const dbConnection = $.import(sPlatformConnection.substr(0, sPlatformConnection.lastIndexOf('.')), sPlatformConnection.substr(sPlatformConnection.lastIndexOf('.') + 1));
+const dbConnection = await $.import(sPlatformConnection.substr(0, sPlatformConnection.lastIndexOf('.')), sPlatformConnection.substr(sPlatformConnection.lastIndexOf('.') + 1));
 const ADMIN = 'Admin';
 
 /** prepare-upgrade

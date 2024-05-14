@@ -10,7 +10,7 @@ const VariantMatrixLockContext = Constants.CalculationVersionLockContext.VARIANT
 const VariantItemQuantityState = Constants.VariantItemQuantityState;
 const Metadata = require('./persistency-metadata').Metadata;
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     variant: 'sap.plc.db::basis.t_variant',
     variant_temporary: 'sap.plc.db::basis.t_variant_temporary',
     variant_item: 'sap.plc.db::basis.t_variant_item',
@@ -22,12 +22,12 @@ var Tables = await Object.freeze({
     calculation_with_privileges: 'sap.plc.db.authorization::privileges.v_calculation_read'
 });
 
-const Sequences = await Object.freeze({
+const Sequences = Object.freeze({
     variant_id: 'sap.plc.db.sequence::s_variant_id',
     calculation_version: 'sap.plc.db.sequence::s_calculation_version'
 });
 
-const Procedures = await Object.freeze({
+const Procedures = Object.freeze({
     p_calculate_variant: 'sap.plc.db.calcengine.procedures::p_calculate_variant',
     p_calculate_sum_variant: 'sap.plc.db.calcengine.procedures::p_calculate_sum_variant'
 });
@@ -50,13 +50,13 @@ async function Variant($, dbConnection, hQuery) {
      * REMARK: This check is only working based on the assuption that the SESSION_ID is the same as the USERNAME.
      * This approach was used in order to not change the data model but also have the USERNAME of the locking user.
      */
-    this.isLockedInAConcurrentVariantContext = iCalculationVersionId => {
+    this.isLockedInAConcurrentVariantContext = async iCalculationVersionId => {
         const sStmt = `select * from "${ Tables.open_calculation_versions }"
                        where CALCULATION_VERSION_ID = ? 
                        and CONTEXT = ?
                        and SESSION_ID != ?
                        and IS_WRITEABLE = 1 `;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, VariantMatrixLockContext, sUserId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, VariantMatrixLockContext, sUserId);
         return oQueryResult.length > 0;
     };
 
@@ -115,12 +115,12 @@ async function Variant($, dbConnection, hQuery) {
 
         sStmt += ' order by VARIANT_ORDER ';
 
-        const oQueryResult = dbConnection.executeQuery(sStmt);
+        const oQueryResult = await dbConnection.executeQuery(sStmt);
         return Array.from(oQueryResult);
     };
 
     this.getVariants = async function getVariants(iCalculationVersionId, aVariantIds) {
-        return await this.getVariantsInternal(iCalculationVersionId, aVariantIds, false);
+        return this.getVariantsInternal(iCalculationVersionId, aVariantIds, false);
     };
 
     /**
@@ -160,7 +160,7 @@ async function Variant($, dbConnection, hQuery) {
      */
     this.getCopiedVariants = async function getCopiedVariants(iCalculationVersionId) {
         let aVariantIds;
-        return await this.getVariantsInternal(iCalculationVersionId, aVariantIds, true);
+        return this.getVariantsInternal(iCalculationVersionId, aVariantIds, true);
     };
 
     /**
@@ -171,20 +171,20 @@ async function Variant($, dbConnection, hQuery) {
      * @returns {aReturnObject} -  Returns an array containing all the items,
      *                              found in the database for the variant.
      */
-    this.getVariantItems = function getVariantItems(iVariantId, aItemIds) {
+    this.getVariantItems = async function getVariantItems(iVariantId, aItemIds) {
         let sStmt = `select * from "${ Tables.variant_item }" where "VARIANT_ID" = ? `;
         if (!_.isUndefined(aItemIds) && aItemIds.length > 0) {
             sStmt += `and "ITEM_ID" in (${ aItemIds.join() })`;
         }
-        const oQueryResult = dbConnection.executeQuery(sStmt, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iVariantId);
         return Array.from(oQueryResult);
     };
     /*
     Remove all temporary transient variants and items from temporary tables when save is pressed
     */
-    this.removeTemporaryVariants = iCalculationVersionId => {
-        dbConnection.executeUpdate(`delete from "${ Tables.variant_temporary }" where CALCULATION_VERSION_ID = ${ iCalculationVersionId } and VARIANT_ID < 0`);
-        dbConnection.executeUpdate(`delete from "${ Tables.variant_item_temporary }" WHERE CALCULATION_VERSION_ID = ${ iCalculationVersionId } and VARIANT_ID < 0`);
+    this.removeTemporaryVariants = async iCalculationVersionId => {
+        await dbConnection.executeUpdate(`delete from "${ Tables.variant_temporary }" where CALCULATION_VERSION_ID = ${ iCalculationVersionId } and VARIANT_ID < 0`);
+        await dbConnection.executeUpdate(`delete from "${ Tables.variant_item_temporary }" WHERE CALCULATION_VERSION_ID = ${ iCalculationVersionId } and VARIANT_ID < 0`);
     };
 
     /**
@@ -226,8 +226,8 @@ async function Variant($, dbConnection, hQuery) {
         `;
         const aInsertValues = [];
         aInsertValues.push(Object.keys(oInsertObject).map(key => oInsertObject[key]));
-        const isCreated = dbConnection.executeUpdate(sStmt, aInsertValues);
-        const isCreatedTemp = dbConnection.executeUpdate(sStmtTemp, aInsertValues);
+        const isCreated = await dbConnection.executeUpdate(sStmt, aInsertValues);
+        const isCreatedTemp = await dbConnection.executeUpdate(sStmtTemp, aInsertValues);
         // Return the variant ID if the insert is successful otherwise throw an error
         if (isCreated[0] !== 1) {
             const sClientMsg = 'Error while inserting a new variant.';
@@ -247,7 +247,7 @@ async function Variant($, dbConnection, hQuery) {
      * @param {array}
      *            aVariantItemsToUpdate - an array of variant items to be updated
      */
-    this.upsertVariantItems = (iVariantId, aVariantItemsToUpsert, iCalculationVersionId) => {
+    this.upsertVariantItems = async (iVariantId, aVariantItemsToUpsert, iCalculationVersionId) => {
         // RF: decided to hard-code columns of t_variant_item because it's the most performant option and changes to table unlikely
         const aVariantItemKeys = [
             'VARIANT_ID',
@@ -276,7 +276,7 @@ async function Variant($, dbConnection, hQuery) {
             return aItemValues;
         });
 
-        dbConnection.executeUpdate(sStmt, aValues);
+        await dbConnection.executeUpdate(sStmt, aValues);
 
         aVariantItemKeys.push('CALCULATION_VERSION_ID');
 
@@ -291,7 +291,7 @@ async function Variant($, dbConnection, hQuery) {
             aEntry.push(iCalculationVersionId);
         });
 
-        dbConnection.executeUpdate(sStmtTemp, aValues);
+        await dbConnection.executeUpdate(sStmtTemp, aValues);
     };
 
     /**
@@ -300,7 +300,7 @@ async function Variant($, dbConnection, hQuery) {
      * @param {integer}
      *            iCalculationVersionId - id of the calculation version for which variants are moved to temporary tables
      */
-    this.copyToTemporaryTables = iCalculationVersionId => {
+    this.copyToTemporaryTables = async iCalculationVersionId => {
         const aVariantKeys = [
             'VARIANT_ID',
             'CALCULATION_VERSION_ID',
@@ -332,7 +332,7 @@ async function Variant($, dbConnection, hQuery) {
             'TOTAL_QUANTITY',
             'TOTAL_COST'
         ];
-        const aVariantIds = dbConnection.executeQuery(`select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = ${ iCalculationVersionId }`).map(dbObject => dbObject.VARIANT_ID);
+        const aVariantIds = await dbConnection.executeQuery(`select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = ${ iCalculationVersionId }`).map(dbObject => dbObject.VARIANT_ID);
         if (aVariantIds.length > 0) {
             const sStmtVariant = `
             UPSERT "${ Tables.variant_temporary }"  
@@ -346,8 +346,8 @@ async function Variant($, dbConnection, hQuery) {
             SELECT ${ aVariantItemKeys.join(', ') } , ${ iCalculationVersionId } as CALCULATION_VERSION_ID
             FROM "${ Tables.variant_item }"
             WHERE VARIANT_ID IN (${ aVariantIds.join(', ') })`;
-            dbConnection.executeUpdate(sStmtVariant);
-            dbConnection.executeUpdate(sStmtVariantItem);
+            await dbConnection.executeUpdate(sStmtVariant);
+            await dbConnection.executeUpdate(sStmtVariantItem);
         }
     };
 
@@ -367,7 +367,7 @@ async function Variant($, dbConnection, hQuery) {
      * @param {boolean}
      *            bUpdateOnlyTemporaryTable - true only when the temporary table should be updated
      */
-    this.update = (aVariantsToUpdate, aVariantsFromDatabase, iCalculationVersionId, bUpdateOnlyTemporaryTable = false) => {
+    this.update = async (aVariantsToUpdate, aVariantsFromDatabase, iCalculationVersionId, bUpdateOnlyTemporaryTable = false) => {
         const oColumnsSet = new Set(aVariantsToUpdate.map(oVariant => Object.keys(oVariant)));
         const oColumnSetSorted = oColumnsSet.values().next().value.sort();
         const aSortedColumns = _.without(oColumnSetSorted, 'VARIANT_ID', 'LAST_GENERATED_VERSION_ID', 'LAST_GENERATED_CALCULATION_ID');
@@ -400,9 +400,9 @@ async function Variant($, dbConnection, hQuery) {
         });
 
         if (bUpdateOnlyTemporaryTable === false) {
-            dbConnection.executeUpdate(sStmt, aValues);
+            await dbConnection.executeUpdate(sStmt, aValues);
         }
-        dbConnection.executeUpdate(sStmtTemp, aValues);
+        await dbConnection.executeUpdate(sStmtTemp, aValues);
     };
 
     /**
@@ -415,7 +415,7 @@ async function Variant($, dbConnection, hQuery) {
      * @param {boolean}
      *            bUpdateOnlyTemporaryTable - true only when the temporary table should be updated
      */
-    this.updateVariantItems = (iVariantId, aVariantItemsToUpdate, bUpdateOnlyTemporaryTable = false) => {
+    this.updateVariantItems = async (iVariantId, aVariantItemsToUpdate, bUpdateOnlyTemporaryTable = false) => {
         // prevent "ITEM_ID", "VARIANT_ID" as primary keys to be part of the updatable properties
         const aUpdateProperties = _.without(Object.keys(aVariantItemsToUpdate[0]), 'ITEM_ID', 'VARIANT_ID');
         const sStmt = `
@@ -444,9 +444,9 @@ async function Variant($, dbConnection, hQuery) {
         });
 
         if (bUpdateOnlyTemporaryTable == false) {
-            dbConnection.executeUpdate(sStmt, aValues);
+            await dbConnection.executeUpdate(sStmt, aValues);
         }
-        dbConnection.executeUpdate(sStmtTemp, aValues);
+        await dbConnection.executeUpdate(sStmtTemp, aValues);
     };
 
     /**
@@ -465,23 +465,23 @@ async function Variant($, dbConnection, hQuery) {
      * Gets all the ITEM_IDs of the base version
      * @return {array} - array of ITEM_IDs that belong to a calculation version
      */
-    this.getBaseVersionItems = iCalculationVersionId => {
+    this.getBaseVersionItems = async iCalculationVersionId => {
         const sStmt = `select ITEM_ID from "${ Tables.calculation_version_item }"
               where CALCULATION_VERSION_ID = ?`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
         return (await helpers.transposeResultArray(oQueryResult)).ITEM_ID || [];
     };
 
-    this.getBaseVersionLastModifiedOn = iCalculationVersionId => {
+    this.getBaseVersionLastModifiedOn = async iCalculationVersionId => {
         const sStmt = `select LAST_MODIFIED_ON from "${ Tables.calculation_version }"
                     where CALCULATION_VERSION_ID = ?`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
         return oQueryResult[0].LAST_MODIFIED_ON;
     };
 
-    this.deleteNotMatchingVariantItems = (iCalculationVersionId, iVariantId) => {
+    this.deleteNotMatchingVariantItems = async (iCalculationVersionId, iVariantId) => {
         const sStmt = ` DELETE FROM "${ Tables.variant_item }"
                         WHERE variant_id = ?
                         AND item_id IN (
@@ -494,10 +494,10 @@ async function Variant($, dbConnection, hQuery) {
                             AND calculation_version_item.item_id IS NULL
                         )`;
 
-        dbConnection.executeUpdate(sStmt, iVariantId, iCalculationVersionId, iVariantId);
+        await dbConnection.executeUpdate(sStmt, iVariantId, iCalculationVersionId, iVariantId);
     };
 
-    this.deleteVariant = (iCalculationVersionId, iVariantId) => {
+    this.deleteVariant = async (iCalculationVersionId, iVariantId) => {
         const sStmt = ` DELETE FROM "${ Tables.variant }"
                         WHERE CALCULATION_VERSION_ID = ?
                         AND VARIANT_ID = ?`;
@@ -505,17 +505,17 @@ async function Variant($, dbConnection, hQuery) {
                         WHERE CALCULATION_VERSION_ID = ?
                         AND VARIANT_ID = ?`;
 
-        dbConnection.executeUpdate(sStmtTemp, iCalculationVersionId, iVariantId);
-        return dbConnection.executeUpdate(sStmt, iCalculationVersionId, iVariantId);
+        await dbConnection.executeUpdate(sStmtTemp, iCalculationVersionId, iVariantId);
+        return await dbConnection.executeUpdate(sStmt, iCalculationVersionId, iVariantId);
     };
 
-    this.deleteVariantItems = iVariantId => {
+    this.deleteVariantItems = async iVariantId => {
         const sStmt = ` DELETE FROM "${ Tables.variant_item }"
                         WHERE VARIANT_ID = ?`;
         const sStmtTemp = ` DELETE FROM "${ Tables.variant_item_temporary }"
                         WHERE VARIANT_ID = ?`;
-        dbConnection.executeUpdate(sStmtTemp, iVariantId);
-        return dbConnection.executeUpdate(sStmt, iVariantId);
+        await dbConnection.executeUpdate(sStmtTemp, iVariantId);
+        return await dbConnection.executeUpdate(sStmt, iVariantId);
     };
 
     this.calculateVariant = (iCalculationVersionId, aVariants, aVariantItems) => {
@@ -559,7 +559,7 @@ async function Variant($, dbConnection, hQuery) {
      * @returns {integer} iNextCalculationVersionId - If the generation is successful the new calculation version id is returned, else 0 is returned.
      *
      */
-    this.generateCalculationVersion = (iVariantId, iCalculationId, sCalculationVersionName) => {
+    this.generateCalculationVersion = async (iVariantId, iCalculationId, sCalculationVersionName) => {
         const iNextCalculationVersionId = this.helper.getNextSequenceID(Sequences.calculation_version);
         const sStmt = `
         insert into "${ Tables.calculation_version }"
@@ -604,7 +604,7 @@ async function Variant($, dbConnection, hQuery) {
         where variant.variant_id = ?
         `;
 
-        const iInsertedRowCount = dbConnection.executeUpdate(sStmt, iCalculationId, sCalculationVersionName, sUserId, sUserId, iVariantId);
+        const iInsertedRowCount = await dbConnection.executeUpdate(sStmt, iCalculationId, sCalculationVersionName, sUserId, sUserId, iVariantId);
         if (iInsertedRowCount !== 1) {
             const sClientMsg = 'Error while generating a new calculation version';
             $.trace.error(sClientMsg);
@@ -623,7 +623,7 @@ async function Variant($, dbConnection, hQuery) {
      * @returns {integer} - Returns the number of rows inserted.
      *
      */
-    this.generateCalculationVersionItems = (iCalculationVersionId, iVariantId) => {
+    this.generateCalculationVersionItems = async (iCalculationVersionId, iVariantId) => {
         const sStmt = `
         insert into "${ Tables.calculation_version_item }"
             (item_id, calculation_version_id, parent_item_id, predecessor_item_id, is_active, highlight_green, highlight_orange, highlight_yellow,
@@ -786,7 +786,7 @@ async function Variant($, dbConnection, hQuery) {
             where variant.variant_id = ?
             and variant_item.is_included = 1
         `;
-        const iInsertedRowCount = dbConnection.executeUpdate(sStmt, iCalculationVersionId, sUserId, sUserId, iVariantId);
+        const iInsertedRowCount = await dbConnection.executeUpdate(sStmt, iCalculationVersionId, sUserId, sUserId, iVariantId);
         if (iInsertedRowCount === 0) {
             const sClientMsg = 'Error while generating a new calculation version';
             $.trace.error(sClientMsg);
@@ -804,7 +804,7 @@ async function Variant($, dbConnection, hQuery) {
                                                 and ITEM_ID in (select ITEM_ID 
                                                                 from "${ Tables.calculation_version_item }" 
                                                                 where calculation_version_id = ?)`;
-            dbConnection.executeUpdate(sInsertStatementItemExt, iCalculationVersionId, iVariantId, iCalculationVersionId);
+            await dbConnection.executeUpdate(sInsertStatementItemExt, iCalculationVersionId, iVariantId, iCalculationVersionId);
         }
         return iInsertedRowCount;
     };
@@ -817,14 +817,14 @@ async function Variant($, dbConnection, hQuery) {
      * @returns {aReturnObject} -  Returns an array containing all the excluded items (ITEM_ID, PREDECESSOR_ITEM_ID),
      *                             found in the database for the given variant id.
      */
-    this.getExcludedVariantItems = (iCalculationVersionId, iVariantId) => {
+    this.getExcludedVariantItems = async (iCalculationVersionId, iVariantId) => {
         const sStmt = `select version_items.ITEM_ID, version_items.PREDECESSOR_ITEM_ID from "${ Tables.variant_item }" as variant_items 
                         inner join "${ Tables.calculation_version_item }" as version_items
                             on version_items.item_id = variant_items.item_id
                             and version_items.calculation_version_id = ?
                         where variant_items.VARIANT_ID = ?
                         and variant_items.IS_INCLUDED = 0;`;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, iVariantId);
         return Array.from(oQueryResult);
     };
 
@@ -836,14 +836,14 @@ async function Variant($, dbConnection, hQuery) {
      *
      * @returns {aReturnObject} -  Returns an array containing incorrect predecessors that have to be replaced
      */
-    this.getVersionItemsWrongPredecessor = (iGeneratedCalculationVersionId, iVariantId) => {
+    this.getVersionItemsWrongPredecessor = async (iGeneratedCalculationVersionId, iVariantId) => {
         const sStmt = `select version_items.PREDECESSOR_ITEM_ID from "${ Tables.variant_item }" as variant_items 
                         inner join "${ Tables.calculation_version_item }" as version_items
                             on version_items.predecessor_item_id = variant_items.item_id
                             and version_items.calculation_version_id = ?
                         where variant_items.VARIANT_ID = ?
                         and variant_items.IS_INCLUDED = 0;`;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iGeneratedCalculationVersionId, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iGeneratedCalculationVersionId, iVariantId);
         return Array.from(oQueryResult);
     };
 
@@ -854,7 +854,7 @@ async function Variant($, dbConnection, hQuery) {
      *                                         - PREDECESSOR_TO_CHANGE: represents a PREDECESSOR_ITEM_ID that is not correct and has to be replaced
      *                                         - CORRECT_PREDECESSOR: the replacement of the PREDECESSOR_TO_CHANGE
      */
-    this.updateVersionItemsPredecessors = (iVersionId, aVariantItemsToUpdate) => {
+    this.updateVersionItemsPredecessors = async (iVersionId, aVariantItemsToUpdate) => {
         const sStmt = `
             update "${ Tables.calculation_version_item }" set 
                 PREDECESSOR_ITEM_ID = ?
@@ -867,7 +867,7 @@ async function Variant($, dbConnection, hQuery) {
             aItemValues.push(iVersionId);
             return aItemValues;
         });
-        return dbConnection.executeUpdate(sStmt, aValues);
+        return await dbConnection.executeUpdate(sStmt, aValues);
     };
 
 
@@ -879,8 +879,8 @@ async function Variant($, dbConnection, hQuery) {
      * @param {array} aListOfItemsToUpdate - list of item to be corrected.
      */
 
-    this.updateParentsIsIncludedState = function (iVariantId, aListOfItemsToUpdate) {
-        dbConnection.executeUpdate(`UPDATE "${ Tables.variant_item }" set IS_INCLUDED = 1
+    this.updateParentsIsIncludedState = async function (iVariantId, aListOfItemsToUpdate) {
+        await dbConnection.executeUpdate(`UPDATE "${ Tables.variant_item }" set IS_INCLUDED = 1
             WHERE VARIANT_ID = ? AND IS_INCLUDED = 0 AND
             ITEM_ID in (${ aListOfItemsToUpdate.join(',') })`, iVariantId);
     };
@@ -891,8 +891,8 @@ async function Variant($, dbConnection, hQuery) {
      * @param {integer} iVersionId - id of the calculation version
      * @return {boolean} true if sum variant exists for given calc version, false otherwise
      */
-    this.checkSumVariantExists = iVersionId => {
-        const aQueryResult = dbConnection.executeQuery(` select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = '${ iVersionId }' and VARIANT_TYPE = 1`);
+    this.checkSumVariantExists = async iVersionId => {
+        const aQueryResult = await dbConnection.executeQuery(` select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = '${ iVersionId }' and VARIANT_TYPE = 1`);
         return aQueryResult.length !== 0;
     };
 
@@ -900,14 +900,14 @@ async function Variant($, dbConnection, hQuery) {
      * 
      * @param {integer} iVariantId - id of variant
      */
-    this.addQuantityUomToItems = iVariantId => {
+    this.addQuantityUomToItems = async iVariantId => {
         const sStmt = `update variantItem set QUANTITY_UOM_ID = variantItemTemporary.QUANTITY_UOM_ID
             from "${ Tables.variant_item }" variantItem inner join "${ Tables.variant_item_temporary }" variantItemTemporary on variantItem.ITEM_ID = variantItemTemporary.ITEM_ID and
             variantItem.VARIANT_ID = variantItemTemporary.VARIANT_ID and variantItem.VARIANT_ID = ${ iVariantId }`;
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     };
 }
-Variant.prototype = await Object.create(Variant.prototype);
+Variant.prototype = Object.create(Variant.prototype);
 Variant.prototype.constructor = Variant;
 
 module.exports.Tables = Tables;

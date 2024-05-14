@@ -1,6 +1,6 @@
-var oInstanceBasedPrivilege = $.import('xs.postinstall.release_2_1_0', '02_grant_instance_based_privileges');
+var oInstanceBasedPrivilege = await $.import('xs.postinstall.release_2_1_0', '02_grant_instance_based_privileges');
 var oConnection = await $.hdb.getConnection();
-oConnection.setAutoCommit(true);
+await oConnection.setAutoCommit(true);
 try {
     if ($.request.method === $.net.http.POST) {
         var sUserList = $.request.parameters[0].value;

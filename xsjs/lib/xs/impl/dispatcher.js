@@ -146,7 +146,7 @@ const retentionPeriods = async function ($) {
 
 let sVersionId;
 
-const Privileges = await Object.freeze({
+const Privileges = Object.freeze({
     BASE_ACCESS: 'Base',
     EXT_GREET: 'ExtGreet',
     ADDIN_EDIT: 'AddinE',
@@ -249,7 +249,7 @@ module.exports.Privileges = Privileges;
 // projects and calculation versions reference master data; if during update or create requests, references are changed, the response contains the newly
 // referenced master data entities; in order to prevent enumeration attacks, update and create requests for calculation versions and projects need to
 //  have read privileges for all the master data entities they reference; those are listed here and used in the resource definition below
-const aEditProjectsMasterdataPrivileges = await Object.freeze([
+const aEditProjectsMasterdataPrivileges = Object.freeze([
     Privileges.COSTING_SHEET_READ,
     Privileges.COMPONENT_SPLIT_READ,
     Privileges.PLANT_READ,
@@ -266,7 +266,7 @@ const aEditProjectsMasterdataPrivileges = await Object.freeze([
     Privileges.MATERIAL_READ
 ]);
 
-const aEditCalculationVersionMasterdataPrivileges = await Object.freeze([
+const aEditCalculationVersionMasterdataPrivileges = Object.freeze([
     Privileges.MATERIAL_PRICE_READ,
     Privileges.ACTIVITY_PRICE_READ,
     Privileges.ACCOUNT_READ,
@@ -298,7 +298,7 @@ const aEditCalculationVersionMasterdataPrivileges = await Object.freeze([
 
 // For each "businessLogic", the value is changed from array of callbacks to a function. In this way, the passed in callbacks in array are imported
 // only when actually invoked, instead of the timepoint when Resources object is initialized.
-module.exports.Resources = await Object.freeze({
+module.exports.Resources = Object.freeze({
     'auth': {
         'GET': {
             parameters: [],
@@ -1812,7 +1812,7 @@ module.exports.Resources = await Object.freeze({
 module.exports.prepareDispatch = async function ($) {
 
     let Connection = await new (require('../db/connection/connection')).ConnectionFactory($);
-    let Persistency = $.import('xs.db', 'persistency').Persistency;
+    let Persistency = await $.import('xs.db', 'persistency').Persistency;
     let persistency = await new Persistency(await Connection.getConnection());
     return {
         xsjsContext: $,
@@ -1930,7 +1930,7 @@ class Dispatcher {
             }
 
             const sRequestMethod = HttpMethodMapping[oRequest.method];
-            if (await Helpers.isNullOrUndefined(sRequestMethod)) {
+            if (Helpers.isNullOrUndefined(sRequestMethod)) {
                 const sLogMessage = `Unknown request method ${ oRequest.method }`;
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_METHOD_NOT_ALLOWED_ERROR, sLogMessage);
@@ -1958,7 +1958,7 @@ class Dispatcher {
                 await (await persistency.getConnection()).commit();
             }
 
-            const LibValidator = $.import('xs.validator', 'validator');
+            const LibValidator = await $.import('xs.validator', 'validator');
             const ValidatorInput = LibValidator.ValidatorInput;
             const Validator = LibValidator.Validator;
             var oValidatorInput = await new ValidatorInput(oRequest, sResourceDefinitionKey);
@@ -1996,7 +1996,7 @@ class Dispatcher {
         }
 
         async function getRequiredPrivileges(oRequestDefinition, aParameters) {
-            if (await Helpers.isNullOrUndefined(oRequestDefinition.privilege)) {
+            if (Helpers.isNullOrUndefined(oRequestDefinition.privilege)) {
                 throw new (await new InternalException('privileges not defined' + $.net.http.INTERNAL_SERVER_ERROR, 500))();
             }
             var aPrivilege;
@@ -2012,7 +2012,7 @@ class Dispatcher {
                         });
                     }
                 });
-                if (await Helpers.isNullOrUndefined(aPrivilege)) {
+                if (Helpers.isNullOrUndefined(aPrivilege)) {
                     const sLogMessage = `Parameter '${ oRequestDefinition.privilege.parameterName }' not set or set with invalid value. 
 				    Required privilege cannot be determined ${ $.net.http.INTERNAL_SERVER_ERROR }.`;
                     $.trace.error(sLogMessage);
@@ -2029,7 +2029,7 @@ class Dispatcher {
         }
 
         async function checkPrivilege(aPrivilege) {
-            if (await Helpers.isNullOrUndefined(aPrivilege) || !_.isArray(aPrivilege)) {
+            if (Helpers.isNullOrUndefined(aPrivilege) || !_.isArray(aPrivilege)) {
                 const sLogMessage = 'aPrivilege must be an array.';
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
@@ -2077,7 +2077,7 @@ class Dispatcher {
                 }
                 switch (sBusinessObjectType) {
                 case AuthorizationManager.BusinessObjectTypes.Project:
-                    if (await Helpers.isNullOrUndefined(oRequestContent.parameters.id) || _.includes(CalculationServiceParameters, oRequestContent.parameters.action)) {
+                    if (Helpers.isNullOrUndefined(oRequestContent.parameters.id) || _.includes(CalculationServiceParameters, oRequestContent.parameters.action)) {
                         sBusinessObjectId = await Helpers.isNullOrUndefined(_.result(oRequestContent.data, 'PROJECT_ID')) ? _.result(_.find(oRequestContent.data, 'PROJECT_ID'), 'PROJECT_ID') : _.result(oRequestContent.data, 'PROJECT_ID');
                     } else {
                         sBusinessObjectId = oRequestContent.parameters.id;
@@ -2136,7 +2136,7 @@ class Dispatcher {
     }
 }
 
-Dispatcher.prototype = await Object.create(Dispatcher.prototype);
+Dispatcher.prototype = Object.create(Dispatcher.prototype);
 ;
 
 module.exports.Dispatcher = Dispatcher;

@@ -7,15 +7,15 @@ function check(oConnection) {
     return true;
 }
 
-function getCurrentSchemaName(oConnection) {
-    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+async function getCurrentSchemaName(oConnection) {
+    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
     const sCurrentSchema = await getCurrentSchemaName(oConnection);
 
     //Get all custom fields with currency and rollup
-    const oCustomFieldsCurrencyRollup = oConnection.executeQuery(`SELECT "COLUMN_ID" FROM "${ sCurrentSchema }"."${ sMetadataTable }"
+    const oCustomFieldsCurrencyRollup = await oConnection.executeQuery(`SELECT "COLUMN_ID" FROM "${ sCurrentSchema }"."${ sMetadataTable }"
                                                                     WHERE "IS_CUSTOM" = 1
                                                                     AND "ROLLUP_TYPE_ID" != 0
                                                                     AND "PROPERTY_TYPE" = 7
@@ -30,7 +30,7 @@ async function run(oConnection) {
         const sInCondition = aColumnNames.map(column => `'${ column }'`).join(',');
 
         // Check if the script was already executed
-        const iNumberOfMinusOnes = oConnection.executeQuery(`SELECT COUNT(*) AS COUNTER
+        const iNumberOfMinusOnes = await oConnection.executeQuery(`SELECT COUNT(*) AS COUNTER
                                                                 FROM "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
                                                                 WHERE "COLUMN_ID" IN (${ sInCondition })
                                                                 AND "SUBITEM_STATE" = -1;`)[0].COUNTER;
@@ -42,7 +42,7 @@ async function run(oConnection) {
          *  for the SUBITEM_STATE column.
          */
         aColumnNames.forEach(sColumn => {
-            oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
+            await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
                                         SET SUBITEM_STATE = 0 
                                         WHERE "PATH" = '${ sItem }'
                                         AND "BUSINESS_OBJECT" = '${ sItem }'
@@ -53,9 +53,9 @@ async function run(oConnection) {
          *  with the value 1 for SUBITEM_STATE and IS_READ_ONLY columns.
          */
         const currentUser = $.getPlcUsername();
-        let aExistingRows = oConnection.executeQuery(`SELECT * FROM "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" WHERE "PATH" = '${ sItem }' AND "BUSINESS_OBJECT" = '${ sItem }' AND "COLUMN_ID" IN (${ sInCondition });`);
+        let aExistingRows = await oConnection.executeQuery(`SELECT * FROM "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" WHERE "PATH" = '${ sItem }' AND "BUSINESS_OBJECT" = '${ sItem }' AND "COLUMN_ID" IN (${ sInCondition });`);
         aExistingRows.forEach(oRow => {
-            oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" 
+            await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" 
                                 ("PATH", "BUSINESS_OBJECT", "COLUMN_ID", "ITEM_CATEGORY_ID", "SUBITEM_STATE", "IS_MANDATORY", "IS_READ_ONLY", "IS_TRANSFERABLE", "DEFAULT_VALUE", "CREATED_ON", "CREATED_BY", "LAST_MODIFIED_ON", "LAST_MODIFIED_BY")
                                 VALUES('${ oRow.PATH }', '${ oRow.BUSINESS_OBJECT }', '${ oRow.COLUMN_ID }', ${ oRow.ITEM_CATEGORY_ID }, 
                                 1, ${ oRow.IS_MANDATORY }, 1, ${ oRow.IS_TRANSFERABLE }, 

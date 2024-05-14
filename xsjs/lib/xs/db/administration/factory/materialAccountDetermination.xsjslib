@@ -2,7 +2,7 @@ var _ = $.require('lodash');
 var helpers = $.require('../../../util/helpers');
 var Resources = $.require('../../../util/masterdataResources').MasterdataResource;
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
 var MessageLibrary = $.require('../../../util/message');
 var PlcException = MessageLibrary.PlcException;
 var MessageCode = MessageLibrary.Code;
@@ -14,9 +14,9 @@ function MaterialAccountDetermination(dbConnection, hQuery, sObjectName) {
 
     MasterDataBaseObject.apply(this, arguments);
 
-    MaterialAccountDetermination.prototype.getDataUsingSqlProcedure = function (fnProcedure, oProcedureParameters) {
+    MaterialAccountDetermination.prototype.getDataUsingSqlProcedure = async function (fnProcedure, oProcedureParameters) {
         var oReturnObject = {};
-        var result = fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
+        var result = await fnProcedure(oProcedureParameters.sLanguage, oProcedureParameters.sMasterDataDate, oProcedureParameters.sSqlFilter, oProcedureParameters.iTopRecords, oProcedureParameters.iSkipRecords);
 
         oReturnObject[BusinessObjectsEntities.MATERIAL_ACCOUNT_DETERMINATION_ENTITIES] = Array.slice(result.OT_MATERIAL_ACCOUNT_DETERMINATION);
         oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = Array.slice(result.OT_CONTROLLING_AREA);
@@ -33,13 +33,13 @@ function MaterialAccountDetermination(dbConnection, hQuery, sObjectName) {
 	 * Keys: MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID can be empty
 	*/
     MaterialAccountDetermination.prototype.initializeColumns = async function (oRecord, sOperation, sObjectType) {
-        if (await helpers.isNullOrUndefined(oRecord.MATERIAL_TYPE_ID)) {
+        if (helpers.isNullOrUndefined(oRecord.MATERIAL_TYPE_ID)) {
             oRecord.MATERIAL_TYPE_ID = '';
         }
-        if (await helpers.isNullOrUndefined(oRecord.PLANT_ID)) {
+        if (helpers.isNullOrUndefined(oRecord.PLANT_ID)) {
             oRecord.PLANT_ID = '';
         }
-        if (await helpers.isNullOrUndefined(oRecord.VALUATION_CLASS_ID)) {
+        if (helpers.isNullOrUndefined(oRecord.VALUATION_CLASS_ID)) {
             oRecord.VALUATION_CLASS_ID = '';
         }
     };
@@ -60,6 +60,6 @@ function MaterialAccountDetermination(dbConnection, hQuery, sObjectName) {
 
 }
 
-MaterialAccountDetermination.prototype = await Object.create(MasterDataBaseObject.prototype);
+MaterialAccountDetermination.prototype = Object.create(MasterDataBaseObject.prototype);
 MaterialAccountDetermination.prototype.constructor = MaterialAccountDetermination;
 export default {_,helpers,Resources,BusinessObjectsEntities,MasterDataBaseObject,MessageLibrary,PlcException,MessageCode,ValidationInfoCode,AdministrationObjType,Operation,MaterialAccountDetermination};

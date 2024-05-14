@@ -148,7 +148,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                     await utils.checkMandatoryProperties(oBodyItem, _.union(aMandatoryPropertiesMetadata, ['UOM_CURRENCY_FLAG']));
                     utils.checkInvalidProperties(oBodyItem, aValidPropertiesMetadata);
                     if (colRegexUnit.exec(oBodyItem.COLUMN_ID)) {
-                        if (await helpers.isNullOrUndefined(oBodyItem.PROPERTY_TYPE) && oBodyItem.UOM_CURRENCY_FLAG === 1) {
+                        if (helpers.isNullOrUndefined(oBodyItem.PROPERTY_TYPE) && oBodyItem.UOM_CURRENCY_FLAG === 1) {
                             const oMessageDetails = new MessageDetails();
                             oMessageDetails.addMetadataObjs(oBodyItem);
                             oMessageDetails.validationObj = {
@@ -342,7 +342,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
 
                     var aAttributes = oBodyItem.ATTRIBUTES;
                     if (_.isArray(aAttributes) || aAttributes.length > 0) {
-                        if (await helpers.isNullOrUndefined(oMetaData)) {
+                        if (helpers.isNullOrUndefined(oMetaData)) {
                             oMetaData = metadataProvider.get(oBodyItem.PATH, oBodyItem.BUSINESS_OBJECT, oBodyItem.COLUMN_ID, null, persistency, sSessionId, sUserId);
                             if (oMetaData === undefined || oMetaData.length === 0) {
                                 const oMessageDetails = new MessageDetails();
@@ -654,6 +654,6 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
     };
 }
 
-CustomfieldsformulaValidator.prototype = await Object.create(CustomfieldsformulaValidator.prototype);
+CustomfieldsformulaValidator.prototype = Object.create(CustomfieldsformulaValidator.prototype);
 CustomfieldsformulaValidator.prototype.constructor = CustomfieldsformulaValidator;
 export default {_,helpers,constants,ValidationException,GenericSyntaxValidator,MessageLibrary,MessageDetails,PlcException,Code,ValidationInfoCode,sUserId,sSessionId,CustomfieldsformulaValidator};

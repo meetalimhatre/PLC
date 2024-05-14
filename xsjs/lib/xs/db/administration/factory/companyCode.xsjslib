@@ -1,8 +1,8 @@
 var _ = $.require('lodash');
 var helpers = $.require('../../../util/helpers');
 var BusinessObjectsEntities = $.require('../../../util/masterdataResources').BusinessObjectsEntities;
-var MasterDataBaseObject = $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
-var ConstrollingArea = $.import('xs.db.administration.factory', 'controllingArea');
+var MasterDataBaseObject = await $.import('xs.db.administration.factory', 'masterDataBaseObject').MasterDataBaseObject;
+var ConstrollingArea = await $.import('xs.db.administration.factory', 'controllingArea');
 
 function CompanyCode(dbConnection, hQuery, sObjectName) {
 

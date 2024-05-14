@@ -52,7 +52,7 @@ async function getFilterObjectFromFilterString(sFilter, aMetadata) {
 
     var oValidationUtils = await new BusinessObjectValidatorUtils();
 
-    if (await helpers.isNullOrUndefined(sFilter)) {
+    if (helpers.isNullOrUndefined(sFilter)) {
         return oFilter;
     }
 

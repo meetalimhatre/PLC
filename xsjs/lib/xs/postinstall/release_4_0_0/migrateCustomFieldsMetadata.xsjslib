@@ -50,9 +50,9 @@ async function removeOldVersionData() {
 async function migrateMetadataCustomFields(sSchema, oConnection) {
     sCurrentSchema = sSchema;
     oSqlccConnection = oConnection;
-    await console.log(sMetadataTable);
+    console.log(sMetadataTable);
     await migrateCustomFieldsMetadataTable();
-    await console.log(sMetadataAttributesTable);
+    console.log(sMetadataAttributesTable);
     await migrateCustomFieldsMetadataAttributesTable();
     await removeOldVersionData();
 }

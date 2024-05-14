@@ -362,7 +362,7 @@ module.exports.CalculationVersions = function ($) {
 
             if (!helpers.isNullOrUndefined(oCalculationVersion.STATUS_ID)) {
                 let oStatus = oPersistency.CalculationVersion.getStatusById(oCalculationVersion.STATUS_ID);
-                if (await helpers.isNullOrUndefined(oStatus)) {
+                if (helpers.isNullOrUndefined(oStatus)) {
                     const sClientMsg = `Calculation version status not found. Status id: ${ oCalculationVersion.STATUS_ID }.`;
                     $.trace.error(sClientMsg);
                     throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
@@ -415,7 +415,7 @@ module.exports.CalculationVersions = function ($) {
                 }
 
 
-                if (await helpers.isNullOrUndefined(oCalculationVersion.CUSTOMER_ID)) {
+                if (helpers.isNullOrUndefined(oCalculationVersion.CUSTOMER_ID)) {
                     oCalculationVersion.CUSTOMER_ID = null;
                 }
 
@@ -468,14 +468,14 @@ module.exports.CalculationVersions = function ($) {
 
                 let sSelectedCostingSheet = oCalculationVersion.COSTING_SHEET_ID;
                 let sOldSelectedCostingSheet = oOldCalculationVersion.COSTING_SHEET_ID;
-                if (await helpers.isNullOrUndefined(sSelectedCostingSheet) || sSelectedCostingSheet !== sOldSelectedCostingSheet) {
+                if (helpers.isNullOrUndefined(sSelectedCostingSheet) || sSelectedCostingSheet !== sOldSelectedCostingSheet) {
                     oOutputCalculationVersion.SELECTED_TOTAL_COSTING_SHEET = constants.CalculationVersionCostingSheetTotals[0];
                 }
 
 
                 let sSelectedCompSplit = oCalculationVersion.COMPONENT_SPLIT_ID;
                 let sOldSelectedCompSplit = oOldCalculationVersion.COMPONENT_SPLIT_ID;
-                if (await helpers.isNullOrUndefined(sSelectedCompSplit) || sSelectedCompSplit !== sOldSelectedCompSplit) {
+                if (helpers.isNullOrUndefined(sSelectedCompSplit) || sSelectedCompSplit !== sOldSelectedCompSplit) {
                     oOutputCalculationVersion.SELECTED_TOTAL_COMPONENT_SPLIT = constants.CalculationVersionCostingSheetTotals[0];
                 }
 
@@ -501,7 +501,7 @@ module.exports.CalculationVersions = function ($) {
 
                 oOutputCalculationVersion[MetaInformation.IsDirty] = iIsDirty;
 
-                if (await helpers.isNullOrUndefined(oOutputCalculationVersion.ITEMS) === true) {
+                if (helpers.isNullOrUndefined(oOutputCalculationVersion.ITEMS) === true) {
 
                     oOutputCalculationVersion.ITEMS = [];
                 }
@@ -595,18 +595,18 @@ module.exports.CalculationVersions = function ($) {
                     var oCalculation = oPersistency.Calculation.getCurrentCalculationData(oCalculationVersion.CALCULATION_ID);
 
                     var oDefaultSettings = oPersistency.Project.getProjectProperties(oCalculation.PROJECT_ID);
-                    if (await helpers.isNullOrUndefined(oDefaultSettings)) {
+                    if (helpers.isNullOrUndefined(oDefaultSettings)) {
                         const sClientMsg = 'Default settings for calculation not found in project.';
                         const sServerMsg = `${ sClientMsg } Calculation id: ${ oCalculationVersion.CALCULATION_ID }, project id: ${ oCalculation.PROJECT_ID }.`;
                         $.trace.error(sServerMsg);
                         throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
                     } else {
-                        if (await helpers.isNullOrUndefined(oCalculationVersion.CALCULATION_VERSION_NAME)) {
+                        if (helpers.isNullOrUndefined(oCalculationVersion.CALCULATION_VERSION_NAME)) {
                             oCalculationVersion.CALCULATION_VERSION_NAME = 'Version 1';
                         }
 
                         await helpers.setDefaultValuesForCalculationVersion(oCalculationVersion, oDefaultSettings);
-                        if (await helpers.isNullOrUndefined(oCalculationVersion.EXCHANGE_RATE_TYPE_ID)) {
+                        if (helpers.isNullOrUndefined(oCalculationVersion.EXCHANGE_RATE_TYPE_ID)) {
 
                             oCalculationVersion.EXCHANGE_RATE_TYPE_ID = sDefaultExchangeRateType;
                         }
@@ -889,7 +889,7 @@ module.exports.CalculationVersions = function ($) {
 
         if (oBodyData.LOCK.IS_WRITEABLE == 1) {
 
-            if (await handleVersionLock(oServiceOutput, oPersistency, iCvId, oBodyData.LOCK.CONTEXT) === 1) {
+            if (handleVersionLock(oServiceOutput, oPersistency, iCvId, oBodyData.LOCK.CONTEXT) === 1) {
                 if (oBodyData.LOCK.CONTEXT === constants.CalculationVersionLockContext.VARIANT_MATRIX) {
                     oPersistency.Variant.copyToTemporaryTables(iCvId);
                 }

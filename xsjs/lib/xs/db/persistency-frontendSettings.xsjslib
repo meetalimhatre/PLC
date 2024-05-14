@@ -8,9 +8,9 @@ const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
 
-var Tables = await Object.freeze({ frontend_settings: 'sap.plc.db::basis.t_frontend_settings' });
+var Tables = Object.freeze({ frontend_settings: 'sap.plc.db::basis.t_frontend_settings' });
 
-const Sequences = await Object.freeze({ frontend_settings: 'sap.plc.db.sequence::s_frontend_settings' });
+const Sequences = Object.freeze({ frontend_settings: 'sap.plc.db.sequence::s_frontend_settings' });
 
 /**
  * Provides persistency operations with frontend settings.
@@ -32,7 +32,7 @@ async function FrontendSettings(dbConnection, hQuery) {
             var stmtFrontendSettings = `select SETTING_ID, SETTING_NAME, SETTING_TYPE, USER_ID, SETTING_CONTENT from 
 				"${ Tables.frontend_settings }" where SETTING_TYPE = ?
 				and (USER_ID = ? OR USER_ID is null)`;
-            var oReturnObject = dbConnection.executeQuery(stmtFrontendSettings, sType, sUserId);
+            var oReturnObject = await dbConnection.executeQuery(stmtFrontendSettings, sType, sUserId);
         } catch (e) {
             const sLogMessage = `Error when reading frontend settings.`;
             $.trace.error(sLogMessage);
@@ -65,7 +65,7 @@ async function FrontendSettings(dbConnection, hQuery) {
         }
 
         try {
-            var oReturnObject = dbConnection.executeQuery(sStmtFrontendSettings);
+            var oReturnObject = await dbConnection.executeQuery(sStmtFrontendSettings);
         } catch (e) {
             const sLogMessage = `Error when reading frontend settings.`;
             $.trace.error(sLogMessage);
@@ -106,7 +106,7 @@ async function FrontendSettings(dbConnection, hQuery) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.frontend_settings }" 
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.frontend_settings }" 
 			                    (SETTING_ID, SETTING_NAME, SETTING_TYPE, USER_ID, SETTING_CONTENT) VALUES (?,?,?,?,?)`, aSettingsInsert);
         } catch (e) {
             const sLogMessage = `Error during insertion of frontend settings with ID ${ aSettings.HANDLE_ID }.`;
@@ -147,7 +147,7 @@ async function FrontendSettings(dbConnection, hQuery) {
         });
 
         try {
-            var aUpdateResult = dbConnection.executeUpdate(`update "${ Tables.frontend_settings }"
+            var aUpdateResult = await dbConnection.executeUpdate(`update "${ Tables.frontend_settings }"
 		                                                set SETTING_NAME = ?, SETTING_CONTENT = ?
 		                                                where SETTING_ID = ?`, aSettingsUpdate);
         } catch (e) {
@@ -189,7 +189,7 @@ async function FrontendSettings(dbConnection, hQuery) {
                 selectStmt = selectStmt + ` or SETTING_ID = '${ aSettings[i].SETTING_ID }' and USER_ID is null`;
             }
         }
-        var aDbSettings = dbConnection.executeQuery(selectStmt);
+        var aDbSettings = await dbConnection.executeQuery(selectStmt);
         return aDbSettings;
     };
 
@@ -206,13 +206,13 @@ async function FrontendSettings(dbConnection, hQuery) {
             aSettingsIds.push(oSettingsIds);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.frontend_settings }" where SETTING_ID = ?`, aSettingsIds);
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.frontend_settings }" where SETTING_ID = ?`, aSettingsIds);
 
         //returns an array with the objects that could not be deleted, 1 means delete was successful and 0 not successful
         return await helpers.unsuccessfulItemsDbOperation(aSettings, aDeleteResult);
     };
 }
 
-FrontendSettings.prototype = await Object.create(FrontendSettings.prototype);
+FrontendSettings.prototype = Object.create(FrontendSettings.prototype);
 FrontendSettings.prototype.constructor = FrontendSettings;
 export default {_,helpers,Helper,MessageLibrary,PlcException,Code,MessageDetails,Tables,Sequences,FrontendSettings};

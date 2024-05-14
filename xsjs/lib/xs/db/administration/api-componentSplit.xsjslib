@@ -7,8 +7,8 @@ var Limits = $.require('../../util/masterdataResources').Limits;
 var Helper = $.require('../persistency-helper').Helper;
 var Misc = $.require('../persistency-misc').Misc;
 var Metadata = $.require('../persistency-metadata').Metadata;
-var apiHelpers = $.import('xs.db.administration', 'api-helper');
-var ProjectTables = $.import('xs.db', 'persistency-project').Tables;
+var apiHelpers = await $.import('xs.db.administration', 'api-helper');
+var ProjectTables = await $.import('xs.db', 'persistency-project').Tables;
 var UrlToSqlConverter = $.require('../../util/urlToSqlConverter').UrlToSqlConverter;
 
 const MessageLibrary = $.require('../../util/message');
@@ -22,7 +22,7 @@ var sSessionId;
 var sUserId;
 sSessionId = sUserId = $.getPlcUsername();
 
-var Procedures = await Object.freeze({ component_split_read: 'sap.plc.db.administration.procedures::p_component_split_read' });
+var Procedures = Object.freeze({ component_split_read: 'sap.plc.db.administration.procedures::p_component_split_read' });
 
 async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
     this.helper = await new Helper($, hQuery, dbConnection);
@@ -101,7 +101,7 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
 
             oReturnObject[BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES] = Array.slice(result.OT_COMPONENT_SPLIT);
 
-            if (await helpers.isNullOrUndefined(oGetParameters.searchAutocomplete)) {
+            if (helpers.isNullOrUndefined(oGetParameters.searchAutocomplete)) {
                 oReturnObject[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES] = Array.slice(result.OT_COMPONENT_SPLIT_TEXT);
             }
 
@@ -465,6 +465,6 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
     };
 }
 
-ComponentSplit.prototype = await Object.create(ComponentSplit.prototype);
+ComponentSplit.prototype = Object.create(ComponentSplit.prototype);
 ComponentSplit.prototype.constructor = ComponentSplit;
 export default {_,helpers,BusinessObjectTypes,Resources,BusinessObjectsEntities,Limits,Helper,Misc,Metadata,apiHelpers,ProjectTables,UrlToSqlConverter,MessageLibrary,MessageOperation,PlcException,Code,MessageDetails,AdministrationObjType,sSessionId,sUserId,Procedures,ComponentSplit};

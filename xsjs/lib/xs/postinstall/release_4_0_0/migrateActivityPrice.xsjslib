@@ -8,12 +8,12 @@ const sXSCExtTableName = 'sap.plc.db::basis.t_activity_rate_ext';
 const sMetadataTableName = 'sap.plc.db::basis.t_metadata';
 
 async function removeOldVersionData(sTableName, oConnection) {
-    oConnection.executeUpdate(`TRUNCATE TABLE "${ plcSchema }"."${ sTableName }"`);
+    await oConnection.executeUpdate(`TRUNCATE TABLE "${ plcSchema }"."${ sTableName }"`);
     await oConnection.commit();
 }
 
-function checkTableSize(sTableName, oConnection) {
-    return oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`)[0].RECORDNUMBER;
+async function checkTableSize(sTableName, oConnection) {
+    return await oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`)[0].RECORDNUMBER;
 }
 
 async function insertByChuncks(iRecordNumber, sUpsertStatement) {
@@ -143,19 +143,19 @@ async function insertDuplicatesActivityPrice(sCurrentSchemaName) {
 async function migrateActivityPrice(currentSchemaName, oSqlccCon) {
     oSqlccConnection = oSqlccCon;
     let sCurrentState = `Migrating unique values from: ${ sXSCTableName };`;
-    await console.log(sCurrentState);
+    console.log(sCurrentState);
     await insertUniqueActivityPrice(currentSchemaName);
 
     sCurrentState = `Migrating duplicated values from: ${ sXSCTableName };`;
-    await console.log(sCurrentState);
+    console.log(sCurrentState);
     await insertDuplicatesActivityPrice(currentSchemaName);
 
     sCurrentState = `Migrating custom fields from: ${ sXSCExtTableName };`;
-    await console.log(sCurrentState);
+    console.log(sCurrentState);
     await adaptActivityPriceExt(currentSchemaName);
 
     sCurrentState = `Removing data from XSC tables: ${ sXSCTableName } and ${ sXSCExtTableName };`;
-    await console.log(sCurrentState);
+    console.log(sCurrentState);
 
     await removeOldVersionData(sXSCTableName, oSqlccConnection);
     await removeOldVersionData(sXSCExtTableName, oSqlccConnection);

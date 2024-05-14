@@ -12,7 +12,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 
-module.exports.Tables = await Object.freeze({
+module.exports.Tables = Object.freeze({
     item: 'sap.plc.db::basis.t_item',
     item_ext: 'sap.plc.db::basis.t_item_ext',
     item_temporary: 'sap.plc.db::basis.t_item_temporary',
@@ -31,7 +31,7 @@ module.exports.Tables = await Object.freeze({
     item_category: 'sap.plc.db::basis.t_item_category'
 });
 
-module.exports.Procedures = await Object.freeze({
+module.exports.Procedures = Object.freeze({
     create_item: 'sap.plc.db.calculationmanager.procedures::p_item_create',
     delete_item: 'sap.plc.db.calculationmanager.procedures::p_item_delete_item_with_children',
     delete_items_marked_for_deletion: 'sap.plc.db.calculationmanager.procedures::p_item_delete_items_marked_for_deletion',
@@ -308,17 +308,17 @@ async function Item($, dbConnection, hQuery, sUserId) {
                 let index = 0;
                 for (let i = 0; i <= aItemIds.length / MAX_LIMIT; i++) {
                     let sStmtVar = sStmt + ` and item_id in (${ aItemIds.slice(index, index + MAX_LIMIT).join(',') })`;
-                    aAuditResult = aAuditResult.concat(Array.from(dbConnection.executeQuery(sStmtVar, sSessionId, iCvId)));
+                    aAuditResult = aAuditResult.concat(Array.from(await dbConnection.executeQuery(sStmtVar, sSessionId, iCvId)));
                     index += MAX_LIMIT;
                 }
                 return aAuditResult;
             } else {
                 sStmt += ` and item_id in (${ aItemIds.join(',') })`;
-                const oAuditResult = dbConnection.executeQuery(sStmt, sSessionId, iCvId);
+                const oAuditResult = await dbConnection.executeQuery(sStmt, sSessionId, iCvId);
                 return Array.from(oAuditResult);
             }
         } else {
-            const oAuditResult = dbConnection.executeQuery(sStmt, sSessionId, iCvId);
+            const oAuditResult = await dbConnection.executeQuery(sStmt, sSessionId, iCvId);
             return Array.from(oAuditResult);
         }
 
@@ -403,13 +403,13 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 */
     this.update = async function (oItem, sSessionId, bUpdateOnlyStandardFields, iOldCategoryId, iNewCategoryId) {
 
-        if (await helpers.isNullOrUndefined(bUpdateOnlyStandardFields))
+        if (helpers.isNullOrUndefined(bUpdateOnlyStandardFields))
             bUpdateOnlyStandardFields = false;
 
-        if (await helpers.isNullOrUndefined(iOldCategoryId))
+        if (helpers.isNullOrUndefined(iOldCategoryId))
             iOldCategoryId = 0;
 
-        if (await helpers.isNullOrUndefined(iNewCategoryId))
+        if (helpers.isNullOrUndefined(iNewCategoryId))
             iNewCategoryId = 0;
 
         if (!helpers.isPlainObject(oItem)) {
@@ -497,7 +497,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
             row.push(sSessionId);
             aUpdateValues.push(row);
         });
-        dbConnection.executeUpdate(sUpdateStatement, aUpdateValues);
+        await dbConnection.executeUpdate(sUpdateStatement, aUpdateValues);
     }
 
     /**
@@ -663,7 +663,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 */
     this.updateReferencedCalculationVersionID = async function (aItemToUpdateReferencedVersion, sSessionId) {
 
-        if (await helpers.isNullOrUndefined(aItemToUpdateReferencedVersion) || aItemToUpdateReferencedVersion.length < 1) {
+        if (helpers.isNullOrUndefined(aItemToUpdateReferencedVersion) || aItemToUpdateReferencedVersion.length < 1) {
             const sLogMessage = 'aItemToUpdateReferencedVersion must be an array with at least one entry.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
@@ -688,7 +688,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         });
         var sStmt = aStmtBuilder.join(' ');
         try {
-            dbConnection.executeUpdate(sStmt, aInsertValues);
+            await dbConnection.executeUpdate(sStmt, aInsertValues);
         } catch (e) {
             const sClientMsg = `Error while filling temporary table ${ Tables.gtt_reference_calculation_version_items }.`;
             const sServerMsg = `${ sClientMsg } Error message: ${ e.message || e.msg }.`;
@@ -796,7 +796,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
             });
 
             var sStmt = aStmtBuilder.join(' ');
-            dbConnection.executeUpdate(sStmt, aInsertValues);
+            await dbConnection.executeUpdate(sStmt, aInsertValues);
 
             var fnDetermination = dbConnection.loadProcedure(Procedures.value_determination);
             var oResult = fnDetermination(iCvId, sSessionId, sImportFlag, sReevaluate, false);
@@ -901,7 +901,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
             });
 
             var sStmt = aStmtBuilder.join(' ');
-            dbConnection.executeUpdate(sStmt, aInsertValues);
+            await dbConnection.executeUpdate(sStmt, aInsertValues);
 
 
             var fnCreate = dbConnection.loadProcedure(Procedures.create_item);
@@ -1102,7 +1102,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
             ];
         });
         var sInsertStmt = `insert into "${ Tables.gtt_item_changed_active_state }" values(?,?,?)`;
-        dbConnection.executeUpdate(sInsertStmt, aValues);
+        await dbConnection.executeUpdate(sInsertStmt, aValues);
 
         var fSetActiveStates = dbConnection.loadProcedure(Procedures.set_active_states);
         // currently there is no use case, for preserving the active state of substructures from XS; for this reason, it's always set to 0
@@ -1159,7 +1159,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         });
         var sInsertStmt = `insert into "${ Tables.gtt_changed_items }" values(?,?)`;
         try {
-            dbConnection.executeUpdate(sInsertStmt, aValues);
+            await dbConnection.executeUpdate(sInsertStmt, aValues);
         } catch (e) {
             const sClientMsg = `Error while filling temporary table ${ Tables.gtt_changed_items }.`;
             const sServerMsg = `${ sClientMsg } Error message: ${ e.message || e.msg }.`;
@@ -1237,7 +1237,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
      * @return ResultSet object containing the found entities.
      */
     this.getExistingMaterialBaseUomIds = function (dMasterdataTimestamp, aMaterialIds) {
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select material_id, base_uom_id from "${ Tables.material }"
             where   _valid_from <= ?
 				and (_valid_to > ? or _valid_to is null)
@@ -1268,7 +1268,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         const sAllStandardFields = aStandardFieldsWithFormulas.map(field => "'" + field + "'").join(',');
 
         // get all formula-overwritable standard fields and all custom fields names except UNIT fields
-        const oAllFields = dbConnection.executeQuery(`select distinct meta.column_id, attr.item_category_id, rollup_type_id, is_formula_used 
+        const oAllFields = await dbConnection.executeQuery(`select distinct meta.column_id, attr.item_category_id, rollup_type_id, is_formula_used 
 			from "${ Tables.metadata }" meta
 				inner join "${ Tables.metadataItemAttributes }" attr 
 					on 	meta.column_id = attr.column_id 
@@ -1307,7 +1307,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	* @return Array containing the ids.
 	*/
     this.getParentItemIds = function (iCvId, sSessionId) {
-        const oResult = dbConnection.executeQuery(`select distinct parent_item_id
+        const oResult = await dbConnection.executeQuery(`select distinct parent_item_id
 			from "${ Tables.item_temporary }"
 			where 	calculation_version_id = ?
 					and session_id = ?
@@ -1326,7 +1326,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 
         const parentsForItemsWithDuplicates = function (iCalculationVersionId, iVersionRootItemId, aListOfItems) {
 
-            const oResult = dbConnection.executeQuery(`select distinct parent_item_id 
+            const oResult = await dbConnection.executeQuery(`select distinct parent_item_id 
 				from "${ Tables.item }"
 				where calculation_version_id = ?
 				and parent_item_id IS NOT NULL
@@ -1364,7 +1364,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         }
         // item_id list in the where condition cannot be passed using SQL parameters ("?")
         // because there is a HANA limit in the maximum number of parameters.
-        const oResult = dbConnection.executeQuery(`select distinct item_id from "${ Tables.item_temporary }"
+        const oResult = await dbConnection.executeQuery(`select distinct item_id from "${ Tables.item_temporary }"
 			 where calculation_version_id = ? and session_id = ? and is_deleted = 0
 			 and item_id in (${ aItemIds.join(',') })`, iCalculationVersionId, sSessionId);
 
@@ -1382,7 +1382,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
     this.getItemIdsOfCategory = (iItemCategory, iCalculationVersionId) => {
         const sStmt = ` SELECT ITEM_ID FROM "${ Tables.item }"
 					WHERE CALCULATION_VERSION_ID = ? and ITEM_CATEGORY_ID = ?`;
-        return Array.from(dbConnection.executeQuery(sStmt, iCalculationVersionId, iItemCategory));
+        return Array.from(await dbConnection.executeQuery(sStmt, iCalculationVersionId, iItemCategory));
     };
 
     /**
@@ -1396,7 +1396,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 			item.CALCULATION_VERSION_ID = ${ iCalculationVersionId } and variantItem.VARIANT_ID = ${ iVariantId }
 			`;
 
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     };
 
     /**
@@ -1409,7 +1409,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 		where CALCULATION_VERSION_ID = ${ iCalculationVersionId }
 			`;
 
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     };
 
     /**
@@ -1421,7 +1421,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
     this.getItemCategories = async function () {
         try {
             const sStmt = ` SELECT ITEM_CATEGORY_ID, CHILD_ITEM_CATEGORY_ID FROM "${ Tables.item_category }"`;
-            const oResult = await helpers.transposeResultArray(dbConnection.executeQuery(sStmt));
+            const oResult = await helpers.transposeResultArray(await dbConnection.executeQuery(sStmt));
             return _.zipObject(oResult.CHILD_ITEM_CATEGORY_ID, oResult.ITEM_CATEGORY_ID);
         } catch (e) {
             const sClientMsg = 'Error while getting item categories.';
@@ -1432,7 +1432,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
     };
 }
 
-Item.prototype = await Object.create(Item.prototype);
+Item.prototype = Object.create(Item.prototype);
 Item.prototype.constructor = Item;
 
 module.exports.Item = Item;

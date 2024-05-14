@@ -8,7 +8,7 @@ const Code = MessageLibrary.Code;
 
 const authorizationUnroller = $.require('../authorization/authorization-unroller');
 
-var Tables = await Object.freeze({
+var Tables = Object.freeze({
     authorization: 'sap.plc.db::auth.t_auth_project',
     user_privileges: 'sap.plc.db::auth.t_auth_user',
     group_privileges: 'sap.plc.db::auth.t_auth_usergroup',
@@ -37,7 +37,7 @@ function Privilege(dbConnection) {
 	 */
     this.getUserPrivileges = function (sEntityType, sEntityId, sUserId) {
 
-        var aPrivileges = dbConnection.executeQuery(`select USER_ID, PRIVILEGE from "${ Tables.authorization }" 
+        var aPrivileges = await dbConnection.executeQuery(`select USER_ID, PRIVILEGE from "${ Tables.authorization }" 
 				 									 where UPPER(PROJECT_ID) = ? and USER_ID = ?
 				 									 UNION
 													 select USER_ID, PRIVILEGE from "${ Tables.user_privileges }" 
@@ -72,7 +72,7 @@ function Privilege(dbConnection) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.user_privileges }" 
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.user_privileges }" 
 										(OBJECT_TYPE, OBJECT_ID, USER_ID, PRIVILEGE) VALUES (?,?,?,?)`, aPrivilegesColumn);
 
             await authorizationUnroller.unrollPrivilegesOnObjectUpdate(dbConnection, sEntityType, sEntityId);
@@ -110,7 +110,7 @@ function Privilege(dbConnection) {
             aPrivilegesColumn.push(oPrivilegeColumn);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.user_privileges }" 
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.user_privileges }" 
 													where (OBJECT_TYPE, OBJECT_ID, USER_ID) = (?,?,?)`, aPrivilegesColumn);
         await authorizationUnroller.unrollPrivilegesOnObjectUpdate(dbConnection, sEntityType, sEntityId);
 
@@ -141,7 +141,7 @@ function Privilege(dbConnection) {
             aPrivilegesColumn.push(oPrivilegeColumn);
         });
 
-        var aUpdateResult = dbConnection.executeUpdate(`UPDATE "${ Tables.user_privileges }" SET PRIVILEGE = ? 
+        var aUpdateResult = await dbConnection.executeUpdate(`UPDATE "${ Tables.user_privileges }" SET PRIVILEGE = ? 
 				where (OBJECT_TYPE, OBJECT_ID, USER_ID) = (?,?,?)`, aPrivilegesColumn);
 
         await authorizationUnroller.unrollPrivilegesOnObjectUpdate(dbConnection, sEntityType, sEntityId);
@@ -163,7 +163,7 @@ function Privilege(dbConnection) {
 
     this.getGroupPrivileges = function (sEntityType, sEntityId) {
 
-        var aPrivileges = dbConnection.executeQuery(`select USERGROUP_ID as GROUP_ID, PRIVILEGE from "${ Tables.group_privileges }" 
+        var aPrivileges = await dbConnection.executeQuery(`select USERGROUP_ID as GROUP_ID, PRIVILEGE from "${ Tables.group_privileges }" 
 										where UPPER(OBJECT_TYPE) = ? and UPPER(OBJECT_ID) = ?`, sEntityType.toUpperCase(), sEntityId.toUpperCase());
 
         return aPrivileges;
@@ -196,7 +196,7 @@ function Privilege(dbConnection) {
         });
 
         try {
-            var aInsertResult = dbConnection.executeUpdate(`INSERT INTO "${ Tables.group_privileges }"  
+            var aInsertResult = await dbConnection.executeUpdate(`INSERT INTO "${ Tables.group_privileges }"  
 					 	select ? as "OBJECT_TYPE", ? as "OBJECT_ID", USERGROUP_ID as USERGROUP_ID, ? as PRIVILEGE
 					 	from "${ Tables.usergroup }" where USERGROUP_ID = ?`, aPrivilegesColumn);
 
@@ -250,7 +250,7 @@ function Privilege(dbConnection) {
             aPrivilegesColumn.push(oPrivilegeColumn);
         });
 
-        var aDeleteResult = dbConnection.executeUpdate(`delete from "${ Tables.group_privileges }" 
+        var aDeleteResult = await dbConnection.executeUpdate(`delete from "${ Tables.group_privileges }" 
 				where (OBJECT_TYPE, OBJECT_ID, USERGROUP_ID) = (?,?,?)`, aPrivilegesColumn);
 
         await authorizationUnroller.unrollPrivilegesOnObjectUpdate(dbConnection, sEntityType, sEntityId);
@@ -282,7 +282,7 @@ function Privilege(dbConnection) {
             aPrivilegesColumn.push(oPrivilegeColumn);
         });
 
-        var aUpdateResult = dbConnection.executeUpdate(`UPDATE "${ Tables.group_privileges }" 
+        var aUpdateResult = await dbConnection.executeUpdate(`UPDATE "${ Tables.group_privileges }" 
 					SET PRIVILEGE = ? where (OBJECT_TYPE, OBJECT_ID, USERGROUP_ID) = (?,?,?)`, aPrivilegesColumn);
 
         await authorizationUnroller.unrollPrivilegesOnObjectUpdate(dbConnection, sEntityType, sEntityId);
@@ -304,7 +304,7 @@ function Privilege(dbConnection) {
 
     this.adminstratorExists = function (sEntityType, sEntityId) {
 
-        var aPrivileges = dbConnection.executeQuery(`select USER_ID from "${ Tables.user_privileges }" 
+        var aPrivileges = await dbConnection.executeQuery(`select USER_ID from "${ Tables.user_privileges }" 
 													 where OBJECT_TYPE = ? and OBJECT_ID = ? and PRIVILEGE = ?`, sEntityType.toUpperCase(), sEntityId.toUpperCase(), InstancePrivileges.ADMINISTRATE);
 
         if (aPrivileges.length > 0) {
@@ -316,6 +316,6 @@ function Privilege(dbConnection) {
     };
 }
 
-Privilege.prototype = await Object.create(Privilege.prototype);
+Privilege.prototype = Object.create(Privilege.prototype);
 Privilege.prototype.constructor = Privilege;
 export default {_,helpers,InstancePrivileges,MessageLibrary,PlcException,Code,authorizationUnroller,Tables,Privilege};
