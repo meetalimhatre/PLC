@@ -111,7 +111,7 @@ function getCurrentConnection() {
  * @return current schema
  */
 async function getSchemaName(oConnection) {
-    return await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"`)[0].CURRENT_SCHEMA;
+    return (await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"`))[0].CURRENT_SCHEMA;
 }
 
 
@@ -138,7 +138,7 @@ async function compareTableColumns(tableName, currentSchemaName) {
  * return {array} the columns collection
  */
 async function getSchemaTableColumns(tableName, currentSchemaName) {
-    return await oSqlccConnection.executeQuery(`SELECT COLUMN_NAME FROM SYS.COLUMNS WHERE SCHEMA_NAME = '${ currentSchemaName }' AND TABLE_NAME = '${ tableName }' ORDER BY POSITION`).map(function (item, index) {
+    return (await oSqlccConnection.executeQuery(`SELECT COLUMN_NAME FROM SYS.COLUMNS WHERE SCHEMA_NAME = '${ currentSchemaName }' AND TABLE_NAME = '${ tableName }' ORDER BY POSITION`)).map(function (item, index) {
         return item.COLUMN_NAME;
     });
 }
@@ -196,7 +196,7 @@ async function run(oConnection, oLibraryMeta, oRequestArgs) {
             var currentSchemaName = await getSchemaName(oConnection);
             migrateMetadataCustomFields(currentSchemaName, oSqlccConnection);
             for (var preIndex in preMigrationTableName) {
-                if (!await compareTableColumns(preMigrationTableName[preIndex], currentSchemaName)) {
+                if (!compareTableColumns(preMigrationTableName[preIndex], currentSchemaName)) {
                     //todo: special operation to make preMigration tables consistent
                     return false;
                 }
@@ -287,7 +287,7 @@ async function executeMigration(sTableName, oMappingUserList, currentSchemaName)
  */
 async function removeOldVersionData(sTableName, oConnection) {
     await oConnection.executeUpdate(`TRUNCATE TABLE "${ plcSchema }"."${ sTableName }"`);
-    await oConnection.commit();
+    oConnection.commit();
 }
 
 /**
@@ -297,7 +297,7 @@ async function removeOldVersionData(sTableName, oConnection) {
  * @return {integer} table size
  */
 async function checkTableSize(sTableName, oConnection) {
-    return await oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`)[0].RECORDNUMBER;
+    return (await oConnection.executeQuery(`SELECT COUNT(*) as RECORDNUMBER FROM "${ plcSchema }"."${ sTableName }"`))[0].RECORDNUMBER;
 }
 
 /**
@@ -334,4 +334,4 @@ async function clean(oConnection) {
     closeSqlConnection();
     return true;
 }
-export default {oSqlccConnection,dbArtefactControllerLibrary,DbArtefactController,aDeletedTables,,,,,plcSchema,excludeTables,preMigrationTableName,iTableThreshold,getPLCTables,getCurrentConnection,getSchemaName,compareTableColumns,getSchemaTableColumns,getXSCPLCTableColumns,check,run,executeMigration,removeOldVersionData,checkTableSize,createUserReplaceSql,closeSqlConnection,clean};
+export default {oSqlccConnection,dbArtefactControllerLibrary,DbArtefactController,aDeletedTables,plcSchema,excludeTables,preMigrationTableName,iTableThreshold,getPLCTables,getCurrentConnection,getSchemaName,compareTableColumns,getSchemaTableColumns,getXSCPLCTableColumns,check,run,executeMigration,removeOldVersionData,checkTableSize,createUserReplaceSql,closeSqlConnection,clean};

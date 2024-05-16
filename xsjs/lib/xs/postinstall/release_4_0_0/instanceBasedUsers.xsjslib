@@ -4,16 +4,15 @@ const replaceColumns = [
     'USER_ID'
 ];
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
 async function run(oConnection, oLibraryMeta, oRequestArgs) {
     try {
-        if (!validateInstanceBasedUsers(oRequestArgs.file)) {
+        if (!await validateInstanceBasedUsers(oRequestArgs.file)) {
             throw new Error(`empty user mapping file uploaded, please check your .csv file`);
-        }
-        ;
+        };
         const sSchema = await getCurrentSchema(oConnection);
         const aPLCTables = await getPLCTables(oConnection, sSchema);
         await replaceInstanceBasedUsers(oConnection, aPLCTables, sSchema, oRequestArgs.file);
@@ -53,7 +52,7 @@ async function validateInstanceBasedUsers(oMappingUserList) {
 
         //the user mapping csv file's format is <user_id>,<user_email> which is opposite to the update
         //here need reverse the format to match update operation
-        oMappingUserList = oMappingUserList.map(aSubArray => {
+        oMappingUserList = oMappingUserList.map((aSubArray) => {
             return aSubArray.reverse();
         });
         return true;
@@ -82,7 +81,7 @@ async function createUserReplaceSql(sTableName, oConnection, sColumnName, curren
  * @return current schema
  */
 async function getCurrentSchema(oConnection) {
-    return await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    return (await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
 /**
@@ -91,7 +90,7 @@ async function getCurrentSchema(oConnection) {
  */
 async function getPLCTables(oConnection, sSchema) {
     const aTables = await oConnection.executeQuery(`SELECT TABLE_NAME FROM "SYS"."M_CS_TABLES" WHERE SCHEMA_NAME = '${ sSchema }'`);
-    return aTables.map(item => {
+    return aTables.map((item) => {
         return item.TABLE_NAME;
     });
 }
@@ -106,7 +105,7 @@ async function getPLCTables(oConnection, sSchema) {
 async function replaceInstanceBasedUsers(oConnection, aPLCTables, sSchema, aMappingUserList) {
     console.log(`the user mapping list is ${ aMappingUserList }`);
     if (aMappingUserList && aMappingUserList.length && aMappingUserList !== 'no data' && aMappingUserList !== '[]') {
-        aPLCTables.map(sTable => {
+        for (let sTable of aPLCTables) {
             for (let column of replaceColumns) {
                 const sSql = await createUserReplaceSql(sTable, oConnection, column, sSchema);
                 if (sSql && sSql.length) {
@@ -115,11 +114,11 @@ async function replaceInstanceBasedUsers(oConnection, aPLCTables, sSchema, aMapp
                 }
             }
             await oConnection.commit();
-        });
+        };
     }
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 export default {replaceColumns,check,run,validateInstanceBasedUsers,createUserReplaceSql,getCurrentSchema,getPLCTables,replaceInstanceBasedUsers,clean};

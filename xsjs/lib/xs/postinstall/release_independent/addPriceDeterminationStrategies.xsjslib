@@ -19,67 +19,64 @@ const deTexts = [
     'Standard Preisfindung Materialiensstrategie (SAP PLC)'
 ];
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
 async function getCurrentSchemaName(oConnection) {
-    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
     const sCurrentSchema = await getCurrentSchemaName(oConnection);
     var result;
 
-    [
-        materialTypeID,
-        activityTypeID
-    ].forEach(typeID => {
-        result = await oConnection.executeUpdate(`SELECT "PRICE_DETERMINATION_STRATEGY_ID" FROM "${ sCurrentSchema }"."${ sPriceDeterminationStrategyTable }"
-                WHERE "PRICE_DETERMINATION_STRATEGY_ID"='${ defaultPriceDeterminationStrategyID }'
-                AND "PRICE_DETERMINATION_STRATEGY_TYPE_ID"=${ typeID }`);
+    for (let typeID of [materialTypeID, activityTypeID]) {
+        result = await oConnection.executeUpdate(`SELECT "PRICE_DETERMINATION_STRATEGY_ID" FROM "${sCurrentSchema}"."${sPriceDeterminationStrategyTable}"
+                WHERE "PRICE_DETERMINATION_STRATEGY_ID"='${defaultPriceDeterminationStrategyID}'
+                AND "PRICE_DETERMINATION_STRATEGY_TYPE_ID"=${typeID}`);
 
         if (result.length == 0) {
-            await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDeterminationStrategyTable }"
+            await oConnection.executeUpdate(`INSERT INTO "${sCurrentSchema}"."${sPriceDeterminationStrategyTable}"
                     ("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "CREATED_ON", "CREATED_BY", "LAST_MODIFIED_ON", "LAST_MODIFIED_BY")
-                    VALUES ('${ defaultPriceDeterminationStrategyID }', ${ typeID }, '${ defaultDate }', '${ sUser }', '${ defaultDate }', '${ sUser }')`);
+                    VALUES ('${defaultPriceDeterminationStrategyID}', ${typeID}, '${defaultDate}', '${sUser}', '${defaultDate}', '${sUser}')`);
 
-            await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDeterminationStrategyTextTable }"
+            await oConnection.executeUpdate(`INSERT INTO "${sCurrentSchema}"."${sPriceDeterminationStrategyTextTable}"
                     ("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "LANGUAGE", "PRICE_DETERMINATION_STRATEGY_DESCRIPTION") VALUES
-                    ('${ defaultPriceDeterminationStrategyID }', ${ typeID }, 'EN', '${ enTexts[typeID - 1] }')`);
-            await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDeterminationStrategyTextTable }"
+                    ('${defaultPriceDeterminationStrategyID}', ${typeID}, 'EN', '${enTexts[typeID - 1]}')`);
+            await oConnection.executeUpdate(`INSERT INTO "${sCurrentSchema}"."${sPriceDeterminationStrategyTextTable}"
                     ("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "LANGUAGE", "PRICE_DETERMINATION_STRATEGY_DESCRIPTION") VALUES
-                    ('${ defaultPriceDeterminationStrategyID }', ${ typeID }, 'DE', '${ deTexts[typeID - 1] }')`);
+                    ('${defaultPriceDeterminationStrategyID}', ${typeID}, 'DE', '${deTexts[typeID - 1]}')`);
         }
 
-        await oConnection.executeUpdate(`DELETE FROM "${ sCurrentSchema }"."${ sPriceDeterminationStrategyPriceSourceTable }"
-                WHERE "PRICE_SOURCE_TYPE_ID"=${ typeID }`);
+        await oConnection.executeUpdate(`DELETE FROM "${sCurrentSchema}"."${sPriceDeterminationStrategyPriceSourceTable}"
+                WHERE "PRICE_SOURCE_TYPE_ID"=${typeID}`);
 
         // Usually PARTITION BY should be done by PRICE_DETERMINATION_STRATEGY_ID and PRICE_SOURCE_TYPE_ID
         // but in this case PRICE_DETERMINATION_STRATEGY_ID will remain the same
 
-        await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDeterminationStrategyPriceSourceTable }"
-                    SELECT '${ defaultPriceDeterminationStrategyID }' AS "PRICE_DETERMINATION_STRATEGY_ID",
+        await oConnection.executeUpdate(`INSERT INTO "${sCurrentSchema}"."${sPriceDeterminationStrategyPriceSourceTable}"
+                    SELECT '${defaultPriceDeterminationStrategyID}' AS "PRICE_DETERMINATION_STRATEGY_ID",
                         "PRICE_SOURCE_TYPE_ID" as "PRICE_DETERMINATION_STRATEGY_TYPE_ID",	
                         "PRICE_SOURCE_ID",
                         "PRICE_SOURCE_TYPE_ID",
                         "DETERMINATION_SEQUENCE" -1 as "DETERMINATION_SEQUENCE"
-                    FROM "${ sCurrentSchema }"."${ sPriceSourceTable }"
-                    WHERE PRICE_SOURCE_TYPE_ID = ${ typeID };`);
-    });
+                    FROM "${sCurrentSchema}"."${sPriceSourceTable}"
+                    WHERE PRICE_SOURCE_TYPE_ID = ${typeID};`);
+    };
 
-    await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sProjectTable }"
-        SET MATERIAL_PRICE_STRATEGY_ID = '${ defaultPriceDeterminationStrategyID }',
-            ACTIVITY_PRICE_STRATEGY_ID = '${ defaultPriceDeterminationStrategyID }';`);
+    await oConnection.executeUpdate(`UPDATE "${sCurrentSchema}"."${sProjectTable}"
+        SET MATERIAL_PRICE_STRATEGY_ID = '${defaultPriceDeterminationStrategyID}',
+            ACTIVITY_PRICE_STRATEGY_ID = '${defaultPriceDeterminationStrategyID}';`);
 
-    await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sCalculationVersionTable }"
-        SET MATERIAL_PRICE_STRATEGY_ID = '${ defaultPriceDeterminationStrategyID }',
-            ACTIVITY_PRICE_STRATEGY_ID = '${ defaultPriceDeterminationStrategyID }';`);
+    await  oConnection.executeUpdate(`UPDATE "${sCurrentSchema}"."${sCalculationVersionTable}"
+        SET MATERIAL_PRICE_STRATEGY_ID = '${defaultPriceDeterminationStrategyID}',
+            ACTIVITY_PRICE_STRATEGY_ID = '${defaultPriceDeterminationStrategyID}';`);
 
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
-export default {sCalculationVersionTable,sPriceDeterminationStrategyPriceSourceTable,sPriceDeterminationStrategyTable,sPriceDeterminationStrategyTextTable,sPriceSourceTable,sProjectTable,defaultPriceDeterminationStrategyID,materialTypeID,activityTypeID,defaultDate,sUser,enTexts,deTexts,check,getCurrentSchemaName,run,clean};
+export default { sCalculationVersionTable, sPriceDeterminationStrategyPriceSourceTable, sPriceDeterminationStrategyTable, sPriceDeterminationStrategyTextTable, sPriceSourceTable, sProjectTable, defaultPriceDeterminationStrategyID, materialTypeID, activityTypeID, defaultDate, sUser, enTexts, deTexts, check, getCurrentSchemaName, run, clean };

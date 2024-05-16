@@ -3,12 +3,12 @@ const sMetadataTable = 'sap.plc.db::basis.t_metadata';
 const sItem = 'Item';
 const _ = $.require('lodash');
 
-function check(oConnection) {
+async function check(oConnection) {
     return true;
 }
 
 async function getCurrentSchemaName(oConnection) {
-    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+    return (await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"'))[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
@@ -42,7 +42,7 @@ async function run(oConnection) {
          *  for the SUBITEM_STATE column.
          */
         aColumnNames.forEach(sColumn => {
-            await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
+             oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
                                         SET SUBITEM_STATE = 0 
                                         WHERE "PATH" = '${ sItem }'
                                         AND "BUSINESS_OBJECT" = '${ sItem }'
@@ -55,20 +55,20 @@ async function run(oConnection) {
         const currentUser = $.getPlcUsername();
         let aExistingRows = await oConnection.executeQuery(`SELECT * FROM "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" WHERE "PATH" = '${ sItem }' AND "BUSINESS_OBJECT" = '${ sItem }' AND "COLUMN_ID" IN (${ sInCondition });`);
         aExistingRows.forEach(oRow => {
-            await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" 
+             oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }" 
                                 ("PATH", "BUSINESS_OBJECT", "COLUMN_ID", "ITEM_CATEGORY_ID", "SUBITEM_STATE", "IS_MANDATORY", "IS_READ_ONLY", "IS_TRANSFERABLE", "DEFAULT_VALUE", "CREATED_ON", "CREATED_BY", "LAST_MODIFIED_ON", "LAST_MODIFIED_BY")
                                 VALUES('${ oRow.PATH }', '${ oRow.BUSINESS_OBJECT }', '${ oRow.COLUMN_ID }', ${ oRow.ITEM_CATEGORY_ID }, 
                                 1, ${ oRow.IS_MANDATORY }, 1, ${ oRow.IS_TRANSFERABLE }, 
                                 ${ oRow.DEFAULT_VALUE }, CURRENT_TIMESTAMP, '${ currentUser }', CURRENT_TIMESTAMP, '${ currentUser }');`);
         });
 
-        await oConnection.commit();
+        oConnection.commit();
     }
 
     return true;
 }
 
-function clean(oConnection) {
+async function clean(oConnection) {
     return true;
 }
 export default {sMetadataItemAttributesTable,sMetadataTable,sItem,_,check,getCurrentSchemaName,run,clean};

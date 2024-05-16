@@ -7,7 +7,7 @@ var xsenv = require('@sap/xsenv');
 var port = process.env.PORT || 3000;
 
 var options = {
-    anonymous: false,
+    anonymous: true,
      // remove to authenticate calls
     auditLog: { logToConsole: true },
      // change to auditlog service for productive scenarios

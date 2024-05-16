@@ -42,7 +42,7 @@ async function check(oConnection) {
 async function run(oConnection) {
     addStandardAnalyticsSetting(oConnection);
     aFrontendSettings.forEach(oFrontendSetting => {
-        addFrontendSetting(oFrontendSetting, oConnection);
+    addFrontendSetting(oFrontendSetting, oConnection);
     });
     return true;
 }
@@ -52,31 +52,31 @@ async function clean(oConnection) {
 }
 
 async function getCurrentSchemaName(oConnection) {
-    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+    return (await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"'))[0].CURRENT_SCHEMA;
 }
 
 addStandardAnalyticsSetting = oConnection => {
     //check if setting already exists
-    let oResult = await oConnection.executeQuery(`select SETTING_ID from "${ sFrontendSettingsTable }" where SETTING_NAME = 'AnalysisForOfficeAnalyticViews'`);
+    let oResult =  oConnection.executeQuery(`select SETTING_ID from "${ sFrontendSettingsTable }" where SETTING_NAME = 'AnalysisForOfficeAnalyticViews'`);
 
     if (oResult.length > 0) {
-        await oConnection.executeUpdate(`delete from "${ sFrontendSettingsTable }" where SETTING_NAME = 'AnalysisForOfficeAnalyticViews'`);
+         oConnection.executeUpdate(`delete from "${ sFrontendSettingsTable }" where SETTING_NAME = 'AnalysisForOfficeAnalyticViews'`);
     }
 
-    const sCurrentSchemaName = await getCurrentSchemaName(oConnection);
+    const sCurrentSchemaName =  getCurrentSchemaName(oConnection);
 
     let sSettingContentToInsert = sSettingContent.split('{{DBSCHEMA}}').join(sCurrentSchemaName);
 
-    await oConnection.executeUpdate(`INSERT INTO "${ sFrontendSettingsTable }" (SETTING_ID,SETTING_NAME,SETTING_TYPE,USER_ID,SETTING_CONTENT) VALUES ("sap.plc.db.sequence::s_frontend_settings".nextval,'AnalysisForOfficeAnalyticViews','ANALYTICSINTEGRATION',null,'${ sSettingContentToInsert }')`);
+     oConnection.executeUpdate(`INSERT INTO "${ sFrontendSettingsTable }" (SETTING_ID,SETTING_NAME,SETTING_TYPE,USER_ID,SETTING_CONTENT) VALUES ("sap.plc.db.sequence::s_frontend_settings".nextval,'AnalysisForOfficeAnalyticViews','ANALYTICSINTEGRATION',null,'${ sSettingContentToInsert }')`);
 
 };
 
 addFrontendSetting = (oFrontendSetting, oConnection) => {
     //check if setting already exists
-    let oResult = await oConnection.executeQuery(`select SETTING_ID from "${ sFrontendSettingsTable }" where SETTING_NAME = '${ oFrontendSetting.SETTING_NAME }'`);
+    let oResult =  oConnection.executeQuery(`select SETTING_ID from "${ sFrontendSettingsTable }" where SETTING_NAME = '${ oFrontendSetting.SETTING_NAME }'`);
 
     if (oResult.length === 0) {
-        await oConnection.executeUpdate(`INSERT INTO "${ sFrontendSettingsTable }" (SETTING_ID,SETTING_NAME,SETTING_TYPE,USER_ID,SETTING_CONTENT) VALUES ("sap.plc.db.sequence::s_frontend_settings".nextval,'${ oFrontendSetting.SETTING_NAME }','${ oFrontendSetting.SETTING_TYPE }',NULL,'${ oFrontendSetting.SETTING_CONTENT }')`);
+         oConnection.executeUpdate(`INSERT INTO "${ sFrontendSettingsTable }" (SETTING_ID,SETTING_NAME,SETTING_TYPE,USER_ID,SETTING_CONTENT) VALUES ("sap.plc.db.sequence::s_frontend_settings".nextval,'${ oFrontendSetting.SETTING_NAME }','${ oFrontendSetting.SETTING_TYPE }',NULL,'${ oFrontendSetting.SETTING_CONTENT }')`);
     }
 };
 export default {whoAmI,sFrontendSettingsTable,sSettingContent,aFrontendSettings,check,run,clean,getCurrentSchemaName};

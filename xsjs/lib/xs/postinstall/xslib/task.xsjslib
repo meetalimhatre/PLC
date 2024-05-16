@@ -71,7 +71,7 @@ async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState) {
         await oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, sNameTechnicalUser, sStep, sState);
         await commit();
     } catch (e) {
-        await error('insert data to t_installation_log table failed, can"t log post-install data to database');
+        await error('insert data to t_installation_log table failed, can\'t log post-install data to database');
         throw new Error("Can't log upgrade info to database");
     }
 }
@@ -113,7 +113,7 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
     await info(await padLeft('execute ' + sMethod + ': ') + oLibraryMeta.library_full_name);
     var currentTimestamp = await getCurrentTimestamp(oConnection);
     try {
-        var bOK = oLibraryMeta.library[sMethod](oConnection, oLibraryMeta, requestArg);
+        var bOK = await oLibraryMeta.library[sMethod](oConnection, oLibraryMeta, requestArg);
 
         if (bOK && sMethod === 'run') {
             await commit();
@@ -148,14 +148,14 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
                 STARTED: await convertDateToString(taskObj.STARTED),
                 LAST_UPDATED_ON: await convertDateToString(currentTimestamp),
                 ERROR_CODE: '-1',
-                ERROR_DETAILS: `${ oLibraryMeta.description } ${ sMethod } failed returning false`
+                ERROR_DETAILS: `${oLibraryMeta.description} ${sMethod} failed returning false`
             });
             await rollback();
             await updateTaskStatus(taskObj, oConnection);
         }
     } catch (e) {
         bOK = false;
-        var error_detail = `${ oLibraryMeta.description } ${ sMethod } failed returning exception: ${ e.message || e.developerMessage || '' }`;
+        var error_detail = `${oLibraryMeta.description} ${sMethod} failed returning exception: ${e.message || e.developerMessage || ''}`;
         Object.assign(taskObj, {
             TASK_ID: taskObj.TASK_ID,
             SESSION_ID: taskObj.SESSION_ID,
@@ -198,7 +198,7 @@ async function convertDateToString(oDate) {
 
 
 async function resetLockTable(oConnection, sUserId) {
-    var sSchema = await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    var sSchema = (await oConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
     oHQuerySecondary = new HQuery(oConnection).setSchema(sSchema);
     oMisc = new Misc($, oHQuerySecondary, sUserId, oConnection);
 }
@@ -266,7 +266,7 @@ async function runBackgroundTask(args) {
     var release = [];
     sTenantID = args.requestArg.tenantid;
     try {
-        args.filterLibs.forEach(function (lib) {
+        args.filterLibs.forEach((lib) => {
             release.push({
                 library: $.import(lib.library_package, lib.library_name),
                 library_full_name: lib.library_full_name,
@@ -307,12 +307,12 @@ async function getTaskInfo(request) {
     const oRes = await odbConnection.executeQuery(`
         select * 
         from "sap.plc.db::basis.t_task"
-        where TASK_ID=${ oParam.id }
+        where TASK_ID=${oParam.id}
         `);
     if (Object.keys(oRes).length === 0) {
         return { error: 'NOT exist this task' };
     }
-    const {TASK_ID, STATUS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED_TIME, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS} = oRes[0];
+    const { TASK_ID, STATUS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED_TIME, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS } = oRes[0];
     return {
         TASK_ID,
         STATUS,
@@ -333,4 +333,4 @@ async function processParameters(request) {
     }
     return oParam;
 }
-export default {HQuery,installTrace,pTask,whoAmI,_,sFinishRegister,oTarget,,Misc,sBusinessObjectTypes,isCloud,sPlatformConnection,task,oMisc,oConnection,sNameTechnicalUser,oHQuerySecondary,sTenantID,taskObj,currentLibCount,error,info,debug,commit,rollback,getTask,resetData,getConnectionUsername,getCurrentTimestamp,log,getConnection,lockLog,deleteLogEntry,updateTaskStatus,padLeft,genericCall,convertDateToString,resetLockTable,execute,updateTenantStatus,runBackgroundTask,taskInfo,getTaskInfo,processParameters};
+export default { HQuery, installTrace, pTask, whoAmI, _, sFinishRegister, oTarget, Misc, sBusinessObjectTypes, isCloud, sPlatformConnection, task, oMisc, oConnection, sNameTechnicalUser, oHQuerySecondary, sTenantID, taskObj, currentLibCount, error, info, debug, commit, rollback, getTask, resetData, getConnectionUsername, getCurrentTimestamp, log, getConnection, lockLog, deleteLogEntry, updateTaskStatus, padLeft, genericCall, convertDateToString, resetLockTable, execute, updateTenantStatus, runBackgroundTask, taskInfo, getTaskInfo, processParameters };

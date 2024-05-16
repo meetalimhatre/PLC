@@ -3,16 +3,16 @@ const sPriceDetStrategyRuleTable = 'sap.plc.db::basis.t_price_determination_stra
 const sPriceDetStrategyTable = 'sap.plc.db::basis.t_price_determination_strategy';
 const sPriceDetStrategyId = 'PLC_STANDARD';
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 
 async function getCurrentSchemaName(oConnection) {
-    return await oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
+    return oConnection.executeQuery('SELECT CURRENT_SCHEMA FROM "sap.plc.db::DUMMY"')[0].CURRENT_SCHEMA;
 }
 
 async function run(oConnection) {
@@ -25,7 +25,7 @@ async function run(oConnection) {
         aCurrentPriceDeterminationStartegies.forEach(oPriceDetStrategy => {
             aValues.forEach(record => {
                 if (oPriceDetStrategy.PRICE_DETERMINATION_STRATEGY_TYPE_ID === record.RULE_TYPE_ID) {
-                    await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDetStrategyRuleTable }"("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "RULE_CODE", "PRIORITY")
+                    oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDetStrategyRuleTable }"("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "RULE_CODE", "PRIORITY")
                     VALUES (?, ?, ?, ?)`, [[
                             oPriceDetStrategy.PRICE_DETERMINATION_STRATEGY_ID,
                             record.RULE_TYPE_ID,

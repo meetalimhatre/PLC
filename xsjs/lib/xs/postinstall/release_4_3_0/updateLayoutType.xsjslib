@@ -10,11 +10,11 @@ async function clean(oConnection) {
     return true;
 }
 
-const setLayoutType = oConnection => {
+const setLayoutType = async oConnection => {
     await oConnection.executeUpdate(`update "${ sLayoutTable }" set LAYOUT_TYPE = 1 where layout_type is null`);
 };
 
-const cleanUpInconsistentLayouts = oConnection => {
+const cleanUpInconsistentLayouts = async oConnection => {
     await oConnection.executeUpdate(`delete from "${ sLayoutTable }" where layout_type = 2`);
     await oConnection.executeUpdate(`delete from "${ sLayoutColumnTable }" where layout_id in 
                                 (select layoutColumn.LAYOUT_ID from "${ sLayoutColumnTable }" layoutColumn left outer join "${ sLayoutTable }" layout 
@@ -24,7 +24,7 @@ const cleanUpInconsistentLayouts = oConnection => {
                                 on layoutPersonal.LAYOUT_ID = layout.LAYOUT_ID where layout.LAYOUT_ID is null)`);
 };
 
-const insertStandardBomCompareLayout = oConnection => {
+const insertStandardBomCompareLayout = async oConnection => {
     await oConnection.executeUpdate(`UPSERT "${ sLayoutTable }" (LAYOUT_ID,LAYOUT_NAME,IS_CORPORATE,LAYOUT_TYPE) VALUES (3,'#SAP Default for BoM Compare',1,2) WITH PRIMARY KEY`);
     await oConnection.executeUpdate(`UPSERT "${ sLayoutColumnTable }" (LAYOUT_ID,DISPLAY_ORDER,PATH,BUSINESS_OBJECT,COLUMN_ID,COSTING_SHEET_ROW_ID,COST_COMPONENT_ID,COLUMN_WIDTH) VALUES (3,'0','ITEM','Item','ITEM_KEY',NULL,NULL,'320') WITH PRIMARY KEY`);
     await oConnection.executeUpdate(`UPSERT "${ sLayoutColumnTable }" (LAYOUT_ID,DISPLAY_ORDER,PATH,BUSINESS_OBJECT,COLUMN_ID,COSTING_SHEET_ROW_ID,COST_COMPONENT_ID,COLUMN_WIDTH) VALUES (3,'1','ITEM','Item','QUANTITY',NULL,NULL,'320') WITH PRIMARY KEY`);
@@ -47,7 +47,7 @@ async function run(oConnection) {
         setLayoutType(oConnection);
         cleanUpInconsistentLayouts(oConnection);
         insertStandardBomCompareLayout(oConnection);
-        await oConnection.commit();
+        oConnection.commit();
     } catch (e) {
         console.log('error:', e.message);
         throw new Error(`Failed to adapt layouts: ${ e.message }`);

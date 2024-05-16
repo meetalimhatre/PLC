@@ -17,7 +17,7 @@ const oRenamedColumns = {
     PATH: 'ITEM.CUSTOM_ITEM_CATEGORIES'
 };
 
-async function updateFrontendSettings(oCurrentCondition) {
+function updateFrontendSettings(oCurrentCondition) {
     const oConditionToUpdate = JSON.parse(JSON.stringify(oCurrentCondition));
     if (!helpers.isNullOrUndefined(oConditionToUpdate.FIELD) && !helpers.isNullOrUndefined(oConditionToUpdate.FIELD.COLUMN_ID) && oConditionToUpdate.FIELD.COLUMN_ID === 'ITEM_CATEGORY_ID') {
         oConditionToUpdate.FIELD.COLUMN_ID = oRenamedColumns.COLUMN_ID;
@@ -38,25 +38,25 @@ async function updateFrontendSettings(oCurrentCondition) {
     return oConditionToUpdate;
 }
 
-async function replaceFieldsFilterSetting(oSetting) {
+function replaceFieldsFilterSetting(oSetting) {
     const oUpdatedSettingContent = oSetting;
     if (!helpers.isNullOrUndefined(oSetting.CONDITIONS)) {
         oSetting.CONDITIONS.forEach((oCondition, iIndex) => {
-            oUpdatedSettingContent.CONDITIONS[iIndex] = await updateFrontendSettings(oCondition);
+            oUpdatedSettingContent.CONDITIONS[iIndex] =  updateFrontendSettings(oCondition);
         });
     }
     return $.util.codec.encodeBase64(JSON.stringify(oUpdatedSettingContent));
 }
 
-async function replaceFieldsMassChangeSetting(oSetting) {
+function replaceFieldsMassChangeSetting(oSetting) {
     const oUpdatedSettingContent = oSetting;
     if (!helpers.isNullOrUndefined(oSetting.FILTER_CONFIGURATION) && !helpers.isNullOrUndefined(oSetting.FILTER_CONFIGURATION.CONDITIONS)) {
         oSetting.FILTER_CONFIGURATION.CONDITIONS.forEach((oCondition, iIndex) => {
-            oUpdatedSettingContent.FILTER_CONFIGURATION.CONDITIONS[iIndex] = await updateFrontendSettings(oCondition);
+            oUpdatedSettingContent.FILTER_CONFIGURATION.CONDITIONS[iIndex] =  updateFrontendSettings(oCondition);
         });
     }
     if (!helpers.isNullOrUndefined(oUpdatedSettingContent.CHANGE_CONFIGURATION)) {
-        oUpdatedSettingContent.CHANGE_CONFIGURATION = await updateFrontendSettings(oSetting.CHANGE_CONFIGURATION);
+        oUpdatedSettingContent.CHANGE_CONFIGURATION = updateFrontendSettings(oSetting.CHANGE_CONFIGURATION);
     }
     return $.util.codec.encodeBase64(JSON.stringify(oUpdatedSettingContent));
 }
@@ -66,12 +66,12 @@ async function replaceFieldsMassChangeSetting(oSetting) {
  * If anything has changed for a given entry, it's SETTING_ID and encoded SETTING_CONTENT are inserted into a map that is afterwards returned.
  * @param aDatabaseFrontendSettings - array that contains all frontend settings with the type FILTER or MASSCHANGE found in the t_frontend_settings table
  */
-async function findFieldsToReplace(aDatabaseFrontendSettings) {
+function findFieldsToReplace(aDatabaseFrontendSettings) {
     const mSettingsToUpdate = new Map();
     aDatabaseFrontendSettings.forEach(oSetting => {
         if (!helpers.isNullOrUndefined(oSetting.SETTING_CONTENT)) {
             const oSettingContentDecoded = JSON.parse(helpers.arrayBufferToString($.util.codec.decodeBase64(oSetting.SETTING_CONTENT)));
-            const sChangedSettingContentEncoded = oSetting.SETTING_TYPE === 'FILTER' ? await replaceFieldsFilterSetting(oSettingContentDecoded) : await replaceFieldsMassChangeSetting(oSettingContentDecoded);
+            const sChangedSettingContentEncoded = oSetting.SETTING_TYPE === 'FILTER' ?  replaceFieldsFilterSetting(oSettingContentDecoded) :  replaceFieldsMassChangeSetting(oSettingContentDecoded);
             if (sChangedSettingContentEncoded !== oSetting.SETTING_CONTENT) {
                 mSettingsToUpdate.set(oSetting.SETTING_ID, sChangedSettingContentEncoded);
             }
@@ -88,7 +88,7 @@ async function findFieldsToReplace(aDatabaseFrontendSettings) {
  * @param mSettingsToUpdate - map that contains all the changes that need to be done for the t_frontend_settings table
  *                            this map has as a key SETTING_ID and as a value the modified SETTING_CONTENT encoded in base64
  */
-async function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
+function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
     let sUpdateStatement = `update "${ sCurrentSchema }"."${ sFrontendSettingsTable }" set SETTING_CONTENT = case `;
     mSettingsToUpdate.forEach((sSettingContent, iSettingId) => {
         sUpdateStatement += `when SETTING_ID = ${ iSettingId } then '${ sSettingContent }' `;
@@ -108,24 +108,24 @@ async function check(oCurrentConnection) {
  */
 async function run(oCurrentConnection) {
     const sCurrentSchema = await getCurrentSchema(oCurrentConnection);
-    const aDatabaseFrontendSettings = Array.from(oCurrentConnection.executeQuery(`select SETTING_ID, SETTING_NAME, SETTING_TYPE, SETTING_CONTENT
+    const aDatabaseFrontendSettings = Array.from(await oCurrentConnection.executeQuery(`select SETTING_ID, SETTING_NAME, SETTING_TYPE, SETTING_CONTENT
                                                                                         from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"
                                                                                   where SETTING_TYPE = 'FILTER' or SETTING_TYPE = 'MASSCHANGE'`));
-    const mSettingsToUpdate = await findFieldsToReplace(aDatabaseFrontendSettings);
+    const mSettingsToUpdate = findFieldsToReplace(aDatabaseFrontendSettings);
     if (mSettingsToUpdate.size > 0) {
-        const sUpdateFrontendSettingsStatement = await generateUpdateStatement(sCurrentSchema, mSettingsToUpdate);
-        oCurrentConnection.executeUpdate(sUpdateFrontendSettingsStatement);
+        const sUpdateFrontendSettingsStatement = generateUpdateStatement(sCurrentSchema, mSettingsToUpdate);
+        await oCurrentConnection.executeUpdate(sUpdateFrontendSettingsStatement);
     }
     return true;
 }
 
 async function getCurrentSchema(oCurrentConnection) {
-    return oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    return  (await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
 async function closeSqlConnection(oConnection) {
     if (oConnection.close) {
-        await oConnection.close();
+        oConnection.close();
     }
 }
 

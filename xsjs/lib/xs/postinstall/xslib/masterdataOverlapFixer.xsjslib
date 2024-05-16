@@ -50,7 +50,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @param  {string} sTableName Name of the table
      * @return {boolean}         True if the table exists, false otherwise.
      */
-    function existsTable(sTableName) {
+    async function existsTable(sTableName) {
         return await oConnection.executeQuery(`
             select count(*) as count
             from "SYS"."TABLES"
@@ -66,7 +66,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @param  {string} sTableName Name of the table to backup.
      */
     async function backupTable(sTableName) {
-        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = await getTableColumns(sTableName);
+        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = getTableColumns(sTableName);
         const sBackupTableName = `${ sTableName }${ MasterdataOverlapFixer.BACKUP_SUFFIX }`;
         if (existsTable(sBackupTableName) === true) {
             $.trace.error(`Dropping table ${ sBackupTableName } because it already exists`);
@@ -104,7 +104,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      */
     async function repairOverlaps(sTableName) {
         $.trace.error(`Trying to repair overlaps for ${ sTableName }...`);
-        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = await getTableColumns(sTableName);
+        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = getTableColumns(sTableName);
 
         const aValueColumnNames = aColumns.filter(oColumn => {
             const sName = oColumn.COLUMN_NAME;
@@ -255,7 +255,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      *      
      * @return {array}  String array of all mastedata table names. 
      */
-    this.getMasterdataTables = () => {
+    this.getMasterdataTables = async () => {
         return Array.from(await oConnection.executeQuery(`select distinct columns.table_name 
              from "SYS"."TABLE_COLUMNS" as columns 
              inner join "SYS"."TABLES"  as  tables
@@ -274,9 +274,9 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * @param  {string} sTableName Name of the table that should be checked for overlaps.
      * @return {array}            Array of objects. Each object in the array contains an overlapping entity. 
      */
-    this.getOverlaps = sTableName => {
+    this.getOverlaps = async(sTableName) => {
         $.trace.error(`Retrieving overlaps for table ${ sTableName }...`);
-        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = await getTableColumns(sTableName);
+        const [aColumns, aKeyColumnNames, aKeyColumnNamesWithoutValidFrom] = getTableColumns(sTableName);
         const sStmt = `select ${ aKeyColumnNamesWithoutValidFrom.map(sColumnName => `a.${ sColumnName }`).join(', ') },
                     a._valid_from,
                     a._valid_to,
@@ -311,7 +311,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      *  4. Check for overlaps again. If overlaps are still there, there need an overlap with different data and the function is producing 
      *   an error; got to 1
      */
-    this.fix = () => {
+    this.fix = async () => {
         try {
             const aMasterdataTables = this.getMasterdataTables();
             aMasterdataTables.forEach((sTableName, iIndex) => {
@@ -325,15 +325,15 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
                 oTableOutputData.needRepair = bHasOverlaps;
 
                 if (bHasOverlaps === true) {
-                    await backupTable(sTableName);
-                    await repairOverlaps(sTableName);
+                    backupTable(sTableName);
+                    repairOverlaps(sTableName);
                     oTableOutputData.overlapsAfter = this.getOverlaps(sTableName);
                 }
 
                 // committing right after a table was processed in order to save the current progress in case there is a timeout or other issue 
                 // later
                 $.trace.error(`Commiting transaction...`);
-                await oConnection.commit();
+                oConnection.commit();
                 $.trace.error(`Commited`);
             });
             await generateResponse();

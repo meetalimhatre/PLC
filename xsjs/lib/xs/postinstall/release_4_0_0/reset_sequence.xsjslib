@@ -23,9 +23,9 @@ async function run(oCurrentConnection) {
     let sCurrentSchema = await getCurrentSchema(oCurrentConnection);
     aSequences.forEach(element => {
         //get each sequence current number in PLC XSC version
-        let iSequenceValue = (await oConnection.executeQuery(`SELECT "${ sXSCSchema }"."${ element.SEQUENCE_NAME }".nextval as newid FROM DUMMY`))[0].NEWID;
+        let iSequenceValue = (oConnection.executeQuery(`SELECT "${ sXSCSchema }"."${ element.SEQUENCE_NAME }".nextval as newid FROM DUMMY`))[0].NEWID;
         //update each sequence current number to XSA version
-        await oCurrentConnection.executeUpdate(`ALTER SEQUENCE "${ sCurrentSchema }"."${ element.SEQUENCE_NAME }" RESTART WITH ${ iSequenceValue }`);
+        oCurrentConnection.executeUpdate(`ALTER SEQUENCE "${ sCurrentSchema }"."${ element.SEQUENCE_NAME }" RESTART WITH ${ iSequenceValue }`);
     });
     return true;
 }
@@ -35,7 +35,7 @@ function getConnection() {
 }
 
 async function getCurrentSchema(oCurrentConnection) {
-    return await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    return (await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
 function closeSqlConnection(oConnection) {

@@ -5,7 +5,7 @@ const helpers = $.require('../../util/helpers');
 
 async function postInstallationInfo(request, response, oConnection) {
 
-    let info = await driver.isFreshInstallation(request, oConnection) ? await getFreshInstallationInfo(request, oConnection) : request.parameters.get('mode') === 'prepareForUpgrade' ? await getPrepareForUpgradeInfo(request, oConnection) : await getUpgradeInfo(request, oConnection);
+    let info =  driver.isFreshInstallation(request, oConnection) ? await getFreshInstallationInfo(request, oConnection) : request.parameters.get('mode') === 'prepareForUpgrade' ? await getPrepareForUpgradeInfo(request, oConnection) : await getUpgradeInfo(request, oConnection);
 
 
     if (info.status === 'error') {
@@ -17,7 +17,7 @@ async function postInstallationInfo(request, response, oConnection) {
     response.setBody(JSON.stringify(_.omit(info, 'logs')));
 }
 
-function checkPreviousInstallationRun(response, oConnection) {
+async function checkPreviousInstallationRun(response, oConnection) {
 
     let errOrFinishResult = await oConnection.executeQuery(`
         SELECT 
@@ -46,7 +46,7 @@ function checkPreviousInstallationRun(response, oConnection) {
 }
 
 async function getFreshInstallationInfo(request, oConnection) {
-    let oBaseRelease = await driver.readBaseRelease(oConnection);
+    let oBaseRelease = driver.readBaseRelease(oConnection);
     // If fresh installtion has been finished and user choose fresh installation mode, it returns an error object
     if (oBaseRelease.version !== 0 || oBaseRelease.version_sp !== 0 || oBaseRelease.version_patch !== 0) {
         var sMessage = `Current version is ${ oBaseRelease.version }.${ oBaseRelease.version_sp }.${ oBaseRelease.version_patch }. You don't need fresh installation.`;
@@ -57,7 +57,7 @@ async function getFreshInstallationInfo(request, oConnection) {
         };
     }
 
-    const aRegister = await driver.getFreshInstallationRegister();
+    const aRegister = driver.getFreshInstallationRegister();
     const total = aRegister.length;
     const current = await getCurrentStep(aRegister, oConnection);
     return {
@@ -77,7 +77,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
     if (bLogEmpty) {
         let oSecondaryConnection;
         try {
-            oSecondaryConnection = await $.hdb.getConnection({
+            oSecondaryConnection =  $.hdb.getConnection({
                 'sqlcc': 'xsjs.sqlcc_config',
                 'pool': true,
                 'treatDateAsUTC': true
@@ -93,7 +93,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
                     logs: sMessage + '"SAP_PLC"."sap.plc.db::basis.t_log".'
                 };
             } else {
-                return await getPrepareForUpgradeInfo(request, oConnection);
+                return  getPrepareForUpgradeInfo(request, oConnection);
             }
         } catch (e) {
             var sMessage = 'An error occurred when checking version information of previous PLC. ';
@@ -104,11 +104,11 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
             };
         } finally {
             if (oSecondaryConnection) {
-                await oSecondaryConnection.close();
+                 oSecondaryConnection.close();
             }
         }
     } else {
-        let oBaseRelease = await driver.readBaseRelease(oConnection);
+        let oBaseRelease =  driver.readBaseRelease(oConnection);
         // t_installation_log is not empty, and fresh installation is not finished, could not run upgrade
         if (oBaseRelease.version === 0 && oBaseRelease.version_sp === 0 && oBaseRelease.version_patch === 0) {
             var sMessage = 'Fresh installation is not finished yet, please run fresh installation first!';
@@ -118,7 +118,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
                 logs: sMessage
             };
         } else {
-            let oLastAction = await driver.readLastAction(oConnection);
+            let oLastAction =  driver.readLastAction(oConnection);
             if (helpers.isNullOrUndefined(oLastAction)) {
                 var sMessage = 'Could not found any records in installation logs';
                 return {
@@ -152,7 +152,7 @@ async function getUpgradeInfo(request, oConnection) {
     if (bLogEmpty) {
         let oSecondaryConnection;
         try {
-            oSecondaryConnection = await $.hdb.getConnection({
+            oSecondaryConnection = $.hdb.getConnection({
                 'sqlcc': 'xsjs.sqlcc_config',
                 'pool': true,
                 'treatDateAsUTC': true
@@ -168,7 +168,7 @@ async function getUpgradeInfo(request, oConnection) {
                     logs: sMessage + '"SAP_PLC"."sap.plc.db::basis.t_log".'
                 };
             } else {
-                return await getUpgradeInfo(request, oConnection);
+                return getUpgradeInfo(request, oConnection);
             }
         } catch (e) {
             var sMessage = 'An error occurred when checking version information of previous PLC. ';
@@ -179,11 +179,11 @@ async function getUpgradeInfo(request, oConnection) {
             };
         } finally {
             if (oSecondaryConnection) {
-                await oSecondaryConnection.close();
+                 oSecondaryConnection.close();
             }
         }
     } else {
-        let oBaseRelease = await driver.readBaseRelease(oConnection);
+        let oBaseRelease =  driver.readBaseRelease(oConnection);
         // t_installation_log is not empty, and fresh installation is not finished, could not run upgrade
         if (oBaseRelease.version === 0 && oBaseRelease.version_sp === 0 && oBaseRelease.version_patch === 0) {
             var sMessage = 'Fresh installation is not finished yet, please run fresh installation first!';
@@ -193,7 +193,7 @@ async function getUpgradeInfo(request, oConnection) {
                 logs: sMessage
             };
         } else {
-            let oLastAction = await driver.readLastAction(oConnection);
+            let oLastAction = driver.readLastAction(oConnection);
             if (helpers.isNullOrUndefined(oLastAction)) {
                 var sMessage = 'Could not found any records in installation logs';
                 return {
@@ -210,7 +210,7 @@ async function getUpgradeInfo(request, oConnection) {
                     logs: sMessage
                 };
             }
-            const aRegister = await driver.getUpgradeRegisters(oConnection, oBaseRelease);
+            const aRegister =  driver.getUpgradeRegisters(oConnection, oBaseRelease);
             const current = await getCurrentStep(aRegister, oConnection);
             return {
                 version: `${ oBaseRelease.version }.${ oBaseRelease.version_sp }.${ oBaseRelease.version_patch }`,
@@ -231,7 +231,7 @@ async function getCurrentStep(aRegister, oConnection) {
     return aRegister.map(oRigister => oRigister.library_full_name).indexOf(sErrorStepName) + 1;
 }
 
-function getLatestErrorStep(oConnection) {
+async function getLatestErrorStep(oConnection) {
     const aResult = await oConnection.executeQuery(`
         select top 1 * 
             from "sap.plc.db::basis.t_installation_log"
@@ -247,17 +247,17 @@ function getLatestErrorStep(oConnection) {
 }
 
 // If t_installation_log is empty, return true
-function isLogEmpty(oConnection) {
+async function isLogEmpty(oConnection) {
     const aResult = await oConnection.executeQuery(`
             select * from "sap.plc.db::basis.t_installation_log"
         `);
     return aResult.length === 0;
 }
 
-function copyLog(oConnection) {
-    return await oConnection.executeUpdate(`
+async function copyLog(oConnection) {
+    return oConnection.executeUpdate(`
         insert into "sap.plc.db::basis.t_installation_log"
         select * from "SAP_PLC"."sap.plc.db::basis.t_log"
     `);
 }
-export default {_,,driver,helpers,postInstallationInfo,checkPreviousInstallationRun,getFreshInstallationInfo,getPrepareForUpgradeInfo,getUpgradeInfo,getCurrentStep,getLatestErrorStep,isLogEmpty,copyLog};
+export default {_,driver,helpers,postInstallationInfo,checkPreviousInstallationRun,getFreshInstallationInfo,getPrepareForUpgradeInfo,getUpgradeInfo,getCurrentStep,getLatestErrorStep,isLogEmpty,copyLog};

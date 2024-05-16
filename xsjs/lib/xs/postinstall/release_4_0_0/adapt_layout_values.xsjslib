@@ -144,7 +144,7 @@ const mRenamedBusinessObjects = new Map(aRenamedBusinessObjects);
 
 async function check(oCurrentConnection) {
     try {
-        oConnection = $.hdb.getConnection({
+        oConnection = await $.hdb.getConnection({
             'sqlcc': 'xsjs.sqlcc_config',
             'pool': true,
             'treatDateAsUTC': true
@@ -197,7 +197,7 @@ async function updateLayoutColumn(oConnection, aLayoutColumnsAdapted, sCurrentSc
                         where LAYOUT_ID = ? and DISPLAY_ORDER = ? `;
 
     const aValues = [];
-    aLayoutColumnsAdapted.forEach(oLayout => {
+    aLayoutColumnsAdapted.forEach((oLayout) => {
         const aLayoutValues = [];
         aLayoutValues.push(oLayout.PATH);
         aLayoutValues.push(oLayout.BUSINESS_OBJECT);
@@ -218,7 +218,7 @@ async function updateLayoutHiddenField(oConnection, aLayoutHiddenFieldsAdapted, 
                         where LAYOUT_ID = ? and PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ? `;
 
     const aValues = [];
-    aLayoutHiddenFieldsAdapted.forEach(oLayout => {
+    aLayoutHiddenFieldsAdapted.forEach((oLayout) => {
         const aLayoutValues = [];
         aLayoutValues.push(oLayout.PATH);
         aLayoutValues.push(oLayout.BUSINESS_OBJECT);
@@ -235,7 +235,7 @@ async function updateLayoutHiddenField(oConnection, aLayoutHiddenFieldsAdapted, 
 async function run(oCurrentConnection) {
     // Adaptions for t_layout_column
     const sCurrentSchema =  await getCurrentSchema(oCurrentConnection);
-    const aDatabaseLayoutColumns = Array.from(oCurrentConnection.executeQuery(`select LAYOUT_ID, DISPLAY_ORDER, PATH, BUSINESS_OBJECT, COLUMN_ID
+    const aDatabaseLayoutColumns = Array.from(await oCurrentConnection.executeQuery(`select LAYOUT_ID, DISPLAY_ORDER, PATH, BUSINESS_OBJECT, COLUMN_ID
                                                                                     from "${ sCurrentSchema }"."${ sLayoutColumnTable }"`));
     const aLayoutColumnsAdapted =  await adaptLayout(aDatabaseLayoutColumns);
     if (aLayoutColumnsAdapted.length > 0) {
@@ -243,7 +243,7 @@ async function run(oCurrentConnection) {
     }
 
     // Adaptions for t_layout_hidden_field
-    const aDatabaseLayoutHiddenFields = Array.from(oCurrentConnection.executeQuery(`select LAYOUT_ID, PATH, BUSINESS_OBJECT, COLUMN_ID
+    const aDatabaseLayoutHiddenFields = Array.from(await oCurrentConnection.executeQuery(`select LAYOUT_ID, PATH, BUSINESS_OBJECT, COLUMN_ID
                                                                                          from "${ sCurrentSchema }"."${ sLayoutHiddenFieldTable }"`));
     const isHiddenField = true;
     const aLayoutHiddenFieldsAdapted = await adaptLayout(aDatabaseLayoutHiddenFields, isHiddenField);
@@ -254,17 +254,17 @@ async function run(oCurrentConnection) {
 }
 
 async function getCurrentSchema(oCurrentConnection) {
-    return oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    return (await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
-function closeSqlConnection(oConnection) {
+async function closeSqlConnection(oConnection) {
     if (oConnection.close) {
         await oConnection.close();
     }
 }
 
 async function clean(oCurrentConnection) {
-    closeSqlConnection(oConnection);
+    await closeSqlConnection(oConnection);
     return true;
 }
 export default {sLayoutColumnTable,sLayoutHiddenFieldTable,_,oConnection,aRenamedColumns,aRenamedBusinessObjects,aRenamedPaths,mRenamedColumns,mRenamedBusinessObjects,check,adaptLayout,updateLayoutColumn,updateLayoutHiddenField,run,getCurrentSchema,closeSqlConnection,clean};
