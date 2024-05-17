@@ -17,7 +17,7 @@
     "@sap/async-xsjs": "2.0.0",
     "@sap/audit-logging": "5.7.1",
     "@sap/hana-client": "^2.8.20",
-    "@sap/hdbext": "^8.0.3",
+    "@sap/hdbext": "8.0.3",
     "@sap/hdi": "4.3.1",
     "@sap/instance-manager": "3.5.3",
     "@sap/xsenv": "3.4.0",
