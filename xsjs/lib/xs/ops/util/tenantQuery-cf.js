@@ -1,5 +1,5 @@
 const hdbext = require('@sap/xsjs/node_modules/@sap/hdbext');
-const async = require('@sap/async-xsjs');
+const async = require('@sap/xsjs/node_modules/async');
 const moment = require('@sap/xsjs/node_modules/moment');
 const _ = require('lodash');
 
@@ -139,7 +139,7 @@ TenantQuery.prototype.loadProcedure = async function (sSchema, sSql) {
 
 
     return (...params) => {
-        return async.waterfall.sync([async callback => {
+        return async.waterfall.sync([callback => {
                 oProcedure(await normalizeInput(params, _this.treatDateAsUTC), callback);
             }]);
     };
@@ -155,7 +155,7 @@ TenantQuery.prototype.commit = async function () {
 
 TenantQuery.prototype.rollback = async function () {
     let oConnection = await this.getConnection();
-    return async.waterfall.sync([async callback => {
+    return async.waterfall.sync([callback => {
             await oConnection.rollback(callback);
         }]);
 };
@@ -182,4 +182,4 @@ module.exports = {
     TenantQuery,
     tenantQuery
 };
-module.exports = {hdbext,async,moment,_,TenantQuery,normalizeInput,tenantQuery};
+export default {hdbext,async,moment,_,TenantQuery,normalizeInput,tenantQuery};

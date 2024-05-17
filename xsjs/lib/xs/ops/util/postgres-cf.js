@@ -2,7 +2,7 @@
 // So is fit for xsjs
 
 const {Client} = require('pg');
-const async = require('@sap/async-xsjs');
+const async = require('@sap/xsjs/node_modules/async');
 
 var Postgres = function (credentials, autoCommit = true) {
     this.config = {
@@ -139,4 +139,4 @@ module.exports = {
     Postgres,
     postgres
 };
-module.exports = {async,Postgres,postgres};
+export default {,async,Postgres,postgres};
