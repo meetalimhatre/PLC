@@ -57,5 +57,5 @@ async function checkAvailability($, oRequest, oResponse) {
     oResponse.setBody(JSON.stringify({ message: 'Success. Could connect to all tenant HDI containers' }));
 }
 
-module.exports = { checkAvailability };
-export default {tenantUtil,checkAvailability};
+module.exports = {tenantUtil, checkAvailability};
+//export default {tenantUtil,checkAvailability};

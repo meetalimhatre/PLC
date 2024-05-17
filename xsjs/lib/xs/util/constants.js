@@ -2,7 +2,7 @@ const _ = require('lodash');
 const BusinessObjectsEntities = require('./masterdataResources').BusinessObjectsEntities;
 
 // The function from other lib is copied here to avoid circular imports
-async function deepFreeze(oObject) {
+function deepFreeze(oObject) {
     if (Object.isFrozen(oObject) === false) {
         Object.freeze(oObject);
     }
@@ -18,7 +18,7 @@ async function deepFreeze(oObject) {
 module.exports.BusinessObjectsEntities = BusinessObjectsEntities;
 
 //TODO VV: replace var X = Object.freeze(...) with var X=...
-module.exports.ServiceMetaInformation = await deepFreeze({
+module.exports.ServiceMetaInformation = deepFreeze({
     CalculationId: 'CALCULATION_ID',
     CalculationVersionId: 'CALCULATION_VERSION_ID',
     UserId: 'USER_ID',
@@ -37,7 +37,7 @@ module.exports.ServiceMetaInformation = await deepFreeze({
     CalculationVersionsMetadata: 'CalculationVersions'
 });
 
-var TansactionalObjectTyps = await deepFreeze({
+var TansactionalObjectTyps = deepFreeze({
     ApplicationData: 'ApplicationData',
     Calculation: 'Calculation',
     CalculatedResults: 'Calculated_Results',
@@ -71,13 +71,13 @@ var TansactionalObjectTyps = await deepFreeze({
 });
 module.exports.TansactionalObjectTyps = TansactionalObjectTyps;
 
-module.exports.AuthObjectTypes = await deepFreeze({
+module.exports.AuthObjectTypes = deepFreeze({
     groupObject: 'groupObject',
     privilegeObject: 'privilegeObject',
     Group: 'Usergroup'
 });
 
-var MasterDataObjectTypes = await deepFreeze({
+var MasterDataObjectTypes = deepFreeze({
     Account: 'Account',
     AccountGroup: 'Account_Group',
     ActivityPrice: 'Activity_Price',
@@ -277,7 +277,7 @@ module.exports.MasterDataObjectsAllowedReqBodyEntities = function () {
     return returnedMap;
 }();
 
-var HelperObjectTypes = await deepFreeze({
+var HelperObjectTypes = deepFreeze({
     AccountAccountGroup: 'Account_Account_Group',
     ComponentSplitAccountGroup: 'Component_Split_Account_Group',
     Addin: 'Addin',
@@ -308,7 +308,7 @@ module.exports.HelperObjectTypes = HelperObjectTypes;
 
 var BusinessObjectTypes = {};
 _.extend(BusinessObjectTypes, MasterDataObjectTypes, HelperObjectTypes, TansactionalObjectTyps);
-await deepFreeze(BusinessObjectTypes);
+deepFreeze(BusinessObjectTypes);
 module.exports.BusinessObjectTypes = BusinessObjectTypes;
 
 module.exports.FallbackLanguages = Object.freeze([
@@ -321,7 +321,7 @@ module.exports.LanguageFields = Object.freeze([
 ]);
 
 
-module.exports.ServiceParameters = await deepFreeze({
+module.exports.ServiceParameters = deepFreeze({
     Save: 'save',
     SaveAs: 'save-as',
     Close: 'close',
@@ -355,7 +355,7 @@ module.exports.ServiceParameters = await deepFreeze({
     }
 });
 
-module.exports.AddinServiceParameters = await deepFreeze({
+module.exports.AddinServiceParameters = deepFreeze({
     Status: {
         Name: 'status',
         Values: {
@@ -365,7 +365,7 @@ module.exports.AddinServiceParameters = await deepFreeze({
     }
 });
 
-module.exports.ProjectServiceParameters = await deepFreeze({
+module.exports.ProjectServiceParameters = deepFreeze({
     action: {
         name: 'action',
         values: {
@@ -379,14 +379,14 @@ module.exports.ProjectServiceParameters = await deepFreeze({
     overwriteManualVersions: { name: 'overwriteManualVersions' }
 });
 
-module.exports.CalculationVersionParameters = await deepFreeze({
+module.exports.CalculationVersionParameters = deepFreeze({
     expand: {
         name: 'expand',
         values: { items: 'ITEMS' }
     }
 });
 
-module.exports.CalculationServiceParameters = await deepFreeze({
+module.exports.CalculationServiceParameters = deepFreeze({
     Create: 'create',
     CopyVersion: 'copy-version'
 });
@@ -405,17 +405,17 @@ module.exports.parameterActionValidValues = Object.freeze([
     'freeze'
 ]);
 
-module.exports.AddinStates = await deepFreeze({
+module.exports.AddinStates = deepFreeze({
     Activated: 'activated',
     Registered: 'registered'
 });
 
-module.exports.parameterCalculationTopValues = await deepFreeze({
+module.exports.parameterCalculationTopValues = deepFreeze({
     defaultTopPerProject: 100,
     maximumTopPerProject: 100000
 });
 
-module.exports.DefaultSettings = await deepFreeze({
+module.exports.DefaultSettings = deepFreeze({
     CONTROLLING_AREA: 'CONTROLLING_AREA',
     COMPANY_CODE: 'COMPANY_CODE',
     PLANT: 'PLANT',
@@ -432,7 +432,7 @@ module.exports.DefaultSettingsMasterDataColumns =  Object.freeze({
     costingSheetId: 'COSTING_SHEET_ID'
 });
 
-module.exports.ItemCategory = await deepFreeze({
+module.exports.ItemCategory = deepFreeze({
     CalculationVersion: 0,
     Document: 1,
     Material: 2,
@@ -447,7 +447,7 @@ module.exports.ItemCategory = await deepFreeze({
     CustomItemCategory: 'Custom_Item_Categories'
 });
 
-module.exports.CalculationVersionType = await deepFreeze({
+module.exports.CalculationVersionType = deepFreeze({
     Base: 1,
     Lifecycle: 2,
     VariantBase: 4,
@@ -458,13 +458,13 @@ module.exports.CalculationVersionType = await deepFreeze({
 module.exports.CalculationNameMaxLength = 500;
 module.exports.ActivityTimeUpdateFrequency = 60;
 
-module.exports.CustomFieldDisplayGroup = await deepFreeze({
+module.exports.CustomFieldDisplayGroup = deepFreeze({
     Organization: 102,
     Prices: 104,
     Material: 110
 });
 
-module.exports.PriceSource = await deepFreeze({
+module.exports.PriceSource = deepFreeze({
     PlcStandardPrice: '101',
     ErpStandardPrice: '201',
     PlcStandardRate: '301',
@@ -473,16 +473,16 @@ module.exports.PriceSource = await deepFreeze({
     ManualRate: '903'
 });
 
-module.exports.PriceSourceType = await deepFreeze({
+module.exports.PriceSourceType = deepFreeze({
     Material: 1,
     Activity: 2,
     Manual: 3,
     Calculated: 4
 });
 
-module.exports.ApplicationTimeout = await deepFreeze({ SessionTimeout: 'SessionTimeout' });
+module.exports.ApplicationTimeout = deepFreeze({ SessionTimeout: 'SessionTimeout' });
 
-module.exports.SemanticDataTypeAttributes = await deepFreeze({
+module.exports.SemanticDataTypeAttributes = deepFreeze({
     String: 'length=5000',
     Link: 'length=2000',
     StringUOM: 'length=3',
@@ -492,7 +492,7 @@ module.exports.SemanticDataTypeAttributes = await deepFreeze({
     LocalDate: null
 });
 
-module.exports.PropertyTypes = await deepFreeze({
+module.exports.PropertyTypes = deepFreeze({
     String: 3,
     Decimal: 2,
     Integer: 2,
@@ -502,7 +502,7 @@ module.exports.PropertyTypes = await deepFreeze({
     Link: 22
 });
 
-module.exports.RegexIds = await deepFreeze({ LINK: 'LINK' });
+module.exports.RegexIds = deepFreeze({ LINK: 'LINK' });
 
 module.exports.ProjectSurchargeStrategies = {
     NoSurcharges: 'NO_SURCHARGES',
@@ -517,7 +517,7 @@ module.exports.RegularExpressions = Object.freeze({
     AutoComplete: '^[\\pL\\d_#/. +`:|)(%-]*$'
 });
 
-var globalSearchTypeValues = await deepFreeze({
+var globalSearchTypeValues = deepFreeze({
     All: 'All',
     Calculation: 'Calculation',
     CalculationVersion: 'CalculationVersion',
@@ -548,7 +548,7 @@ module.exports.globalSearchEntityType =  Object.freeze([
     globalSearchTypeValues.Project
 ]);
 
-module.exports.globalSearchDefaultValues = await deepFreeze({
+module.exports.globalSearchDefaultValues = deepFreeze({
     SortedColumnId: 'LAST_MODIFIED_ON',
     SortedDirection: 'DESC',
     Filter: '*',
@@ -627,7 +627,7 @@ module.exports.aValidPropertiesFormula = [
 ];
 
 module.exports.isFrozen = 1;
-module.exports.calculationVersionSearchDefaultValues = await deepFreeze({
+module.exports.calculationVersionSearchDefaultValues = deepFreeze({
     SortingColumn: 'CALCULATION_VERSION_NAME',
     SortingDirection: 'ASC',
     MaxQueryResults: 100
@@ -697,13 +697,13 @@ module.exports.aCustomFieldMasterdataBusinessObjects = Object.freeze([
     'Activity_Price'
 ]);
 
-module.exports.TaskType = await deepFreeze({
+module.exports.TaskType = deepFreeze({
     CALCULATE_LIFECYCLE_VERSIONS: 'PROJECT_CALCULATE_LIFECYCLE_VERSIONS',
     TRANSPORTATION_IMPORT: 'TRANSPORTATION_IMPORT',
     METADATA_CUSTOM_FIELDS: 'METADATA_CUSTOM_FIELDS'
 });
 
-module.exports.TaskStatus = await deepFreeze({
+module.exports.TaskStatus = deepFreeze({
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE',
     COMPLETED: 'COMPLETED',
@@ -711,7 +711,7 @@ module.exports.TaskStatus = await deepFreeze({
     FAILED: 'FAILED'
 });
 
-module.exports.FollowUp = await deepFreeze({
+module.exports.FollowUp = deepFreeze({
     CALCULATE_LIFECYCLE_VERSIONS: {
         URI: 'xs.followUp:lifecycleCalculator.xsjs',
         FUNCTION_NAME: 'calculateLifecycleVersions'
@@ -726,7 +726,7 @@ module.exports.FollowUp = await deepFreeze({
     }
 });
 
-module.exports.LifecycleInterval = await deepFreeze({
+module.exports.LifecycleInterval = deepFreeze({
     YEARLY: 12,
     QUARTERLY: 3,
     MONTHLY: 1
@@ -748,7 +748,7 @@ module.exports.mapStandardFieldsWithFormulas = function () {
 
 module.exports.SQLMaximumInteger = 2147483647;
 
-module.exports.HttpMethodMapping = await deepFreeze({
+module.exports.HttpMethodMapping = deepFreeze({
     1: 'GET',
     3: 'POST',
     4: 'PUT',
@@ -756,7 +756,7 @@ module.exports.HttpMethodMapping = await deepFreeze({
     8: 'PATCH'
 });
 
-module.exports.VariantItemQuantityState = await deepFreeze({
+module.exports.VariantItemQuantityState = deepFreeze({
     CALCULATED_VALUE: 0,
     MANUAL_VALUE: 1,
     LINKED_VALUE: 2
@@ -781,7 +781,7 @@ module.exports.WorkCenterCategories = [
 
 module.exports.sDefaultExchangeRateType = 'STANDARD';
 
-module.exports.SurchargePlaceholders = await deepFreeze({
+module.exports.SurchargePlaceholders = deepFreeze({
     ANY_ACCOUNT_GROUP: -2,
     NO_ACCOUNT_GROUP: -1,
     ANY_MATERIAL_GROUP: '*',
@@ -794,7 +794,7 @@ module.exports.SurchargePlaceholders = await deepFreeze({
     ANY_MATERIAL_ID: '*'
 });
 
-module.exports.CalculationVersionLockContext = await deepFreeze({
+module.exports.CalculationVersionLockContext = deepFreeze({
     CALCULATION_VERSION: 'calculation_version',
     VARIANT_MATRIX: 'variant_matrix'
 });
@@ -812,23 +812,23 @@ module.exports.aSidePanelGroupsItemCustomFields = [
     113,
     115
 ];
-module.exports.PriceStrategiesTypes = await deepFreeze({
+module.exports.PriceStrategiesTypes = deepFreeze({
     Material: 1,
     Activity: 2
 });
 
-module.exports.Uom = await deepFreeze({
+module.exports.Uom = deepFreeze({
     Hour: 'H',
     Piece: 'PC'
 });
 
-module.exports.EntityTypes = await deepFreeze({
+module.exports.EntityTypes = deepFreeze({
     Project: 'P',
     Folder: 'F',
     Calculation: 'C'
 });
 
-module.exports.PriceDeterminationScenarios = await deepFreeze({
+module.exports.PriceDeterminationScenarios = deepFreeze({
     MaterialPriceDeterminationScenario: 'MATERIAL_PRICE_DETERMINATION_SCENARIO',
     ActivityPriceDeterminationScenario: 'ACTIVITY_PRICE_DETERMINATION_SCENARIO',
     AllCategoriesScenario: 'ALL_CATEGORIES_SCENARIO'
@@ -844,4 +844,4 @@ module.exports.CalculationVersionCostingSheetTotals =  Object.freeze([
     'TOTAL_COST2',
     'TOTAL_COST3'
 ]);
-export default {_,BusinessObjectsEntities,deepFreeze,TansactionalObjectTyps,MasterDataObjectTypes,HelperObjectTypes,BusinessObjectTypes,globalSearchTypeValues,aMandatoryPropertiesMetadata,aMandatoryPropertiesMetadataAttributes,aMandatoryPropertiesMetadataText,aMandatoryPropertiesMetadataKeys};
+module.exports = _,BusinessObjectsEntities,deepFreeze,TansactionalObjectTyps,MasterDataObjectTypes,HelperObjectTypes,BusinessObjectTypes,globalSearchTypeValues,aMandatoryPropertiesMetadata,aMandatoryPropertiesMetadataAttributes,aMandatoryPropertiesMetadataText,aMandatoryPropertiesMetadataKeys;

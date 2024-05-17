@@ -1,7 +1,8 @@
 const oInstanceMananger = require('@sap/instance-manager');
-const async = require('@sap/xsjs/node_modules/async');
+const async = require('@sap/async-xsjs');
 const oXsEnv = require('@sap/xsenv');
-const options = oXsEnv.getServices({ 'hana': { label: 'service-manager' } });
+//const options = oXsEnv.getServices({ 'hana': { label: 'service-manager' } });
+const options = oXsEnv.getServices({ 'hana': { tag: 'hana' } });
 const postgres = require('./postgres-cf').postgres;
 const oTenantQuery = require('./tenantQuery-cf');
 
@@ -72,7 +73,7 @@ async function getAllTenantRelatedInfo() {
     try {
         aTenantInfo = async.waterfall.sync([
             async function (callback) {
-                await oInstanceMananger.create(options.hana, callback);
+                oInstanceMananger.create(options.hana, callback);
             },
             function (oInstMananger, callback) {
                 oInstMananger.getAll(function (err, result) {
@@ -93,7 +94,7 @@ async function getAllTenantRelatedInfo() {
 async function getConnectionByTenantID(sTenantID) {
     let oInstance = async.waterfall.sync([
         callback => {
-            await oInstanceMananger.create(options['hana'], callback);
+            oInstanceMananger.create(options['hana'], callback);
         },
         (oInstMananger, callback) => {
             oInstMananger.get(sTenantID, callback);
@@ -115,7 +116,7 @@ async function getAllProvisionedTenantDBClients() {
     // "module.exports." is for easy mock in testing
     const aTenants = await module.exports.getProvisionedTenants();
     if (aTenants.length === 0) {
-        await console.info('no provisioned tenant');
+        console.info('no provisioned tenant');
         oResult.message = 'no provisioned tenant';
         return oResult;
     }
@@ -127,7 +128,7 @@ async function getAllProvisionedTenantDBClients() {
         let dCreatedOn = tenant.created_on;
         let tenantInfo = aTenantInfos.find(o => o.tenant_id === sTenantId);
         if (tenantInfo === undefined) {
-            await console.error('can not find tenant ' + sTenantId + ' in HDI container');
+            console.error('can not find tenant ' + sTenantId + ' in HDI container');
             oResult.message = 'can not find tenant ' + sTenantId + ' in HDI container';
             oResult.clients.push({
                 tenantId: sTenantId,
@@ -149,4 +150,4 @@ async function getAllProvisionedTenantDBClients() {
 
     return oResult;
 }
-export default {oInstanceMananger,async,oXsEnv,options,postgres,oTenantQuery,tables,getProvisionedTenants,updateTenantStatus,getConnection,getAllTenantRelatedInfo,getConnectionByTenantID,getAllProvisionedTenantDBClients};
+module.exports = {oInstanceMananger,async,oXsEnv,options,postgres,oTenantQuery,tables,getProvisionedTenants,updateTenantStatus,getConnection,getAllTenantRelatedInfo,getConnectionByTenantID,getAllProvisionedTenantDBClients};

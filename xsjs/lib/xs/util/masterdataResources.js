@@ -2078,4 +2078,4 @@ module.exports.Limits = Limits;
 module.exports.BusinessObjectsEntities = BusinessObjectsEntities;
 module.exports.MasterdataReadProcedures = MasterdataReadProcedures;
 module.exports.aNotMaintainableBusinessObjects = aNotMaintainableBusinessObjects;
-export default {MasterdataResource,CostingSheetResources,Source,BatchOperation,Limits,BusinessObjectsEntities,MasterdataReadProcedures,aNotMaintainableBusinessObjects};
+//module.exports = MasterdataResource,CostingSheetResources,Source,BatchOperation,Limits,BusinessObjectsEntities,MasterdataReadProcedures,aNotMaintainableBusinessObjects;
