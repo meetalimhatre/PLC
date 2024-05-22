@@ -1,5 +1,5 @@
-const hdbext = require('@sap/xsjs/node_modules/@sap/hdbext');
-const async = require('@sap/xsjs/node_modules/async');
+const hdbext = require('@sap/hdbext');
+const async = require('@sap/async-xsjs');
 const moment = require('@sap/xsjs/node_modules/moment');
 const _ = require('lodash');
 
@@ -67,7 +67,7 @@ TenantQuery.prototype.validateAndGetParameters = async function (sqlStatement, .
             if (aIsValid.length === 0) {
                 return value;
             } else {
-                await console.error('parameter is not consistent with sql statement');
+                console.error('parameter is not consistent with sql statement');
                 return null;
             }
         }
@@ -75,7 +75,7 @@ TenantQuery.prototype.validateAndGetParameters = async function (sqlStatement, .
         if (parameterCount === options.length) {
             return await normalizeInput(options, this.treatDateAsUTC);
         } else {
-            await console.error('parameter is not consistent with sql statement');
+            console.error('parameter is not consistent with sql statement');
             return null;
         }
     }
@@ -87,10 +87,10 @@ TenantQuery.prototype.executeQuery = async function (sqlStatement, ...options) {
     var result = null;
     if (sqlStatement.split('?').length === 1) {
         result = async.waterfall.sync([function (cb) {
-                connection.exec(sqlStatement, function (err, result) {
-                    cb(err, result);
-                });
-            }]);
+            connection.exec(sqlStatement, function (err, result) {
+                cb(err, result);
+            });
+        }]);
     } else {
         var parameters = this.validateAndGetParameters(sqlStatement, ...options);
         if (parameters === null) {
@@ -139,9 +139,9 @@ TenantQuery.prototype.loadProcedure = async function (sSchema, sSql) {
 
 
     return (...params) => {
-        return async.waterfall.sync([callback => {
-                oProcedure(await normalizeInput(params, _this.treatDateAsUTC), callback);
-            }]);
+        return async.waterfall.sync([async callback => {
+            oProcedure(await normalizeInput(params, _this.treatDateAsUTC), callback);
+        }]);
     };
 };
 
@@ -155,16 +155,16 @@ TenantQuery.prototype.commit = async function () {
 
 TenantQuery.prototype.rollback = async function () {
     let oConnection = await this.getConnection();
-    return async.waterfall.sync([callback => {
-            await oConnection.rollback(callback);
-        }]);
+    return async.waterfall.sync([async callback => {
+        await oConnection.rollback(callback);
+    }]);
 };
 
 TenantQuery.prototype.close = async function () {
     this.connection && await this.connection.close();
 };
 
-function normalizeInput(oParams, treatDateAsUTC) {
+async function normalizeInput(oParams, treatDateAsUTC) {
     for (var i = 0; i < oParams.length; i++) {
         if (_.isDate(oParams[i])) {
             // hdb driver works with up to 3 digits for the fractional seconds
@@ -182,4 +182,4 @@ module.exports = {
     TenantQuery,
     tenantQuery
 };
-export default {hdbext,async,moment,_,TenantQuery,normalizeInput,tenantQuery};
+//export default { hdbext, async, moment, _, TenantQuery, normalizeInput, tenantQuery };

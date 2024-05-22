@@ -1,5 +1,5 @@
 {
-    "xsappname": "xsac-plc-xsjs",
+    "xsappname": "xsac-plc-xsjs-test",
     "tenant-mode": "dedicated",
     "scopes": [],
     "role-templates": [

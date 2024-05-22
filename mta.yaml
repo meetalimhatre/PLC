@@ -5,36 +5,42 @@ version: 2.7.1
 
 modules:
   - name: xsac-plc-xsjs
+    parameters:
+      memory: 1024M
     path: xsjs
     type: nodejs
     requires:
       - name: xsac-plc-hdi_db
-      - name: xsac-plc-uaa-service
+      - name: xsac-plc-uaa-service-test
     provides:
       - name: xsac-plc-xs-api
         properties:
           url: ${default-url}
 
   - name: xsac-plc-db
+    parameters:
+      memory: 1024M
     type: hdb
     path: db
     requires:
       - name: xsac-plc-hdi_db
         properties:
           TARGET_CONTAINER: ~{service-name}
-      - name: xsac-plc-synonym-grantor-service
+      - name: plc-synonym-grantor-service-test
 
 resources:
   - name: xsac-plc-hdi_db
     type: com.sap.xs.hdi-container
     properties:
       service-name: ${service-name}
-  - name: xsac-plc-synonym-grantor-service
+      config:
+        database_id: 26cbe951-c860-4655-a9e7-6c651853b40d
+  - name: plc-synonym-grantor-service-test
     type: org.cloudfoundry.existing-service
     parameters:
-      service-name: xsac-plc-synonym-grantor-service
+      service-name: plc-synonym-grantor-service-test
 
-  - name: xsac-plc-uaa-service
+  - name: xsac-plc-uaa-service-test
     type: com.sap.xs.uaa-space
     parameters:
       path: xs-security.json

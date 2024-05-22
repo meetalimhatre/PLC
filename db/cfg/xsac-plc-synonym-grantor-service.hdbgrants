@@ -1,5 +1,5 @@
 {
-    "xsac-plc-synonym-grantor-service": {
+    "plc-synonym-grantor-service-test": {
         "object_owner": {
             "object_privileges": [
                 {

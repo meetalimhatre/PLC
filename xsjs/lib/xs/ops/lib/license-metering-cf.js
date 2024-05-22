@@ -121,7 +121,7 @@ async function collectUsageData($, req, res) {
         return;
     }
 
-    const cfEnv = await module.exports.getCFEnv(); // module.exports is for mocking in testing
+    const cfEnv = module.exports.getCFEnv(); // module.exports is for mocking in testing
     if (!cfEnv.services.hasOwnProperty('metering-service')) {
         throw new Error('metering service is not create or bind to app');
     }
@@ -204,4 +204,5 @@ async function collectUsageData($, req, res) {
         }));
     }
 }
-export default {axios,cfenv,tenantUtil,btoa,getTenantUserCount,sendUsageData,getCFEnv,getAuthorizationToken,collectUsageData};
+//export default {axios,cfenv,tenantUtil,btoa,getTenantUserCount,sendUsageData,getCFEnv,getAuthorizationToken,collectUsageData};
+//module.exports = {axios,cfenv,tenantUtil,btoa,getTenantUserCount,sendUsageData,getCFEnv,getAuthorizationToken,collectUsageData};

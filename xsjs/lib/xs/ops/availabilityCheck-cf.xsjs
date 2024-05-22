@@ -4,4 +4,3 @@ if ($.request.method === $.net.http.GET) {
 } else {
     $.response.status = $.net.http.NOT_FOUND;
 }
-export default {};
