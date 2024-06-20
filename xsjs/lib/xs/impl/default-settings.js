@@ -26,7 +26,7 @@ module.exports.DefaultSettings = function ($) {
         var vLock = oParameters.lock;
         var sUserId = $.getPlcUsername();
         var sSessionId = $.getPlcUsername();
-        var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        var mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
 
         if (sType === 'global') {
             // release all locked objects for current user.
@@ -47,7 +47,7 @@ module.exports.DefaultSettings = function ($) {
             sUserId = '';
         }
 
-        oDefaultSettings = oPersistency.DefaultSettings.get(sType, sUserId, mSessionDetails.language, new Date());
+        oDefaultSettings = await oPersistency.DefaultSettings.get(sType, sUserId, mSessionDetails.language, new Date());
 
         var oResponse = {};
         oResponse.DEFAULT_SETTINGS = oDefaultSettings;
@@ -66,7 +66,7 @@ module.exports.DefaultSettings = function ($) {
 
         if (sType === 'global') {
             // create is possible only if the default_settings are not locked by another user
-            var aLockObject = oPersistency.Misc.getLock(BusinessObjectTypes.DefaultSettings, sUserId);
+            var aLockObject = await oPersistency.Misc.getLock(BusinessObjectTypes.DefaultSettings, sUserId);
 
             if (aLockObject.length === 0) {
                 oResult.DEFAULT_SETTINGS = await oPersistency.DefaultSettings.create(oDefaultSettings, sType, sUserId);
@@ -114,13 +114,13 @@ module.exports.DefaultSettings = function ($) {
             var aLockObject = oPersistency.Misc.getLock(BusinessObjectTypes.DefaultSettings, sUserId);
 
             if (aLockObject.length === 0) {
-                oResult.DEFAULT_SETTINGS = oPersistency.DefaultSettings.removeDefaultSettings(sType, sUserId);
+                oResult.DEFAULT_SETTINGS = await oPersistency.DefaultSettings.removeDefaultSettings(sType, sUserId);
                 oServiceOutput.setBody(oResult);
             } else {
                 await throwLockingUserException(aLockObject[0].USER_ID);
             }
         } else {
-            oResult.DEFAULT_SETTINGS = oPersistency.DefaultSettings.removeDefaultSettings(sType, sUserId);
+            oResult.DEFAULT_SETTINGS = await oPersistency.DefaultSettings.removeDefaultSettings(sType, sUserId);
             oServiceOutput.setBody(oResult);
         }
     };

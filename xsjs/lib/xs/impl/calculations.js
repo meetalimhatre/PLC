@@ -56,9 +56,9 @@ module.exports.Calculations = function ($) {
         }
 
         if (_.has(aParameters, 'project_id') || _.has(aParameters, 'calculation_id')) {
-            oGetCalculationsOutput = oPersistency.Calculation.getSaved(aProjectIds, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations);
+            oGetCalculationsOutput = await oPersistency.Calculation.getSaved(aProjectIds, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations);
         } else {
-            oGetCalculationsOutput = oPersistency.Calculation.get(aProjectIds, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations);
+            oGetCalculationsOutput = await oPersistency.Calculation.get(aProjectIds, sUserId, aCalculationIds, itopPerProject, sSearchCriteria, iTopCalculations);
         }
 
         aCalculations = oGetCalculationsOutput.calculations;
@@ -121,8 +121,8 @@ module.exports.Calculations = function ($) {
 
 
                 var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
-                _.each(oCreatedCalculation.CALCULATION_VERSIONS, function (oCv) {
-                    var mCalculationMasterdata = oPersistency.Administration.getMasterdataForCalculationVersion(oCv.CALCULATION_VERSION_ID, mSessionDetails.language, sSessionId);
+                _.each(oCreatedCalculation.CALCULATION_VERSIONS,async function (oCv) {
+                    var mCalculationMasterdata = await oPersistency.Administration.getMasterdataForCalculationVersion(oCv.CALCULATION_VERSION_ID, mSessionDetails.language, sSessionId);
 
                     oServiceOutput.addMasterdata(mCalculationMasterdata);
                 });
@@ -201,11 +201,11 @@ module.exports.Calculations = function ($) {
             var oCopiedCalcVersion = oCopy.version;
 
 
-            var oChangedMasterdataCounts = oPersistency.CalculationVersion.resetMissingNontemporaryMasterdata(oCopiedCalcVersion.CALCULATION_VERSION_ID, sSessionId);
+            var oChangedMasterdataCounts = await oPersistency.CalculationVersion.resetMissingNontemporaryMasterdata(oCopiedCalcVersion.CALCULATION_VERSION_ID, sSessionId);
             await processItemsWithResetNontemporaryMasterdata(oCopiedCalcVersion, oChangedMasterdataCounts, aCopiedItems);
 
 
-            var oAutomaticallyDeterminedValuesResult = oPersistency.Item.automaticValueDetermination(aCopiedItems, oCopiedCalcVersion.CALCULATION_VERSION_ID, sSessionId);
+            var oAutomaticallyDeterminedValuesResult = await oPersistency.Item.automaticValueDetermination(aCopiedItems, oCopiedCalcVersion.CALCULATION_VERSION_ID, sSessionId);
 
             var mAutomaticallyDeterminedValues = {};
 
@@ -218,7 +218,7 @@ module.exports.Calculations = function ($) {
                 mAutomaticallyDeterminedValues[oDeterminedValuesItem.ITEM_ID].ACCOUNT_ID = oDeterminedValuesItem.ACCOUNT_ID;
             });
 
-            await ItemService.processValueDeterminationMessages(oAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
+            ItemService.processValueDeterminationMessages(oAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
 
 
             _.each(aCopiedItems, async function (oItemToUpdate) {
@@ -243,11 +243,11 @@ module.exports.Calculations = function ($) {
         SessionService.checkSessionIsOpened(oPersistency, sSessionId, sUserId);
 
 
-        await calculationVersionService.checkIfVersionExists(oPersistency, sSessionId, iCalcVersionId, oMessageDetails);
+        calculationVersionService.checkIfVersionExists(oPersistency, sSessionId, iCalcVersionId, oMessageDetails);
 
         var sTargetProjectId = oCalculation.PROJECT_ID;
         var bControllingAreaChanged = false;
-        var oCurrentProjectProperties = oPersistency.CalculationVersion.getProjectPropertiesForCalculationVersion(iCalcVersionId, false);
+        var oCurrentProjectProperties = await oPersistency.CalculationVersion.getProjectPropertiesForCalculationVersion(iCalcVersionId, false);
 
         if (sTargetProjectId !== oCurrentProjectProperties.PROJECT_ID) {
 
@@ -264,7 +264,7 @@ module.exports.Calculations = function ($) {
                 bControllingAreaChanged = true;
             }
         }
-        var mSessionDetails = oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
+        var mSessionDetails = await oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
 
 
         const oCopy = await oPersistency.Calculation.createCalculationAsCopy(iCalcVersionId, sTargetProjectId, sSessionId, sUserId, mSessionDetails.language);
@@ -276,7 +276,7 @@ module.exports.Calculations = function ($) {
         var oCopiedCalculation = oCopy.calculation;
         oCopiedCalculation.CALCULATION_VERSIONS = [oCopy.version];
 
-        var mCalculationMasterdata = oPersistency.Administration.getMasterdataForCalculationVersion(oCopiedCalculation.CALCULATION_VERSIONS[0].CALCULATION_VERSION_ID, mSessionDetails.language, sSessionId);
+        var mCalculationMasterdata = await oPersistency.Administration.getMasterdataForCalculationVersion(oCopiedCalculation.CALCULATION_VERSIONS[0].CALCULATION_VERSION_ID, mSessionDetails.language, sSessionId);
         oServiceOutput.addMasterdata(mCalculationMasterdata);
         oServiceOutput.setReferencesData(oCopy.referencesdata);
 
@@ -307,7 +307,7 @@ module.exports.Calculations = function ($) {
 
     this.handlePostRequest = async function (oBodyData, aParameters, oServiceOutput, oPersistency) {
         var sActionParameter = aParameters.action;
-        var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        var mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
 
         if (sActionParameter === CalculationServiceParameters.Create) {
             await that.create(oBodyData, aParameters, oServiceOutput, oPersistency);
@@ -390,8 +390,8 @@ module.exports.Calculations = function ($) {
                 aValidProjectIds.add(oSavedCalculation.PROJECT_ID);
             }
         });
-        aValidProjectIds.forEach(sProjectId => {
-            oPersistency.Project.recalculateOneTimeCostForProject(sProjectId);
+        aValidProjectIds.forEach(async sProjectId => {
+            await oPersistency.Project.recalculateOneTimeCostForProject(sProjectId);
         });
     };
 
@@ -418,7 +418,7 @@ module.exports.Calculations = function ($) {
             oMessageDetails.addCalculationObjs({ id: iCalculationId });
 
 
-            var oCurrentCalculation = oPersistency.Calculation.getCurrentCalculationData(iCalculationId);
+            var oCurrentCalculation = await oPersistency.Calculation.getCurrentCalculationData(iCalculationId);
 
             var dCurrentCalcLastModified = oCurrentCalculation.LAST_MODIFIED_ON;
             if (_.isString(dCurrentCalcLastModified)) {
@@ -448,7 +448,7 @@ module.exports.Calculations = function ($) {
             }
 
 
-            const bVersionBelongsToCalculation = oPersistency.Calculation.IsCalculationVersionInCalculation(iCalculationVersionId, iCalculationId);
+            const bVersionBelongsToCalculation = await oPersistency.Calculation.IsCalculationVersionInCalculation(iCalculationVersionId, iCalculationId);
             if (!bVersionBelongsToCalculation) {
                 oMessageDetails.addCalculationVersionObjs({ id: iCalculationVersionId });
                 const sClientMsg = 'This version does not belong to the given calculation.';
@@ -458,7 +458,7 @@ module.exports.Calculations = function ($) {
             }
 
 
-            var oTargetProjectDefaults = oPersistency.Project.getProjectProperties(oCalculation.PROJECT_ID);
+            var oTargetProjectDefaults = await oPersistency.Project.getProjectProperties(oCalculation.PROJECT_ID);
             if (helpers.isNullOrUndefined(oTargetProjectDefaults)) {
                 const sClientMsg = 'Project does not exist.';
                 const sServerMsg = `${ sClientMsg } Project id: ${ oCalculation.PROJECT_ID }.`;
@@ -468,7 +468,7 @@ module.exports.Calculations = function ($) {
 
 
             if (oCurrentCalculation.PROJECT_ID !== oCalculation.PROJECT_ID) {
-                var oCurrentProjectDefaults = oPersistency.Project.getProjectProperties(oCurrentCalculation.PROJECT_ID);
+                var oCurrentProjectDefaults = await oPersistency.Project.getProjectProperties(oCurrentCalculation.PROJECT_ID);
                 if (oCurrentProjectDefaults.CONTROLLING_AREA_ID !== oTargetProjectDefaults.CONTROLLING_AREA_ID) {
                     const sClientMsg = 'Different controlling areas in calculation and target projects.';
                     const sServerMsg = `${ sClientMsg } Calculation project: ${ oCurrentProjectDefaults.CONTROLLING_AREA_ID }, target project: ${ oTargetProjectDefaults.CONTROLLING_AREA_ID }.`;

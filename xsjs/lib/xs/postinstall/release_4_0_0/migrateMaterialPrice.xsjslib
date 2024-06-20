@@ -20,7 +20,7 @@ async function insertByChuncks(iRecordNumber, sUpsertStatement) {
     var iloops = Math.ceil(iRecordNumber / iTableThreshold);
     for (var i = 0; i < iloops; i++) {
         var sLoopSql = sUpsertStatement + ` LIMIT ${ iTableThreshold } OFFSET ${ i * iTableThreshold }`;
-        oSqlccConnection.executeUpdate(sLoopSql);
+        await oSqlccConnection.executeUpdate(sLoopSql);
         await oSqlccConnection.commit();
     }
 }
@@ -55,7 +55,7 @@ async function adaptMaterialPriceExt(sCurrentSchemaName) {
         if (iExtRecordNumber > iTableThreshold) {
             await insertByChuncks(iExtRecordNumber, sUpsertMaterialPriceExt);
         } else {
-            oSqlccConnection.executeUpdate(sUpsertMaterialPriceExt);
+            await oSqlccConnection.executeUpdate(sUpsertMaterialPriceExt);
             await oSqlccConnection.commit();
         }
     }
@@ -85,7 +85,7 @@ async function insertUniqueMaterialPrice(sCurrentSchemaName) {
     if (iRecordNumber > iTableThreshold) {
         await insertByChuncks(iRecordNumber, sUpsertMaterialPriceUniqueKey);
     } else {
-        oSqlccConnection.executeUpdate(sUpsertMaterialPriceUniqueKey);
+        await oSqlccConnection.executeUpdate(sUpsertMaterialPriceUniqueKey);
         await oSqlccConnection.commit();
     }
 }
@@ -125,7 +125,7 @@ async function insertDuplicatesMaterialPrice(sCurrentSchemaName) {
     if (iRecordNumber > iTableThreshold) {
         await insertByChuncks(iRecordNumber, sUpsertStatement);
     } else {
-        oSqlccConnection.executeUpdate(sUpsertStatement);
+        await oSqlccConnection.executeUpdate(sUpsertStatement);
         await oSqlccConnection.commit();
     }
 }

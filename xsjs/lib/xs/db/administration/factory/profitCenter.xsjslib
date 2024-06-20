@@ -61,7 +61,7 @@ function ProfitCenter(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by PROFIT_CENTER_ID, CONTROLLING_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.PROFIT_CENTER_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;

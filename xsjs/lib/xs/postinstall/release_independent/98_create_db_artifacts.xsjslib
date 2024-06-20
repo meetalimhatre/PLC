@@ -6,7 +6,7 @@ var pers = $.import('xs.db', 'persistency');
 
 var runOnFreshInstallation = true;
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
@@ -28,7 +28,7 @@ async function run(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 export default {pers,runOnFreshInstallation,check,run,clean};

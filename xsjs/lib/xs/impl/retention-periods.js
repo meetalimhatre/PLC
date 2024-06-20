@@ -25,7 +25,7 @@ module.exports.RetentionPeriods = function ($) {
             throw new PlcException(Code.GENERAL_ENTITY_DUPLICATE_ERROR, sClientMsg);
         }
 
-        await addAuditLog();
+        addAuditLog();
 
         oServiceOutput.setBody(oBodyItems);
         oServiceOutput.setStatus($.net.http.CREATED);
@@ -37,7 +37,7 @@ module.exports.RetentionPeriods = function ($) {
      * 
      */
     this.get = async function (oBodyData, oParameters, oServiceOutput, oPersistency) {
-        let aRetentionPeriods = oPersistency.RetentionPeriods.getAllRetentionData();
+        let aRetentionPeriods = await oPersistency.RetentionPeriods.getAllRetentionData();
         oServiceOutput.setBody(aRetentionPeriods);
         oServiceOutput.setStatus($.net.http.OK);
         return oServiceOutput;
@@ -49,7 +49,7 @@ module.exports.RetentionPeriods = function ($) {
      */
     this.remove = async function (oBodyItems, aParameters, oServiceOutput, oPersistency) {
 
-        let aDeletedPeriods = oPersistency.RetentionPeriods.deletePeriods(oBodyItems);
+        let aDeletedPeriods = await oPersistency.RetentionPeriods.deletePeriods(oBodyItems);
         if (!aDeletedPeriods.every(item => item === 1)) {
             let sClientMsg = 'Record(s) not found in personal data validity table.';
             let sServerMsg = `${ sClientMsg }`;
@@ -77,16 +77,16 @@ module.exports.RetentionPeriods = function ($) {
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
         }
 
-        await addAuditLog();
+        addAuditLog();
 
         oServiceOutput.setStatus($.net.http.OK);
         oServiceOutput.setBody(oBodyItems);
         return oServiceOutput;
     };
 
-    async function addAuditLog() {
+    function addAuditLog() {
         $.trace.error(`[INFO] Retention table is maintained by: [${ sUserId }] on [${ new Date().toString() }]`);
-        await auditLog.read({
+        auditLog.read({
             type: sRetentionPeriods,
             id: { key: `TimeStamp: [${ new Date().toString() }]` }
         }).attribute({
@@ -96,7 +96,7 @@ module.exports.RetentionPeriods = function ($) {
             type: 'SAP',
             id: { key: 'PLC' },
             role: 'RetentionPeriodsEdit'
-        }).accessChannel('UI').by(`[${ sUserId }]`).log(async function (err) {
+        }).accessChannel('UI').by(`[${ sUserId }]`).log( function (err) {
             if (err) {
                 $.trace.error(`Edit retention periods. Error when logging using AuditLog`);
             }

@@ -6,20 +6,20 @@ const MessageDetails = MessageLibrary.Details;
 const SQLMaximumInteger = $.require('../util/constants').SQLMaximumInteger;
 
 function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
-    this.validate = async function validate(oRequest, mValidatedParameters) {
+    this.validate = function validate(oRequest, mValidatedParameters) {
         const getExistingNoTemporaryMasterdata = (oResultSet, sColumnName) => oPersistency.Helper.createValueSetFromResult(oResultSet, sColumnName);
-        const oNonTemporaryMasterdata = await oPersistency.Variant.getExistingNonTemporaryMasterdata();
+        const oNonTemporaryMasterdata = oPersistency.Variant.getExistingNonTemporaryMasterdata();
         const aExistingCurrencies = getExistingNoTemporaryMasterdata(oNonTemporaryMasterdata.CURRENCIES, 'CURRENCY_ID');
         const aExistingExchangeRates = getExistingNoTemporaryMasterdata(oNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID');
         const aExistingUOMs = getExistingNoTemporaryMasterdata(oNonTemporaryMasterdata.UNIT_OF_MEASURES, 'UOM_ID');
 
-        async function checkNonTemporaryMasterdataReferences(oVariant) {
+        function checkNonTemporaryMasterdataReferences(oVariant) {
             oUtils.checkNonTemporaryMasterdataReferences(oVariant, ['REPORT_CURRENCY_ID'], aExistingCurrencies);
             oUtils.checkNonTemporaryMasterdataReferences(oVariant, ['EXCHANGE_RATE_TYPE_ID'], aExistingExchangeRates);
             return oVariant;
         }
 
-        async function checkVariant(oVariant, aVariantMetadata) {
+        function checkVariant(oVariant, aVariantMetadata) {
             const oVariantToValidate = _.omit(oVariant, 'ITEMS');
             const oSyntacticallyCorrectVariant = oUtils.checkEntity({
                 entity: oVariantToValidate,
@@ -27,11 +27,11 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 subitemState: -1,
                 metadata: aVariantMetadata
             });
-            await checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
+            checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
             return oSyntacticallyCorrectVariant;
         }
 
-        async function checkSumVariant(oSumVariant) {
+        function checkSumVariant(oSumVariant) {
             let aSumVariantMetadata = oMetadataProvider.get(BusinessObjectTypes.SumVariant, BusinessObjectTypes.SumVariant, null, null, oPersistency);
 
             const oVariantToValidate = _.omit(oSumVariant, 'VARIANTS');
@@ -41,10 +41,10 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 subitemState: -1,
                 metadata: aSumVariantMetadata
             });
-            await checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
+            checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
         }
 
-        async function checkVariantItems(aVariantItems, aVariantItemMetadata) {
+        function checkVariantItems(aVariantItems, aVariantItemMetadata) {
             const aSyntacticallyCorrectVariantItems = [];
             aVariantItems.forEach(oVariantItem => {
                 const oSyntacticallyCorrectItem = oUtils.checkEntity({
@@ -59,7 +59,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             return aSyntacticallyCorrectVariantItems;
         }
 
-        async function changeMandatoryMetadataAttribute(aVariantMetadata, aAttributes, bIsMandatory) {
+        function changeMandatoryMetadataAttribute(aVariantMetadata, aAttributes, bIsMandatory) {
             const aVariantMetadataAdapted = aVariantMetadata;
             if (aVariantMetadataAdapted) {
                 aAttributes.forEach(sAttribute => {
@@ -102,7 +102,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 LAST_CALCULATED_BY: null
             };
         }
-        async function transposeCompressedItemsToTableType(oItemValues, iVariantId) {
+        function transposeCompressedItemsToTableType(oItemValues, iVariantId) {
             const aItemProperties = Object.keys(_.omit(oItemValues, 'VARIANT_ID'));
             if (_.isUndefined(oItemValues.ITEM_ID)) {
                 const sClientMsg = 'ITEM_ID is mandatory in the request body of variant items.';
@@ -129,7 +129,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             return aItemsTransposed;
         }
 
-        async function checkVariantHasItems(oVariant) {
+        function checkVariantHasItems(oVariant) {
             if (!oVariant.ITEMS) {
                 const sDeveloperInfo = "Mandatory field 'ITEMS' missing";
                 const sClientInfo = 'Mandatory field missing';
@@ -137,7 +137,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientInfo);
             }
         }
-        async function checkItemAttributesLength(aRequestItemsCompressed) {
+        function checkItemAttributesLength(aRequestItemsCompressed) {
             const iMaxDifferentLengthsAllowed = 1;
             const oItemAttributesLengthSet = new Set(aRequestItemsCompressed.map(aRequestItemAttribute => aRequestItemAttribute.length));
             if (oItemAttributesLengthSet.size > iMaxDifferentLengthsAllowed) {
@@ -148,7 +148,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             }
         }
 
-        async function validatePostRequest() {
+        function validatePostRequest() {
             const aVariants = oUtils.tryParseJson(oRequest.body.asString());
             const iCalculationVersionId = mValidatedParameters.calculation_version_id;
             if (!_.isArray(aVariants)) {
@@ -203,7 +203,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
             oUtils.checkEmptyBody(oRequest.body);
         }
 
-        async function validateSumRequest() {
+        function validateSumRequest() {
             const oSumVariant = oUtils.tryParseJson(oRequest.body.asString());
             const iCalculationVersionId = mValidatedParameters.calculation_version_id;
             if (!_.isArray(oSumVariant.VARIANTS)) {
@@ -212,7 +212,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
                 throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sMsg);
             }
 
-            await checkSumVariant(oSumVariant);
+            checkSumVariant(oSumVariant);
 
             let aVariantMetadata = oMetadataProvider.get(BusinessObjectTypes.Variant, BusinessObjectTypes.Variant, null, null, oPersistency);
             const aSyntacticallyCorrectVariants = [];
@@ -234,7 +234,7 @@ function VariantCalculatorValidator(oPersistency, oMetadataProvider, oUtils) {
         };
         switch (oRequest.method) {
         case $.net.http.POST:
-            return oRequest.queryPath.indexOf('sum') !== -1 ? await validateSumRequest() : await validatePostRequest();
+            return oRequest.queryPath.indexOf('sum') !== -1 ? validateSumRequest() : validatePostRequest();
         case $.net.http.PUT:
             return validatePutRequest();
         default: {

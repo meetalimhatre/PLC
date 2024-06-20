@@ -12,33 +12,33 @@ const sIsManualRegex = /^CUST_[A-Z][A-Z0-9_]*_IS_MANUAL$/;
 const sUserIdRegex = /((^[a-zA-Z0-9_+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*)(@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7})?$)/;
 const iUserIdMaxLen = 256;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
-async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValidator) {
+function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValidator) {
 
-    var genericSyntaxValidator = oGenericSyntaxValidator || await new GenericSyntaxValidator();
+    var genericSyntaxValidator = oGenericSyntaxValidator || new GenericSyntaxValidator();
 
     this.tryParseJson = async function (sToParse) {
         try {
             var oBody = JSON.parse(sToParse);
         } catch (e) {
             const sLogMessage = `Cannot parse string during validation of ${ sBusinessObject }. Error: ${ e.message }`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
         return oBody;
     };
 
-    this.checkEmptyBody = async function (oBody) {
+    this.checkEmptyBody = function (oBody) {
         if (oBody === undefined || oBody === null) {
             return;
         }
         var sBodyContent = _.isFunction(oBody.asString) ? oBody.asString() : oBody.toString();
         if (sBodyContent !== '') {
             const sLogMessage = `Expected an empty body during validation of ${ sBusinessObject }, but the body contained ${ sBodyContent.length } characters.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
     };
@@ -71,7 +71,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
                 'includedWithBlanks'
             ], sMode)) {
             const sLogMessage = `Unsupported check mode for mandatory properties: ${ sMode }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
@@ -100,18 +100,18 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         _.each(aMandatoryProperites, async function (sMandatoryProperty) {
             if (!fChecker(oEntity, sMandatoryProperty)) {
                 const sLogMessage = `Mandatory property ${ sMandatoryProperty } ${ sMode === 'included' ? 'is missing' : 'was set to null' } (business object: ${ sBusinessObject }). The mandatory properties are ${ aMandatoryProperites.toString() }.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
         });
     };
 
-    this.checkInvalidProperties = async function (oEntity, aValidProperties) {
+    this.checkInvalidProperties = function (oEntity, aValidProperties) {
         var aInvalidProperties = _.keys(_.omit(oEntity, aValidProperties));
 
         if (aInvalidProperties.length > 0) {
             const sLogMessage = `Found invalid properties during validation of ${ sBusinessObject }: ${ aInvalidProperties.toString() }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
     };
@@ -137,13 +137,13 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
             const sUserId = oObject.USER_ID;
             if (sUserId.length > iUserIdMaxLen) {
                 const sLogMessage = `User Id ${ sUserId } exceeds the maximum length 256.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 this.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, sObjectType, oObject, ValidationInfoCode.VALUE_ERROR, aResultErrors);
                 return;
             }
             if (!sUserIdRegex.test(sUserId)) {
                 const sLogMessage = `User Id ${ sUserId } doesn't match the regular expression.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 this.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, sObjectType, oObject, ValidationInfoCode.VALUE_ERROR, aResultErrors);
             }
         }
@@ -217,13 +217,13 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         if (!_.isArray(aProjectDetails)) {
             const sClientMsg = `Cannot validate because the request body is not an array. `;
             const sServerMsg = `${ sClientMsg } ${ oRequest.body.asString() }`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sClientMsg);
         }
 
         if (bEmptyArrayAllowed === true && aProjectDetails.length === 0) {
             const sLogMessage = `Request body must be a non empty array.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
@@ -266,7 +266,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         const that = this;
         if (oInput.entity === undefined || oInput.categoryId === undefined || oInput.subitemState === undefined || oInput.metadata === undefined) {
             const sLogMessage = 'Malformed input object for this function. Please check if all properties are correctly set.';
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
@@ -284,12 +284,12 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
                 });
                 if (aPropertyMetadata.length === 0) {
                     const sLogMessage = `Not able to find property ${ sPropertyKey } in metadata during validation of ${ sBusinessObject }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
                 if (aPropertyMetadata.length > 1) {
                     const sLogMessage = `Ambiguous metadata and column_id ${ sPropertyKey } during validation of ${ sBusinessObject }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
                 aPropertyMetadataAttributes = _.filter(aPropertyMetadata[0].ATTRIBUTES, function (oAttributeMetadata) {
@@ -297,7 +297,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
                 });
                 if (aPropertyMetadataAttributes.length === 0) {
                     const sLogMessage = `Property ${ sPropertyKey } not allowed in current context (category: ${ oInput.categoryId }, SUBITEM_STATE: ${ oInput.subitemState }) during the validation of ${ sBusinessObject }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
 
 
 
@@ -306,7 +306,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
                 }
                 if (aPropertyMetadataAttributes.length > 1) {
                     const sLogMessage = `Ambiguous metadata attributes for property ${ sPropertyKey } not allowed in current context (category: ${ oInput.categoryId },SUBITEM_STATE: ${ oInput.subitemState }) during the validation of ${ sBusinessObject }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
 
@@ -315,7 +315,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
                 if (aPropertyMetadataAttributes[0].IS_READ_ONLY === 1 && aPropertyMetadataAttributes[0].IS_TRANSFERABLE !== 1) {
                     if (aPropertyMetadataAttributes[0].SUBITEM_STATE !== 1 || aPropertyMetadata[0].ROLLUP_TYPE_ID === 0 || aPropertyMetadata[0].IS_CUSTOM !== 1 || !sIsManualRegex.exec(aPropertyMetadata[0].COLUMN_ID) || oPropertyValue !== 0) {
                         const sLogMessage = `Property ${ sPropertyKey } is read-only for current context (category: ${ oInput.categoryId }, SUBITEM_STATE: ${ oInput.subitemState }) during the validation of ${ sBusinessObject }.`;
-                        await logError(sLogMessage);
+                        logError(sLogMessage);
                         throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                     }
                 }
@@ -343,7 +343,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
         return oValidatedEnity;
     };
 
-    this.checkNonTemporaryMasterdataReferences = async function (oEntity, aMasterdataProperties, oValidValuesSet) {
+    this.checkNonTemporaryMasterdataReferences = function (oEntity, aMasterdataProperties, oValidValuesSet) {
         aMasterdataProperties.forEach(sMasterdataProperty => {
             var mdValue = oEntity[sMasterdataProperty];
             if (mdValue !== undefined && mdValue !== null && !oValidValuesSet.has(mdValue)) {
@@ -450,7 +450,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
 
 
 
-    this.checkColumn = async function (aMetadata, sColumnName, oColumnValue, bCheckRegEx) {
+    this.checkColumn = function (aMetadata, sColumnName, oColumnValue, bCheckRegEx) {
         var aColumnMetadata = _.filter(aMetadata, function (oMetadataEntry) {
             return oMetadataEntry.COLUMN_ID === sColumnName;
         });
@@ -463,7 +463,7 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
             };
 
             const sLogMessage = `Unknown property: ${ sColumnName }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
         }
 
@@ -475,16 +475,16 @@ async function BusinessObjectValidatorUtils(sBusinessObject, oGenericSyntaxValid
             };
 
             const sLogMessage = `Ambiguous metadata for column_id ${ sColumnName }`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
         }
 
         if (helpers.isNullOrUndefined(bCheckRegEx))
             bCheckRegEx = true;
         if (bCheckRegEx) {
-            await genericSyntaxValidator.validateValue(oColumnValue, aColumnMetadata[0].SEMANTIC_DATA_TYPE, aColumnMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, false, aColumnMetadata[0].VALIDATION_REGEX_VALUE);
+            genericSyntaxValidator.validateValue(oColumnValue, aColumnMetadata[0].SEMANTIC_DATA_TYPE, aColumnMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, false, aColumnMetadata[0].VALIDATION_REGEX_VALUE);
         } else {
-            await genericSyntaxValidator.validateValue(oColumnValue, aColumnMetadata[0].SEMANTIC_DATA_TYPE, aColumnMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, false, null);
+            genericSyntaxValidator.validateValue(oColumnValue, aColumnMetadata[0].SEMANTIC_DATA_TYPE, aColumnMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, false, null);
         }
     };
 }

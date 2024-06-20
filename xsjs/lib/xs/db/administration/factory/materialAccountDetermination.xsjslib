@@ -47,7 +47,7 @@ function MaterialAccountDetermination(dbConnection, hQuery, sObjectName) {
     /* Additional checks for mandatory fields
 	 * MATERIAL_TYPE_ID, PLANT_ID, VALUATION_CLASS_ID can be empty (even if they are in the key)
 	*/
-    MaterialAccountDetermination.prototype.checkMandatoryProperties = async function (oEntry, sOperation, sObjectType) {
+    MaterialAccountDetermination.prototype.checkMandatoryProperties = function (oEntry, sOperation, sObjectType) {
         var aMandatoryProperties = ['CONTROLLING_AREA_ID'];
         if ((sOperation === Operation.UPDATE || sOperation === Operation.DELETE) && Resources[sObjectName].configuration.IsVersioned) {
             aMandatoryProperties = _.union(aMandatoryProperties, ['_VALID_FROM']);

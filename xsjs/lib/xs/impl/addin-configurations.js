@@ -9,7 +9,7 @@ module.exports.AddinConfigurations = function ($) {
  * Handles a GET request towards the addin-configurations.xsjs resource to get the addin configuration.
  * It only can return the configuration for one addin at the same time
  */
-    this.get = async function (oBodyData, oParameters, oServiceOutput, oPersistency) {
+    this.get = function (oBodyData, oParameters, oServiceOutput, oPersistency) {
         var sGuid = oParameters.guid;
         var sVersion = oParameters.version;
         var aVersions = sVersion.split('.');
@@ -34,7 +34,7 @@ module.exports.AddinConfigurations = function ($) {
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage);
         }
 
-        oServiceOutput.setBody(await prepareAddinConfigurationObject(oAddinConfigurationDBObject));
+        oServiceOutput.setBody( prepareAddinConfigurationObject(oAddinConfigurationDBObject));
     };
 
 
@@ -42,7 +42,7 @@ module.exports.AddinConfigurations = function ($) {
  * Handles HTTP POST requests. The implementation creates an addin configuration.
  * It only can create the configuration for one addin at the same time
  */
-    this.create = async function (oAddinConfigToCreate, oParameters, oServiceOutput, oPersistency) {
+    this.create = function (oAddinConfigToCreate, oParameters, oServiceOutput, oPersistency) {
 
         var sGuid = oAddinConfigToCreate.ADDIN_GUID;
         var sVersion = oAddinConfigToCreate.ADDIN_VERSION;
@@ -74,7 +74,7 @@ module.exports.AddinConfigurations = function ($) {
         var oResultConfiguration = oPersistency.Addin.getAddinConfiguration(sGuid, aVersions);
 
         if (oResultConfiguration !== undefined) {
-            oServiceOutput.setBody(await prepareAddinConfigurationObject(oResultConfiguration));
+            oServiceOutput.setBody( prepareAddinConfigurationObject(oResultConfiguration));
         }
     };
 
@@ -83,7 +83,7 @@ module.exports.AddinConfigurations = function ($) {
  * Handles HTTP PUT requests. The implementation updates addin configuration.
  * It only can update the configuration for one addin at the same time
  */
-    this.update = async function (oAddinConfigToUpdate, oParameters, oServiceOutput, oPersistency) {
+    this.update = function (oAddinConfigToUpdate, oParameters, oServiceOutput, oPersistency) {
 
         var sGuid = oAddinConfigToUpdate.ADDIN_GUID;
         var sVersion = oAddinConfigToUpdate.ADDIN_VERSION;
@@ -129,7 +129,7 @@ module.exports.AddinConfigurations = function ($) {
         var oResultConfiguration = oPersistency.Addin.getAddinConfiguration(sGuid, aVersions);
 
         if (oResultConfiguration !== undefined) {
-            oServiceOutput.setBody(await prepareAddinConfigurationObject(oResultConfiguration));
+            oServiceOutput.setBody( prepareAddinConfigurationObject(oResultConfiguration));
         }
     };
 

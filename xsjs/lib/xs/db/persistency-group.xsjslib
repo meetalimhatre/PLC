@@ -47,7 +47,7 @@ function Group(dbConnection) {
 
         stmt += ` order by USERGROUP_ID`;
 
-        return dbConnection.executeQuery(stmt);
+        return await dbConnection.executeQuery(stmt);
 
     };
 
@@ -61,15 +61,15 @@ function Group(dbConnection) {
 	 *
 	 */
 
-    this.getGroupMembers = function (sGroupId) {
+    this.getGroupMembers =async function (sGroupId) {
 
         var stmtSubgroups = `select usergroup.USERGROUP_ID as GROUP_ID, usergroup.DESCRIPTION from "${ Tables.usergroup }" usergroup
 		inner join "${ Tables.usergroup_usergroup }" subgroups on subgroups.CHILD_USERGROUP_ID = usergroup.USERGROUP_ID 
 		and subgroups.PARENT_USERGROUP_ID = ?`;
         var stmtUsers = `select USER_ID from "${ Tables.usergroup_user }" where USERGROUP_ID = ?`;
 
-        var aGroupMembers = dbConnection.executeQuery(stmtSubgroups, sGroupId);
-        var aUserMembers = dbConnection.executeQuery(stmtUsers, sGroupId);
+        var aGroupMembers = await dbConnection.executeQuery(stmtSubgroups, sGroupId);
+        var aUserMembers = await dbConnection.executeQuery(stmtUsers, sGroupId);
 
         return {
             'GROUPS': aGroupMembers,
@@ -209,7 +209,7 @@ function Group(dbConnection) {
             //remove privileges inherited from the deleted group
             var objectsFromGroupPrivileges = new Set();
             for (let groupId of touchedGroups) {
-                var aObjects = authorizationUnroller.getObjectsFromGroupPrivileges(dbConnection, groupId);
+                var aObjects = await authorizationUnroller.getObjectsFromGroupPrivileges(dbConnection, groupId);
                 for (let i = 0; i < aObjects.length; i++) {
                     objectsFromGroupPrivileges.add({
                         OBJECT_TYPE: aObjects[i].OBJECT_TYPE,

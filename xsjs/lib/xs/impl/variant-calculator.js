@@ -14,7 +14,7 @@ const Severity = MessageLibrary.Severity;
 
 module.exports.VariantCalculator = async function ($) {
 
-    async function handleCalcEngineErrors(aCalcEngineErrors, oServiceOutput) {
+    function handleCalcEngineErrors(aCalcEngineErrors, oServiceOutput) {
         aCalcEngineErrors.forEach(error => {
             const oDetails = new MessageDetails();
             let oCalcEngineDetails = {};
@@ -39,11 +39,11 @@ module.exports.VariantCalculator = async function ($) {
 
     this.calculateTransient = async function (oRequestVariantsAndItems, mParameters, oServiceOutput, oPersistency) {
         const iCalculationVersionId = mParameters.calculation_version_id;
-        await VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
-        await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
-        await VariantService.checkQuantityStateValues(oPersistency, oRequestVariantsAndItems.VARIANT_ITEMS, iCalculationVersionId);
+        VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
+        VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
+        VariantService.checkQuantityStateValues(oPersistency, oRequestVariantsAndItems.VARIANT_ITEMS, iCalculationVersionId);
 
-        const oProcedureResult = oPersistency.Variant.calculateVariant(iCalculationVersionId, oRequestVariantsAndItems.VARIANTS, oRequestVariantsAndItems.VARIANT_ITEMS);
+        const oProcedureResult = await oPersistency.Variant.calculateVariant(iCalculationVersionId, oRequestVariantsAndItems.VARIANTS, oRequestVariantsAndItems.VARIANT_ITEMS);
         const mCalculatedVariantItems = new Map();
         Array.from(oProcedureResult.CALCULATED_VARIANT_ITEMS).forEach(oCalculatedVariantItem => {
             if (!mCalculatedVariantItems.has(oCalculatedVariantItem.VARIANT_ID)) {
@@ -61,17 +61,17 @@ module.exports.VariantCalculator = async function ($) {
         });
 
         const aErrors = Array.from(oProcedureResult.ERRORS);
-        await handleCalcEngineErrors(aErrors, oServiceOutput);
+        handleCalcEngineErrors(aErrors, oServiceOutput);
         oServiceOutput.setCalculationResult(oCalculatedVariantResult);
     };
 
     this.calculatePersistent = async function (oEmptyBody, mParameters, oServiceOutput, oPersistency) {
         const iCalculationVersionId = mParameters.calculation_version_id;
         const iVariantId = mParameters.variant_id;
-        await VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
-        await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
-        await VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
-        await VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
+        VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
+        VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
         const oExistingVariant = await oPersistency.Variant.getVariant(iCalculationVersionId, iVariantId);
         if (_.isUndefined(oExistingVariant)) {
             const sClientMsg = 'No variant exists for the given id.';
@@ -110,7 +110,7 @@ module.exports.VariantCalculator = async function ($) {
         oPersistency.Variant.updateVariantItems(iVariantId, aItemsToUpdate);
 
         const aErrors = Array.from(oProcedureResult.ERRORS);
-        await handleCalcEngineErrors(aErrors, oServiceOutput);
+        handleCalcEngineErrors(aErrors, oServiceOutput);
     };
 
     /**
@@ -120,12 +120,12 @@ module.exports.VariantCalculator = async function ($) {
  * @param {object} oServiceOutput - object used to set the requests response
  * @param {object} oPersistency - object used to persist the calculated variants
  */
-    this.calculateSumVariant = (oRequestVariants, mParameters, oServiceOutput, oPersistency) => {
+    this.calculateSumVariant = async (oRequestVariants, mParameters, oServiceOutput, oPersistency) => {
         const iCalculationVersionId = mParameters.calculation_version_id;
-        await VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
-        await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
+        VariantService.checkCalculationVersionExists(oPersistency, iCalculationVersionId);
+        VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
         const bIsFormulaUsed = oPersistency.Metadata.checkIfFormulaContainsString('$TOTAL_QUANTITY_OF_VARIANTS');
-        const oMaximumNumberOfVariants = oPersistency.FrontendSettings.getFrontendSettings(Constants.MaxNoOfVariantsSettingType, null);
+        const oMaximumNumberOfVariants = await oPersistency.FrontendSettings.getFrontendSettings(Constants.MaxNoOfVariantsSettingType, null);
         if (oMaximumNumberOfVariants.length === 0) {
             const oDetails = new MessageDetails();
             oDetails.addSettingsObj({ id: Constants.MaxNoOfVariantsSettingType });
@@ -147,7 +147,7 @@ module.exports.VariantCalculator = async function ($) {
             aCalculatedVariantResult = aCalculatedVariantResult.filter(oVariant => oVariant.VARIANT_TYPE === 1);
         }
         if (mParameters.persist) {
-            aCalculatedVariantResult.forEach(oVariant => {
+            aCalculatedVariantResult.forEach(async oVariant => {
                 await persistVariantsAfterRecalculation(oVariant, iCalculationVersionId, oPersistency);
                 const aCalculatedVariantItems = Array.from(oProcedureResult.OT_CALCULATED_VARIANT_ITEMS).filter(oItemCalculationResult => oItemCalculationResult.VARIANT_ID === oVariant.VARIANT_ID);
                 const aItemsToUpdate = aCalculatedVariantItems.map(oItemCalculationResult => _.omit(oItemCalculationResult, 'VARIANT_ID'));
@@ -175,7 +175,7 @@ module.exports.VariantCalculator = async function ($) {
             });
 
             const aErrors = Array.from(oProcedureResult.OT_ERRORS);
-            await handleCalcEngineErrors(aErrors, oServiceOutput);
+            handleCalcEngineErrors(aErrors, oServiceOutput);
             oServiceOutput.setCalculationResult(aCalculatedVariantResult);
         }
     };

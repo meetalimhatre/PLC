@@ -41,7 +41,7 @@ async function run(oConnection) {
         // every value within a group is calculated based on the first value from the previous group and the length of the previous group 
         while (currIndex < oStatuses.length) {
             if (storedValue != null && storedValue >= oStatuses[currIndex].DISPLAY_ORDER) {
-                windowLength = await Math.max(storedValue - oStatuses[currIndex].DISPLAY_ORDER + 1, 0);
+                windowLength = Math.max(storedValue - oStatuses[currIndex].DISPLAY_ORDER + 1, 0);
             } else {
                 windowLength = 0;
             }

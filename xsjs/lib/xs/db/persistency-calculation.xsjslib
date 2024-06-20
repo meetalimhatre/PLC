@@ -608,8 +608,8 @@ function Calculation(dbConnection, hQuery) {
         return aCalculation[0];
     };
 
-    this.IsCalculationVersionInCalculation = (iCalcVersionId, iCalcId) => {
-        const rsCalculationVersion = dbConnection.executeQuery(`select CALCULATION_VERSION_ID from "${ Tables.calculation_version }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId } union
+    this.IsCalculationVersionInCalculation = async (iCalcVersionId, iCalcId) => {
+        const rsCalculationVersion = await dbConnection.executeQuery(`select CALCULATION_VERSION_ID from "${ Tables.calculation_version }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId } union
 		                                  select CALCULATION_VERSION_ID from "${ Tables.calculation_version_temporary }" where CALCULATION_ID = ${ iCalcId } and CALCULATION_VERSION_ID = ${ iCalcVersionId }`);
         return !helpers.isNullOrUndefined(rsCalculationVersion.length) && rsCalculationVersion.length >= 1 ? true : false;
     };

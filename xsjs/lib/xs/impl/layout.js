@@ -16,7 +16,7 @@ module.exports.Layout = function ($) {
         if (helpers.isNullOrUndefined(aParameters.layout_type)) {
             aParameters.layout_type = 1;
         }
-        var oLayoutInformation = oPersistency.Layout.getLayouts(sUserId, aParameters.layout_type);
+        var oLayoutInformation = await oPersistency.Layout.getLayouts(sUserId, aParameters.layout_type);
 
         // add columns and hidden fields for each layout
         var aLayouts = [];
@@ -89,7 +89,7 @@ module.exports.Layout = function ($) {
  */
     this.remove = async function (oBodyItems, aParameters, oServiceOutput, oPersistency) {
         var iIsCorporate = aParameters.is_corporate === true ? 1 : 0;
-        var iDeletedRows = oPersistency.Layout.deleteLayout(oBodyItems.LAYOUT_ID, sUserId, iIsCorporate);
+        var iDeletedRows = await oPersistency.Layout.deleteLayout(oBodyItems.LAYOUT_ID, sUserId, iIsCorporate);
         if (iDeletedRows === 0) {
             const sLogMessage = `Layout with id ${ oBodyItems.LAYOUT_ID } not found.`;
             $.trace.error(sLogMessage);

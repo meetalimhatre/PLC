@@ -2,14 +2,14 @@ const MessageLibrary = $.require('../util/message');
 const PlcException = MessageLibrary.PlcException;
 
 function MasterdataValidator(oPersistency, oUtils) {
-    this.validate = async function validate(oRequest) {
-        async function validateGetRequest() {
+    this.validate = function validate(oRequest) {
+        function validateGetRequest() {
             oUtils.checkEmptyBody(oRequest.body);
         }
 
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest();
+            return validateGetRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);

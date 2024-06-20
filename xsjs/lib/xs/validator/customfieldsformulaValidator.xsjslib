@@ -22,9 +22,9 @@ const sSessionId = $.getPlcUsername();
  * @constructor
  */
 
-async function CustomfieldsformulaValidator(persistency, sessionId, metadataProvider, utils) {
+function CustomfieldsformulaValidator(persistency, sessionId, metadataProvider, utils) {
 
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+    var genericSyntaxValidator = new GenericSyntaxValidator();
 
 
     /**
@@ -41,7 +41,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
 	 *              values cannot be validated against the 
 		data types provided in the meta data. 
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         var aMandatoryPropertiesMetadata = constants.aMandatoryPropertiesMetadata;
         var aMandatoryPropertiesMetadataAttributes = constants.aMandatoryPropertiesMetadataAttributes;
         var aMandatoryPropertiesMetadataText = constants.aMandatoryPropertiesMetadataText;
@@ -60,7 +60,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             'LocalDate',
             'Link'
         ]; //Semantic Data Types		
-        var aMaintainedLanguages = await getMaintainableLanguages();
+        var aMaintainedLanguages = getMaintainableLanguages();
         var aBusinessObjects = _.union(['Item'], constants.aCustomFieldMasterdataBusinessObjects); // for version 2.1; extend for future versions with the other business objects
         var aRollupType = [
             0,
@@ -85,7 +85,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return await validateBatchRequest();
+            return validateBatchRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -93,7 +93,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function validateBatchRequest() {
+        function validateBatchRequest() {
             var oBodyData;
             try {
                 oBodyData = JSON.parse(oRequest.body.asString());
@@ -116,7 +116,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
-            _.each(oBodyData, async function (value, key) {
+            _.each(oBodyData, function (value, key) {
                 if (!helpers.isNullOrUndefined(mValidatedParameters) && !helpers.isNullOrUndefined(mValidatedParameters.checkCanExecute)) {
                     if (mValidatedParameters.checkCanExecute === true && (key == 'CREATE' || key == 'UPDATE') && value.length != 0) {
                         const sClientMsg = 'Body content for CREATE or UPDATE must to be empty.';
@@ -126,11 +126,11 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                     }
                 }
                 if (key == 'CREATE') {
-                    await validateCreateCF(value);
+                    validateCreateCF(value);
                 } else if (key == 'UPDATE') {
-                    await validateUpdateCF(value);
+                    validateUpdateCF(value);
                 } else if (key == 'DELETE') {
-                    await validateDeleteCF(value);
+                    validateDeleteCF(value);
                 } else {
                     const sLogMessage = `Unknown property of the request object for metadata: ${ key }.`;
                     $.trace.error(sLogMessage);
@@ -141,11 +141,11 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             return oBodyData;
         }
 
-        async function validateCreateCF(aCreatedFields) {
+        function validateCreateCF(aCreatedFields) {
             var aValidatedItems = [];
             if (_.isArray(aCreatedFields) && aCreatedFields.length > 0) {
-                _.each(aCreatedFields, async function (oBodyItem, iIndex) {
-                    await utils.checkMandatoryProperties(oBodyItem, _.union(aMandatoryPropertiesMetadata, ['UOM_CURRENCY_FLAG']));
+                _.each(aCreatedFields, function (oBodyItem, iIndex) {
+                    utils.checkMandatoryProperties(oBodyItem, _.union(aMandatoryPropertiesMetadata, ['UOM_CURRENCY_FLAG']));
                     utils.checkInvalidProperties(oBodyItem, aValidPropertiesMetadata);
                     if (colRegexUnit.exec(oBodyItem.COLUMN_ID)) {
                         if (helpers.isNullOrUndefined(oBodyItem.PROPERTY_TYPE) && oBodyItem.UOM_CURRENCY_FLAG === 1) {
@@ -244,7 +244,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
 
                     // check that rollup type is valid for the semantic data type
                     if (!helpers.isNullOrUndefined(oBodyItem.ROLLUP_TYPE_ID) && !colRegexUnit.exec(oBodyItem.COLUMN_ID)) {
-                        await checkRollupType(oBodyItem.ROLLUP_TYPE_ID, oBodyItem.SEMANTIC_DATA_TYPE);
+                        checkRollupType(oBodyItem.ROLLUP_TYPE_ID, oBodyItem.SEMANTIC_DATA_TYPE);
                     }
 
                     // check that custom fields support rollup type
@@ -261,7 +261,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                     }
 
                     //validate the texts
-                    await validateTexts(oBodyItem);
+                    validateTexts(oBodyItem);
 
 
                     var aAttributes = oBodyItem.ATTRIBUTES;
@@ -276,11 +276,11 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                         throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                     }
                     _.each(aAttributes, async function (oAttribute, iIndex) {
-                        await checkAttribute(oAttribute, oBodyItem);
+                        checkAttribute(oAttribute, oBodyItem);
                     });
 
 
-                    await checkSidePanelGroupId(oBodyItem);
+                    checkSidePanelGroupId(oBodyItem);
 
 
                     var aFormulas = oBodyItem.FORMULAS;
@@ -297,7 +297,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                                 $.trace.error(sLogMessage);
                                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
                             } else
-                                await checkFormula(oFormula, oBodyItem);
+                                checkFormula(oFormula, oBodyItem);
                         });
                     }
 
@@ -308,25 +308,25 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             return aValidatedItems;
         }
 
-        async function validateUpdateCF(aUpdatedFields) {
+        function validateUpdateCF(aUpdatedFields) {
             var aValidatedItems = [];
             var oMetaData;
 
             if (_.isArray(aUpdatedFields) && aUpdatedFields.length > 0) {
                 _.each(aUpdatedFields, async function (oBodyItem, iIndex) {
-                    await utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesMetadataKeys);
+                    utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesMetadataKeys);
                     utils.checkInvalidProperties(oBodyItem, _.difference(aValidPropertiesMetadata, ['SEMANTIC_DATA_TYPE']));
 
 
                     if (!_.isUndefined(oBodyItem.SIDE_PANEL_GROUP_ID)) {
-                        await checkSidePanelGroupId(oBodyItem);
+                        checkSidePanelGroupId(oBodyItem);
                     }
 
 
                     if (!helpers.isNullOrUndefined(oBodyItem.ROLLUP_TYPE_ID) && !colRegexUnit.exec(oBodyItem.COLUMN_ID)) {
                         oMetaData = metadataProvider.get(oBodyItem.PATH, oBodyItem.BUSINESS_OBJECT, oBodyItem.COLUMN_ID, null, persistency, sSessionId, sUserId);
                         if (oMetaData !== undefined) {
-                            await checkRollupType(oBodyItem.ROLLUP_TYPE_ID, oMetaData[0].SEMANTIC_DATA_TYPE);
+                            checkRollupType(oBodyItem.ROLLUP_TYPE_ID, oMetaData[0].SEMANTIC_DATA_TYPE);
                         } else {
                             const oMessageDetails = new MessageDetails();
                             oMessageDetails.addMetadataObjs(oMetaData);
@@ -337,7 +337,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                     }
 
 
-                    await validateTexts(oBodyItem);
+                    validateTexts(oBodyItem);
 
 
                     var aAttributes = oBodyItem.ATTRIBUTES;
@@ -352,8 +352,8 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                                 throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage, oMessageDetails);
                             }
                         }
-                        _.each(aAttributes, async function (oAttribute, iIndex) {
-                            await checkAttribute(oAttribute, oBodyItem, oMetaData);
+                        _.each(aAttributes, function (oAttribute, iIndex) {
+                            checkAttribute(oAttribute, oBodyItem, oMetaData);
                         });
                     }
 
@@ -373,8 +373,8 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
                                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
                                 }
                             }
-                            _.each(aFormulas, async function (oFormula, iIndex) {
-                                await checkFormula(oFormula, oBodyItem, oMetaData);
+                            _.each(aFormulas, function (oFormula, iIndex) {
+                                checkFormula(oFormula, oBodyItem, oMetaData);
                             });
                         }
                     }
@@ -385,12 +385,12 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             return aValidatedItems;
         }
 
-        async function validateDeleteCF(aDeletedFields) {
+        function validateDeleteCF(aDeletedFields) {
             var aValidatedItems = [];
             if (_.isArray(aDeletedFields) || aDeletedFields.length < 0) {
-                _.each(aDeletedFields, async function (oBodyItem, iIndex) {
+                _.each(aDeletedFields, function (oBodyItem, iIndex) {
 
-                    await utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesMetadataKeys);
+                    utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesMetadataKeys);
                     utils.checkInvalidProperties(oBodyItem, aMandatoryPropertiesMetadataKeys);
 
                     aValidatedItems.push(oBodyItem);
@@ -399,9 +399,9 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             return aValidatedItems;
         }
 
-        async function checkRollupType(iRollupType, iSemanticDataType) {
+        function checkRollupType(iRollupType, iSemanticDataType) {
 
-            await genericSyntaxValidator.validateValue(iRollupType, 'Integer', undefined, true);
+            genericSyntaxValidator.validateValue(iRollupType, 'Integer', undefined, true);
             if (iRollupType < 0 || iRollupType > 5) {
                 const oMessageDetails = new MessageDetails();
                 oMessageDetails.validationObj = {
@@ -437,8 +437,8 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function checkAttribute(oAttribute, oBodyItem, oMetaData) {
-            await utils.checkMandatoryProperties(oAttribute, aMandatoryPropertiesMetadataAttributes);
+        function checkAttribute(oAttribute, oBodyItem, oMetaData) {
+            utils.checkMandatoryProperties(oAttribute, aMandatoryPropertiesMetadataAttributes);
             utils.checkInvalidProperties(oAttribute, aValidPropertiesMetadataAttributes);
             if (oAttribute.PATH != oBodyItem.PATH || oAttribute.BUSINESS_OBJECT != oBodyItem.BUSINESS_OBJECT || oAttribute.COLUMN_ID != oBodyItem.COLUMN_ID) {
                 const oMessageDetails = new MessageDetails();
@@ -488,13 +488,13 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             if (!helpers.isNullOrUndefined(oAttribute.DEFAULT_VALUE)) {
                 try {
                     if (sSemanticDataType === 'Decimal') {
-                        await genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.Decimal, true);
+                        genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.Decimal, true);
                     } else if (sSemanticDataType === 'String') {
-                        await genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.String, true);
+                        genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.String, true);
                     } else if (sSemanticDataType === 'Link') {
-                        await genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.Link, true, sLinkRegexValue);
+                        genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, constants.SemanticDataTypeAttributes.Link, true, sLinkRegexValue);
                     } else {
-                        await genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, undefined, true);
+                        genericSyntaxValidator.validateValue(oAttribute.DEFAULT_VALUE, sSemanticDataType, undefined, true);
                     }
                 } catch (e) {
                     if (e.code.code === Code.GENERAL_VALIDATION_ERROR.code) {
@@ -525,8 +525,8 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function checkFormula(oFormula, oBodyItem, oMetaData) {
-            await utils.checkMandatoryProperties(oFormula, aMandatoryPropertiesFormula);
+        function checkFormula(oFormula, oBodyItem, oMetaData) {
+            utils.checkMandatoryProperties(oFormula, aMandatoryPropertiesFormula);
             utils.checkInvalidProperties(oFormula, aValidPropertiesFormula);
             if (oFormula.PATH != oBodyItem.PATH || oFormula.BUSINESS_OBJECT != oBodyItem.BUSINESS_OBJECT || oFormula.COLUMN_ID != oBodyItem.COLUMN_ID) {
                 const oMessageDetails = new MessageDetails();
@@ -574,13 +574,13 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function validateTexts(oBodyItem) {
+        function validateTexts(oBodyItem) {
             var aTexts = oBodyItem.TEXT;
             if (_.isArray(aTexts)) {
-                _.each(aTexts, async function (oText, iIndex) {
-                    await utils.checkMandatoryProperties(oText, aMandatoryPropertiesMetadataText);
+                _.each(aTexts, function (oText, iIndex) {
+                    utils.checkMandatoryProperties(oText, aMandatoryPropertiesMetadataText);
                     utils.checkInvalidProperties(oText, aValidPropertiesMetadataText);
-                    await validateTextMaxLength(oText);
+                    validateTextMaxLength(oText);
                     if (oText.PATH != oBodyItem.PATH || oText.COLUMN_ID != oBodyItem.COLUMN_ID) {
                         const sClientMsg = 'Unknown text key for body metadata.';
                         const sServerMsg = `${ sClientMsg } oBodyItem: ${ oBodyItem }`;
@@ -596,7 +596,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function validateTextMaxLength(oText) {
+        function validateTextMaxLength(oText) {
             if (oText.hasOwnProperty('DISPLAY_NAME') && oText.DISPLAY_NAME.lenght > 250) {
                 const sLogMessage = `The name ${ oText.DISPLAY_NAME } of the custom field is too long. Maximum length allowed is 250 characters.`;
                 $.trace.error(sLogMessage);
@@ -609,7 +609,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             }
         }
 
-        async function getMaintainableLanguages() {
+        function getMaintainableLanguages() {
             var oParameters = {};
             oParameters.business_object = constants.BusinessObjectTypes.Language;
             oParameters.filter = 'TEXTS_MAINTAINABLE=1';
@@ -620,7 +620,7 @@ async function CustomfieldsformulaValidator(persistency, sessionId, metadataProv
             return _.map(aLanguages, 'LANGUAGE');
         }
 
-        async function checkSidePanelGroupId(oBodyItem) {
+        function checkSidePanelGroupId(oBodyItem) {
             let bInvalidId;
             switch (oBodyItem.BUSINESS_OBJECT) {
             case constants.TansactionalObjectTyps.Item:

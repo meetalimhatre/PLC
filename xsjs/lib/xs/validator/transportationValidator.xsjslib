@@ -40,7 +40,7 @@ function TransportationValidator(oPersistency, sSessionId, utils) {
         case $.net.http.GET:
             return await validateExportRequest();
         case $.net.http.POST:
-            return await validateImportRequest();
+            return validateImportRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -48,7 +48,7 @@ function TransportationValidator(oPersistency, sSessionId, utils) {
             }
         }
 
-        async function validateExportRequest() {
+        function validateExportRequest() {
             var aTableNames = [];
             var aBusinessObjects = [];
 

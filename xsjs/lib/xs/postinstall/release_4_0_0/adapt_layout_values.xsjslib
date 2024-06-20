@@ -166,7 +166,7 @@ async function check(oCurrentConnection) {
  *               [isHiddenField] - flag used to differentiate between t_layout_column and t_layout_hidden_field
  *               default value = false
  */
-async function adaptLayout(aDatabaseLayouts, isHiddenField = false) {
+function adaptLayout(aDatabaseLayouts, isHiddenField = false) {
     const aLayoutsAdapted = [];
     aDatabaseLayouts.forEach(oLayoutColumn => {
         const oLayoutColumnAdapted = JSON.parse(JSON.stringify(oLayoutColumn));
@@ -237,7 +237,7 @@ async function run(oCurrentConnection) {
     const sCurrentSchema =  await getCurrentSchema(oCurrentConnection);
     const aDatabaseLayoutColumns = Array.from(await oCurrentConnection.executeQuery(`select LAYOUT_ID, DISPLAY_ORDER, PATH, BUSINESS_OBJECT, COLUMN_ID
                                                                                     from "${ sCurrentSchema }"."${ sLayoutColumnTable }"`));
-    const aLayoutColumnsAdapted =  await adaptLayout(aDatabaseLayoutColumns);
+    const aLayoutColumnsAdapted = adaptLayout(aDatabaseLayoutColumns);
     if (aLayoutColumnsAdapted.length > 0) {
         await updateLayoutColumn(oCurrentConnection, aLayoutColumnsAdapted, sCurrentSchema);
     }
@@ -246,7 +246,7 @@ async function run(oCurrentConnection) {
     const aDatabaseLayoutHiddenFields = Array.from(await oCurrentConnection.executeQuery(`select LAYOUT_ID, PATH, BUSINESS_OBJECT, COLUMN_ID
                                                                                          from "${ sCurrentSchema }"."${ sLayoutHiddenFieldTable }"`));
     const isHiddenField = true;
-    const aLayoutHiddenFieldsAdapted = await adaptLayout(aDatabaseLayoutHiddenFields, isHiddenField);
+    const aLayoutHiddenFieldsAdapted = adaptLayout(aDatabaseLayoutHiddenFields, isHiddenField);
     if (aLayoutHiddenFieldsAdapted.length > 0) {
         await updateLayoutHiddenField(oCurrentConnection, aLayoutHiddenFieldsAdapted, sCurrentSchema);
     }

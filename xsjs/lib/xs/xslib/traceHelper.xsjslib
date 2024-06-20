@@ -2,7 +2,7 @@ var _ = $.require('lodash');
 var ArgumentException = $.require('./exceptions').ArgumentException;
 
 
-async function buildRequestMessage(oRequest) {
+function buildRequestMessage(oRequest) {
     if (!(oRequest instanceof $.web.WebRequest.constructor)) {
         throw new ArgumentException('oRequest has be instance of $.web.WebRequest');
     }
@@ -22,7 +22,7 @@ async function buildRequestMessage(oRequest) {
     return aStringBuilder.join(' ');
 }
 
-async function buildResponseMessage(oResponse) {
+function buildResponseMessage(oResponse) {
     if (!(oResponse instanceof $.web.WebRequest.constructor)) {
         throw new ArgumentException('oResponse has be instance of $.web.WebResponse');
     }
@@ -38,7 +38,7 @@ async function buildResponseMessage(oResponse) {
     return aStringBuilder.join(' ');
 }
 
-async function buildExceptionMessage(oRequest, oException) {
+function buildExceptionMessage(oRequest, oException) {
     if (!(oRequest instanceof $.web.WebRequest.constructor)) {
         throw new ArgumentException('oRequest has be instance of $.web.WebRequest');
     }

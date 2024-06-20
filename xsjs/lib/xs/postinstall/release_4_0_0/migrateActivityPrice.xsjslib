@@ -30,7 +30,7 @@ async function adaptActivityPriceExt(sCurrentSchemaName) {
                                     FROM "${ sCurrentSchemaName }"."${ sMetadataTableName }"
                                   where IS_CUSTOM = 1 and BUSINESS_OBJECT = 'Activity_Price' and PATH='Activity_Price' and UOM_CURRENCY_FLAG = 0  
                                 `;
-    const aActivityPriceCFF = oSqlccConnection.executeQuery(sGetActivityPriceCFF);
+    const aActivityPriceCFF =await  oSqlccConnection.executeQuery(sGetActivityPriceCFF);
     if (aActivityPriceCFF.length > 0) {
         const aActivityPriceCFFColumns = [];
         aActivityPriceCFF.forEach(oColumn => {
@@ -58,7 +58,7 @@ async function adaptActivityPriceExt(sCurrentSchemaName) {
         if (iExtRecordNumber > iTableThreshold) {
             await insertByChuncks(iExtRecordNumber, sUpsertActivityPriceExt);
         } else {
-            oSqlccConnection.executeUpdate(sUpsertActivityPriceExt);
+            await oSqlccConnection.executeUpdate(sUpsertActivityPriceExt);
             await oSqlccConnection.commit();
         }
     }
@@ -87,7 +87,7 @@ async function insertUniqueActivityPrice(sCurrentSchemaName) {
     if (iRecordNumber > iTableThreshold) {
         await insertByChuncks(iRecordNumber, sUpsertActivityPriceUniqueKey);
     } else {
-        oSqlccConnection.executeUpdate(sUpsertActivityPriceUniqueKey);
+        await oSqlccConnection.executeUpdate(sUpsertActivityPriceUniqueKey);
         await oSqlccConnection.commit();
     }
 }
@@ -126,7 +126,7 @@ async function insertDuplicatesActivityPrice(sCurrentSchemaName) {
     if (iRecordNumber > iTableThreshold) {
         await insertByChuncks(iRecordNumber, sUpsertActivityPriceDuplicateKey);
     } else {
-        oSqlccConnection.executeUpdate(sUpsertActivityPriceDuplicateKey);
+        await oSqlccConnection.executeUpdate(sUpsertActivityPriceDuplicateKey);
         await oSqlccConnection.commit();
     }
 }

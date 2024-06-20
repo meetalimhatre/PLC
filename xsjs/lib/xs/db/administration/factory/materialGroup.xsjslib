@@ -56,7 +56,7 @@ function MaterialGroup(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by MATERIAL_GROUP_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.MATERIAL_GROUP_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;

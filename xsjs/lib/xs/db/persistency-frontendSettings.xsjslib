@@ -65,7 +65,7 @@ async function FrontendSettings(dbConnection, hQuery) {
         }
 
         try {
-            var oReturnObject = dbConnection.executeQuery(sStmtFrontendSettings);
+            var oReturnObject = await dbConnection.executeQuery(sStmtFrontendSettings);
         } catch (e) {
             const sLogMessage = `Error when reading frontend settings.`;
             $.trace.error(sLogMessage);
@@ -175,7 +175,7 @@ async function FrontendSettings(dbConnection, hQuery) {
 	 * @returns {array} aDbSettings
 	 *              all corporate frontend settings and the user defined ones corresponding to the ids in aSettings
 	 */
-    this.getDbSettings = function (aSettings, sUserId) {
+    this.getDbSettings = async function (aSettings, sUserId) {
         var selectStmt = `select SETTING_ID, SETTING_NAME, SETTING_TYPE, USER_ID, SETTING_CONTENT from "${ Tables.frontend_settings }"
 	                        where SETTING_ID = '${ aSettings[0].SETTING_ID }' and USER_ID `;
         if (sUserId != null) {
@@ -189,7 +189,7 @@ async function FrontendSettings(dbConnection, hQuery) {
                 selectStmt = selectStmt + ` or SETTING_ID = '${ aSettings[i].SETTING_ID }' and USER_ID is null`;
             }
         }
-        var aDbSettings = dbConnection.executeQuery(selectStmt);
+        var aDbSettings = await dbConnection.executeQuery(selectStmt);
         return aDbSettings;
     };
 

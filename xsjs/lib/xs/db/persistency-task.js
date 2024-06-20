@@ -13,7 +13,7 @@ var Sequences = Object.freeze({ task_id: 'sap.plc.db.sequence::s_task_id' });
  * Provides persistency operations with tasks.
  */
 
-async function Task(dbConnection) {
+function Task(dbConnection) {
 
     /**
 	 * Gets all running tasks for a user, a specific type, or a specified running task for the user.
@@ -63,7 +63,7 @@ async function Task(dbConnection) {
         // unshift (=add as first element) sStmt in order to use apply() to pass all arguments as array to the JS function
         aQueryParameters.unshift(sStmt);
 
-        return dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
+        return await dbConnection.executeQuery.apply(dbConnection, aQueryParameters);
     };
 
     /**
@@ -82,8 +82,8 @@ async function Task(dbConnection) {
         var aModifiableColumns = _.keys(oSafeTask);
         var aValues = _.values(oSafeTask);
         // it's in-lined here in order to cut of dependency to persistency-helper, since this would cause dependency issues for TaskService (RF)
-        var sequenceTaskId = helpers.toPositiveInteger(dbConnection.executeQuery(`select "${ Sequences.task_id }".nextval as task_id from dummy`)[0].TASK_ID);
-        var maxTaskId = helpers.toPositiveInteger(dbConnection.executeQuery(`select ifnull(max(TASK_ID)+1, 1) as task_id from "${ Tables.task }"`)[0].TASK_ID);
+        var sequenceTaskId = helpers.toPositiveInteger(await dbConnection.executeQuery(`select "${ Sequences.task_id }".nextval as task_id from dummy`)[0].TASK_ID);
+        var maxTaskId = helpers.toPositiveInteger(await dbConnection.executeQuery(`select ifnull(max(TASK_ID)+1, 1) as task_id from "${ Tables.task }"`)[0].TASK_ID);
         var iTaskId = await _.max([
             sequenceTaskId,
             maxTaskId
@@ -181,8 +181,8 @@ async function Task(dbConnection) {
 	 * @returns {oReturnObject} Returns a booleand value indicating if there are any active tasks for the current session 
 	 * and the session of the task in progress
 	 */
-    this.isTaskInProgress = taskType => {
-        var countTasksInProgress = dbConnection.executeQuery(`SELECT SESSION_ID as sessionID, count(*) as taskcount
+    this.isTaskInProgress = async taskType => {
+        var countTasksInProgress = await dbConnection.executeQuery(`SELECT SESSION_ID as sessionID, count(*) as taskcount
 									FROM "${ Tables.task }"
 									WHERE STATUS = 'ACTIVE'
 									AND TASK_TYPE = ? GROUP BY SESSION_ID`, taskType);
@@ -204,9 +204,9 @@ async function Task(dbConnection) {
 	 * @param  {type} iMinutes 	 The number of minutes that will be subtracted from the current datetime and all tasks last updated before this date, will be affected.
 	 *
 	 */
-    this.cancelTasksWithStatusAndLastUpdatedOlderThan = (sStatus, sTaskType, iMinutes) => {
+    this.cancelTasksWithStatusAndLastUpdatedOlderThan = async (sStatus, sTaskType, iMinutes) => {
         let sLastUpdatedBefore = new Date(Date.now() - 1000 * (60 * iMinutes));
-        let aInactiveTasks = dbConnection.executeQuery(`SELECT TASK_ID, SESSION_ID, TASK_TYPE, STATUS, PARAMETERS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS 
+        let aInactiveTasks = await dbConnection.executeQuery(`SELECT TASK_ID, SESSION_ID, TASK_TYPE, STATUS, PARAMETERS, PROGRESS_STEP, PROGRESS_TOTAL, STARTED, LAST_UPDATED_ON, ERROR_CODE, ERROR_DETAILS 
 										from "${ Tables.task }"
 									WHERE STATUS = ?
 									AND TASK_TYPE = ? AND LAST_UPDATED_ON <= ?`, sStatus, sTaskType, sLastUpdatedBefore);

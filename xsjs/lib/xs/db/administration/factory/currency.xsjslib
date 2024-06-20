@@ -27,7 +27,7 @@ function Currency(dbConnection, hQuery, sObjectName) {
     /**
 	 * Check if mandatory fields are filled. 
 	 */
-    Currency.prototype.checkMandatoryProperties = async function (oEntry, sOperation, sObjectType) {
+    Currency.prototype.checkMandatoryProperties = function (oEntry, sOperation, sObjectType) {
 
         var aMandatoryProperties = Resources[sObjectName].configuration.aKeyColumns;
         if ((sOperation === Operation.UPDATE || sOperation === Operation.DELETE) && Resources[sObjectName].configuration.IsVersioned) {

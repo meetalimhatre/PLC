@@ -41,8 +41,8 @@ async function run(oConnection) {
         /** The existing row that is inserted now, should be updated with the value 0 instead of -1
          *  for the SUBITEM_STATE column.
          */
-        aColumnNames.forEach(sColumn => {
-             oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
+        aColumnNames.forEach(async sColumn => {
+            await oConnection.executeUpdate(`UPDATE "${ sCurrentSchema }"."${ sMetadataItemAttributesTable }"
                                         SET SUBITEM_STATE = 0 
                                         WHERE "PATH" = '${ sItem }'
                                         AND "BUSINESS_OBJECT" = '${ sItem }'
@@ -68,7 +68,7 @@ async function run(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 export default {sMetadataItemAttributesTable,sMetadataTable,sItem,_,check,getCurrentSchemaName,run,clean};

@@ -51,16 +51,16 @@ function getTransientTrace() {
     return output;
 }
 
-async function trace(level, group, comment, condition) {
+function trace(level, group, comment, condition) {
     function isFunction(input) {
         return $.toString.call(input) === '[object Function]';
     }
 
     // only use the first letter, e.g. "error" would be mapped to "E"
     var theLevel = level[0];
-    var everythingOK = await isFunction(condition) ? condition() : condition;
+    var everythingOK = isFunction(condition) ? condition() : condition;
     if (!everythingOK) {
-        var output = '[' + group + ']: ' + (await isFunction(comment) ? comment() : comment);
+        var output = '[' + group + ']: ' + ( isFunction(comment) ? comment() : comment);
         if (transientTrace) {
             if (sLevel.indexOf(level) <= sLevel.indexOf(transientTrace.level)) {
                 transientTrace.rawEntries.push({
@@ -71,49 +71,49 @@ async function trace(level, group, comment, condition) {
         } else {
             switch (theLevel) {
             case gc_level.debug:
-                await $.trace.debug(output);
+                $.trace.debug(output);
                 break;
             case gc_level.info:
-                await $.trace.info(output);
+                $.trace.info(output);
                 break;
             case gc_level.warning:
-                await $.trace.warning(output);
+                $.trace.warning(output);
                 break;
             case gc_level.error:
                 $.trace.error(output);
                 break;
             case gc_level.fatal:
-                await $.trace.fatal(output);
+                $.trace.fatal(output);
                 break;
             default:
-                await $.trace.debug(output);
+                $.trace.debug(output);
             }
         }
     }
 }
 
 
-async function debug(group, comment, condition) {
-    await trace(gc_level.debug, group, comment, condition);
+function debug(group, comment, condition) {
+    trace(gc_level.debug, group, comment, condition);
 }
 
-async function info(group, comment, condition) {
-    await trace(gc_level.info, group, comment, condition);
+function info(group, comment, condition) {
+    trace(gc_level.info, group, comment, condition);
 }
 
-async function warning(group, comment, condition) {
-    await trace(gc_level.warning, group, comment, condition);
+function warning(group, comment, condition) {
+    trace(gc_level.warning, group, comment, condition);
 }
 
-async function error(group, comment, condition) {
-    await trace(gc_level.error, group, comment, condition);
+function error(group, comment, condition) {
+    trace(gc_level.error, group, comment, condition);
 }
 
-async function fatal(group, comment, condition) {
-    await trace(gc_level.fatal, group, comment, condition);
+function fatal(group, comment, condition) {
+    trace(gc_level.fatal, group, comment, condition);
 }
 
-async function assert(group, comment, condition) {
-    await trace(gc_level.fatal, group, comment, condition);
+function assert(group, comment, condition) {
+    trace(gc_level.fatal, group, comment, condition);
 }
 export default {gc_level,sLevel,transientTrace,setTransientMode,getRawTransientTrace,getTransientTrace,trace,debug,info,warning,error,fatal,assert};

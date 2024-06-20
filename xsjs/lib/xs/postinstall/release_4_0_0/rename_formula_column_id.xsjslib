@@ -30,7 +30,7 @@ async function run(oCurrentConnection) {
 }
 
 async function getCurrentSchema(oCurrentConnection) {
-    return oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    return await  oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
 }
 
 async function closeSqlConnection(oConnection) {

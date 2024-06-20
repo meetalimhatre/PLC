@@ -62,7 +62,7 @@ function ControllingArea(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by CONTROLLING_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.CONTROLLING_AREA_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
         return oReturnObject;
     };
@@ -93,7 +93,7 @@ async function getControllingAreaEntities(aControllingAreaIds, masterdataTimesta
                    and (plcTextTable._VALID_TO > '${ masterdataTimestamp }' or plcTextTable._VALID_TO is null)  
                where plcTable._VALID_FROM <= '${ masterdataTimestamp }' and (plcTable._VALID_TO > '${ masterdataTimestamp }' or plcTable._VALID_TO is null)   
                	   AND plcTable.CONTROLLING_AREA_ID in ('${ aControllingAreaIds }')`;
-        return _.values(dbConnection.executeQuery(stmt));
+        return _.values( await dbConnection.executeQuery(stmt));
     }
     return [];
 }

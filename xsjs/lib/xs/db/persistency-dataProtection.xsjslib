@@ -96,7 +96,7 @@ function DataProtection(dbConnection) {
         }
 
         const sStmtDeleteUserFromAuthTable = `delete from "${ Tables.auth_user }" where user_id = ?;`;
-        return dbConnection.executeUpdate(sStmtDeleteUserFromAuthTable, sUserId);
+        return await dbConnection.executeUpdate(sStmtDeleteUserFromAuthTable, sUserId);
     };
 
     /**
@@ -259,7 +259,7 @@ function DataProtection(dbConnection) {
 	 *
 	 * @returns {number} - Number of affected rows
 	 */
-    this.removePersonalDataFromProject = function (sProjectId) {
+    this.removePersonalDataFromProject = async function (sProjectId) {
         let iAffectedRows = 0;
 
         const sStmtSelectCalculations = `select calculation_id  from "${ Tables.calculation }" where project_id = ?`;
@@ -275,7 +275,7 @@ function DataProtection(dbConnection) {
                 last_removed_markings_by = ?
             where variant_id in (
             ${ sStmtSelectVariants })`;
-        iAffectedRows = dbConnection.executeUpdate(sStmtUpdateVariants, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows = await dbConnection.executeUpdate(sStmtUpdateVariants, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         const sStmtSelectTempVariants = `select variant_id from "${ Tables.variant_temporary }" where calculation_version_id in (${ sStmtSelectCalculationVersions })`;
 
@@ -285,13 +285,13 @@ function DataProtection(dbConnection) {
                         last_removed_markings_by = ?
                     where variant_id in (
                     ${ sStmtSelectTempVariants })`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateTempVariants, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateTempVariants, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateEntityTags = `update "${ Tables.entity_tags }"
                             set created_by = ?
                             where (entity_id in (${ sStmtSelectCalculations }) and ENTITY_TYPE = 'C')
                             OR (entity_id in (${ sStmtSelectCalculationVersions }) AND ENTITY_TYPE = 'V')`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateEntityTags, this.sPlaceholder, sProjectId, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateEntityTags, this.sPlaceholder, sProjectId, sProjectId);
 
 
         const sStmtUpdateItems = `update "${ Tables.item }"
@@ -300,20 +300,20 @@ function DataProtection(dbConnection) {
                 last_modified_by = ?
             where calculation_version_id in (
             ${ sStmtSelectCalculationVersions })`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateItems, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateItems, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateCalculationVersions = `update "${ Tables.calculation_version }"
             set customer_id = ?,
                 last_modified_by = ?
             where calculation_id in (
             ${ sStmtSelectCalculations })`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateCalculationVersions, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateCalculationVersions, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateCalculations = `update "${ Tables.calculation }"
             set created_by = ?,
                 last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateCalculations, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateCalculations, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProject = `update "${ Tables.project }"
             set customer_id = ?,
@@ -321,7 +321,7 @@ function DataProtection(dbConnection) {
                 created_by = ?,
                 last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProject, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProject, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, this.sPlaceholder, sProjectId);
 
         // Delete from t_material_price_ext since t_material_price contains PROJECT_ID
         const sStmtDeleteMaterialPriceExt = `delete from "${ Tables.material_price_ext }"
@@ -329,48 +329,48 @@ function DataProtection(dbConnection) {
                                         select PRICE_ID from "${ Tables.material_price }"
                                         where PROJECT_ID = ?
                                     );`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtDeleteMaterialPriceExt, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtDeleteMaterialPriceExt, sProjectId);
         // Table t_material_price contains PROJECT_ID
         const sStmtDeletePrice = `
             delete from "${ Tables.material_price }"
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtDeletePrice, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtDeletePrice, sProjectId);
 
         const sStmtUpdateOneTimeProjectCost = `update "${ Tables.one_time_project_cost }"
             set last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateOneTimeProjectCost, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateOneTimeProjectCost, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateOneTimeProductCost = `update "${ Tables.one_time_product_cost }"
             set last_modified_by = ?
             where calculation_id in (${ sStmtSelectCalculations })`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateOneTimeProductCost, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateOneTimeProductCost, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProjectLifecycleConfig = `update "${ Tables.project_lifecycle_configuration }"
             set last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProjectLifecycleConfig, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProjectLifecycleConfig, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProjectLifecyclePeriodType = `update "${ Tables.project_lifecycle_period_type }"
             set last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProjectLifecyclePeriodType, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProjectLifecyclePeriodType, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProjectMonthlyLifecyclePeriod = `update "${ Tables.project_monthly_lifecycle_period }"
             set last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProjectMonthlyLifecyclePeriod, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProjectMonthlyLifecyclePeriod, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProjectLifecyclePeriodQuatityValue = `update "${ Tables.project_lifecycle_period_quantity_value }"
             set last_modified_by = ?
             where project_id = ?`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProjectLifecyclePeriodQuatityValue, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProjectLifecyclePeriodQuatityValue, this.sPlaceholder, sProjectId);
 
         const sStmtUpdateProjectTotalQuantites = `update "${ Tables.project_total_quantities }"
             set last_modified_by = ?
             where calculation_id in (
             ${ sStmtSelectCalculations })`;
-        iAffectedRows += dbConnection.executeUpdate(sStmtUpdateProjectTotalQuantites, this.sPlaceholder, sProjectId);
+        iAffectedRows += await dbConnection.executeUpdate(sStmtUpdateProjectTotalQuantites, this.sPlaceholder, sProjectId);
 
         return iAffectedRows;
     };
@@ -386,7 +386,7 @@ function DataProtection(dbConnection) {
 	 *
 	 * @returns {array} - Array with IDs of formulas containing personal data
 	 */
-    this.findFormulasThatContainPersonalData = function (sParam, sType) {
+    this.findFormulasThatContainPersonalData =async function (sParam, sType) {
         const sStmtSelect = `select formula_id, count(*) as ROWCOUNT from "${ Tables.formula }" where upper(formula_string) LIKE to_nvarchar(?) or 
                             upper(formula_string) LIKE to_nvarchar(?) or upper(formula_string) LIKE to_nvarchar(?) or 
                             upper(formula_string) LIKE to_nvarchar(?) or upper(formula_string) LIKE to_nvarchar(?) group by formula_id`;
@@ -397,7 +397,7 @@ function DataProtection(dbConnection) {
             '%CUSTOMER_ID%',
             '%VENDOR_ID%'
         ];
-        const oResultSet = dbConnection.executeQuery(sStmtSelect, aSearchParam);
+        const oResultSet = await dbConnection.executeQuery(sStmtSelect, aSearchParam);
         return _.map(oResultSet, oRow => oRow.FORMULA_ID);
     };
 

@@ -34,7 +34,7 @@ const deprecatedPLCRoles = [
 
 
 
-async function transformRoletoRT(oRoleName) {
+function transformRoletoRT(oRoleName) {
     return roleTemplateMap[oRoleName] === undefined ? '-1' : roleTemplateMap[oRoleName];
 }
 
@@ -63,9 +63,9 @@ async function getXSCUsers(oConnection) {
                     'xsaRoleTemplates': []
                 };
 
-                validUser.map(async function (item, index) {
+                validUser.map( function (item, index) {
                     oUserWithRoles.xscRoles.push(item.ROLE_NAME);
-                    oUserWithRoles.xsaRoleTemplates.push(await transformRoletoRT(item.ROLE_NAME));
+                    oUserWithRoles.xsaRoleTemplates.push( transformRoletoRT(item.ROLE_NAME));
                 });
                 finalMigrateUsers.push(oUserWithRoles);
             }

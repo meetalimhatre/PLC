@@ -57,8 +57,8 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
     this.get = async function (sSortedColumnId, sSortedDirection, sFilter, sType, iTop, sUserId) {
         iTop = !helpers.isNullOrUndefined(iTop) ? iTop : GlobalSearchDefaultValues.MaxQueryResults;
         sSortedColumnId = !helpers.isNullOrUndefined(sSortedColumnId) ? sSortedColumnId : GlobalSearchDefaultValues.SortedColumnId;
-        sSortedDirection = !helpers.isNullOrUndefined(sSortedDirection) ? await getSortedDirection(sSortedDirection) : GlobalSearchDefaultValues.SortedDirection;
-        sFilter = await getFilter(sFilter);
+        sSortedDirection = !helpers.isNullOrUndefined(sSortedDirection) ? getSortedDirection(sSortedDirection) : GlobalSearchDefaultValues.SortedDirection;
+        sFilter = getFilter(sFilter);
 
         if (helpers.isNullOrUndefinedOrEmpty(sFilter)) {
             return [];
@@ -66,7 +66,7 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
 
         try {
 
-            let sWhereClause = await buildWhereClause(sType);
+            let sWhereClause =  buildWhereClause(sType);
             let sStmt = `select top ?
 					entityData.PROJECT_ID as PROJECT_ID, entityData.PROJECT_NAME as PROJECT_NAME, entityData.STATUS_ID as STATUS_ID, entityData.CALCULATION_ID as CALCULATION_ID, entityData.CALCULATION_NAME as CALCULATION_NAME, 
 					entityData.CALCULATION_VERSION_ID as CALCULATION_VERSION_ID, entityData.CALCULATION_VERSION_NAME as CALCULATION_VERSION_NAME, 
@@ -168,7 +168,7 @@ async function GlobalSearch(dbConnection, hQueryPlc) {
 	 * 
 	 * @returns {string} prepared string for contains function
 	 */
-    async function getFilter(sFilter) {
+    function getFilter(sFilter) {
         if (helpers.isNullOrUndefined(sFilter)) {
             return '';
         }

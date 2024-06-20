@@ -42,7 +42,7 @@ module.exports.Projects = async function ($) {
  * the existing path in the database
  * If any of these checks fail, a PlcException will be thrown
  */
-    async function checkEntityData(sPath, oPersistency, sTable, sPathType) {
+    function checkEntityData(sPath, oPersistency, sTable, sPathType) {
         const oPathCheck = {
             CODE_NOT_FOUND: sPathType === 'PATH' ? Code.GENERAL_ENTITY_NOT_FOUND_ERROR : Code.GENERAL_TARGET_ENTITY_NOT_FOUND_ERROR,
             CODE_NOT_CURRENT: sPathType === 'PATH' ? Code.GENERAL_ENTITY_NOT_CURRENT_ERROR : Code.GENERAL_TARGET_ENTITY_NOT_CURRENT_ERROR
@@ -105,7 +105,7 @@ module.exports.Projects = async function ($) {
             var sProjectId = oProject.PROJECT_ID;
 
             if (oProject.PATH && oProject.PATH !== '0') {
-                await checkEntityData(oProject.PATH, oPersistency, Tables.folder, 'PATH');
+                checkEntityData(oProject.PATH, oPersistency, Tables.folder, 'PATH');
             }
 
             if (oPersistency.Project.exists(sProjectId) === true) {
@@ -266,7 +266,7 @@ module.exports.Projects = async function ($) {
 
 
     async function checkReferencedLifecycleVersions(sProjectId, oPersistency) {
-        const aReferencedVersions = Array.from(oPersistency.Project.getReferencedVersions(sProjectId));
+        const aReferencedVersions = Array.from( await oPersistency.Project.getReferencedVersions(sProjectId));
         if (aReferencedVersions && aReferencedVersions.length > 0) {
             let oMessageDetails = new MessageDetails();
             let aBaseVersionIds = [...new Set(aReferencedVersions.map(o => o.BASE_CALCULATION_VERSION_ID))];
@@ -286,7 +286,7 @@ module.exports.Projects = async function ($) {
 
     async function handleLifecycleLock(sProjectId, oPersistency) {
 
-        const aLockedVersions = oPersistency.Project.getOpenedLifecycleVersions(sProjectId);
+        const aLockedVersions = await oPersistency.Project.getOpenedLifecycleVersions(sProjectId);
 
         if (aLockedVersions && aLockedVersions.length > 0) {
             let oMessageDetails = new MessageDetails();
@@ -373,12 +373,12 @@ module.exports.Projects = async function ($) {
             const iSourceEntityId = helpers.getEntityIdFromPath(oProject.PATH);
             oPersistency.Project.checkProjectIdSameAsSourceEntityId(sProjectId, iSourceEntityId);
             if (oProject.TARGET_PATH !== '0') {
-                await checkEntityData(oProject.TARGET_PATH, oPersistency, Tables.folder, 'TARGET_PATH');
+                checkEntityData(oProject.TARGET_PATH, oPersistency, Tables.folder, 'TARGET_PATH');
             }
-            await checkEntityData(oProject.PATH, oPersistency, Tables.project, 'PATH');
+            checkEntityData(oProject.PATH, oPersistency, Tables.project, 'PATH');
         }
 
-        var oCurrentProject = oPersistency.Project.getProjectProperties(sProjectId);
+        var oCurrentProject = await oPersistency.Project.getProjectProperties(sProjectId);
 
         if (helpers.isNullOrUndefined(oCurrentProject)) {
             const sClientMsg = 'Project does not exist and cannot be updated.';
@@ -419,7 +419,7 @@ module.exports.Projects = async function ($) {
     this.remove = async function (oProject, aParameters, oServiceOutput, oPersistency) {
         var sProjectId = oProject.PROJECT_ID;
 
-        var aDbOpeningUsers = oPersistency.Project.getOpeningUsers(sProjectId, sSessionId);
+        var aDbOpeningUsers = await oPersistency.Project.getOpeningUsers(sProjectId, sSessionId);
         if (aDbOpeningUsers.length > 0) {
 
             var aOpeningUserDetails = _.map(aDbOpeningUsers, function (oDbOpeningUser) {
@@ -438,7 +438,7 @@ module.exports.Projects = async function ($) {
         }
 
 
-        var aFrozenVersions = oPersistency.Project.getFrozenVersions(sProjectId);
+        var aFrozenVersions = await oPersistency.Project.getFrozenVersions(sProjectId);
         if (aFrozenVersions.length > 0) {
             var oCalculationVersionsFrozenDetails = new MessageDetails();
             _.each(aFrozenVersions, function (oFrozenVersion, index) {
@@ -469,7 +469,7 @@ module.exports.Projects = async function ($) {
         }
 
 
-        var aSourceVersions = oPersistency.Project.getSourceVersionsWithMasterVersionsFromDifferentProjects(sProjectId);
+        var aSourceVersions = await oPersistency.Project.getSourceVersionsWithMasterVersionsFromDifferentProjects(sProjectId);
         if (aSourceVersions.length > 0) {
             aSourceVersions = _.map(aSourceVersions, function (oSourceVersion) {
                 return {
@@ -509,8 +509,8 @@ module.exports.Projects = async function ($) {
 
 
     this.get = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
-        var mSessionDetails = oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
-        var oProjects = oPersistency.Project.getAll(mSessionDetails.language, sUserId, mParameters);
+        var mSessionDetails = await oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
+        var oProjects = await oPersistency.Project.getAll(mSessionDetails.language, sUserId, mParameters);
 
         oServiceOutput.setTransactionalData(oProjects.aProjects);
         oServiceOutput.addMasterdata(oProjects.mMasterdata);
@@ -525,9 +525,9 @@ module.exports.Projects = async function ($) {
 
         var sProjectId = mParameters.id;
 
-        var aProjectTotalQuantities = oPersistency.Project.getTotalQuantities(sProjectId);
+        var aProjectTotalQuantities = await oPersistency.Project.getTotalQuantities(sProjectId);
 
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, 'CALCULATION_ID'));
+        oServiceOutput.setTransactionalData( prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, 'CALCULATION_ID'));
     };
 
 
@@ -550,7 +550,7 @@ module.exports.Projects = async function ($) {
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
         }
 
-        var aExistingCalculationsWithVersions = oPersistency.Project.getCalculationsWithVersions(sProjectId);
+        var aExistingCalculationsWithVersions = await oPersistency.Project.getCalculationsWithVersions(sProjectId);
         var aExistingCalculationsInProject = _.map(aExistingCalculationsWithVersions, 'CALCULATION_ID');
         if (_.intersection(aExistingCalculationsInProject, aCalculationIds).length !== aCalculationIds.length) {
             const sClientMsg = 'Project does not contain the calculations.';
@@ -595,14 +595,14 @@ module.exports.Projects = async function ($) {
         await ProjectService.checkLifetimeLimitsForProjectDetails(aBodyData, sProjectId, oPersistency);
 
 
-        oPersistency.Project.deleteTotalQuantitiesForProject(sProjectId);
+        await oPersistency.Project.deleteTotalQuantitiesForProject(sProjectId);
 
 
-        oPersistency.Project.createTotalQuantities(aBodyData, sProjectId);
+        await oPersistency.Project.createTotalQuantities(aBodyData, sProjectId);
 
 
-        var aProjectTotalQuantities = oPersistency.Project.getTotalQuantities(sProjectId);
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, 'CALCULATION_ID'));
+        var aProjectTotalQuantities =await oPersistency.Project.getTotalQuantities(sProjectId);
+        oServiceOutput.setTransactionalData( prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, 'CALCULATION_ID'));
     };
 
 
@@ -616,7 +616,7 @@ module.exports.Projects = async function ($) {
         let mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
         let aProjectSurcharges = oPersistency.Project.getActivityPriceSurcharges(sProjectId, mSessionDetails.language);
 
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
+        oServiceOutput.setTransactionalData( prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
     };
 
 
@@ -640,19 +640,19 @@ module.exports.Projects = async function ($) {
         await ProjectService.checkLifetimeLimitsForProjectDetails(aBodyData, sProjectId, oPersistency);
 
 
-        oPersistency.Project.deleteSurchargesForProject(sProjectId, BusinessObjectTypes.ProjectActivityPriceSurcharges);
+        await oPersistency.Project.deleteSurchargesForProject(sProjectId, BusinessObjectTypes.ProjectActivityPriceSurcharges);
 
 
-        oPersistency.Project.createSurcharges(sProjectId, aBodyData, BusinessObjectTypes.ProjectActivityPriceSurcharges);
+        await oPersistency.Project.createSurcharges(sProjectId, aBodyData, BusinessObjectTypes.ProjectActivityPriceSurcharges);
 
 
         await ProjectService.checkOverlappingAccountsInAccountGroups(sProjectId, BusinessObjectTypes.ProjectActivityPriceSurcharges, oServiceOutput, oPersistency);
 
 
-        let mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
-        let aProjectSurcharges = oPersistency.Project.getActivityPriceSurcharges(sProjectId, mSessionDetails.language);
+        let mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        let aProjectSurcharges = await oPersistency.Project.getActivityPriceSurcharges(sProjectId, mSessionDetails.language);
 
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
+        oServiceOutput.setTransactionalData(prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
     };
 
 
@@ -663,10 +663,10 @@ module.exports.Projects = async function ($) {
 
         await ProjectService.checkExists(sProjectId, oPersistency);
 
-        let mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
-        let aProjectSurcharges = oPersistency.Project.getMaterialPriceSurcharges(sProjectId, mSessionDetails.language);
+        let mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        let aProjectSurcharges = await oPersistency.Project.getMaterialPriceSurcharges(sProjectId, mSessionDetails.language);
 
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
+        oServiceOutput.setTransactionalData( prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
     };
 
 
@@ -691,19 +691,19 @@ module.exports.Projects = async function ($) {
         await ProjectService.checkLifetimeLimitsForProjectDetails(aBodyData, sProjectId, oPersistency);
 
 
-        oPersistency.Project.deleteSurchargesForProject(sProjectId, BusinessObjectTypes.ProjectMaterialPriceSurcharges);
+        await oPersistency.Project.deleteSurchargesForProject(sProjectId, BusinessObjectTypes.ProjectMaterialPriceSurcharges);
 
 
-        oPersistency.Project.createSurcharges(sProjectId, aBodyData, BusinessObjectTypes.ProjectMaterialPriceSurcharges);
+        await oPersistency.Project.createSurcharges(sProjectId, aBodyData, BusinessObjectTypes.ProjectMaterialPriceSurcharges);
 
 
         await ProjectService.checkOverlappingAccountsInAccountGroups(sProjectId, BusinessObjectTypes.ProjectMaterialPriceSurcharges, oServiceOutput, oPersistency);
 
 
-        let mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
-        let aProjectSurcharges = oPersistency.Project.getMaterialPriceSurcharges(sProjectId, mSessionDetails.language);
+        let mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        let aProjectSurcharges = await oPersistency.Project.getMaterialPriceSurcharges(sProjectId, mSessionDetails.language);
 
-        oServiceOutput.setTransactionalData(await prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
+        oServiceOutput.setTransactionalData( prepareServiceOutputForProjectLifecycleDetails(aProjectSurcharges, 'RULE_ID'));
     };
 
 
@@ -723,8 +723,8 @@ module.exports.Projects = async function ($) {
 
 
 
-    function setOutputForProject(sProjectId, sLanguage, oServiceOutput, oPersistency) {
-        var oProjectsAndMasterdata = oPersistency.Project.get(sLanguage, sUserId, sProjectId);
+    async function setOutputForProject(sProjectId, sLanguage, oServiceOutput, oPersistency) {
+        var oProjectsAndMasterdata = await oPersistency.Project.get(sLanguage, sUserId, sProjectId);
 
         var oOutputProject = _.omit(oProjectsAndMasterdata.aProjects[0], 'CALCULATION_NO');
 
@@ -739,7 +739,7 @@ module.exports.Projects = async function ($) {
 
 
 
-    async function prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, sGroupingProperty) {
+    function prepareServiceOutputForProjectLifecycleDetails(aProjectTotalQuantities, sGroupingProperty) {
         var aTotalQuantitiesOutput = [];
         _.each(_.groupBy(aProjectTotalQuantities, sGroupingProperty), (aCalculationGroups, iCalculationId) => {
             let oCalculationOutput = _.omit(aCalculationGroups[0], [

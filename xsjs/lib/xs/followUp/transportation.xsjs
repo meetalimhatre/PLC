@@ -12,10 +12,10 @@ const Transportation = $.import('xs.followUp', 'transportation').Transportation;
  *
  * @param  {type} mParameters Map of parameters passed by the Follow-up. Must contain a property TASK_ID (check in {@link Transportation}).
  */
-function transportation(mParameters) {
+async function transportation(mParameters) {
     let iTaskId = mParameters.TASK_ID;
-    let oPersistency = new Persistency(oConnectionFactory.getConnection());
-    let oTaskService = new TaskService($, oPersistency);
+    let oPersistency = new Persistency ( await oConnectionFactory.getConnection());
+    let oTaskService = await new TaskService($, oPersistency);
     let oBodyData = mParameters.A_BODY_META;
 
     (new Transportation(iTaskId, oPersistency, oConnectionFactory, oTaskService)).importData(oBodyData);

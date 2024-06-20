@@ -62,7 +62,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
 
         if (!helpers.isNullOrUndefined(mValidatedParameters) && mValidatedParameters.omitItems === true && mValidatedParameters.compressedResult === true) {
             const sLogMessage = 'Cannot use omitItems = true and compressedResult = true in the same request.';
@@ -74,16 +74,16 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
         const self = this;
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest();
+            return validateGetRequest();
         case $.net.http.POST:
-            return await validatePostRequest();
+            return validatePostRequest();
         case $.net.http.PUT:
-            return await validateUpdateRequest();
+            return validateUpdateRequest();
         case $.net.http.PATCH:
-            return await validatePatchRequest();
+            return validatePatchRequest();
         case $.net.http.DEL:
             var aCvs = utils.tryParseJson(oRequest.body.asString());
-            return await validateCloseDeleteRequests(aCvs);
+            return validateCloseDeleteRequests(aCvs);
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }`;
                 $.trace.error(sLogMessage);
@@ -112,23 +112,23 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             case 'save':
             case 'save-as': {
                     const aCvs = utils.tryParseJson(oRequest.body.asString());
-                    return await validateSaveRequests(aCvs);
+                    return validateSaveRequests(aCvs);
                 }
             case 'close': {
                     const aCvs = utils.tryParseJson(oRequest.body.asString());
-                    return await validateCloseDeleteRequests(aCvs);
+                    return validateCloseDeleteRequests(aCvs);
                 }
             case 'copy':
-                return await validateCopyRequests();
+                return validateCopyRequests();
             case 'create': {
                     const aCvs = utils.tryParseJson(oRequest.body.asString());
-                    return await validateCreateRequests(aCvs);
+                    return validateCreateRequests(aCvs);
                 }
             case 'open':
-                return await validateOpenRequests();
+                return validateOpenRequests();
             case 'freeze': {
                     const aCvs = utils.tryParseJson(oRequest.body.asString());
-                    return await validateFreezeRequests(aCvs);
+                    return validateFreezeRequests(aCvs);
                 }
             default: {
                     const sLogMessage = `Unknown value for parameter action: ${ mValidatedParameters.action }. Cannot validate.`;
@@ -138,10 +138,10 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             }
         }
 
-        async function validateSaveRequests(aCvs) {
+        function validateSaveRequests(aCvs) {
             var aValidatedCvs = [];
-            _.each(aCvs, async function (oCv) {
-                await utils.checkMandatoryProperties(oCv, aSaveMandatoryPropertiesStatic);
+            _.each(aCvs, function (oCv) {
+                utils.checkMandatoryProperties(oCv, aSaveMandatoryPropertiesStatic);
                 utils.checkInvalidProperties(oCv, aSaveMandatoryPropertiesStatic);
 
                 var aCvNamePropertyMetadata = metadataProvider.get(BusinessObjectTypes.CalculationVersion, BusinessObjectTypes.CalculationVersion, 'CALCULATION_VERSION_NAME', null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
@@ -152,42 +152,42 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
                 }
 
                 var oValidatedCv = {};
-                oValidatedCv.CALCULATION_ID = await genericSyntaxValidator.validateValue(oCv.CALCULATION_ID, 'PositiveInteger', undefined, true);
-                oValidatedCv.CALCULATION_VERSION_ID = await genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
-                oValidatedCv.CALCULATION_VERSION_NAME = await genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_NAME, aCvNamePropertyMetadata[0].SEMANTIC_DATA_TYPE, aCvNamePropertyMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, true, aCvNamePropertyMetadata[0].VALIDATION_REGEX_VALUE);
+                oValidatedCv.CALCULATION_ID = genericSyntaxValidator.validateValue(oCv.CALCULATION_ID, 'PositiveInteger', undefined, true);
+                oValidatedCv.CALCULATION_VERSION_ID = genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
+                oValidatedCv.CALCULATION_VERSION_NAME = genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_NAME, aCvNamePropertyMetadata[0].SEMANTIC_DATA_TYPE, aCvNamePropertyMetadata[0].SEMANTIC_DATA_TYPE_ATTRIBUTES, true, aCvNamePropertyMetadata[0].VALIDATION_REGEX_VALUE);
 
                 aValidatedCvs.push(oValidatedCv);
             });
             return aValidatedCvs;
         }
 
-        async function validateFreezeRequests(aCvs) {
+        function validateFreezeRequests(aCvs) {
             var aValidatedCvs = [];
             _.each(aCvs, async function (oCv) {
-                await utils.checkMandatoryProperties(oCv, aFreezeMandatoryPropertiesStatic);
+                utils.checkMandatoryProperties(oCv, aFreezeMandatoryPropertiesStatic);
                 utils.checkInvalidProperties(oCv, aFreezeMandatoryPropertiesStatic);
 
                 var oValidatedCv = {};
-                oValidatedCv.CALCULATION_VERSION_ID = await genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
+                oValidatedCv.CALCULATION_VERSION_ID = genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
                 aValidatedCvs.push(oValidatedCv);
             });
             return aValidatedCvs;
         }
 
-        async function validateCloseDeleteRequests(aCvs) {
+        function validateCloseDeleteRequests(aCvs) {
             var aValidatedCvs = [];
-            _.each(aCvs, async function (oCv) {
-                await utils.checkMandatoryProperties(oCv, aCloseMandatoryPropertiesStatic);
+            _.each(aCvs, function (oCv) {
+                utils.checkMandatoryProperties(oCv, aCloseMandatoryPropertiesStatic);
                 utils.checkInvalidProperties(oCv, aCloseMandatoryPropertiesStatic);
 
                 var oValidatedCv = {};
-                oValidatedCv.CALCULATION_VERSION_ID = await genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
+                oValidatedCv.CALCULATION_VERSION_ID = genericSyntaxValidator.validateValue(oCv.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
                 aValidatedCvs.push(oValidatedCv);
             });
             return aValidatedCvs;
         }
 
-        async function validateCopyRequests() {
+        function validateCopyRequests() {
             utils.checkEmptyBody(oRequest.body);
             if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = 'ID parameter is missing';
@@ -197,15 +197,15 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             return [];
         }
 
-        async function validateCreateRequests(aCvs) {
+        function validateCreateRequests(aCvs) {
             var oCalculationVersionMetadata = metadataProvider.get(BusinessObjectTypes.CalculationVersion, BusinessObjectTypes.CalculationVersion, null, null, oPersistency);
             var oItemMetadata = metadataProvider.get(BusinessObjectTypes.Item, BusinessObjectTypes.Item, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             var oItemMetadataCF = utils.extendMetadataCustomFields(oItemMetadata);
             var aValidatedCvs = [];
             let aItemInvalidmasterdataReferences = [];
-            _.each(aCvs, async function (oCv) {
+            _.each(aCvs, function (oCv) {
 
-                await utils.checkMandatoryProperties(oCv, ['ITEMS']);
+                utils.checkMandatoryProperties(oCv, ['ITEMS']);
                 if (!(_.isArray(oCv.ITEMS) && oCv.ITEMS.length === 1)) {
                     const sLogMessage = 'Inital calculation version does not contain an array with 1 entry named ITEMS. Cannot validate.';
                     $.trace.error(sLogMessage);
@@ -280,7 +280,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             return aValidatedItems;
         }
 
-        async function validateOpenRequests() {
+        function validateOpenRequests() {
             utils.checkEmptyBody(oRequest.body);
             if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = "Parameter 'id' is missing";
@@ -295,28 +295,28 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             return [];
         }
 
-        async function validateGetRequest() {
+        function validateGetRequest() {
             // there are 2 ways to get calculation versions:
             //		1. Load a single version with it's item by it's id
             //		2. Load versions for the cockpit or search by using query parameters
             // unfortunately, there is no better way of distinguishing them from each other
             if (mValidatedParameters.calculation_version_id && mValidatedParameters.expand) {
-                await validateGetSingleVersion();
+                validateGetSingleVersion();
 
 
                 return [];
             } else {
-                return await validateCockpitSearch();
+                return validateCockpitSearch();
             }
         }
 
-        async function validateGetSingleVersion() {
+        function validateGetSingleVersion() {
 
 
             utils.checkEmptyBody(oRequest.body);
         }
 
-        async function validateCockpitSearch() {
+        function validateCockpitSearch() {
             utils.checkEmptyBody(oRequest.body);
 
             var iParamsCount = 0;
@@ -331,7 +331,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 
                 var aCalcIds = mValidatedParameters.calculation_id.toString().split(',');
                 _.each(aCalcIds, async function (sCalcId) {
-                    await genericSyntaxValidator.validateValue(sCalcId, 'PositiveInteger', undefined, true);
+                    genericSyntaxValidator.validateValue(sCalcId, 'PositiveInteger', undefined, true);
                 });
             }
 
@@ -339,7 +339,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 
                 var aProjectIds = mValidatedParameters.project_id.split(',');
                 _.each(aProjectIds, async function (sProjectId) {
-                    await genericSyntaxValidator.validateValue(sProjectId, 'String', undefined, true);
+                    genericSyntaxValidator.validateValue(sProjectId, 'String', undefined, true);
                 });
             }
 
@@ -413,7 +413,7 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
 
 
 
-        async function validatePatchRequest() {
+        function validatePatchRequest() {
 
 
 
@@ -425,14 +425,14 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
             ];
             let oRequestedPatchSet = utils.tryParseJson(oRequest.body.asString());
 
-            await utils.checkMandatoryProperties(oRequestedPatchSet, aValidPatchAttributes);
+            utils.checkMandatoryProperties(oRequestedPatchSet, aValidPatchAttributes);
             utils.checkInvalidProperties(oRequestedPatchSet, aValidPatchAttributes);
 
-            await utils.checkMandatoryProperties(oRequestedPatchSet.LOCK, aValidLockAttributes);
+            utils.checkMandatoryProperties(oRequestedPatchSet.LOCK, aValidLockAttributes);
             utils.checkInvalidProperties(oRequestedPatchSet.LOCK, aValidLockAttributes);
 
 
-            oRequestedPatchSet.LOCK.IS_WRITEABLE = await genericSyntaxValidator.validateValue(oRequestedPatchSet.LOCK.IS_WRITEABLE, 'BooleanInt', undefined, true);
+            oRequestedPatchSet.LOCK.IS_WRITEABLE = genericSyntaxValidator.validateValue(oRequestedPatchSet.LOCK.IS_WRITEABLE, 'BooleanInt', undefined, true);
 
             if (!_.includes([
                     constants.CalculationVersionLockContext.CALCULATION_VERSION,
@@ -447,16 +447,16 @@ async function CalculationVersionValidator(oPersistency, sSessionId, metadataPro
         }
     };
 
-    this.checkMasterdataReferences = async function (oVersion, oNonTemporaryMasterdata) {
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['COSTING_SHEET_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.COSTING_SHEETS, 'COSTING_SHEET_ID'));
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['COMPONENT_SPLIT_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.COMPONENT_SPLITS, 'COMPONENT_SPLIT_ID'));
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['REPORT_CURRENCY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.CURRENCIES, 'CURRENCY_ID'));
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['EXCHANGE_RATE_TYPE_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID'));
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['MATERIAL_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.MATERIAL_PRICE_STRATEGIES, 'MATERIAL_PRICE_STRATEGY_ID'));
-        await utils.checkNonTemporaryMasterdataReferences(oVersion, ['ACTIVITY_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.ACTIVITY_PRICE_STRATEGIES, 'ACTIVITY_PRICE_STRATEGY_ID'));
+    this.checkMasterdataReferences = function (oVersion, oNonTemporaryMasterdata) {
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['COSTING_SHEET_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.COSTING_SHEETS, 'COSTING_SHEET_ID'));
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['COMPONENT_SPLIT_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.COMPONENT_SPLITS, 'COMPONENT_SPLIT_ID'));
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['REPORT_CURRENCY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.CURRENCIES, 'CURRENCY_ID'));
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['EXCHANGE_RATE_TYPE_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID'));
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['MATERIAL_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.MATERIAL_PRICE_STRATEGIES, 'MATERIAL_PRICE_STRATEGY_ID'));
+        utils.checkNonTemporaryMasterdataReferences(oVersion, ['ACTIVITY_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oNonTemporaryMasterdata.ACTIVITY_PRICE_STRATEGIES, 'ACTIVITY_PRICE_STRATEGY_ID'));
     };
 
-    this.checkCostingSheetSelectedTotals = async function (oVersion, bOnly_default) {
+    this.checkCostingSheetSelectedTotals = function (oVersion, bOnly_default) {
 
         if (!helpers.isNullOrUndefined(oVersion.SELECTED_TOTAL_COSTING_SHEET)) {
             if (bOnly_default && oVersion.SELECTED_TOTAL_COSTING_SHEET != constants.CalculationVersionCostingSheetTotals[0] || !bOnly_default && !constants.CalculationVersionCostingSheetTotals.includes(oVersion.SELECTED_TOTAL_COSTING_SHEET)) {

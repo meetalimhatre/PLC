@@ -63,7 +63,7 @@ function DocumentStatus(dbConnection, hQuery, sObjectName) {
 
             stmt += ` order by plcTable.DOCUMENT_TYPE_ID, plcTable.DOCUMENT_STATUS_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            const rsDocumentStatusEntities = dbConnection.executeQuery(stmt);
+            const rsDocumentStatusEntities = await dbConnection.executeQuery(stmt);
             oReturnObject[BusinessObjectsEntities.DOCUMENT_STATUS_ENTITIES] = _.values(rsDocumentStatusEntities);
 
             const dependentBusinessObject = helpers.transposeResultArray(rsDocumentStatusEntities, true);

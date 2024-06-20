@@ -14,7 +14,7 @@ const helpers = $.require('../util/helpers');
  */
 
 async function FrontendSettingsValidator(oPersistency, utils) {
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+    var genericSyntaxValidator = new GenericSyntaxValidator();
     // Accept characters from other language with \w (replaces "a-zA-Z0-9_"), # and space except of leading and trailing spaces
     var sSettingsNameRegExp = '^([\\pL\\d_:#.\\/\\-][^\\S\\n\\r\\f\\t]?)*[\\pL\\d_:#.\\/\\-]$';
     // RegEx used only to validate the URL for the aplication help link
@@ -40,16 +40,16 @@ async function FrontendSettingsValidator(oPersistency, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return await validatePostRequest();
+            return validatePostRequest();
         case $.net.http.PUT:
-            return await validatePutRequest();
+            return validatePutRequest();
         case $.net.http.DEL:
-            return await validateDeleteRequest();
+            return validateDeleteRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -57,7 +57,7 @@ async function FrontendSettingsValidator(oPersistency, utils) {
             }
         }
 
-        async function validatePostRequest() {
+        function validatePostRequest() {
             var aMandatoryAndValidProperties = [
                 'SETTING_ID',
                 'SETTING_NAME',
@@ -71,18 +71,18 @@ async function FrontendSettingsValidator(oPersistency, utils) {
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             } else {
-                _.each(aFrontendSettings, async function (oFrontendSetting) {
-                    await utils.checkMandatoryProperties(oFrontendSetting, aMandatoryAndValidProperties);
+                _.each(aFrontendSettings, function (oFrontendSetting) {
+                    utils.checkMandatoryProperties(oFrontendSetting, aMandatoryAndValidProperties);
                     utils.checkInvalidProperties(oFrontendSetting, aMandatoryAndValidProperties);
                     const bIsApplicationHelpLink = oFrontendSetting.SETTING_NAME.toUpperCase() === sCustomerHelpLink;
                     const bIsNotEmpty = oFrontendSetting.SETTING_CONTENT && oFrontendSetting.SETTING_CONTENT.length > 0;
                     if (bIsApplicationHelpLink && bIsNotEmpty) {
-                        await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sURLRegEx);
+                        genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sURLRegEx);
                     } else {
-                        await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sSettingsContentRegExp);
+                        genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sSettingsContentRegExp);
                     }
-                    await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_NAME, 'String', 'length = ' + sSettingsNameMaxLength, false, sSettingsNameRegExp);
-                    await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_TYPE, 'String', 'length = ' + sSettingsTypeMaxLength, false, sSettingsTypeRegExp);
+                    genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_NAME, 'String', 'length = ' + sSettingsNameMaxLength, false, sSettingsNameRegExp);
+                    genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_TYPE, 'String', 'length = ' + sSettingsTypeMaxLength, false, sSettingsTypeRegExp);
 
 
                     if (oFrontendSetting.SETTING_TYPE === 'MassChange') {
@@ -106,7 +106,7 @@ async function FrontendSettingsValidator(oPersistency, utils) {
             return aFrontendSettings;
         }
 
-        async function validatePutRequest() {
+        function validatePutRequest() {
             var aUpdateMandatoryProperties = [
                 'SETTING_ID',
                 'SETTING_NAME'
@@ -125,17 +125,17 @@ async function FrontendSettingsValidator(oPersistency, utils) {
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             } else {
-                _.each(aFrontendSettings, async function (oFrontendSetting) {
-                    await utils.checkMandatoryProperties(oFrontendSetting, aUpdateMandatoryProperties);
+                _.each(aFrontendSettings ,function (oFrontendSetting) {
+                    utils.checkMandatoryProperties(oFrontendSetting, aUpdateMandatoryProperties);
                     utils.checkInvalidProperties(oFrontendSetting, aUpdateValidProperties);
                     const bIsApplicationHelpLink = oFrontendSetting.SETTING_NAME.toUpperCase() === sCustomerHelpLink;
                     const bIsNotEmpty = oFrontendSetting.SETTING_CONTENT && oFrontendSetting.SETTING_CONTENT.length > 0;
                     if (bIsApplicationHelpLink && bIsNotEmpty) {
-                        await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sURLRegEx);
+                        genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sURLRegEx);
                     } else {
-                        await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sSettingsContentRegExp);
+                        genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_CONTENT, 'String', undefined, false, sSettingsContentRegExp);
                     }
-                    await genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_NAME, 'String', 'length = ' + sSettingsNameMaxLength, false, sSettingsNameRegExp);
+                    genericSyntaxValidator.validateValue(oFrontendSetting.SETTING_NAME, 'String', 'length = ' + sSettingsNameMaxLength, false, sSettingsNameRegExp);
                     aFrontEndSettingsIdAndContent.set(oFrontendSetting.SETTING_ID, oFrontendSetting.SETTING_CONTENT);
                 });
             }
@@ -164,7 +164,7 @@ async function FrontendSettingsValidator(oPersistency, utils) {
             return aFrontendSettings;
         }
 
-        async function validateDeleteRequest() {
+        function validateDeleteRequest() {
             var aDeleteMandatoryProperties = ['SETTING_ID'];
             var aFrontendSettings = utils.tryParseJson(oRequest.body.asString());
 
@@ -173,8 +173,8 @@ async function FrontendSettingsValidator(oPersistency, utils) {
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             } else {
-                _.each(aFrontendSettings, async function (oFrontendSetting) {
-                    await utils.checkMandatoryProperties(oFrontendSetting, aDeleteMandatoryProperties);
+                _.each(aFrontendSettings, function (oFrontendSetting) {
+                    utils.checkMandatoryProperties(oFrontendSetting, aDeleteMandatoryProperties);
                     utils.checkInvalidProperties(oFrontendSetting, aDeleteMandatoryProperties);
                 });
             }

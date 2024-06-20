@@ -6,14 +6,14 @@ const TenancyConnection = $.require('../../ops/util/tenantUtil-cf');
 */
 async function getConnection(oOption, sTenantID) {
     let oHanaOption = oOption || { 'treatDateAsUTC': true };
-    let iTenantID = sTenantID || (await processParameters($.request)).tenantid;
+    let iTenantID = sTenantID || ( processParameters($.request)).tenantid;
     if (!iTenantID) {
         throw Error('Invalid request on CF without tenant ID');
     }
     return await TenancyConnection.getConnectionByTenantID(iTenantID, oHanaOption);
 }
 
-async function processParameters(request) {
+function processParameters(request) {
     const params = request.parameters;
     const oParam = {};
     for (let i = 0; i < params.length; i++) {

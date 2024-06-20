@@ -98,7 +98,7 @@ function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
     return sUpdateStatement;
 }
 
-async function check(oCurrentConnection) {
+function check(oCurrentConnection) {
     return true;
 }
 /**
@@ -123,14 +123,14 @@ async function getCurrentSchema(oCurrentConnection) {
     return  (await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
-async function closeSqlConnection(oConnection) {
+function closeSqlConnection(oConnection) {
     if (oConnection.close) {
         oConnection.close();
     }
 }
 
 async function clean(oCurrentConnection) {
-    await closeSqlConnection(oCurrentConnection);
+    closeSqlConnection(oCurrentConnection);
     return true;
 }
 export default {helpers,sFrontendSettingsTable,aItemCategories,oConnection,aRenamedColumns,mRenamedColumns,oRenamedColumns,updateFrontendSettings,replaceFieldsFilterSetting,replaceFieldsMassChangeSetting,findFieldsToReplace,generateUpdateStatement,check,run,getCurrentSchema,closeSqlConnection,clean};

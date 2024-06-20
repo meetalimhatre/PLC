@@ -33,16 +33,16 @@ function LayoutValidator(oPersistency, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return await validatePostRequest();
+            return validatePostRequest();
         case $.net.http.PUT:
-            return await validatePutRequest();
+            return validatePutRequest();
         case $.net.http.DEL:
-            return await validateDeleteRequest();
+            return validateDeleteRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -50,7 +50,7 @@ function LayoutValidator(oPersistency, utils) {
             }
         }
 
-        async function validatePostRequest() {
+        function validatePostRequest() {
             var oLayout = utils.tryParseJson(oRequest.body.asString());
 
             var aCreateMandatoryProperties = ['LAYOUT_ID'];
@@ -72,17 +72,17 @@ function LayoutValidator(oPersistency, utils) {
             }
 
             //check mandatory properties and invalid properties for layout
-            await utils.checkMandatoryProperties(oLayout, aCreateMandatoryProperties);
+            utils.checkMandatoryProperties(oLayout, aCreateMandatoryProperties);
             utils.checkInvalidProperties(oLayout, aCreateValidProperties);
 
             //check mandatory and invalid properties for layout_columns and hidden_fields
-            await checkLayoutColumns(oLayout);
-            await checkHiddenFields(oLayout);
+            checkLayoutColumns(oLayout);
+            checkHiddenFields(oLayout);
 
             return oLayout;
         }
 
-        async function checkLayoutColumns(oLayout) {
+        function checkLayoutColumns(oLayout) {
             var aDisplayOrder = [];
             var aColumnsMetadataFields = [];
 
@@ -93,11 +93,11 @@ function LayoutValidator(oPersistency, utils) {
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
                 if (oLayout.LAYOUT_COLUMNS.length > 0) {
-                    _.each(oLayout.LAYOUT_COLUMNS, async function (oLayoutColumn) {
+                    _.each(oLayout.LAYOUT_COLUMNS, function (oLayoutColumn) {
                         aDisplayOrder.push(oLayoutColumn.DISPLAY_ORDER);
                         if (!helpers.isNullOrUndefined(oLayoutColumn.COLUMN_ID)) {
                             // Column from side-panel, except costing sheet or component split
-                            await utils.checkMandatoryProperties(oLayoutColumn, [
+                            utils.checkMandatoryProperties(oLayoutColumn, [
                                 'DISPLAY_ORDER',
                                 'PATH',
                                 'BUSINESS_OBJECT',
@@ -123,7 +123,7 @@ function LayoutValidator(oPersistency, utils) {
                             }
                         } else if (!helpers.isNullOrUndefined(oLayoutColumn.COSTING_SHEET_ROW_ID)) {
                             // costing sheet column
-                            await utils.checkMandatoryProperties(oLayoutColumn, [
+                            utils.checkMandatoryProperties(oLayoutColumn, [
                                 'DISPLAY_ORDER',
                                 'COSTING_SHEET_ROW_ID'
                             ]);
@@ -134,7 +134,7 @@ function LayoutValidator(oPersistency, utils) {
                             ]);
                         } else if (!helpers.isNullOrUndefined(oLayoutColumn.COST_COMPONENT_ID)) {
                             // component split column
-                            await utils.checkMandatoryProperties(oLayoutColumn, [
+                            utils.checkMandatoryProperties(oLayoutColumn, [
                                 'DISPLAY_ORDER',
                                 'COST_COMPONENT_ID'
                             ]);
@@ -145,7 +145,7 @@ function LayoutValidator(oPersistency, utils) {
                             ]);
                         } else if (helpers.isNullOrUndefined(oLayoutColumn.COLUMN_ID)) {
 
-                            await utils.checkMandatoryProperties(oLayoutColumn, ['DISPLAY_ORDER']);
+                            utils.checkMandatoryProperties(oLayoutColumn, ['DISPLAY_ORDER']);
                             utils.checkInvalidProperties(oLayoutColumn, [
                                 'DISPLAY_ORDER',
                                 'COLUMN_WIDTH'
@@ -169,7 +169,7 @@ function LayoutValidator(oPersistency, utils) {
             }
         }
 
-        async function checkHiddenFields(oLayout) {
+        function checkHiddenFields(oLayout) {
             if (!helpers.isNullOrUndefined(oLayout.HIDDEN_FIELDS)) {
                 if (!_.isArray(oLayout.HIDDEN_FIELDS)) {
                     const sLogMessage = 'Hidden fields are not an array.';
@@ -177,8 +177,8 @@ function LayoutValidator(oPersistency, utils) {
                     throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
                 }
                 if (oLayout.HIDDEN_FIELDS.length > 0) {
-                    _.each(oLayout.HIDDEN_FIELDS, async function (oHiddenField) {
-                        await utils.checkMandatoryProperties(oHiddenField, [
+                    _.each(oLayout.HIDDEN_FIELDS, function (oHiddenField) {
+                        utils.checkMandatoryProperties(oHiddenField, [
                             'PATH',
                             'BUSINESS_OBJECT',
                             'COLUMN_ID'
@@ -199,7 +199,7 @@ function LayoutValidator(oPersistency, utils) {
             }
         }
 
-        async function validatePutRequest() {
+        function validatePutRequest() {
             var oLayout = utils.tryParseJson(oRequest.body.asString());
 
             var aUpdateMandatoryProperties = ['LAYOUT_ID'];
@@ -213,21 +213,21 @@ function LayoutValidator(oPersistency, utils) {
             ];
 
 
-            await utils.checkMandatoryProperties(oLayout, aUpdateMandatoryProperties);
+            utils.checkMandatoryProperties(oLayout, aUpdateMandatoryProperties);
             utils.checkInvalidProperties(oLayout, aUpdateValidProperties);
 
 
-            await checkLayoutColumns(oLayout);
-            await checkHiddenFields(oLayout);
+            checkLayoutColumns(oLayout);
+            checkHiddenFields(oLayout);
 
             return oLayout;
         }
 
-        async function validateDeleteRequest() {
+        function validateDeleteRequest() {
             var aDeleteMandatoryProperties = ['LAYOUT_ID'];
             var oLayout = utils.tryParseJson(oRequest.body.asString());
 
-            await utils.checkMandatoryProperties(oLayout, aDeleteMandatoryProperties);
+            utils.checkMandatoryProperties(oLayout, aDeleteMandatoryProperties);
             utils.checkInvalidProperties(oLayout, aDeleteMandatoryProperties);
 
             return oLayout;

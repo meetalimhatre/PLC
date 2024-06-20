@@ -170,7 +170,7 @@ module.exports.CalculationVersions = function ($) {
  * @param {object} oServiceOutput Object the result of the function is written to. 
  * @param {object} oPersistency Instance of persistency object to access database tables.
  */
-    this.getSingle = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
+    this.getSingle = function (oBodyData, mParameters, oServiceOutput, oPersistency) {
         const iCvId = mParameters.calculation_version_id;
         if (!oPersistency.CalculationVersion.exists(iCvId)) {
             const sClientMsg = 'Calculation version does not exist.';
@@ -212,7 +212,7 @@ module.exports.CalculationVersions = function ($) {
  * 		-  will always return root item for each calculation version
  * 		-  will return projects and calculations that are assigned to calculation versions found.
  */
-    this.recover = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
+    this.recover = function (oBodyData, mParameters, oServiceOutput, oPersistency) {
         // Remove all locks for variant matrix context which may remain from previous wrong finished sessions.
         oPersistency.CalculationVersion.unlockVariantMatrixVersionsForSession(sSessionId);
 
@@ -242,7 +242,7 @@ module.exports.CalculationVersions = function ($) {
     /**
  * Reads calculation version data for provided CV id and fills output object accordingly.
  */
-    this.openCalculationVersion = async function (oBodyData, mParameters, oServiceOutput, oPersistency, iCalcVersionId, bCopyData) {
+    this.openCalculationVersion = function (oBodyData, mParameters, oServiceOutput, oPersistency, iCalcVersionId, bCopyData) {
 
         var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
         var bCompressedResult = mParameters.compressedResult ? mParameters.compressedResult : false;
@@ -250,7 +250,7 @@ module.exports.CalculationVersions = function ($) {
 
         oPersistency.CalculationVersion.checkLockCalculatingLifecycle(iCalcVersionId);
 
-        var oReadCalculationVersionResult = await oPersistency.CalculationVersion.open(iCalcVersionId, sSessionId, sUserId, mSessionDetails.language, bCopyData, bCompressedResult);
+        var oReadCalculationVersionResult = oPersistency.CalculationVersion.open(iCalcVersionId, sSessionId, sUserId, mSessionDetails.language, bCopyData, bCompressedResult);
         if (_.isEmpty(oReadCalculationVersionResult.version)) {
             const oMessageDetails = new MessageDetails().addCalculationVersionObjs({ id: iCalcVersionId });
 
@@ -298,9 +298,9 @@ module.exports.CalculationVersions = function ($) {
             oServiceOutput.addMasterdata(mCalculationMasterdata);
         }
 
-        var oOutputObject = await CalculationVersionService.prepareOutput(oReadCalculationVersionResult);
+        var oOutputObject = CalculationVersionService.prepareOutput(oReadCalculationVersionResult);
 
-        var iIsWritable = await handleVersionLock(oServiceOutput, oPersistency, iCalcVersionId);
+        var iIsWritable = handleVersionLock(oServiceOutput, oPersistency, iCalcVersionId);
 
         oOutputObject[MetaInformation.IsDirty] = oRootItem.IS_DIRTY;
         oOutputObject[MetaInformation.IsWritable] = iIsWritable;
@@ -329,7 +329,7 @@ module.exports.CalculationVersions = function ($) {
  * client gives in the request body. This update uses a opt-in approach, which means only properties that are contained in the request are
  * updated. Properties that shall be set to <code>NULL</code> must be explicitly set to to <code>null</code> in the request data.
  */
-    this.update = async function (oBodyData, aParameters, oServiceOutput, oPersistency) {
+    this.update = function (oBodyData, aParameters, oServiceOutput, oPersistency) {
 
         var oMessageDetails = new MessageDetails();
         const bOmitItems = aParameters.omitItems || false;
@@ -354,7 +354,7 @@ module.exports.CalculationVersions = function ($) {
         }
 
         // Process each calculation version sent in the body.
-        _.each(oBodyData, async function (oCalculationVersion) {
+        _.each(oBodyData, function (oCalculationVersion) {
 
             var iIsDirty = 0;
             var iCalculationVersionId = helpers.toPositiveInteger(oCalculationVersion.CALCULATION_VERSION_ID);
@@ -398,14 +398,14 @@ module.exports.CalculationVersions = function ($) {
                     return oOldCalculationVersion[key] !== oCalculationVersion[key];
                 })) {
                 // Check if calculation version name is unique.
-                await CalculationVersionService.isNameUnique(oPersistency, oCalculationVersion.CALCULATION_ID, oCalculationVersion.CALCULATION_VERSION_ID, oCalculationVersion.CALCULATION_VERSION_NAME, oMessageDetails);
+                CalculationVersionService.isNameUnique(oPersistency, oCalculationVersion.CALCULATION_ID, oCalculationVersion.CALCULATION_VERSION_ID, oCalculationVersion.CALCULATION_VERSION_NAME, oMessageDetails);
 
                 const iCalculationVersionType = oPersistency.CalculationVersion.getVersionType(oCalculationVersion.CALCULATION_VERSION_ID, sSessionId);
                 if (iCalculationVersionType === constants.CalculationVersionType.Lifecycle || iCalculationVersionType === constants.CalculationVersionType.ManualLifecycleVersion) {
                     aProtectedColumnsUpdate.push('LIFECYCLE_PERIOD_FROM', 'BASE_VERSION_ID');
                 }
                 ;
-                var iAffectedRows = await oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsUpdate, sSessionId);
+                var iAffectedRows = oPersistency.CalculationVersion.update(oCalculationVersion, aProtectedColumnsUpdate, sSessionId);
 
                 if (iAffectedRows === 0) {
                     const sClientMsg = "Calculation version wasn't updated and/or does not exist.";
@@ -437,14 +437,14 @@ module.exports.CalculationVersions = function ($) {
                 var oOutputCalculationVersion;
                 if (mTriggerColumnsChanged.size > 0) {
                     oPersistency.CalculationVersion.persistUpdatedColumns(iCalculationVersionId, sSessionId, mTriggerColumnsChanged);
-                    const sUpdateScenario = await determineUpdateScenario(mTriggerColumnsChanged);
+                    const sUpdateScenario = determineUpdateScenario(mTriggerColumnsChanged);
 
                     var oPriceDeterminationResult = oPersistency.CalculationVersion.triggerPriceDetermination(iCalculationVersionId, sSessionId, sUpdateScenario);
 
 
                     var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
 
-                    var oCalculationVersionResult = await oPersistency.CalculationVersion.open(iCalculationVersionId, sSessionId, sUserId, mSessionDetails.language, false);
+                    var oCalculationVersionResult = oPersistency.CalculationVersion.open(iCalculationVersionId, sSessionId, sUserId, mSessionDetails.language, false);
 
 
                     var oCalculationVersionWithUpdatedItemPriceInfo = oCalculationVersion;
@@ -521,10 +521,10 @@ module.exports.CalculationVersions = function ($) {
         var sActionParameter = aParameters.action;
         switch (sActionParameter) {
         case ServiceParameters.Open:
-            await open();
+            open();
             break;
         case ServiceParameters.Close:
-            await close();
+            close();
             break;
         case ServiceParameters.Create:
             await create();
@@ -554,7 +554,7 @@ module.exports.CalculationVersions = function ($) {
             that.openCalculationVersion(oBodyData, aParameters, oServiceOutput, oPersistency, iCalcVersionId, true);
         }
 
-        async function close() {
+        function close() {
             _.each(oBodyData, async oCalculationVersion => {
                 var iCalculationVersionId = oCalculationVersion.CALCULATION_VERSION_ID;
                 try {
@@ -877,7 +877,7 @@ module.exports.CalculationVersions = function ($) {
 
 
 
-    this.patchSingle = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
+    this.patchSingle = function (oBodyData, mParameters, oServiceOutput, oPersistency) {
         const iCvId = mParameters.calculation_version_id;
 
         if (!oPersistency.CalculationVersion.exists(iCvId)) {
@@ -940,7 +940,7 @@ module.exports.CalculationVersions = function ($) {
 
 
 
-    async function handleVersionLock(oServiceOutput, oPersistency, iCvId, sLockContext = constants.CalculationVersionLockContext.CALCULATION_VERSION) {
+    function handleVersionLock(oServiceOutput, oPersistency, iCvId, sLockContext = constants.CalculationVersionLockContext.CALCULATION_VERSION) {
 
         let iIsWritable = 0;
 

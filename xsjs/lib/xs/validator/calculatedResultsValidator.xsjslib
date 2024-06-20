@@ -16,9 +16,9 @@ const Code = MessageLibrary.Code;
  * @constructor
  */
 
-async function CalculatedResultsValidator(oPersistency, sSessionId, metadataProvider, utils) {
+function CalculatedResultsValidator(oPersistency, sSessionId, metadataProvider, utils) {
 
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+    var genericSyntaxValidator = new GenericSyntaxValidator();
 
     /**
 	 * This function validates the request body of the given oRequest object (instance of $.request). Depending on
@@ -34,10 +34,10 @@ async function CalculatedResultsValidator(oPersistency, sSessionId, metadataProv
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest();
+            return validateGetRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }`;
                 $.trace.error(sLogMessage);
@@ -45,7 +45,7 @@ async function CalculatedResultsValidator(oPersistency, sSessionId, metadataProv
             }
         }
 
-        async function checkIfCalculationVersionExists(iCalculationVersionId) {
+        function checkIfCalculationVersionExists(iCalculationVersionId) {
             if (oPersistency.CalculationVersion.existsCVTemp(iCalculationVersionId, sSessionId) === false) {
                 const sClientMsg = 'Calculation version does not exist.';
                 const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }.`;
@@ -54,7 +54,7 @@ async function CalculatedResultsValidator(oPersistency, sSessionId, metadataProv
             }
         }
 
-        async function checkIfCalculationVersionIsOpen(iCalculationVersionId) {
+        function checkIfCalculationVersionIsOpen(iCalculationVersionId) {
             if (oPersistency.CalculationVersion.isOpenedInSessionAndContext(sSessionId, iCalculationVersionId) === false) {
                 const sClientMsg = 'Calculation version is not opened in the session.';
                 const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }, session id: ${ sSessionId }.`;
@@ -63,11 +63,11 @@ async function CalculatedResultsValidator(oPersistency, sSessionId, metadataProv
             }
         }
 
-        async function validateGetRequest() {
+        function validateGetRequest() {
             utils.checkEmptyBody(oRequest.body);
             var iCalculationVersionId = helpers.toPositiveInteger(mValidatedParameters.id);
-            await checkIfCalculationVersionExists(iCalculationVersionId);
-            await checkIfCalculationVersionIsOpen(iCalculationVersionId);
+            checkIfCalculationVersionExists(iCalculationVersionId);
+            checkIfCalculationVersionIsOpen(iCalculationVersionId);
             return [];
         }
 

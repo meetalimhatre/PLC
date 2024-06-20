@@ -127,7 +127,7 @@ function Plant(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.PLANT_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            const rsPlant = dbConnection.executeQuery(stmt);
+            const rsPlant = await dbConnection.executeQuery(stmt);
             oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES] = _.values(rsPlant);
 
             const dependentPlants = helpers.transposeResultArrayOfObjects(oReturnObject[BusinessObjectsEntities.PLANT_ENTITIES], true);

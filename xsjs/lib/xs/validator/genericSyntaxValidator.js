@@ -8,7 +8,7 @@ const Code = MessageLibrary.Code;
 const MessageDetails = MessageLibrary.Details;
 const ValidationInfoCode = MessageLibrary.ValidationInfoCode;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
@@ -34,7 +34,7 @@ async function logError(msg) {
  * @constructor
  *
  */
-async function GenericSyntaxValidator() {
+function GenericSyntaxValidator() {
 
 
     /**
@@ -63,7 +63,7 @@ async function GenericSyntaxValidator() {
 	 * This object should be given to garbage collection, if it's not needed anymore due to the high memory footprint of the caching
 	 */
 
-    this.validateValue = async function (value, sDataType, sTypeAttributes, bMandatory, sRegex) {
+    this.validateValue = function (value, sDataType, sTypeAttributes, bMandatory, sRegex) {
         if (value !== undefined && value !== null) {
             let oTypeDetails = null;
             const sDataTypeTrimmed = sDataType.trim();
@@ -72,41 +72,41 @@ async function GenericSyntaxValidator() {
             if ((sDataTypeTrimmed === 'Decimal' || sDataTypeTrimmed === 'String' || sDataTypeTrimmed === 'Link') && oParseDataTypeCache.has(sTypeAttributes)) {
                 oTypeDetails = oParseDataTypeCache.get(sTypeAttributes);
             } else {
-                oTypeDetails = oParseDataTypeCache.get(sDataTypeTrimmed) || await parseDataType(sDataTypeTrimmed, sTypeAttributes);
+                oTypeDetails = oParseDataTypeCache.get(sDataTypeTrimmed) || parseDataType(sDataTypeTrimmed, sTypeAttributes);
             }
             switch (oTypeDetails.name) {
             case 'Decimal':
-                return oValidateDecimalCache.has(value) ? oValidateDecimalCache.get(value) : await validateDecimal(value, oTypeDetails);
+                return oValidateDecimalCache.has(value) ? oValidateDecimalCache.get(value) : validateDecimal(value, oTypeDetails);
             case 'Link':
             case 'String':
                 var sValueKey = value.toString().concat(oTypeDetails.length.toString());
-                return oValidateStringCache.has(sValueKey) ? oValidateStringCache.get(sValueKey) : await validateString(value, oTypeDetails, sRegex);
+                return oValidateStringCache.has(sValueKey) ? oValidateStringCache.get(sValueKey) : validateString(value, oTypeDetails, sRegex);
             case 'Boolean':
-                return oValidateBooleanCache.has(value) ? oValidateBooleanCache.get(value) : await validateBoolean(value, oTypeDetails);
+                return oValidateBooleanCache.has(value) ? oValidateBooleanCache.get(value) : validateBoolean(value, oTypeDetails);
             case 'BooleanInt':
-                return oValidateeBooleanIntCache.has(value) ? oValidateeBooleanIntCache.get(value) : await validateBooleanInt(value, oTypeDetails);
+                return oValidateeBooleanIntCache.has(value) ? oValidateeBooleanIntCache.get(value) : validateBooleanInt(value, oTypeDetails);
             case 'Integer':
-                return oValidateIntegerCache.has(value) ? oValidateIntegerCache.get(value) : await validateInteger(value, oTypeDetails);
+                return oValidateIntegerCache.has(value) ? oValidateIntegerCache.get(value) : validateInteger(value, oTypeDetails);
             case 'PositiveInteger':
-                return oValidatePositiveIntegerCache.has(value) ? oValidatePositiveIntegerCache.get(value) : await validatePositiveInteger(value, oTypeDetails);
+                return oValidatePositiveIntegerCache.has(value) ? oValidatePositiveIntegerCache.get(value) : validatePositiveInteger(value, oTypeDetails);
             case 'NegativeInteger':
-                return oValidateNegativeIntegerCache.has(value) ? oValidateNegativeIntegerCache.get(value) : await validateNegativeInteger(value, oTypeDetails);
+                return oValidateNegativeIntegerCache.has(value) ? oValidateNegativeIntegerCache.get(value) : validateNegativeInteger(value, oTypeDetails);
             
             // because Date objects are mutable, cloning was needed as a precaution in order to avoid modifying more than 1 date object at once
             case 'UTCTimestamp':
-                return oValidateUTCTimestampCache.has(value) ? new Date(oValidateUTCTimestampCache.get(value).getTime()) : await validateUTCTimestamp(value, oTypeDetails);
+                return oValidateUTCTimestampCache.has(value) ? new Date(oValidateUTCTimestampCache.get(value).getTime()) : validateUTCTimestamp(value, oTypeDetails);
             case 'LocalDate':
-                return oValidateLocalDateCache.has(value) ? new Date(oValidateLocalDateCache.get(value).getTime()) : await validateLocalDate(value, oTypeDetails);
+                return oValidateLocalDateCache.has(value) ? new Date(oValidateLocalDateCache.get(value).getTime()) : validateLocalDate(value, oTypeDetails);
             default: {
                     const sLogMessage = `Cannot validate values of data type '${ oTypeDetails.name }'.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
                 }
             }
         } else {
             if (bMandatory === true) {
                 const sLogMessage = 'Mandatory value was undefined or null.';
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
             // if a value is undefined or null => null should be returned; on
@@ -120,13 +120,13 @@ async function GenericSyntaxValidator() {
         }
     };
     const oParseDataTypeCache = new Map();
-    async function parseDataType(sDataTypeTrimmed, sTypeAttributes) {
+    function parseDataType(sDataTypeTrimmed, sTypeAttributes) {
         if (sDataTypeTrimmed.indexOf('Decimal') === 0) {
             var aPrecisionMatch = mDataTypeAttributesRegExp.precisionPattern.exec(sTypeAttributes);
             var aScaleMatch = mDataTypeAttributesRegExp.scalePattern.exec(sTypeAttributes);
             if (aPrecisionMatch === null || aScaleMatch === null) {
                 const sLogMessage = `Cannot parse data type details ${ sTypeAttributes } for data type ${ sDataTypeTrimmed }.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
             }
 
@@ -136,7 +136,7 @@ async function GenericSyntaxValidator() {
             // see: https://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a1569875191014b507cf392724b7eb/content.htm
             if (iPrecision > 38 || iScale > iPrecision || iScale < 0) {
                 const sLogMessage = `Invalid precision and/or scale ${ sTypeAttributes } for data type ${ sDataTypeTrimmed } (0 <= s <= p <= 38).`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
             }
             oParseDataTypeCache.set(sTypeAttributes, {
@@ -158,12 +158,12 @@ async function GenericSyntaxValidator() {
                 var aUppercaseMatch = mDataTypeAttributesRegExp.uppercasePattern.exec(sTypeAttributes);
                 if (aLengthMatch == null) {
                     const sLogMessage = `Cannot parse data type details ${ sTypeAttributes } for data type ${ sDataTypeTrimmed }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
                 }
                 if (sTypeAttributes.indexOf('uppercase') > -1 && aUppercaseMatch == null) {
                     const sLogMessage = `Uppercase value from semantic data type attributes ${ sTypeAttributes } should be 0 or 1.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_ERROR, sLogMessage);
                 }
                 iLength = parseInt(aLengthMatch[1], 10);
@@ -185,7 +185,7 @@ async function GenericSyntaxValidator() {
                 var aLengthMatch = mDataTypeAttributesRegExp.lengthPattern.exec(sTypeAttributes);
                 if (aLengthMatch == null) {
                     const sLogMessage = `Cannot parse data type details ${ sTypeAttributes } for data type ${ sDataTypeTrimmed }.`;
-                    await logError(sLogMessage);
+                    logError(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
                 }
                 iLength = parseInt(aLengthMatch[1], 10);
@@ -221,7 +221,7 @@ async function GenericSyntaxValidator() {
             return { name: sDataTypeTrimmed };
         } else {
             const sLogMessage = `Unknown data type '${ sDataTypeTrimmed }'.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
     }
@@ -229,11 +229,11 @@ async function GenericSyntaxValidator() {
  * For each validate* function there were added maps that are storing the values that are already validated in order to improve the performance
 */
     const oValidateDecimalCache = new Map();
-    async function validateDecimal(value, oTypeDetails) {
+    function validateDecimal(value, oTypeDetails) {
         var sValue = value.toString();
         if (!mValueRegExp.Decimal.test(sValue)) {
             const sLogMessage = `Value '${ sValue }' cannot be parsed as Decimal.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
 
@@ -254,13 +254,13 @@ async function GenericSyntaxValidator() {
         if (iValueWholeDigits > iMaxWholeDigits) {
             const sClientMsg = `Value exceeded the maximum number of ${ iMaxWholeDigits } whole digits (precision = ${ oTypeDetails.precision }, scale = ${ oTypeDetails.scale }).`;
             const sServerMsg = `${ sClientMsg } Value: '${ sValue }'.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (iValueFractionalDigits > iMaxFractionalDigits) {
             const sClientMsg = `Value exceeded the maximum number of ${ iMaxFractionalDigits } fractional digits (precision = ${ oTypeDetails.precision }, scale = ${ oTypeDetails.scale }).`;
             const sServerMsg = `${ sClientMsg } Value: '${ sValue }'.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
 
@@ -271,7 +271,7 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidateStringCache = new Map();
-    async function validateString(value, oTypeDetails, sRegex) {
+    function validateString(value, oTypeDetails, sRegex) {
         var sValueKey = value.toString().concat(oTypeDetails.length.toString());
         var sValue = value.toString();
 
@@ -279,7 +279,7 @@ async function GenericSyntaxValidator() {
         if (oTypeDetails.length > 0 && sValue.length > oTypeDetails.length) {
             const sClientMsg = `String is too long (max. length: ${ oTypeDetails.length }).`;
             const sServerMsg = `${ sClientMsg } String: '${ sValue }'.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
 
         }
@@ -289,7 +289,7 @@ async function GenericSyntaxValidator() {
             if (value !== sUpperValue) {
                 const sClientMsg = `Metadata uppercase value was set to ${ oTypeDetails.uppercase }, but string value is not uppercase.`;
                 const sServerMsg = `${ sClientMsg } String: ${ value }.`;
-                await logError(sServerMsg);
+                logError(sServerMsg);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
             }
         }
@@ -302,7 +302,7 @@ async function GenericSyntaxValidator() {
                 oMessageDetails.validationObj = { 'validationInfoCode': ValidationInfoCode.INVALID_CHARACTERS_ERROR };
 
                 const sLogMessage = `The entry contains invalid characters. Please use only characters matching the regular expression ${ sRegex }`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage, oMessageDetails);
             }
 
@@ -312,12 +312,12 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidateBooleanCache = new Map();
-    async function validateBoolean(value, oTypeDetails) {
+    function validateBoolean(value, oTypeDetails) {
         var sValue = value.toString().trim();
         if (!mValueRegExp.Boolean.test(sValue)) {
             const sClientMsg = 'Value is not a valid Boolean';
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         oValidateBooleanCache.set(value, sValue === 'true');
@@ -325,13 +325,13 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidateeBooleanIntCache = new Map();
-    async function validateBooleanInt(value, oTypeDetails) {
+    function validateBooleanInt(value, oTypeDetails) {
 
         var sValue = value.toString().trim();
         if (!mValueRegExp.BooleanInt.test(sValue)) {
             const sClientMsg = 'Value is not a valid BooleanInt.';
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         oValidateeBooleanIntCache.set(value, parseInt(sValue, 10));
@@ -339,7 +339,7 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidateIntegerCache = new Map();
-    async function validateInteger(value, oTypeDetails) {
+    function validateInteger(value, oTypeDetails) {
         let iValue = null;
         if (typeof value === 'string') {
             // trimming is necessary in order to potential white space characters before or after integer number; 
@@ -348,7 +348,7 @@ async function GenericSyntaxValidator() {
             if (!mValueRegExp.Integer.test(sTrimmedValue)) {
                 const sClientMsg = 'Value contains illegal characters for an integer.';
                 const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-                await logError(sServerMsg);
+                logError(sServerMsg);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
             }
             iValue = parseInt(value, 10);
@@ -357,26 +357,26 @@ async function GenericSyntaxValidator() {
         } else {
             const sClientMsg = `Value is of type ${ typeof value }, which cannot be handled as integer.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
 
         if (isNaN(iValue)) {
             const sClientMsg = `Value cannot be parsed as integer or is NaN.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (!Number.isInteger(iValue)) {
             const sClientMsg = `Value is not an integer.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (iValue > SQLMaximumInteger || iValue < -SQLMaximumInteger) {
             const sClientMsg = `Numeric overflow - value is not supported by SQL.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         oValidateIntegerCache.set(value, iValue);
@@ -384,12 +384,12 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidatePositiveIntegerCache = new Map();
-    async function validatePositiveInteger(value, oTypeDetails) {
-        var iValue = await validateInteger(value, oTypeDetails);
+    function validatePositiveInteger(value, oTypeDetails) {
+        var iValue = validateInteger(value, oTypeDetails);
         if (iValue < 0) {
             const sClientMsg = `Value is lower than zero and thus not a positive integer.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         oValidatePositiveIntegerCache.set(value, iValue);
@@ -397,19 +397,19 @@ async function GenericSyntaxValidator() {
     }
 
     const oValidateNegativeIntegerCache = new Map();
-    async function validateNegativeInteger(value, oTypeDetails) {
-        var iValue = await validateInteger(value, oTypeDetails);
+    function validateNegativeInteger(value, oTypeDetails) {
+        var iValue = validateInteger(value, oTypeDetails);
         if (iValue >= 0) {
             const sClientMsg = `Value is higher than -1 and thus not a negative integer.`;
             const sServerMsg = `${ sClientMsg } Value: ${ value }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         oValidateNegativeIntegerCache.set(value, iValue);
         return iValue;
     }
 
-    async function checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds) {
+    function checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds) {
         // check if the date of Date-object correspond to the given date of
         // sValue
         // this is necessary, because Date.parse() can lead to a date overflow
@@ -418,38 +418,38 @@ async function GenericSyntaxValidator() {
         if (iInputYear !== oUTCDate.getUTCFullYear()) {
             const sClientMsg = `Value is semantically incorrect (year overflow or invalid).`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (iInputMonth !== oUTCDate.getUTCMonth()) {
             const sClientMsg = `Value is semantically incorrect (month overflow or invalid).`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (iInputDate !== oUTCDate.getUTCDate()) {
             const sClientMsg = `Value is semantically incorrect (date overflow or invalid).`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
         if (isNaN(iUTCMilliseconds)) {
             const sClientMsg = `Value cannot be converted into a Date-object.`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
     }
 
     const oValidateUTCTimestampCache = new Map();
-    async function validateUTCTimestamp(value, oTypeDetails) {
+    function validateUTCTimestamp(value, oTypeDetails) {
         var sValue = value.toString().trim();
         var aUTCParts = mValueRegExp.UTCTimestamp.exec(sValue);
 
         if (aUTCParts === null) {
             const sClientMsg = `Value cannot be parsed as UTC timestamp.`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
 
@@ -463,20 +463,20 @@ async function GenericSyntaxValidator() {
         const iUTCMilliseconds = Date.parse(sValue);
         var oUTCDate = new Date(iUTCMilliseconds);
 
-        await checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds);
+        checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds);
         oValidateUTCTimestampCache.set(value, oUTCDate);
         return oUTCDate;
     }
 
     const oValidateLocalDateCache = new Map();
-    async function validateLocalDate(value, oTypeDetails) {
+    function validateLocalDate(value, oTypeDetails) {
         var sValue = value.toString().trim();
         var aDateParts = mValueRegExp.LocalDate.exec(sValue);
 
         if (aDateParts === null) {
             const sClientMsg = `Value cannot be parsed as LocalDate.`;
             const sServerMsg = `${ sClientMsg } Value: ${ sValue }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
 
@@ -491,7 +491,7 @@ async function GenericSyntaxValidator() {
         const iUTCMilliseconds = Date.UTC(iInputYear, iInputMonth, iInputDate);
         var oUTCDate = new Date(iUTCMilliseconds);
 
-        await checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds);
+        checkYearMonthDateMilliseconds(sValue, oUTCDate, iInputYear, iInputMonth, iInputDate, iUTCMilliseconds);
         oValidateLocalDateCache.set(value, oUTCDate);
         return oUTCDate;
     }

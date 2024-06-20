@@ -18,18 +18,18 @@ module.exports = {
     checkSumVariantIsNotDuplicated
 };
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
-async function logInfo(msg) {
+function logInfo(msg) {
     helpers.logInfo(msg);
 }
 
-async function checkCalculationVersionExists(oPersistency, iCalculationVersionId) {
+function checkCalculationVersionExists(oPersistency, iCalculationVersionId) {
     if (!oPersistency.CalculationVersion.exists(iCalculationVersionId)) {
         const sClientMsg = 'No calculation version exists for the given id.';
         const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageLibrary.Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
     }
 }
@@ -39,7 +39,7 @@ async function checkVariantExists(oPersistency, iCalculationVersionId, iVariantI
     if (_.isUndefined(oVariant)) {
         const sClientMsg = 'No variant exists for the given id.';
         const sServerMsg = `${ sClientMsg } Variant id: ${ iVariantId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageLibrary.Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
     }
 }
@@ -49,12 +49,12 @@ async function checkVariantExists(oPersistency, iCalculationVersionId, iVariantI
  * If someone except the current user is locking the calculation version in the context of variant matrix, then the current request is not allowed
  * @throws {ENTITY_NOT_WRITABLE_ERROR}
  */
-async function checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId) {
+function checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId) {
     const bIsVariantMatrixLocked = oPersistency.Variant.isLockedInAConcurrentVariantContext(iCalculationVersionId);
     if (bIsVariantMatrixLocked === true) {
         const oMessageDetails = new MessageDetails().addCalculationVersionObjs({ id: iCalculationVersionId });
         const sServerMsg = `The variant matrix is currently locked by another user. Base Version id: ${ iCalculationVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         oMessageDetails.setNotWriteableEntityDetailsObj(MessageLibrary.NotWriteableEntityDetailsCode.IS_OPENED_BY_ANOTHER_USER);
         throw new PlcException(MessageLibrary.Code.ENTITY_NOT_WRITABLE_ERROR, oMessageDetails);
     }
@@ -89,7 +89,7 @@ async function isVariantNameUnique(sVariantName, iCalculationVersion, oPersisten
         const oMessageDetails = new MessageDetails().addVariantObjs({ id: iVariantId });
         const sClientMsg = 'Variant name is not unique.';
         const sServerMsg = `${ sClientMsg } variant name: ${ sVariantName }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageLibrary.Code.VARIANT_NAME_NOT_UNIQUE_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -102,7 +102,7 @@ async function isVariantNameUnique(sVariantName, iCalculationVersion, oPersisten
  * @param iCalculationVersionId - the id of the calculation version
  * @throws {ENTITY_NOT_WRITABLE_ERROR}
  */
-async function checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId) {
+function checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId) {
     const bIsLifecycleVersion = oPersistency.CalculationVersion.isLifecycleVersion(iCalculationVersionId);
     if (bIsLifecycleVersion === true) {
         const sNotWriteableEntityDetailsCode = MessageLibrary.NotWriteableEntityDetailsCode.IS_LIFECYCLE_VERSION;
@@ -110,7 +110,7 @@ async function checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersi
         const sClientMsg = "Calculation version is not editable as it's a lifecycle version.";
         const sServerMsg = `${ sClientMsg } Id: ${ iCalculationVersionId } `;
         oMessageDetails.setNotWriteableEntityDetailsObj(sNotWriteableEntityDetailsCode);
-        await logInfo(sServerMsg);
+        logInfo(sServerMsg);
         throw new PlcException(MessageCode.ENTITY_NOT_WRITABLE_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -123,7 +123,7 @@ async function checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersi
  * @param iCalculationVersionId - the id of the calculation version
  * @throws {ENTITY_NOT_WRITABLE_ERROR}
  */
-async function checkVersionIsNotFrozen(oPersistency, iCalculationVersionId) {
+function checkVersionIsNotFrozen(oPersistency, iCalculationVersionId) {
     const bIsFrozenVersion = oPersistency.CalculationVersion.isFrozen(iCalculationVersionId);
     if (bIsFrozenVersion === true) {
         const sNotWriteableEntityDetailsCode = MessageLibrary.NotWriteableEntityDetailsCode.IS_FROZEN;
@@ -131,7 +131,7 @@ async function checkVersionIsNotFrozen(oPersistency, iCalculationVersionId) {
         const sClientMsg = "Calculation version is not editable as it's frozen.";
         const sServerMsg = `${ sClientMsg } Id: ${ iCalculationVersionId } `;
         oMessageDetails.setNotWriteableEntityDetailsObj(sNotWriteableEntityDetailsCode);
-        await logInfo(sServerMsg);
+        logInfo(sServerMsg);
         throw new PlcException(MessageCode.ENTITY_NOT_WRITABLE_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -171,13 +171,13 @@ async function checkQuantityStateValues(oPersistency, aVariantsItems, iCalculati
     });
 }
 
-async function checkSumVariantIsNotDuplicated(oPersistency, iCalculationVersionId) {
+function checkSumVariantIsNotDuplicated(oPersistency, iCalculationVersionId) {
     const bSumVariantAlreadyExists = oPersistency.Variant.checkSumVariantExists(iCalculationVersionId);
     if (bSumVariantAlreadyExists) {
         const oMessageDetails = new MessageDetails().addCalculationVersionObjs({ id: iCalculationVersionId });
         const sClientMsg = 'A sum variant for requested calculation version already exist';
         const sServerMsg = `${ sClientMsg } Id: ${ iCalculationVersionId } `;
-        await logInfo(sServerMsg);
+        logInfo(sServerMsg);
         throw new PlcException(MessageCode.GENERAL_VALIDATION_ERROR, sClientMsg, oMessageDetails);
     }
 }

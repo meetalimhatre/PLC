@@ -13,7 +13,7 @@ const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 
 
-async function MasterdataBase(dbConnection, hQuery, hQueryRepl, oConfiguration) {
+function MasterdataBase(dbConnection, hQuery, hQueryRepl, oConfiguration) {
 
     this.helper = new Helper($, hQuery, dbConnection);
     this.metadata = new Metadata($, hQuery, null, $.getPlcUsername());

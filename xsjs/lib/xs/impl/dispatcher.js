@@ -1813,7 +1813,7 @@ module.exports.prepareDispatch = async function ($) {
 
     let Connection = new (require('../db/connection/connection')).ConnectionFactory($);
     let Persistency = $.import('xs.db', 'persistency').Persistency;
-    let persistency = new Persistency(Connection.getConnection());
+    let persistency = await new  Persistency(Connection.getConnection());
     return {
         xsjsContext: $,
         Connection: Connection,
@@ -1865,7 +1865,7 @@ class Dispatcher {
                     oServiceOutput.setStatus(Code.GENERAL_UNEXPECTED_EXCEPTION.responseCode);
                 }
             } finally {
-                setResponse(oResponse, oServiceOutput);
+                await setResponse(oResponse, oServiceOutput);
                 var conn = persistency.getConnection();
                 if (conn && _.isFunction(conn.close)) {
                     await conn.close();
@@ -1947,11 +1947,11 @@ class Dispatcher {
 
 
             if (isCloud()) {
-                updateUserActivity();
+                await updateUserActivity();
             }
 
             if (oRequestDefinition.isSessionRequired !== false) {
-                updateActivityTime();
+                await updateActivityTime();
             }
             if (doCommit) {
 
@@ -1967,7 +1967,7 @@ class Dispatcher {
 
 
             var oPrivileges = await getRequiredPrivileges(oRequestDefinition, oRequest.parameters);
-            await checkPrivilege(oPrivileges.privilege);
+            checkPrivilege(oPrivileges.privilege);
             await checkInstancePrivilege(oPrivileges.instancePrivilege, oRequestDefinition.businessObjectType, oValidatedRequestContent);
 
 
@@ -1990,7 +1990,7 @@ class Dispatcher {
                 fCallback.call(this, oValidatedRequestContent.data, oValidatedRequestContent.parameters, oServiceOutput, persistency);
             });
 
-            await CalculationVersionService.runCalculation(oValidatedRequestContent, oServiceOutput, persistency, $.getPlcUsername(), $.getPlcUsername());
+            CalculationVersionService.runCalculation(oValidatedRequestContent, oServiceOutput, persistency, $.getPlcUsername(), $.getPlcUsername());
 
             return oServiceOutput;
         }
@@ -2028,7 +2028,7 @@ class Dispatcher {
             };
         }
 
-        async function checkPrivilege(aPrivilege) {
+        function checkPrivilege(aPrivilege) {
             if (Helpers.isNullOrUndefined(aPrivilege) || !_.isArray(aPrivilege)) {
                 const sLogMessage = 'aPrivilege must be an array.';
                 $.trace.error(sLogMessage);
@@ -2103,13 +2103,13 @@ class Dispatcher {
             }
         }
 
-        function setResponse(oResponse, oServiceOutput) {
+        async function setResponse(oResponse, oServiceOutput) {
             oResponse.status = oServiceOutput.status;
             oResponse.contentType = 'application/json';
 
 
             if (sVersionId === undefined) {
-                sVersionId = persistency.ApplicationManagement.getApplicationVersion(MTA_METADATA);
+                sVersionId = await persistency.ApplicationManagement.getApplicationVersion(MTA_METADATA);
             }
             oResponse.headers.set('SAP-PLC-API-VERSION', sVersionId);
 
@@ -2117,21 +2117,21 @@ class Dispatcher {
             oResponse.setBody(sResponse);
         }
 
-        function updateActivityTime() {
+        async function updateActivityTime() {
             const sUserId = $.getPlcUsername();
             const sSessionId = $.getPlcUsername();
 
             const details = persistency.Session.getSessionDetails(sSessionId, sUserId);
             if (details.lifetime > constants.ActivityTimeUpdateFrequency) {
-                persistency.Session.updateLastActivity(sSessionId, sUserId);
+                await persistency.Session.updateLastActivity(sSessionId, sUserId);
             }
         }
 
-        function updateUserActivity() {
+        async function updateUserActivity() {
             const sUserId = $.getPlcUsername();
             const sCurrentDate = new Date();
 
-            persistency.Session.updateLastUserActivity(sUserId, sCurrentDate);
+            await persistency.Session.updateLastUserActivity(sUserId, sCurrentDate);
         }
     }
 }

@@ -46,11 +46,11 @@ this.get = async function(aBodyMeta, oParameters, oServiceOutput, oPersistency) 
 
 	if(oParameters.lock === true || oParameters.lock === 'true'){
 	    // get active users 
-		var aActiveUsers = oPersistency.Misc.getActiveUsers();
-		var aActiveJobs = oPersistency.Misc.getActiveJobs();
+		var aActiveUsers = await oPersistency.Misc.getActiveUsers();
+		var aActiveJobs = await  oPersistency.Misc.getActiveJobs();
 	    if(aActiveUsers.length === 0 && aActiveJobs.length === 0){
         // set lock
-			oPersistency.Misc.setLock(BusinessObjectTypes.Metadata, sUserId);
+			await oPersistency.Misc.setLock(BusinessObjectTypes.Metadata, sUserId);
 			$.trace.error(`[INFO] Custom fields and formulas are maintained by user: [${sUserId}] on [${new Date().toString()}]`);
 			const message = auditLog.update({ type: 'Custom fields and formula Locking', id: { key: `TimeStamp: [${new Date().toString()}]` } })
 							.attribute({ name: 'TimeStamp', old: 'oldValue', new: `[${new Date().toString()}]`})
@@ -94,7 +94,7 @@ this.get = async function(aBodyMeta, oParameters, oServiceOutput, oPersistency) 
  * 
  * @returns oServiceOutput {object} - the response
  */
-this.batchCreateUpdateDelete = function(iTaskID, aBodyMeta, oParameters, oPersistency, oConnection) {
+this.batchCreateUpdateDelete = async function(iTaskID, aBodyMeta, oParameters, oPersistency, oConnection) {
 		var oPersistencyToUse = Helpers.isNullOrUndefined(oPersistency) ? localPersistency : oPersistency;
 		var oConnectionToUse = Helpers.isNullOrUndefined(oConnection) ? oConnectionFactory : oConnection;
 		
@@ -111,9 +111,9 @@ this.batchCreateUpdateDelete = function(iTaskID, aBodyMeta, oParameters, oPersis
 				// Update t_field_mapping for Replication Tool when custom fields for masterdata are created/delted
 				// Exclude _UNIT fields or those with Path = 'Item'
 				let aCreatedCFs = _.filter(oResult.batchResults.CREATE, oCustomField => (oCustomField.BUSINESS_OBJECT !== 'Item' && oCustomField.UOM_CURRENCY_FLAG === 0));
-				oPersistencyToUse.Metadata.createCustomFieldEntriesForReplicationTool(aCreatedCFs);
+				await oPersistencyToUse.Metadata.createCustomFieldEntriesForReplicationTool(aCreatedCFs);
 				let aDeletedCFs = aBodyMeta.DELETE;
-				oPersistencyToUse.Metadata.deleteCustomFieldEntriesFromReplicationTool(aDeletedCFs);
+				await oPersistencyToUse.Metadata.deleteCustomFieldEntriesFromReplicationTool(aDeletedCFs);
 
 				oPersistencyToUse.Metadata.generateAllFiles();
 				oPersistencyToUse.getConnection().commit();
@@ -152,14 +152,14 @@ this.batchCreateUpdateDelete = function(iTaskID, aBodyMeta, oParameters, oPersis
  * 
  * @returns oServiceOutput {object} - the response
  */
-this.setLockOnMetadataObj = function(aBodyMeta, oParameters, oServiceOutput, oPersistency){
+this.setLockOnMetadataObj = async function(aBodyMeta, oParameters, oServiceOutput, oPersistency){
 	var oBody = {};
 	var oLockActiveUsersStatus = {};
 	
-	var aActiveUsers = oPersistency.Misc.getActiveUsers();
+	var aActiveUsers = await oPersistency.Misc.getActiveUsers();
     if(aActiveUsers.length === 0 ){
     	// set lock.  create/delete/update is possible only if the metadata is not locked by another user
-		oPersistency.Misc.setLock(BusinessObjectTypes.Metadata, sUserId);
+		await oPersistency.Misc.setLock(BusinessObjectTypes.Metadata, sUserId);
 		$.trace.error(`[INFO] Custom fields and formulas are maintained by user: [${sUserId}] on [${new Date().toString()}]`);
 		const message = auditLog.update({ type: 'Custom fields and formula Locking', id: { key: `TimeStamp: [${new Date().toString()}]` } })
 							.attribute({ name: 'TimeStamp', old: 'oldValue', new: `[${new Date().toString()}]`})

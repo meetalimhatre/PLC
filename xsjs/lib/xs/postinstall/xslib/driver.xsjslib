@@ -37,9 +37,9 @@ function overrideRegister(register, oConnection) {
 //const whoAmI = 'xs.postinstall.xslib.driver';
 //const lockError = 'Lock for current schema cannot be obtained';
 
-async function initialize() {
-    const traceWrapper = await $.import('xs.postinstall.xslib', 'traceWrapper');
-    const trace = await $.import('xs.postinstall.xslib', 'trace');
+function initialize() {
+    const traceWrapper = $.import('xs.postinstall.xslib', 'traceWrapper');
+    const trace = $.import('xs.postinstall.xslib', 'trace');
 }
 
 initialize();
@@ -72,7 +72,7 @@ async function getCurrentTimestamp(oConnection) {
 
 async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState, oConnection) {
     var sLogStatement = 'insert into "sap.plc.db::basis.t_installation_log" (version, version_sp, version_patch, name, time, executed_by, step, state)' + '    values (?, ?, ?, ?, current_utctimestamp, ?, ?, ?)';
-    oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, $.getPlcUsername(), sStep, sState);
+    await oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, $.getPlcUsername(), sStep, sState);
 }
 
 async function readBaseRelease(oConnection) {
@@ -126,7 +126,7 @@ async function readLastAction(oConnection) {
 
 
 
-async function setResponse(response, status, contentType, body) {
+function setResponse(response, status, contentType, body) {
     response.status = status;
     response.contentType = contentType;
     response.setBody(body);
@@ -150,7 +150,7 @@ async function execute(request, response, sMethod, bTrace, bRunInBackground, oCo
     var task = await createTask(register, 0, sMethod, oConnection);
     const oParam = processParameters(request);
     await runBackgroundTask(response, register, task, sMethod, bTrace, oParam, bRunInBackground);
-    await setResponse(response, $.net.http.OK, 'text/plain', JSON.stringify({
+    setResponse(response, $.net.http.OK, 'text/plain', JSON.stringify({
         task_id: task.TASK_ID,
         status: task.TASK_ID ? 'SUCCESS' : 'FAILED',
         steps: register,
@@ -166,7 +166,7 @@ async function wrap(request, response, sMethod, bRunInBackground, oConnection) {
     } catch (e) {
         $.trace.info(JSON.stringify(e));
         var errorMessage = 'There was an error during the installation. Please check the logs for more details. {' + e.message + '};{' + e.stack + '}';
-        await setResponse(response, $.net.http.INTERNAL_SERVER_ERROR, 'text/plain', errorMessage);
+        setResponse(response, $.net.http.INTERNAL_SERVER_ERROR, 'text/plain', errorMessage);
     }
 
 }
@@ -239,7 +239,7 @@ function processParameters(request) {
     return oParam;
 }
 
-async function isFreshInstallation(request) {
+function isFreshInstallation(request) {
     const oParam = processParameters(request);
     return oParam.mode === 'freshInstallation';
 }
@@ -272,7 +272,7 @@ async function getCurrentStep(aRegister, oConnection) {
 }
 
 async function getLatestErrorStep(oConnection) {
-    const oRes = oConnection.executeQuery(`
+    const oRes = await oConnection.executeQuery(`
         select top 1 * 
             from "sap.plc.db::basis.t_installation_log"
             where step != 'clean' and state = 'error'
@@ -281,7 +281,7 @@ async function getLatestErrorStep(oConnection) {
     return oRes && oRes.NAME;
 }
 
-async function getUpgradeRegisters(oConnection, oBaseRelease = readBaseRelease(oConnection)) {
+function getUpgradeRegisters(oConnection, oBaseRelease = readBaseRelease(oConnection)) {
     const oUpgradeRegisters = [
         ...mapUpgradeRegister(aPreDatabaseSetUpUpgradeSteps),
         ...aDatabaseSetup.map(library_full_name => {
@@ -306,8 +306,8 @@ async function getUpgradeRegisters(oConnection, oBaseRelease = readBaseRelease(o
 }
 
 
-async function getMappedRegister(bIsFreshInstallation, oConnection) {
-    return bIsFreshInstallation ? getFreshInstallationRegister(oConnection) : await getUpgradeRegisters(oConnection);
+function getMappedRegister(bIsFreshInstallation, oConnection) {
+    return bIsFreshInstallation ? getFreshInstallationRegister(oConnection) : getUpgradeRegisters(oConnection);
 }
 
 function mapUpgradeRegister(steps) {
@@ -339,9 +339,9 @@ async function obtainFinalSteps(request, oConnection) {
     try {
         var strError = '';
         const oParam = processParameters(request);
-        const bIsFreshInstallation = await isFreshInstallation(request);
-        const aMappedRegister = await getMappedRegister(bIsFreshInstallation, oConnection);
-        const aOptionalRegister = await getOptionalRegister(oParam.optional, bIsFreshInstallation);
+        const bIsFreshInstallation = isFreshInstallation(request);
+        const aMappedRegister = getMappedRegister(bIsFreshInstallation, oConnection);
+        const aOptionalRegister = getOptionalRegister(oParam.optional, bIsFreshInstallation);
         const aMappedFreshInstallRegisters = [
             ...aMappedRegister,
             ...aOptionalRegister
@@ -361,12 +361,12 @@ async function obtainFinalSteps(request, oConnection) {
     }
 }
 
-async function getOptionalRegister(aOptionID, bIsFreshInstallation) {
-    return await getMappedOptionalRegister(bIsFreshInstallation ? aOptionalInstallSteps : aOptionalUpgradeSteps, aOptionID);
+function getOptionalRegister(aOptionID, bIsFreshInstallation) {
+    return getMappedOptionalRegister(bIsFreshInstallation ? aOptionalInstallSteps : aOptionalUpgradeSteps, aOptionID);
 }
 
 
-async function getMappedOptionalRegister(steps, aOptionID) {
+function getMappedOptionalRegister(steps, aOptionID) {
     if (aOptionID === undefined) {
         return steps.reduce((prev, next) => {
             return [

@@ -50,22 +50,22 @@ module.exports.InitSession = async function ($) {
         }
         var sIsoLanguage = oLanguage.LANGUAGE;
 
-        oPersistency.Session.releaseLockTable(BusinessObjectTypes.Metadata);
+        await oPersistency.Session.releaseLockTable(BusinessObjectTypes.Metadata);
 
         // TODO: check if the user is allowed to open the session. Make it after the security concept has been defined.
         // (discussed with Christian).
         // take over old session
-        oPersistency.Session.updateSessionForOpenCalculationVersion(sSessionId, sUserId);
+        await oPersistency.Session.updateSessionForOpenCalculationVersion(sSessionId, sUserId);
         // insert or update old session data
-        oPersistency.Session.upsertSession(sSessionId, sUserId, sIsoLanguage);
+        await oPersistency.Session.upsertSession(sSessionId, sUserId, sIsoLanguage);
 
-        var sClientId = await tryGetClientId(aParameters);
+        var sClientId = tryGetClientId(aParameters);
         var oBasicData = await getBasicData(aLanguages, sIsoLanguage, sClientId, oPersistency);
 
         var sVersionId = oPersistency.ApplicationManagement.getApplicationVersion(MTA_METADATA);
 
         // check if dynamic DB artefacts for custom fields have been initialized for this DU version
-        var bPlcState = oPersistency.ApplicationManagement.isPlcInitialized(sVersionId);
+        var bPlcState = await oPersistency.ApplicationManagement.isPlcInitialized(sVersionId);
         if (!bPlcState) {
             // system has not been initialized or with a wrong version
             const sLogMessage = 'PLC has not been initialized correctly after installation or upgrade.';
@@ -80,7 +80,7 @@ module.exports.InitSession = async function ($) {
         const sDefaultUserGroup = 'PLC_ALL_USERS';
         const aDefaultUserGroup = [sDefaultUserGroup].map(group => `'${ group }'`).join(',');
         if (oPersistency.Group.getGroups(aDefaultUserGroup).length > 0) {
-            const aMembersDetails = oPersistency.Group.getGroupMembers(sDefaultUserGroup).USERS;
+            const aMembersDetails = await oPersistency.Group.getGroupMembers(sDefaultUserGroup).USERS;
             const aMemberIds = aMembersDetails.map(oUser => oUser.USER_ID);
             if (aMemberIds.indexOf(sUserId) === -1) {
                 oUserToBeAdded = {
@@ -125,13 +125,13 @@ module.exports.InitSession = async function ($) {
         var sSessionId = $.getPlcUsername();
 
         // Read data for currencies, system messages, uoms
-        var aSystemMessages = oPersistency.Misc.getSystemMessages(sIsoLanguage);
-        var aCurrencies = await getCurrency(sIsoLanguage, oPersistency);
-        var aUnitsOfMeasure = await getUnitOfMeasures(sIsoLanguage, oPersistency);
+        var aSystemMessages = await oPersistency.Misc.getSystemMessages(sIsoLanguage);
+        var aCurrencies = getCurrency(sIsoLanguage, oPersistency);
+        var aUnitsOfMeasure = getUnitOfMeasures(sIsoLanguage, oPersistency);
 
         // reset persistency schema to the default schema
         oPersistency.Misc.setHQuery(oPersistency.getHQueryPlc());
-        var aGroups = oPersistency.Misc.getSidePanelGroups();
+        var aGroups = await oPersistency.Misc.getSidePanelGroups();
 
         // prepare final output: introduce properties
         var oBasicData = {};
@@ -162,7 +162,7 @@ module.exports.InitSession = async function ($) {
         var oParameters = {}, aCurrency = [];
 
         oParameters.business_object = BusinessObjectTypes.Currency;
-        var sAvailableLanguage = oPersistency.Misc.determineAvailableLanguage(Resources[oParameters.business_object].dbobjects.plcTextTable, sIsoLanguage);
+        var sAvailableLanguage = await oPersistency.Misc.determineAvailableLanguage(Resources[oParameters.business_object].dbobjects.plcTextTable, sIsoLanguage);
 
         if (!helpers.isNullOrUndefined(sAvailableLanguage)) {
             var aCurrencyLong = oPersistency.Administration.getAdministration(oParameters, sAvailableLanguage, new Date())[BusinessObjectsEntities.CURRENCY_ENTITIES];
@@ -189,7 +189,7 @@ module.exports.InitSession = async function ($) {
         var oParameters = {}, aUOM = [];
 
         oParameters.business_object = BusinessObjectTypes.UnitOfMeasure;
-        var sAvailableLanguage = oPersistency.Misc.determineAvailableLanguage(Resources[oParameters.business_object].dbobjects.plcTextTable, sIsoLanguage);
+        var sAvailableLanguage = await oPersistency.Misc.determineAvailableLanguage(Resources[oParameters.business_object].dbobjects.plcTextTable, sIsoLanguage);
 
         if (!helpers.isNullOrUndefined(sAvailableLanguage)) {
             var aUOMLong = oPersistency.Administration.getAdministration(oParameters, sAvailableLanguage, new Date())[BusinessObjectsEntities.UOM_ENTITIES];

@@ -21,7 +21,7 @@ function Helper($, hQuery, dbConnection) {
     /**
      * Check if column name matches the column syntax to avoid SQL injection.
      */
-    async function checkColumnSyntax(sColumnName) {
+    function checkColumnSyntax(sColumnName) {
         if (!sColumnName.match(/^[a-zA-Z0-9_]*$/)) {
             const sLogMessage = `Column name '${ sColumnName }' does not match valid syntax for column name.`;
             $.trace.error(sLogMessage);
@@ -87,8 +87,8 @@ function Helper($, hQuery, dbConnection) {
         var aInsertColumns = _.keys(oInsertSet);
 
         // check syntax of column names in order to explicitly counter SQL injection at this point.
-        _.each(aInsertColumns, async function (column) {
-            await checkColumnSyntax(column);
+        _.each(aInsertColumns, function (column) {
+            checkColumnSyntax(column);
         });
 
         var aInsertValues = _.values(oInsertSet);
@@ -138,8 +138,8 @@ function Helper($, hQuery, dbConnection) {
         var mWhereProperties = oSettings.WHERE_PROPERTIES || null;
 
         var aStmtBuilder = ['select'];
-        _.each(aSelectedColumns, async function (sColumnName, iIndex) {
-            await checkColumnSyntax(sColumnName);
+        _.each(aSelectedColumns, function (sColumnName, iIndex) {
+            checkColumnSyntax(sColumnName);
 
             aStmtBuilder.push(sColumnName);
             if (iIndex < aSelectedColumns.length - 1) {
@@ -152,8 +152,8 @@ function Helper($, hQuery, dbConnection) {
         if (mWhereProperties !== null) {
             aStmtBuilder.push('where');
             var aWhereProperties = _.keys(mWhereProperties);
-            _.each(aWhereProperties, async function (sWhereProperty, iIndex) {
-                await checkColumnSyntax(sWhereProperty);
+            _.each(aWhereProperties, function (sWhereProperty, iIndex) {
+                checkColumnSyntax(sWhereProperty);
 
                 var wherePropertyValue = mWhereProperties[sWhereProperty];
                 if (_.isArray(wherePropertyValue) === true) {
@@ -220,8 +220,8 @@ function Helper($, hQuery, dbConnection) {
         var oUpdateSet = _.extend(oPlainEntity, oGeneratedValues);
 
         // check syntax of column name (in order to explicitly counter SQL injection at this point)
-        _.each(_.keys(oUpdateSet), async function (column) {
-            await checkColumnSyntax(column);
+        _.each(_.keys(oUpdateSet), function (column) {
+            checkColumnSyntax(column);
         });
 
         // construct and execute update query
@@ -280,7 +280,7 @@ function Helper($, hQuery, dbConnection) {
         return aColumns;
     };
 
-    this.getNullableColumnsForTable = function (sTableName) {
+    this.getNullableColumnsForTable = async function (sTableName) {
         var sStmt = `
 			select column_name 
 			from "SYS"."TABLE_COLUMNS" 
@@ -289,7 +289,7 @@ function Helper($, hQuery, dbConnection) {
 					and is_nullable = 'TRUE' 
 			order by position; 
 		`;
-        var oResult = dbConnection.executeQuery(sStmt, sTableName);
+        var oResult = await dbConnection.executeQuery(sStmt, sTableName);
         return _.map(oResult, 'COLUMN_NAME');
     };
 
@@ -438,7 +438,7 @@ function Helper($, hQuery, dbConnection) {
 	 *            oResultSetMetadata - the metadata of the ResultSet *
 	 * @returns {array} aResultSetMetadata - an array of objects containing column name and function to be call for this column
 	 */
-    this.createResultSetMetadata = async function (oResultSet, oResultSetMetadata) {
+    this.createResultSetMetadata = function (oResultSet, oResultSetMetadata) {
         var aResultSetMetadata = [];
         var iColumnCount = oResultSetMetadata.getColumnCount();
         for (var columnIndex = 1; columnIndex <= iColumnCount; columnIndex++) {
@@ -591,8 +591,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return currencies are valid
      * @return ResultSet object containing the found currencies.
      */
-    this.getExistingCurrencies = function (dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+    this.getExistingCurrencies = async function (dMasterdataTimestamp) {
+        return await dbConnection.executeQuery(`
             select currency_id
             from "sap.plc.db::basis.t_currency"
                         where   _valid_from <= ?
@@ -607,8 +607,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found unit of measures.
      */
-    this.getExistingUnitOfMeasures = function (dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+    this.getExistingUnitOfMeasures = async function (dMasterdataTimestamp) {
+        return await dbConnection.executeQuery(`
             select uom_id 
             from "sap.plc.db::basis.t_uom"
             where   _valid_from <= ?
@@ -624,9 +624,9 @@ function Helper($, hQuery, dbConnection) {
      *
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingControllingAreas = function () {
+    this.getExistingControllingAreas = async function () {
         // controlling area entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select controlling_area_id 
             from "sap.plc.db::basis.t_controlling_area"
             union
@@ -640,9 +640,9 @@ function Helper($, hQuery, dbConnection) {
      *
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingExchangeRateTypes = function () {
+    this.getExistingExchangeRateTypes = async function () {
         // exchange rate type entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select exchange_rate_type_id
             from "sap.plc.db::basis.t_exchange_rate_type";
         `);
@@ -653,9 +653,9 @@ function Helper($, hQuery, dbConnection) {
      *
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingPriceSources = function () {
+    this.getExistingPriceSources = async function () {
         // price sources entities are not versioned => no valid_from/to consideration necessary
-        return dbConnection.executeQuery(`
+        return await dbConnection.executeQuery(`
             select price_source_id
             from "sap.plc.db::basis.t_price_source";
         `);
@@ -668,8 +668,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingCostingSheets = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+    this.getExistingCostingSheets = async function (sControllingAreaId, dMasterdataTimestamp) {
+        return await dbConnection.executeQuery(`
             select costing_sheet_id
             from "sap.plc.db::basis.t_costing_sheet"
             where       _valid_from <= ?
@@ -685,8 +685,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingComponentSplits = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+    this.getExistingComponentSplits = async function (sControllingAreaId, dMasterdataTimestamp) {
+        return await dbConnection.executeQuery(`
             select component_split_id
             from "sap.plc.db::basis.t_component_split"
             where   _valid_from <= ?
@@ -702,8 +702,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingAccounts = function (sControllingAreaId, dMasterdataTimestamp) {
-        return dbConnection.executeQuery(`
+    this.getExistingAccounts = async function (sControllingAreaId, dMasterdataTimestamp) {
+        return await dbConnection.executeQuery(`
             select account_id
             from "sap.plc.db::basis.t_account"
             where   _valid_from <= ?
@@ -719,8 +719,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingAccountGroups = (sControllingAreaId, dMasterdataTimestamp, iAccountGroupId) => {
-        return dbConnection.executeQuery(`
+    this.getExistingAccountGroups = async (sControllingAreaId, dMasterdataTimestamp, iAccountGroupId) => {
+        return await dbConnection.executeQuery(`
             select account_group_id
             from "sap.plc.db::basis.t_account_group"
             where   _valid_from <= ?
@@ -736,8 +736,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingMaterialGroups = (dMasterdataTimestamp, sMaterialGroupId) => {
-        return dbConnection.executeQuery(`
+    this.getExistingMaterialGroups = async (dMasterdataTimestamp, sMaterialGroupId) => {
+        return await dbConnection.executeQuery(`
             select material_group_id
             from "sap.plc.db::basis.t_material_group"
             where   _valid_from <= ?
@@ -752,8 +752,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingMaterialTypes = (dMasterdataTimestamp, sMaterialTypeId) => {
-        return dbConnection.executeQuery(`
+    this.getExistingMaterialTypes = async (dMasterdataTimestamp, sMaterialTypeId) => {
+        return await dbConnection.executeQuery(`
             select material_type_id
             from "sap.plc.db::basis.t_material_type"
             where   _valid_from <= ?
@@ -768,8 +768,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingDocumentTypes = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+    this.getExistingDocumentTypes = async dMasterdataTimestamp => {
+        return await dbConnection.executeQuery(`
             select document_type_id
             from "sap.plc.db::basis.t_document_type"
             where   _valid_from <= ?
@@ -783,8 +783,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingDocumentStatuses = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+    this.getExistingDocumentStatuses = async dMasterdataTimestamp => {
+        return await dbConnection.executeQuery(`
             select document_status_id
             from "sap.plc.db::basis.t_document_status"
             where   _valid_from <= ?
@@ -798,8 +798,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingOverheadGroups = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+    this.getExistingOverheadGroups = async dMasterdataTimestamp => {
+        return await dbConnection.executeQuery(`
             select overhead_group_id
             from "sap.plc.db::basis.t_overhead_group"
             where   _valid_from <= ?
@@ -813,8 +813,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingValuationClasses = dMasterdataTimestamp => {
-        return dbConnection.executeQuery(`
+    this.getExistingValuationClasses = async dMasterdataTimestamp => {
+        return await dbConnection.executeQuery(`
             select valuation_class_id
             from "sap.plc.db::basis.t_valuation_class"
             where   _valid_from <= ?
@@ -828,8 +828,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingPlants = function (dMasterdataTimestamp, sPlantId) {
-        return dbConnection.executeQuery(`
+    this.getExistingPlants = async function (dMasterdataTimestamp, sPlantId) {
+        return await dbConnection.executeQuery(`
             select plant_id
             from "sap.plc.db::basis.t_plant"
             where   _valid_from <= ?
@@ -845,8 +845,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingCostCenter = function (sControllingAreaId, dMasterdataTimestamp, sCostCenterId) {
-        return dbConnection.executeQuery(`
+    this.getExistingCostCenter = async function (sControllingAreaId, dMasterdataTimestamp, sCostCenterId) {
+        return await dbConnection.executeQuery(`
             select cost_center_id
             from "sap.plc.db::basis.t_cost_center"
             where   _valid_from <= ?
@@ -863,8 +863,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingActivityTypes = function (sControllingAreaId, dMasterdataTimestamp, sActivityTypeId) {
-        return dbConnection.executeQuery(`
+    this.getExistingActivityTypes = async function (sControllingAreaId, dMasterdataTimestamp, sActivityTypeId) {
+        return await dbConnection.executeQuery(`
             select activity_type_id
             from "sap.plc.db::basis.t_activity_type"
             where   _valid_from <= ?
@@ -880,8 +880,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time the return unit of measures are valid
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingMaterials = function (dMasterdataTimestamp, sMaterialId) {
-        return dbConnection.executeQuery(`
+    this.getExistingMaterials = async function (dMasterdataTimestamp, sMaterialId) {
+        return await dbConnection.executeQuery(`
             select material_id
             from "sap.plc.db::basis.t_material"
             where   _valid_from <= ?
@@ -895,8 +895,8 @@ function Helper($, hQuery, dbConnection) {
      *
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingMaterialPriceStrategies = function () {
-        return dbConnection.executeQuery(`
+    this.getExistingMaterialPriceStrategies = async function () {
+        return await dbConnection.executeQuery(`
 			select PRICE_DETERMINATION_STRATEGY_ID
 			from "sap.plc.db::basis.t_price_determination_strategy"
 			where PRICE_DETERMINATION_STRATEGY_TYPE_ID = ?
@@ -908,8 +908,8 @@ function Helper($, hQuery, dbConnection) {
      *
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingActivityPriceStrategies = function () {
-        return dbConnection.executeQuery(`
+    this.getExistingActivityPriceStrategies = async function () {
+        return await dbConnection.executeQuery(`
 			select PRICE_DETERMINATION_STRATEGY_ID
 			from "sap.plc.db::basis.t_price_determination_strategy"
 			where  PRICE_DETERMINATION_STRATEGY_TYPE_ID = ?
@@ -922,9 +922,9 @@ function Helper($, hQuery, dbConnection) {
      * @param sRegexId Timestamp defining the point in time the return unit of measures are valid
      * @return string containing regex value.
      */
-    this.getRegexValue = function (sRegexId) {
+    this.getRegexValue = async function (sRegexId) {
         let sStmt = `SELECT VALIDATION_REGEX_VALUE FROM "${ Tables.regex }" WHERE VALIDATION_REGEX_ID = ?`;
-        let oQueryResult = dbConnection.executeQuery(sStmt, sRegexId);
+        let oQueryResult = await dbConnection.executeQuery(sStmt, sRegexId);
         if (oQueryResult.length > 0) {
             return oQueryResult[0].VALIDATION_REGEX_VALUE || null;
         }
@@ -950,8 +950,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time when the existence check is done
      * @return Boolean True if currency exists, false otherwise
      */
-    this.currencyExists = function (sCurrencyId, dMasterdataTimestamp) {
-        let oCurrency = dbConnection.executeQuery(`
+    this.currencyExists = async function (sCurrencyId, dMasterdataTimestamp) {
+        let oCurrency = await dbConnection.executeQuery(`
             select count(currency_id) as count
             from "sap.plc.db::basis.t_currency"
                         where   _valid_from <= ?
@@ -967,8 +967,8 @@ function Helper($, hQuery, dbConnection) {
      * @param dMasterdataTimestamp Timestamp defining the point in time when the existence check is done
      * @return Boolean True if uom exists, false otherwise
      */
-    this.uomExists = function (sUomId, dMasterdataTimestamp) {
-        let oUom = dbConnection.executeQuery(`
+    this.uomExists = async function (sUomId, dMasterdataTimestamp) {
+        let oUom = await dbConnection.executeQuery(`
             select count(uom_id) as count
             from "sap.plc.db::basis.t_uom"
                         where   _valid_from <= ?
@@ -989,8 +989,8 @@ function Helper($, hQuery, dbConnection) {
      * @param sControllingAreaId Controlling area the accounts are defined in
      * @return Object containing the found entities.
      */
-    this.getExistingNonTemporaryMasterdataCombined = function (dMasterdataTimestamp, sControllingAreaId) {
-        let oResultSet = dbConnection.executeQuery(`
+    this.getExistingNonTemporaryMasterdataCombined = async function (dMasterdataTimestamp, sControllingAreaId) {
+        let oResultSet = await dbConnection.executeQuery(`
 			select *
 			from (
 				select currency_id as col_value, 'CURRENCY_ID' as col_name

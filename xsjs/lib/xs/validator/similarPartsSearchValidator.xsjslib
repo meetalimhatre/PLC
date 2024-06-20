@@ -39,7 +39,7 @@ const aMandatoryPropertiesMetadataTimeRange = [
     'ToTime'
 ];
 
-async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils) {
+function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils) {
 
     // Supported fuzzy search tables
     const SupportedCalculationVersionTables = _.values(PersistencySimilarParts.CalculationVersionTables);
@@ -58,7 +58,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
     const SupportedScoreFunctions = PersistencySimilarParts.SupportedScoreFunctions;
     const DefaultScoreFunction = PersistencySimilarParts.DefaultScoreFunction;
 
-    let genericSyntaxValidator = await new GenericSyntaxValidator();
+    let genericSyntaxValidator = new GenericSyntaxValidator();
     this.validate = async function (oRequest) {
         switch (oRequest.method) {
         case $.net.http.POST:
@@ -81,7 +81,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
 
-            await validateIsNonEmptyArray(aSearchRequests, 'RequestBody');
+            validateIsNonEmptyArray(aSearchRequests, 'RequestBody');
 
             if (aSearchRequests.length > 1) {
                 bIsBatchSearch = true;
@@ -89,74 +89,74 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
             _.each(aSearchRequests, async function (oSearchRequest) {
                 let aAttributeNames = [];
-                await utils.checkMandatoryProperties(oSearchRequest, aMandatoryPropertiesMetadata);
+                utils.checkMandatoryProperties(oSearchRequest, aMandatoryPropertiesMetadata);
 
 
                 if (bIsBatchSearch) {
-                    await utils.checkMandatoryProperties(oSearchRequest, ['CALCULATION_VERSION_ID']);
+                    utils.checkMandatoryProperties(oSearchRequest, ['CALCULATION_VERSION_ID']);
                 }
                 if (!helpers.isNullOrUndefined(oSearchRequest.CALCULATION_VERSION_ID)) {
-                    await validateValue(oSearchRequest.CALCULATION_VERSION_ID, 'Integer', 'CALCULATION_VERSION_ID');
+                    validateValue(oSearchRequest.CALCULATION_VERSION_ID, 'Integer', 'CALCULATION_VERSION_ID');
                 }
                 if (!helpers.isNullOrUndefined(oSearchRequest.ITEM_ID)) {
-                    await validateValue(oSearchRequest.ITEM_ID, 'Integer', 'ITEM_ID');
+                    validateValue(oSearchRequest.ITEM_ID, 'Integer', 'ITEM_ID');
                 }
-                await validateIsNonEmptyArray(oSearchRequest.Attributes, 'Attributes');
+                validateIsNonEmptyArray(oSearchRequest.Attributes, 'Attributes');
                 await validateSupportedColumnsAndDataTypes(oSearchRequest.Attributes);
                 _.each(oSearchRequest.Attributes, async function (oAttribute) {
-                    await validateAttribute(oAttribute, aAttributeNames);
+                    validateAttribute(oAttribute, aAttributeNames);
                 });
 
                 let oSource = oSearchRequest.Source;
                 if (!helpers.isPlainObject(oSource) || _.isEmpty(oSource)) {
                     const sLogMessage = 'Source is an empty object.';
-                    await throwErrors(oSource, ['Source'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oSource, ['Source'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
-                await validateSource(oSource, oSearchRequest);
+                validateSource(oSource, oSearchRequest);
                 aValidSearchRequests.push(oSearchRequest);
             });
             return aValidSearchRequests;
         }
 
-        async function validateAttribute(oAttribute, aAttributeNames) {
+        function validateAttribute(oAttribute, aAttributeNames) {
             let oPattern = oAttribute.Pattern;
-            await utils.checkMandatoryProperties(oAttribute, aMandatoryPropertiesMetadataAttributes);
+            utils.checkMandatoryProperties(oAttribute, aMandatoryPropertiesMetadataAttributes);
 
-            await validateValue(oAttribute.Name, 'String', 'Attribute.Name');
+            validateValue(oAttribute.Name, 'String', 'Attribute.Name');
             aAttributeNames.push(oAttribute.Name);
-            await validateDuplicatedAttributeNames(aAttributeNames);
-            await validateWeight(oAttribute.Weight);
-            await validateValue(oAttribute.IsFuzzySearch, 'BooleanInt', 'IsFuzzySearch');
+            validateDuplicatedAttributeNames(aAttributeNames);
+            validateWeight(oAttribute.Weight);
+            validateValue(oAttribute.IsFuzzySearch, 'BooleanInt', 'IsFuzzySearch');
 
 
             if (oAttribute.IsFuzzySearch === 0) {
-                await utils.checkMandatoryProperties(oAttribute, ['Pattern']);
-                await utils.checkMandatoryProperties(oPattern, aMandatoryPropertiesMetadataPattern);
-                await validateValue(oPattern.Value, 'String', 'Pattern.Value');
+                utils.checkMandatoryProperties(oAttribute, ['Pattern']);
+                utils.checkMandatoryProperties(oPattern, aMandatoryPropertiesMetadataPattern);
+                validateValue(oPattern.Value, 'String', 'Pattern.Value');
                 if (!oPattern.Value.match(/\([^()]+\)/g) || !oAttribute.Value.match(new RegExp(oPattern.Value))) {
                     const sLogMessage = 'Value of Pattern is not a valid substring_regexpr.';
-                    await throwErrors(oPattern.Value, ['Pattern.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oPattern.Value, ['Pattern.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
 
-                await validateIsNonEmptyArray(oPattern.Groups, 'oPattern.Groups');
+                validateIsNonEmptyArray(oPattern.Groups, 'oPattern.Groups');
                 let iMatchedGroupsLength = oAttribute.Value.match(new RegExp(oPattern.Value)).length - 1;
                 if (iMatchedGroupsLength < oPattern.Groups.length) {
                     const sLogMessage = "Value of Pattern doesn't match Groups length.";
-                    await throwErrors(oPattern, [
+                    throwErrors(oPattern, [
                         'Pattern.Value',
                         'Pattern.Groups'
                     ], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
                 _.each(oPattern.Groups, async function (oGroup) {
-                    await validateGroup(oGroup, aAttributeNames, iMatchedGroupsLength);
+                    validateGroup(oGroup, aAttributeNames, iMatchedGroupsLength);
                 });
             }
 
             if (!helpers.isNullOrUndefined(oAttribute.Option)) {
-                await validateSearchOptions(oAttribute.Option);
+                validateSearchOptions(oAttribute.Option);
             }
 
-            await validateSearchValueAndSetupDefaultOptions(oAttribute);
+            validateSearchValueAndSetupDefaultOptions(oAttribute);
         }
 
 
@@ -165,7 +165,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
 
 
-        async function getMetadataForSupportedBussinesObjects() {
+        function getMetadataForSupportedBussinesObjects() {
             let oItemMetadata = metadataProvider.get(BusinessObjectTypes.Item, BusinessObjectTypes.Item, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             let oMaterialMetadata = metadataProvider.get(BusinessObjectTypes.Material, BusinessObjectTypes.Material, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             let oMaterialPriceMetadata = metadataProvider.get(BusinessObjectTypes.MaterialPrice, BusinessObjectTypes.MaterialPrice, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
@@ -235,7 +235,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
 
         async function validateSupportedColumnsAndDataTypes(aAttributes) {
-            let oMetadata = await getMetadataForSupportedBussinesObjects();
+            let oMetadata = getMetadataForSupportedBussinesObjects();
             let aConvertedAttributes = await getColumnPropertyForInputAttributes(aAttributes);
             _.each(aAttributes, async function (oAttr) {
 
@@ -278,12 +278,12 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
 
 
-        async function validateSearchOptions(oOption) {
+        function validateSearchOptions(oOption) {
             let sScoreFunctionName = oOption.scoreFunction;
             if (!helpers.isNullOrUndefined(oOption.scoreFunction)) {
                 if (!_.includes(_.values(SupportedScoreFunctions), oOption.scoreFunction)) {
                     const sLogMessage = `Similar parts search doesn't support ${ oOption.scoreFunction } as score function for numeric columns.`;
-                    await throwErrors(oOption, ['Option'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oOption, ['Option'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
             } else {
                 sScoreFunctionName = DefaultScoreFunction;
@@ -291,26 +291,26 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
             if (validateNumericValue(oOption.scoreFunctionScale, 'Option.scoreFunctionScale')) {
                 if ((SupportedScoreFunctions.Linear === sScoreFunctionName || SupportedScoreFunctions.Gaussian === sScoreFunctionName) && oOption.scoreFunctionScale <= 0) {
-                    await throwNumericErrors(oOption.scoreFunctionScale, 'Option.scoreFunctionScale', 'scale > 0', sScoreFunctionName);
+                    throwNumericErrors(oOption.scoreFunctionScale, 'Option.scoreFunctionScale', 'scale > 0', sScoreFunctionName);
                 }
             }
             if (validateNumericValue(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay')) {
                 if (SupportedScoreFunctions.Linear === sScoreFunctionName && (oOption.scoreFunctionDecay < 0 || oOption.scoreFunctionDecay >= 1)) {
-                    await throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 <= decay < 1', sScoreFunctionName);
+                    throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 <= decay < 1', sScoreFunctionName);
                 } else if (SupportedScoreFunctions.Gaussian === sScoreFunctionName && (oOption.scoreFunctionDecay <= 0 || oOption.scoreFunctionDecay >= 1)) {
-                    await throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 < decay < 1', sScoreFunctionName);
+                    throwNumericErrors(oOption.scoreFunctionDecay, 'Option.scoreFunctionDecay', '0 < decay < 1', sScoreFunctionName);
                 }
             }
             if (validateNumericValue(oOption.scoreFunctionBase, 'Option.scoreFunctionBase') && (SupportedScoreFunctions.Logarithmic === sScoreFunctionName && oOption.scoreFunctionBase <= 1)) {
-                await throwNumericErrors(oOption.scoreFunctionBase, 'Option.scoreFunctionBase', 'base > 1', sScoreFunctionName);
+                throwNumericErrors(oOption.scoreFunctionBase, 'Option.scoreFunctionBase', 'base > 1', sScoreFunctionName);
             }
             if (validateNumericValue(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset') && oOption.scoreFunctionOffset < 0) {
-                await throwNumericErrors(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset', 'offset >= 0', sScoreFunctionName);
+                throwNumericErrors(oOption.scoreFunctionOffset, 'Option.scoreFunctionOffset', 'offset >= 0', sScoreFunctionName);
             }
 
-            async function throwNumericErrors(inputValue, optionName, optionPossibleValue, scoreFunctionName) {
+            function throwNumericErrors(inputValue, optionName, optionPossibleValue, scoreFunctionName) {
                 const sLogMessage = `${ optionName } ${ inputValue } must satisfy for '${ optionPossibleValue }' for ${ scoreFunctionName } score function.`;
-                await throwErrors(inputValue, [optionName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(inputValue, [optionName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
@@ -323,7 +323,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
 
 
-        async function validateSearchValueAndSetupDefaultOptions(oAttribute) {
+        function validateSearchValueAndSetupDefaultOptions(oAttribute) {
             oAttribute.Option = _.defaults(helpers.isNullOrUndefined(oAttribute.Option) ? {} : oAttribute.Option, { 'scoreFunction': DefaultScoreFunction });
 
 
@@ -342,7 +342,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
                 if (oAttribute.Value <= oAttribute.Option.scoreFunctionOffset || oAttribute.Value <= 0) {
                     const sLogMessage = `Input search value ${ oAttribute.Value } must bigger than 0 and bigger than input scoreFunctionOffset for logarithmic score function.`;
-                    await throwErrors(oAttribute.Value, ['Attribute.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oAttribute.Value, ['Attribute.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 } else {
                     _.defaults(oAttribute.Option, { 'scoreFunctionBase': 1 + (oAttribute.Value - oAttribute.Option.scoreFunctionOffset) });
                 }
@@ -351,7 +351,7 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                 if (helpers.isNullOrUndefined(oAttribute.Option.scoreFunctionScale)) {
                     if (oAttribute.Value <= 0) {
                         const sLogMessage = `Input search value ${ oAttribute.Value } must > 0 (when scoreFunctionScale is unset) for linear or gaussian score function.`;
-                        await throwErrors(oAttribute.Value, ['Attribute.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                        throwErrors(oAttribute.Value, ['Attribute.Value'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                     } else {
                         _.defaults(oAttribute.Option, { 'scoreFunctionScale': oAttribute.Value });
                     }
@@ -359,43 +359,43 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
             }
         }
 
-        async function validateGroup(oGroup, aAttributeNames, iMatchedGroupsLength) {
-            await utils.checkMandatoryProperties(oGroup, aMandatoryPropertiesMetadataGroup);
-            await validateGroupIndex(oGroup.Index, 'oGroup.Index', iMatchedGroupsLength);
-            await validateValue(oGroup.Name, 'String', 'Group.Name');
+        function validateGroup(oGroup, aAttributeNames, iMatchedGroupsLength) {
+            utils.checkMandatoryProperties(oGroup, aMandatoryPropertiesMetadataGroup);
+            validateGroupIndex(oGroup.Index, 'oGroup.Index', iMatchedGroupsLength);
+            validateValue(oGroup.Name, 'String', 'Group.Name');
             aAttributeNames.push(oGroup.Name);
-            await validateDuplicatedAttributeNames(aAttributeNames);
-            await validateWeight(oGroup.Weight);
-            await validateIsNonEmptyArray(oGroup.Dict, 'Group.Dict');
+            validateDuplicatedAttributeNames(aAttributeNames);
+            validateWeight(oGroup.Weight);
+            validateIsNonEmptyArray(oGroup.Dict, 'Group.Dict');
             _.each(oGroup.Dict, async function (oDict) {
-                await utils.checkMandatoryProperties(oDict, aMandatoryPropertiesMetadataDict);
-                await validateIsNonEmptyArray(oDict.Key, 'Dict.Key');
-                await validateArrayItemsDataType(oDict.Key, 'Dict.Key', 'String');
-                await validateValue(oDict.Value, 'String', 'Dict.Value');
+                utils.checkMandatoryProperties(oDict, aMandatoryPropertiesMetadataDict);
+                validateIsNonEmptyArray(oDict.Key, 'Dict.Key');
+                validateArrayItemsDataType(oDict.Key, 'Dict.Key', 'String');
+                validateValue(oDict.Value, 'String', 'Dict.Value');
             });
         }
 
-        async function validateSource(oSource, oSearchRequest) {
+        function validateSource(oSource, oSearchRequest) {
 
             if (!helpers.isNullOrUndefined(oSource.TimeRange)) {
-                await utils.checkMandatoryProperties(oSource.TimeRange, aMandatoryPropertiesMetadataTimeRange);
-                let fromTime = await genericSyntaxValidator.validateValue(oSource.TimeRange.FromTime, 'UTCTimestamp', undefined, false);
-                let toTime = await genericSyntaxValidator.validateValue(oSource.TimeRange.ToTime, 'UTCTimestamp', undefined, false);
+                utils.checkMandatoryProperties(oSource.TimeRange, aMandatoryPropertiesMetadataTimeRange);
+                let fromTime = genericSyntaxValidator.validateValue(oSource.TimeRange.FromTime, 'UTCTimestamp', undefined, false);
+                let toTime = genericSyntaxValidator.validateValue(oSource.TimeRange.ToTime, 'UTCTimestamp', undefined, false);
                 if (fromTime > toTime) {
                     const sLogMessage = 'ToTime should be larger than FromTime. Cannot validate TimeRange.';
-                    await throwErrors(oSource.TimeRange, ['TimeRange'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oSource.TimeRange, ['TimeRange'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
             }
 
             if (!helpers.isPlainObject(oSource.MasterData) && !helpers.isPlainObject(oSource.CalculationVersions)) {
                 const sLogMessage = 'Either valid MasterData or valid CalculationVersions should be defined.';
-                await throwErrors(oSource, ['oSource'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(oSource, ['oSource'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
-            await validateMasterData(oSource.MasterData);
-            await validateCalculationVersions(oSource.CalculationVersions, oSearchRequest);
+            validateMasterData(oSource.MasterData);
+            validateCalculationVersions(oSource.CalculationVersions, oSearchRequest);
         }
 
-        async function validateMasterData(oMasterData) {
+        function validateMasterData(oMasterData) {
             if (!helpers.isNullOrUndefined(oMasterData)) {
                 if (helpers.isPlainObject(oMasterData)) {
                     let aMasterDataFields = [
@@ -410,21 +410,21 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                             'DataType': 'String'
                         }
                     ];
-                    _.each(aMasterDataFields, async function (oField) {
+                    _.each(aMasterDataFields, function (oField) {
 
                         if (!helpers.isNullOrUndefined(oField.Value)) {
-                            await validateIsArray(oField.Value, oField.Name);
-                            await validateArrayItemsDataType(oField.Value, oField.Name, oField.DataType);
+                            validateIsArray(oField.Value, oField.Name);
+                            validateArrayItemsDataType(oField.Value, oField.Name, oField.DataType);
                         }
                     });
                 } else {
                     const sLogMessage = 'MasterData should be a plain object.';
-                    await throwErrors(oMasterData, ['MasterData'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oMasterData, ['MasterData'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
             }
         }
 
-        async function validateCalculationVersions(oCalculationVersions, oSearchRequest) {
+        function validateCalculationVersions(oCalculationVersions, oSearchRequest) {
             if (!helpers.isNullOrUndefined(oCalculationVersions)) {
                 if (helpers.isPlainObject(oCalculationVersions)) {
                     let aCalculationVersionsFields = [
@@ -449,40 +449,40 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
                             'DataType': 'Integer'
                         }
                     ];
-                    _.each(aCalculationVersionsFields, async function (oField) {
+                    _.each(aCalculationVersionsFields, function (oField) {
 
                         if (!helpers.isNullOrUndefined(oField.Value)) {
-                            await validateIsArray(oField.Value, oField.Name);
-                            await validateArrayItemsDataType(oField.Value, oField.Name, oField.DataType);
+                            validateIsArray(oField.Value, oField.Name);
+                            validateArrayItemsDataType(oField.Value, oField.Name, oField.DataType);
                         }
                     });
                     if (!helpers.isNullOrUndefined(oCalculationVersions.OnlyCurrent)) {
-                        await genericSyntaxValidator.validateValue(oCalculationVersions.OnlyCurrent, 'BooleanInt', undefined, false);
+                        genericSyntaxValidator.validateValue(oCalculationVersions.OnlyCurrent, 'BooleanInt', undefined, false);
                         if (oCalculationVersions.OnlyCurrent) {
-                            await utils.checkMandatoryProperties(oSearchRequest, ['CALCULATION_VERSION_ID']);
+                            utils.checkMandatoryProperties(oSearchRequest, ['CALCULATION_VERSION_ID']);
                         }
                     }
                 } else {
                     const sLogMessage = 'CalculationVersions should be a plain object.';
-                    await throwErrors(oCalculationVersions, ['CalculationVersions'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(oCalculationVersions, ['CalculationVersions'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
             }
         }
 
-        async function validateDuplicatedAttributeNames(aArray) {
+        function validateDuplicatedAttributeNames(aArray) {
             if (hasRepeatedItems(aArray)) {
                 const sLogMessage = 'Attributes Name and Groups Name should not be duplicated.';
-                await throwErrors(aArray, [
+                throwErrors(aArray, [
                     'Attributes.Name',
                     'Groups.Name'
                 ], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
-        async function validateWeight(fWeight) {
+        function validateWeight(fWeight) {
             if (!(typeof fWeight === 'number') || fWeight < 0 || fWeight > 1) {
                 const sLogMessage = 'Weight should be a float ranging from 0 to 1. Cannot validate Weight.';
-                await throwErrors(fWeight, ['Weight'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(fWeight, ['Weight'], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
@@ -492,62 +492,62 @@ async function SimilarPartsSearchValidator(oPersistency, metadataProvider, utils
 
         function validateArrayItemsDataType(aArray, sFieldName, sDataType) {
             if (aArray.length > 0) {
-                _.each(aArray, async function (item) {
-                    await validateValue(item, sDataType, sFieldName);
+                _.each(aArray, function (item) {
+                    validateValue(item, sDataType, sFieldName);
                 });
             }
         }
 
-        async function validateValue(value, sDataType, sFieldName) {
+        function validateValue(value, sDataType, sFieldName) {
             switch (sDataType) {
             case 'String':
                 if (!_.isString(value)) {
                     const sLogMessage = `${ sFieldName } should be string.`;
-                    await throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
-                return await genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
+                return genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
             case 'Integer' || 'PositiveInteger' || 'BooleanInt':
-                if (!await _.isNumber(value)) {
+                if (! _.isNumber(value)) {
                     const sLogMessage = `${ sFieldName } is not a ${ sDataType }.`;
-                    await throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                    throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
                 }
-                return await genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
+                return genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
             default:
-                return await genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
+                return genericSyntaxValidator.validateValue(value, sDataType, undefined, false);
             }
         }
 
-        async function validateNumericValue(value, sFieldName) {
-            if (!helpers.isNullOrUndefined(value) && !await _.isNumber(value)) {
+        function validateNumericValue(value, sFieldName) {
+            if (!helpers.isNullOrUndefined(value) && ! _.isNumber(value)) {
                 const sLogMessage = `${ sFieldName } should be numeric.`;
-                await throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(value, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
             return true;
         }
 
-        async function validateIsNonEmptyArray(aArray, sArrayName) {
+        function validateIsNonEmptyArray(aArray, sArrayName) {
             if (!_.isArray(aArray) || aArray.length === 0) {
                 const sLogMessage = `${ sArrayName } is an array with at least 1 entry. Cannot validate.`;
-                await throwErrors(aArray, [sArrayName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(aArray, [sArrayName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
-        async function validateIsArray(aArray, sArrayName) {
+        function validateIsArray(aArray, sArrayName) {
             if (!_.isArray(aArray)) {
                 const sLogMessage = `${ sArrayName } is not an array.`;
-                await throwErrors(aArray, [sArrayName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(aArray, [sArrayName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
-        async function validateGroupIndex(iValue, sFieldName, iMatchedGroupsLength) {
-            await genericSyntaxValidator.validateValue(iValue, 'PositiveInteger', undefined, false);
+        function validateGroupIndex(iValue, sFieldName, iMatchedGroupsLength) {
+            genericSyntaxValidator.validateValue(iValue, 'PositiveInteger', undefined, false);
             if (iValue === 0 || iValue > iMatchedGroupsLength) {
                 const sLogMessage = `${ sFieldName } should be a non zero positive integer and not larger than Groups length.`;
-                await throwErrors(iValue, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
+                throwErrors(iValue, [sFieldName], ValidationInfoCode.VALUE_ERROR, sLogMessage, Code.GENERAL_VALIDATION_ERROR);
             }
         }
 
-        async function throwErrors(oMetadataObjs, aColumnIds, sValidationInfoCode, sLogMessage, oCode) {
+        function throwErrors(oMetadataObjs, aColumnIds, sValidationInfoCode, sLogMessage, oCode) {
             let oMessageDetails = new MessageDetails();
 
             oMessageDetails.validationObj = {

@@ -27,7 +27,7 @@ function ApplicationManagement($, dbConnection) {
      * Check if dynamic DB artefacts (SQLScript, table types) have been initialized for the given MTA version.
      */
     this.isPlcInitialized = async function (sVersion) {
-        var queryResult = dbConnection.executeQuery('select plc_version, generation_time from "' + Tables.initialization_state + '"');
+        var queryResult = await dbConnection.executeQuery('select plc_version, generation_time from "' + Tables.initialization_state + '"');
         return queryResult.length !== 0 && !helpers.isNullOrUndefined(queryResult[0].PLC_VERSION) && queryResult[0].PLC_VERSION === sVersion;
     };
 

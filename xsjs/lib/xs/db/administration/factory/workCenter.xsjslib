@@ -739,7 +739,7 @@ async function WorkCenter(dbConnection, hQuery, sObjectName) {
             var oEntry = {};
             try {
                 await checkColumnsUsingMetadata(oRecord, aMetadataFields, sOperation);
-                await checkMandatoryProperties(oRecord, sObjectName, sOperation);
+                checkMandatoryProperties(oRecord, sObjectName, sOperation);
                 oEntry = oRecord;
                 oEntry.OPERATION = sOperation;
                 oEntry.ERROR_CODE = '';

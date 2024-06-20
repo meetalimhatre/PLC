@@ -555,7 +555,7 @@ var NotWriteableEntityDetailsCode = Object.freeze({
 
 
 
-async function Details() {
+function Details() {
     var messageTextObj;
 
     var userObjs;
@@ -756,13 +756,13 @@ async function Details() {
         }
     });
 
-    this.setMessageText = async function (sMessageText) {
+    this.setMessageText =  function (sMessageText) {
         messageTextObj = sMessageText;
         return this;
     };
 
 
-    this.addUserObj = async function (oUserObj) {
+    this.addUserObj =  function (oUserObj) {
         if (userObjs === undefined) {
             userObjs = [];
         }
@@ -770,7 +770,7 @@ async function Details() {
         return this;
     };
 
-    this.addCalculationObjs = async function (oCalculationObj) {
+    this.addCalculationObjs =  function (oCalculationObj) {
         if (calculationObjs === undefined) {
             calculationObjs = [];
         }
@@ -778,7 +778,7 @@ async function Details() {
         return this;
     };
 
-    this.addCalculationReferenceObjs = async function (oCalculationObj) {
+    this.addCalculationReferenceObjs =  function (oCalculationObj) {
         if (calculationReferenceObjs === undefined) {
             calculationReferenceObjs = [];
         }
@@ -786,7 +786,7 @@ async function Details() {
         return this;
     };
 
-    this.addVariantObjs = async function (oVariantObj) {
+    this.addVariantObjs =  function (oVariantObj) {
         if (variantObjs === undefined) {
             variantObjs = [];
         }
@@ -794,7 +794,7 @@ async function Details() {
         return this;
     };
 
-    this.addCalculationVersionObjs = async function (oCalculationVersionObj) {
+    this.addCalculationVersionObjs = function (oCalculationVersionObj) {
         if (calculationVersionObjs === undefined) {
             calculationVersionObjs = [];
         }
@@ -802,7 +802,7 @@ async function Details() {
         return this;
     };
 
-    this.addCalculationVersionReferenceObjs = async function (oCalculationVersionObj) {
+    this.addCalculationVersionReferenceObjs = function (oCalculationVersionObj) {
         if (calculationVersionReferenceObjs === undefined) {
             calculationVersionReferenceObjs = [];
         }
@@ -810,7 +810,7 @@ async function Details() {
         return this;
     };
 
-    this.addLifecycleCalculationVersionReferenceObjs = async function (oCalculationVersionObj) {
+    this.addLifecycleCalculationVersionReferenceObjs = function (oCalculationVersionObj) {
         if (lifecycleCalculationVersionReferenceObjs === undefined) {
             lifecycleCalculationVersionReferenceObjs = [];
         }
@@ -818,12 +818,12 @@ async function Details() {
         return this;
     };
 
-    this.setLifecycleSurchargeDetailsObj = async function (oOverlaps) {
+    this.setLifecycleSurchargeDetailsObj = function (oOverlaps) {
         lifecycleSurchargeDetailsObj = oOverlaps;
         return this;
     };
 
-    this.addItemObjs = async function (oItemObjs) {
+    this.addItemObjs = function (oItemObjs) {
         if (itemObjs === undefined) {
             itemObjs = [];
         }
@@ -831,7 +831,7 @@ async function Details() {
         return this;
     };
 
-    this.addProjectObjs = async function (oProjectObjs) {
+    this.addProjectObjs = function (oProjectObjs) {
         if (projectObjs === undefined) {
             projectObjs = [];
         }
@@ -839,7 +839,7 @@ async function Details() {
         return this;
     };
 
-    this.addProjectReferenceObjs = async function (oProjectObjs) {
+    this.addProjectReferenceObjs = function (oProjectObjs) {
         if (projectReferenceObjs === undefined) {
             projectReferenceObjs = [];
         }
@@ -847,7 +847,7 @@ async function Details() {
         return this;
     };
 
-    this.addFormulaObjs = async function (oFormulaObjs) {
+    this.addFormulaObjs = function (oFormulaObjs) {
         if (formulaObjs === undefined) {
             formulaObjs = [];
         }
@@ -855,7 +855,7 @@ async function Details() {
         return this;
     };
 
-    this.addMetadataObjs = async function (oMetadataObjs) {
+    this.addMetadataObjs = function (oMetadataObjs) {
         if (metadataObjs === undefined) {
             metadataObjs = [];
         }
@@ -863,27 +863,27 @@ async function Details() {
         return this;
     };
 
-    this.setPriceDeterminationObj = async function (oPriceDeterminationObj) {
+    this.setPriceDeterminationObj = function (oPriceDeterminationObj) {
         priceDeterminationObj = oPriceDeterminationObj;
         return this;
     };
 
-    this.setAccountDeterminationObj = async function (oAccountDeterminationObj) {
+    this.setAccountDeterminationObj = function (oAccountDeterminationObj) {
         accountDeterminationObj = oAccountDeterminationObj;
         return this;
     };
 
-    this.setDependentFieldDeterminationObj = async function (oDependentFieldDeterminationObj) {
+    this.setDependentFieldDeterminationObj = function (oDependentFieldDeterminationObj) {
         dependentFieldDeterminationObj = oDependentFieldDeterminationObj;
         return this;
     };
 
-    this.setNotWriteableEntityDetailsObj = async function (oNotWriteableEntityDetailsObj) {
+    this.setNotWriteableEntityDetailsObj = function (oNotWriteableEntityDetailsObj) {
         notWriteableEntityDetailsObj = oNotWriteableEntityDetailsObj;
         return this;
     };
 
-    this.addSettingsObj = async function (oFrontendSettingsObj) {
+    this.addSettingsObj = function (oFrontendSettingsObj) {
         if (settingsObj === undefined) {
             settingsObj = [];
         }
@@ -903,7 +903,7 @@ async function Details() {
 
 
 
-async function Message(oCode, sSeverity, oDetails, sOperation) {
+function Message(oCode, sSeverity, oDetails, sOperation) {
 
     this.code = oCode.code;
     this.severity = sSeverity;
@@ -913,7 +913,7 @@ async function Message(oCode, sSeverity, oDetails, sOperation) {
 Message.prototype = Object.create(Message.prototype);
 Message.prototype.constructor = Message;
 
-Message.fromPlcException = async function (oPlcException) {
+Message.fromPlcException = function (oPlcException) {
     return  new Message(oPlcException.code, Severity.ERROR, oPlcException.details, oPlcException.operation);
 };
 
@@ -927,14 +927,14 @@ Message.fromPlcException = async function (oPlcException) {
 
 
 
-async function PlcException(oCode, sMessage, oDetails, sOperation, oInnerException) {
+function PlcException(oCode, sMessage, oDetails, sOperation, oInnerException) {
     this.code = oCode;
     this.developerMessage = sMessage;
 
     this.details = oDetails;
     if (!(_.isUndefined(sMessage) || _.isNull(sMessage) || sMessage === '')) {
         if (_.isUndefined(this.details) || _.isNull(this.details)) {
-            this.details = await new Details();
+            this.details = new Details();
         }
 
         if (this.details.hasOwnProperty('messageTextObj') === true) {

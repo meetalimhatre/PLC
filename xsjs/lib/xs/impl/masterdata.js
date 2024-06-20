@@ -11,7 +11,7 @@ module.exports.Masterdata = function ($) {
 */
     this.getMasterdata = async function (aBodyItems, mParameters, oServiceOutput, oPersistency) {
  // eslint-disable-line no-unused-vars
-        const mSessionDetails = oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
+        const mSessionDetails = await oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
         const iCalculationVersionId = mParameters.calculation_version_id;
         if (!oPersistency.CalculationVersion.exists(iCalculationVersionId)) {
             const sClientMsg = 'Calculation version does not exist.';
@@ -20,7 +20,7 @@ module.exports.Masterdata = function ($) {
             throw new PlcException(MessageCode.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
         }
 
-        const oMasterdata = oPersistency.Masterdata.getMasterdata(mSessionDetails.language, iCalculationVersionId, sUserId);
+        const oMasterdata = await oPersistency.Masterdata.getMasterdata(mSessionDetails.language, iCalculationVersionId, sUserId);
         oServiceOutput.setMasterdata(oMasterdata);
     };
 

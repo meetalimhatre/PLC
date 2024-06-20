@@ -140,9 +140,9 @@ function Project(dbConnection, hQuery) {
 	 *            sProjectId - the id of the project that should be retrieved.
 	 * @returns {object} oReturnObject - An object containing an array of project + masterdata
 	 */
-    this.get = function (sLanguage, sUserId, sProjectId) {
+    this.get =async function (sLanguage, sUserId, sProjectId) {
         var sMasterDataDate = new Date();
-        var fnReadProcedure = dbConnection.loadProcedure(Procedures.project_read);
+        var fnReadProcedure = await dbConnection.loadProcedure(Procedures.project_read);
         var oReadResult = fnReadProcedure(sLanguage, sUserId, sMasterDataDate, sProjectId, '', 1, '');
 
         var oReturnObject = {};
@@ -176,7 +176,7 @@ function Project(dbConnection, hQuery) {
 	 * @param  {string} sProjectId The id of the project for which all the calculations with versions shall be retrieved.	 
 	 * @return {array}            A result set containing object with the properties CALCULATION_ID and CALCULATION_VERSION_ID.
 	 */
-    this.getCalculationsWithVersions = function (sProjectId) {
+    this.getCalculationsWithVersions = async function (sProjectId) {
         var sStmt = `
 			select  versions.calculation_id,
 					versions.calculation_version_id 
@@ -186,7 +186,7 @@ function Project(dbConnection, hQuery) {
 			where calculations.project_id = ?;
 		`;
 
-        return dbConnection.executeQuery(sStmt, sProjectId);
+        return await dbConnection.executeQuery(sStmt, sProjectId);
     };
 
     /**
@@ -202,7 +202,7 @@ function Project(dbConnection, hQuery) {
 
         var sCloseStatement = 'delete from "' + Tables.open_projects + '" where session_id = ? and project_id = ?';
 
-        dbConnection.executeUpdate(sCloseStatement, sSessionId, sProjectId);
+        await dbConnection.executeUpdate(sCloseStatement, sSessionId, sProjectId);
         await dbConnection.commit();
     };
 
@@ -226,7 +226,7 @@ function Project(dbConnection, hQuery) {
 	 * @throws {PlcException}
 	 *             if any exceptional state during the communication with the database occurs
 	 */
-    this.create = async function (oProject, sSessionId, sUserId) {
+    this.create = function (oProject, sSessionId, sUserId) {
         const iEntityId = this.getNextSequence();
         const oEntityRelation = { 'PARENT_ENTITY_ID': oProject.PATH !== '0' ? helpers.getEntityIdFromPath(oProject.PATH) : null };
         const oEntityRelationSettings = {
@@ -327,10 +327,10 @@ function Project(dbConnection, hQuery) {
 
     this.open = async function (sProjectId, sSessionId, iIsWriteable) {
 
-        await cleanupSessions(sProjectId);
+        cleanupSessions(sProjectId);
 
         var sUpsertStatement = 'upsert "' + Tables.open_projects + '" values (?, ?, ?) where session_id = ? and project_id = ?';
-        dbConnection.executeUpdate(sUpsertStatement, sSessionId, sProjectId, iIsWriteable, sSessionId, sProjectId);
+        await dbConnection.executeUpdate(sUpsertStatement, sSessionId, sProjectId, iIsWriteable, sSessionId, sProjectId);
         await dbConnection.commit();
     };
 
@@ -339,7 +339,7 @@ function Project(dbConnection, hQuery) {
         return sPrivilege === InstancePrivileges.READ ? true : false;
     };
 
-    const getControllingAreaForParameter = async function (mParameters) {
+    const getControllingAreaForParameter = function (mParameters) {
         let sControllingAreaId = null;
         if (mParameters['controlling_area_id']) {
             sControllingAreaId = mParameters.controlling_area_id;
@@ -381,7 +381,7 @@ function Project(dbConnection, hQuery) {
         };
     };
 
-    this.getExistingNonTemporaryMasterdataForSurcharges = async function (mParameters, oProjectSurcharges) {
+    this.getExistingNonTemporaryMasterdataForSurcharges = function (mParameters, oProjectSurcharges) {
         const dMasterdataTimestamp = new Date();
         const sControllingAreaId = getControllingAreaForParameter(mParameters);
 
@@ -482,7 +482,7 @@ function Project(dbConnection, hQuery) {
             sWriteableCondition
         ].join(' ');
 
-        var result = dbConnection.executeQuery(sStatement, sProjectId, sSessionId);
+        var result = await dbConnection.executeQuery(sStatement, sProjectId, sSessionId);
         var iOpened = parseInt(result[0].COUNT.toString(), 10);
 
         if (iOpened > 1) {
@@ -512,7 +512,7 @@ function Project(dbConnection, hQuery) {
     this.remove = async function (sProjectId) {
         try {
             var fnProcedure = dbConnection.loadProcedure(Procedures.project_delete);
-            var result = fnProcedure(sProjectId);
+            var result = await fnProcedure(sProjectId);
 
             return result.affectedRows;
         } catch (e) {
@@ -535,7 +535,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.update = async function (oProjectToUpdate) {
+    this.update = function (oProjectToUpdate) {
 
         oProjectToUpdate.LAST_MODIFIED_ON = new Date();
         oProjectToUpdate.LAST_MODIFIED_BY = $.getPlcUsername();
@@ -577,9 +577,9 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.createLifecycleVersions = function (sProjectId, sUserId, bOverWriteManualVersions, sOneTimeCostItemDescription) {
+    this.createLifecycleVersions = async function (sProjectId, sUserId, bOverWriteManualVersions, sOneTimeCostItemDescription) {
         let fnCreateLifecycleVersions = dbConnection.loadProcedure(Procedures.create_lifecycle_versions);
-        let oResult = fnCreateLifecycleVersions(sProjectId, sUserId, bOverWriteManualVersions, sOneTimeCostItemDescription);
+        let oResult = await fnCreateLifecycleVersions(sProjectId, sUserId, bOverWriteManualVersions, sOneTimeCostItemDescription);
         var aCreatedLifecycleVersions = oResult.OT_CREATED_LIFECYCLE_VERSIONS;
         return aCreatedLifecycleVersions;
     };
@@ -590,9 +590,9 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.checkManualOneTimeCosts = function (sProjectId) {
+    this.checkManualOneTimeCosts = async function (sProjectId) {
         let fnCheckManualOneTimeCosts = dbConnection.loadProcedure(Procedures.check_manual_one_time_costs);
-        var result = fnCheckManualOneTimeCosts(sProjectId);
+        var result = await fnCheckManualOneTimeCosts(sProjectId);
         return result.OV_IS_VALID === 0;
     };
 
@@ -602,7 +602,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getOpenedLifecycleVersions = sProjectId => {
+    this.getOpenedLifecycleVersions = async sProjectId => {
         let stmt = `select versions.CALCULATION_VERSION_ID,
 		                   versions.CALCULATION_VERSION_NAME, 
  	                       open_calc.SESSION_ID
@@ -614,12 +614,12 @@ function Project(dbConnection, hQuery) {
                             on open_calc.CALCULATION_VERSION_ID = versions.CALCULATION_VERSION_ID and context = ? and IS_WRITEABLE = '1'
             	        where calculation.project_id = ?;	  
 	         	    `;
-        let aLockedLifecycleVersions = dbConnection.executeQuery(stmt, Constants.CalculationVersionType.Lifecycle, Constants.CalculationVersionType.ManualLifecycleVersion, Constants.CalculationVersionLockContext.CALCULATION_VERSION, sProjectId);
+        let aLockedLifecycleVersions = await dbConnection.executeQuery(stmt, Constants.CalculationVersionType.Lifecycle, Constants.CalculationVersionType.ManualLifecycleVersion, Constants.CalculationVersionLockContext.CALCULATION_VERSION, sProjectId);
         return aLockedLifecycleVersions;
     };
 
 
-    this.getReferencedVersions = sProjectId => {
+    this.getReferencedVersions = async sProjectId => {
         let stmt = `SELECT DISTINCT
 							calculation.calculation_id,
 							lifecycleConfiguration.calculation_version_id AS base_calculation_version_id,
@@ -642,7 +642,7 @@ function Project(dbConnection, hQuery) {
 					FROM "sap.plc.db::basis.t_project_lifecycle_period_quantity_value"
 					WHERE ((project_id ='${ sProjectId }')
 						AND calculation_id = calculation.calculation_id)));`;
-        let aReferencedVersions = dbConnection.executeQuery(stmt);
+        let aReferencedVersions = await dbConnection.executeQuery(stmt);
         return aReferencedVersions;
     };
 
@@ -657,17 +657,17 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.calculteLifecycleVersions = function (sProjectId, bOverWriteManualVersions) {
+    this.calculteLifecycleVersions = async function (sProjectId, bOverWriteManualVersions) {
         let fnCalculateLifecycleVersions = dbConnection.loadProcedure(Procedures.calculate_lifecycle_versions);
-        fnCalculateLifecycleVersions(sProjectId, bOverWriteManualVersions);
+        await fnCalculateLifecycleVersions(sProjectId, bOverWriteManualVersions);
     };
 
-    this.recalculateOneTimeCostForProject = function (sProjectId) {
+    this.recalculateOneTimeCostForProject = async function (sProjectId) {
         let fnRecalculateOneTimeCosts = dbConnection.loadProcedure(Procedures.project_calculate_one_time_costs);
-        fnRecalculateOneTimeCosts(sProjectId);
+        await fnRecalculateOneTimeCosts(sProjectId);
     };
 
-    this.updateCostNotDistributedForOneTimeProjectCostWhenCalculationGetsDeleted = function (sProjectId, iCalculationId) {
+    this.updateCostNotDistributedForOneTimeProjectCostWhenCalculationGetsDeleted = async function (sProjectId, iCalculationId) {
 
         const sUpdateCostNotDistributedForProject = `
 			UPDATE otpc
@@ -679,7 +679,7 @@ function Project(dbConnection, hQuery) {
 			WHERE otpc.project_id = ?
 		`;
 
-        dbConnection.executeUpdate(sUpdateCostNotDistributedForProject, iCalculationId, sProjectId);
+        await dbConnection.executeUpdate(sUpdateCostNotDistributedForProject, iCalculationId, sProjectId);
     };
 
 
@@ -687,7 +687,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteOneTimeCostRelatedDataForProjectIdAndCalculationId = function (sProjectId, iCalculationId) {
+    this.deleteOneTimeCostRelatedDataForProjectIdAndCalculationId = async function (sProjectId, iCalculationId) {
 
         const sDeleteProjectLifecycleConfig = `
 			delete from "${ Tables.project_lifecycle_configuration }" 
@@ -708,10 +708,10 @@ function Project(dbConnection, hQuery) {
 			WHERE CALCULATION_ID = ? AND PROJECT_ID = ?
 		`;
 
-        dbConnection.executeUpdate(sDeleteProjectLifecycleConfig, iCalculationId, sProjectId);
-        dbConnection.executeUpdate(sHeader + Tables.product_one_time_cost + sDeleteProductsAndValues, iCalculationId, sProjectId);
-        dbConnection.executeUpdate(sHeader + Tables.project_one_time_cost_lifecycle_value + sDeleteProductsAndValues, iCalculationId, sProjectId);
-        dbConnection.executeUpdate(sDeleteLifecyclePeriodQuantity, iCalculationId, sProjectId);
+        await dbConnection.executeUpdate(sDeleteProjectLifecycleConfig, iCalculationId, sProjectId);
+        await dbConnection.executeUpdate(sHeader + Tables.product_one_time_cost + sDeleteProductsAndValues, iCalculationId, sProjectId);
+        await dbConnection.executeUpdate(sHeader + Tables.project_one_time_cost_lifecycle_value + sDeleteProductsAndValues, iCalculationId, sProjectId);
+        await dbConnection.executeUpdate(sDeleteLifecyclePeriodQuantity, iCalculationId, sProjectId);
     };
 
 
@@ -720,9 +720,9 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getProjectProperties = function (sProjectId) {
+    this.getProjectProperties = async function (sProjectId) {
 
-        var result = hQuery.statement('select PROJECT_ID, BUSINESS_AREA_ID, COMPANY_CODE_ID, COSTING_SHEET_ID, CONTROLLING_AREA_ID, COMPONENT_SPLIT_ID, CUSTOMER_ID, ' + 'REPORT_CURRENCY_ID, SALES_PRICE_CURRENCY_ID, SALES_DOCUMENT, PLANT_ID, PROFIT_CENTER_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, ' + 'END_OF_PRODUCTION, VALUATION_DATE, LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL, EXCHANGE_RATE_TYPE_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID from "' + Tables.project + '" where project_id = ?').execute(sProjectId);
+        var result = await hQuery.statement('select PROJECT_ID, BUSINESS_AREA_ID, COMPANY_CODE_ID, COSTING_SHEET_ID, CONTROLLING_AREA_ID, COMPONENT_SPLIT_ID, CUSTOMER_ID, ' + 'REPORT_CURRENCY_ID, SALES_PRICE_CURRENCY_ID, SALES_DOCUMENT, PLANT_ID, PROFIT_CENTER_ID, START_OF_PROJECT, END_OF_PROJECT, START_OF_PRODUCTION, ' + 'END_OF_PRODUCTION, VALUATION_DATE, LIFECYCLE_VALUATION_DATE, LIFECYCLE_PERIOD_INTERVAL, EXCHANGE_RATE_TYPE_ID, MATERIAL_PRICE_STRATEGY_ID, ACTIVITY_PRICE_STRATEGY_ID from "' + Tables.project + '" where project_id = ?').execute(sProjectId);
         return result[0] || null;
     };
 
@@ -732,14 +732,14 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getFrozenVersions = function (sProjectId) {
+    this.getFrozenVersions = async function (sProjectId) {
         var sStatement = [
             'select calcVersion.calculation_version_id from  "' + Tables.calculation_version + '" as calcVersion',
             ' inner join "' + Tables.calculation + '" as calc',
             ' on calcVersion.calculation_id = calc.calculation_id',
             ' where calc.project_id = ? and calcVersion.is_frozen = 1'
         ].join(' ');
-        return dbConnection.executeQuery(sStatement, sProjectId);
+        return await dbConnection.executeQuery(sStatement, sProjectId);
 
     };
 
@@ -793,7 +793,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.isLifecycleCalculationRunningForProject = function (sProjectId) {
+    this.isLifecycleCalculationRunningForProject = async function (sProjectId) {
         let sParameters = JSON.stringify({ PROJECT_ID: sProjectId });
         let sStmt = `select count(*) as rowcount
 						from "${ Tables.task }" 
@@ -803,7 +803,7 @@ function Project(dbConnection, hQuery) {
 							and parameters = ?         -- the parameters indicate the given project
 					`;
 
-        let oResult = dbConnection.executeQuery(sStmt, sParameters);
+        let oResult = await dbConnection.executeQuery(sStmt, sParameters);
 
         return parseInt(oResult[0].ROWCOUNT, 10) > 0;
     };
@@ -818,7 +818,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.createTotalQuantities = function (aTotalQuantities, sProjectId) {
+    this.createTotalQuantities = async function (aTotalQuantities, sProjectId) {
 
         var aTQValues = [];
         var aCalculationIds = [];
@@ -837,14 +837,14 @@ function Project(dbConnection, hQuery) {
 			( PROJECT_ID, CALCULATION_ID, CALCULATION_VERSION_ID, MATERIAL_PRICE_SURCHARGE_STRATEGY, ACTIVITY_PRICE_SURCHARGE_STRATEGY, LAST_MODIFIED_ON, LAST_MODIFIED_BY )
 			values (?, ?, ?, ?, ?, current_utctimestamp, '${ $.getPlcUsername() }' )
 		`;
-        dbConnection.executeUpdate(sTotalQuantityStmt, aTQValues);
+        await dbConnection.executeUpdate(sTotalQuantityStmt, aTQValues);
 
         var sRuleIdStmt = `select project_id, calculation_id from "${ Tables.project_lifecycle_configuration }" where ${ _.map(aCalculationIds, iId => 'calculation_id = ?').join(' or ') }`;
-        aCalculationIds.unshift(sRuleIdStmt);
+        await aCalculationIds.unshift(sRuleIdStmt);
 
 
 
-        var aRuleIdResult = dbConnection.executeQuery.apply(dbConnection, aCalculationIds);
+        var aRuleIdResult = await dbConnection.executeQuery.apply(dbConnection, aCalculationIds);
 
         var aLifecycleValues = [];
         _.each(aTotalQuantities, oTotalQuantity => {
@@ -859,7 +859,7 @@ function Project(dbConnection, hQuery) {
         });
         if (aLifecycleValues.length > 0) {
             var sLifecycleStmt = `insert into "${ Tables.lifecycle_period_value }" (LIFECYCLE_PERIOD_FROM, VALUE, PROJECT_ID, CALCULATION_ID, LAST_MODIFIED_ON, LAST_MODIFIED_BY) values ( ?, ?, ?, ?, current_utctimestamp, '${ $.getPlcUsername() }')`;
-            dbConnection.executeUpdate(sLifecycleStmt, aLifecycleValues);
+            await dbConnection.executeUpdate(sLifecycleStmt, aLifecycleValues);
         }
 
         return aTotalQuantities;
@@ -944,12 +944,12 @@ function Project(dbConnection, hQuery) {
 					( RULE_ID, ${ aDefinitionProperties.join(', ') }, PROJECT_ID )
 			values  ( ?, ${ _.map(aDefinitionProperties, iId => '?').join(', ') }, '${ sProjectId }' )
 		`;
-        dbConnection.executeUpdate(sDefinitionStmt, aDefinitionEntries);
+        await dbConnection.executeUpdate(sDefinitionStmt, aDefinitionEntries);
 
 
         if (aValueEntries.length > 0) {
             let sValueStmt = `insert into "${ sSurchargeValueTable }" (LIFECYCLE_PERIOD_FROM, VALUE, RULE_ID) values ( ?, ?, ? )`;
-            dbConnection.executeUpdate(sValueStmt, aValueEntries);
+            await dbConnection.executeUpdate(sValueStmt, aValueEntries);
         }
 
         return aSurchargeDefinitions;
@@ -973,9 +973,9 @@ function Project(dbConnection, hQuery) {
 
         let sStmtForMonthlyPeriods = `insert into "${ Tables.project_monthly_periods }" (PROJECT_ID, YEAR, SELECTED_MONTH, MONTH_DESCRIPTION, LAST_MODIFIED_ON, LAST_MODIFIED_BY) values ('${ sProjectId }', ?, 1, '01', current_utctimestamp, '${ $.getPlcUsername() }');`;
         let aYearsToBeInserted = _.range(iLowestValidPeriodFrom, iHighestValidPeriodFrom + 1);
-        aYearsToBeInserted.forEach(iYear => {
-            dbConnection.executeUpdate(sStmt, iYear);
-            dbConnection.executeUpdate(sStmtForMonthlyPeriods, iYear);
+        aYearsToBeInserted.forEach( async iYear => {
+            await dbConnection.executeUpdate(sStmt, iYear);
+            await dbConnection.executeUpdate(sStmtForMonthlyPeriods, iYear);
         });
     };
 
@@ -992,7 +992,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.createMonthlyAndQuarterlyPeriods = function (sProjectId, sPeriodType, iFrom, iTo, bTriggeredForStarDate) {
+    this.createMonthlyAndQuarterlyPeriods = async function (sProjectId, sPeriodType, iFrom, iTo, bTriggeredForStarDate) {
         let iYearDb = bTriggeredForStarDate === true ? Math.trunc(iFrom / 12 + 1900) : Math.trunc(iTo / 12 + 1900);
         let sInsertPeriodsStmt = `insert into "${ Tables.project_monthly_periods }" (PROJECT_ID, YEAR, SELECTED_MONTH, MONTH_DESCRIPTION, LAST_MODIFIED_ON, LAST_MODIFIED_BY) values ('${ sProjectId }', ?, ?, ?, current_utctimestamp, '${ $.getPlcUsername() }');`;
         if (sPeriodType === 'MONTHLY') {
@@ -1007,7 +1007,7 @@ function Project(dbConnection, hQuery) {
                     iMonth < 10 ? '0' + iMonth : iMonth
                 ];
             });
-            dbConnection.executeUpdate(sInsertPeriodsStmt, aValues);
+            await dbConnection.executeUpdate(sInsertPeriodsStmt, aValues);
         }
         if (sPeriodType === 'QUARTERLY') {
 
@@ -1029,7 +1029,7 @@ function Project(dbConnection, hQuery) {
                     'Q' + Math.trunc((iMonth + 2) / 3)
                 ];
             });
-            dbConnection.executeUpdate(sInsertPeriodsStmt, aValues);
+            await dbConnection.executeUpdate(sInsertPeriodsStmt, aValues);
         }
     };
 
@@ -1048,7 +1048,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.addLifecyclePeriodTypeForProject = function (oProject, iLowestValidPeriodFrom, iHighestValidPeriodFrom, iDbLowestPeriod, iDbHighestPeriod) {
+    this.addLifecyclePeriodTypeForProject = async function (oProject, iLowestValidPeriodFrom, iHighestValidPeriodFrom, iDbLowestPeriod, iDbHighestPeriod) {
         let iLowestYearDb = Math.trunc(iDbLowestPeriod / 12 + 1900);
         let iHighestYearDb = Math.trunc(iDbHighestPeriod / 12 + 1900);
 
@@ -1056,14 +1056,14 @@ function Project(dbConnection, hQuery) {
         if (oProject.START_OF_PROJECT.getFullYear() < iLowestYearDb) {
 
 
-            let sPeriodType = dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iLowestYearDb)[0].PERIOD_TYPE;
+            let sPeriodType = await dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iLowestYearDb)[0].PERIOD_TYPE;
             if (sPeriodType === 'QUARTERLY' || sPeriodType === 'MONTHLY') {
                 this.createMonthlyAndQuarterlyPeriods(oProject.PROJECT_ID, sPeriodType, (iLowestYearDb - 1900) * 12, iDbLowestPeriod, true);
             }
             this.createYearlyLifecyclePeriodTypesForProject(oProject.PROJECT_ID, oProject.START_OF_PROJECT.getFullYear(), iLowestYearDb - 1);
         }
         if (oProject.END_OF_PROJECT.getFullYear() > iHighestYearDb) {
-            let sPeriodType = dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iHighestYearDb)[0].PERIOD_TYPE;
+            let sPeriodType = await dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iHighestYearDb)[0].PERIOD_TYPE;
             if (sPeriodType === 'QUARTERLY' || sPeriodType === 'MONTHLY') {
                 this.createMonthlyAndQuarterlyPeriods(oProject.PROJECT_ID, sPeriodType, iDbHighestPeriod, (iHighestYearDb - 1900) * 12 + 11, false);
             }
@@ -1072,11 +1072,11 @@ function Project(dbConnection, hQuery) {
 
 
         if (oProject.START_OF_PROJECT.getFullYear() === iLowestYearDb && iLowestValidPeriodFrom < iDbLowestPeriod) {
-            let sPeriodType = dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iLowestYearDb)[0].PERIOD_TYPE;
+            let sPeriodType = await dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iLowestYearDb)[0].PERIOD_TYPE;
             this.createMonthlyAndQuarterlyPeriods(oProject.PROJECT_ID, sPeriodType, iLowestValidPeriodFrom, iDbLowestPeriod, true);
         }
         if (oProject.END_OF_PROJECT.getFullYear() === iHighestYearDb && iHighestValidPeriodFrom > iDbHighestPeriod) {
-            let sPeriodType = dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iHighestYearDb)[0].PERIOD_TYPE;
+            let sPeriodType = await dbConnection.executeQuery(`select upper(period_type) as PERIOD_TYPE from "${ Tables.project_lifecycle_period_type }" where project_id = ? and year = ?;`, oProject.PROJECT_ID, iHighestYearDb)[0].PERIOD_TYPE;
             this.createMonthlyAndQuarterlyPeriods(oProject.PROJECT_ID, sPeriodType, iDbHighestPeriod, iHighestValidPeriodFrom, false);
         }
     };
@@ -1086,7 +1086,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteAllLifecyclePeriodsForProject = function (sProjectId) {
+    this.deleteAllLifecyclePeriodsForProject = async  function (sProjectId) {
         let aActivityPriceSurchargesStmt = `
 			delete 
 			from "${ Tables.project_activity_price_surcharge_values }"
@@ -1153,11 +1153,11 @@ function Project(dbConnection, hQuery) {
             sProjectId,
             $.getPlcUsername()
         ];
-        dbConnection.executeUpdate(aQuantitiesStmt, [aValuesToDeleteAll]);
-        dbConnection.executeUpdate(aStmtDeleteMonthlyLifecyclePeriodStmt, [aValuesToDeleteAll]);
-        dbConnection.executeUpdate(aStmtDeleteLifecyclePeriodTypeStmt, [aValuesToDeleteAll]);
-        dbConnection.executeUpdate(aMaterialPriceSurchargesStmt, [aValuesToDeleteAll]);
-        dbConnection.executeUpdate(aActivityPriceSurchargesStmt, [aValuesToDeleteAll]);
+        await dbConnection.executeUpdate(aQuantitiesStmt, [aValuesToDeleteAll]);
+        await dbConnection.executeUpdate(aStmtDeleteMonthlyLifecyclePeriodStmt, [aValuesToDeleteAll]);
+        await dbConnection.executeUpdate(aStmtDeleteLifecyclePeriodTypeStmt, [aValuesToDeleteAll]);
+        await dbConnection.executeUpdate(aMaterialPriceSurchargesStmt, [aValuesToDeleteAll]);
+        await dbConnection.executeUpdate(aActivityPriceSurchargesStmt, [aValuesToDeleteAll]);
     };
 
 
@@ -1167,7 +1167,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteLifecyclePeriodsData = function (sProjectId, dStartDate, dEndDate) {
+    this.deleteLifecyclePeriodsData = async function (sProjectId, dStartDate, dEndDate) {
         let aStmtDeleteLifecyclePeriodTypeStmt = `
 			delete
 			from "${ Tables.project_lifecycle_period_type }"
@@ -1249,14 +1249,14 @@ function Project(dbConnection, hQuery) {
         aPeriodValuesForCustomEntries = aPeriodValuesForCustomEntries.concat(aValues);
 
 
-        dbConnection.executeUpdate(aStmtDeleteMonthlyLifecyclePeriodStmt, [
+        await dbConnection.executeUpdate(aStmtDeleteMonthlyLifecyclePeriodStmt, [
             aPeriodValuesForMonthlyEntries,
             aPeriodValuesForCustomEntries,
             aPeriodValuesForQuarterlyEntries,
             aPeriodValuesForYearlyEntries
         ]);
 
-        dbConnection.executeUpdate(aStmtDeleteLifecyclePeriodTypeStmt, [aPeriodValues]);
+        await dbConnection.executeUpdate(aStmtDeleteLifecyclePeriodTypeStmt, [aPeriodValues]);
     };
 
 
@@ -1265,7 +1265,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteLifecycleQuantitiesData = function (sProjectId) {
+    this.deleteLifecycleQuantitiesData = async function (sProjectId) {
         let aQuantitiesStmt = `
 			delete 
 			from "${ Tables.lifecycle_period_value }"
@@ -1290,7 +1290,7 @@ function Project(dbConnection, hQuery) {
             $.getPlcUsername(),
             sProjectId
         ];
-        dbConnection.executeUpdate(aQuantitiesStmt, [aValues]);
+        await dbConnection.executeUpdate(aQuantitiesStmt, [aValues]);
     };
 
 
@@ -1299,7 +1299,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteLifecycleOneTimeCostData = function (sProjectId) {
+    this.deleteLifecycleOneTimeCostData = async function (sProjectId) {
 
         let aOneTimeCostDeleteStmt = `
 			delete 
@@ -1331,11 +1331,11 @@ function Project(dbConnection, hQuery) {
             $.getPlcUsername(),
             sProjectId
         ];
-        dbConnection.executeUpdate(aOneTimeCostDeleteStmt, [aValues]);
+        await dbConnection.executeUpdate(aOneTimeCostDeleteStmt, [aValues]);
 
 
         let fnRecalculateOneTimeCosts = dbConnection.loadProcedure(Procedures.project_calculate_one_time_costs);
-        fnRecalculateOneTimeCosts(sProjectId);
+        await fnRecalculateOneTimeCosts(sProjectId);
     };
 
 
@@ -1345,7 +1345,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteLifecycleSurchargesData = function (sProjectId, dStartDate, dEndDate) {
+    this.deleteLifecycleSurchargesData = async function (sProjectId, dStartDate, dEndDate) {
         let aActivityPriceSurchargesStmt = `
 			delete 
 			from "${ Tables.project_activity_price_surcharge_values }"
@@ -1385,8 +1385,8 @@ function Project(dbConnection, hQuery) {
             dStartDate.getFullYear() + dStartDate.getMonth(),
             dEndDate.getFullYear() + dEndDate.getMonth()
         ];
-        dbConnection.executeUpdate(aMaterialPriceSurchargesStmt, [aValues]);
-        dbConnection.executeUpdate(aActivityPriceSurchargesStmt, [aValues]);
+        await dbConnection.executeUpdate(aMaterialPriceSurchargesStmt, [aValues]);
+        await dbConnection.executeUpdate(aActivityPriceSurchargesStmt, [aValues]);
     };
 
 
@@ -1427,7 +1427,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.deleteTotalQuantitiesForProject = function (sProjectId) {
+    this.deleteTotalQuantitiesForProject = async function (sProjectId) {
         var sStmt = `
 				delete from "${ Tables.project_lifecycle_configuration }"
 				where calculation_id in
@@ -1440,7 +1440,7 @@ function Project(dbConnection, hQuery) {
 					)
 		`;
 
-        dbConnection.executeUpdate(sStmt, sProjectId);
+        await dbConnection.executeUpdate(sStmt, sProjectId);
 
 
         this.cleanUpLifecyclePeriodsValues(Tables.project_lifecycle_configuration, Tables.lifecycle_period_value);
@@ -1482,7 +1482,7 @@ function Project(dbConnection, hQuery) {
 					)
 		`;
 
-        dbConnection.executeUpdate(sStmt, sProjectId);
+        await dbConnection.executeUpdate(sStmt, sProjectId);
 
 
         this.cleanUpLifecyclePeriods(sDefinitionTable, sValueTable);
@@ -1496,13 +1496,13 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.cleanUpLifecyclePeriods = function (sDefinitionTable, sValueTable) {
+    this.cleanUpLifecyclePeriods = async function (sDefinitionTable, sValueTable) {
         var sStmt = `
 				delete from "${ sValueTable }" 
 				where rule_id not in 
 					( select rule_id from "${ sDefinitionTable }" )
 		`;
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
     };
 
 
@@ -1534,7 +1534,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getTotalQuantities = function (sProjectId) {
+    this.getTotalQuantities = async function (sProjectId) {
         var sStatement = `
 				select	project.project_id,
 						calculation.calculation_id,
@@ -1580,7 +1580,7 @@ function Project(dbConnection, hQuery) {
 						and project.user_id = ?;
 		`;
 
-        var aResult = dbConnection.executeQuery(sStatement, sProjectId, $.getPlcUsername());
+        var aResult = await dbConnection.executeQuery(sStatement, sProjectId, $.getPlcUsername());
 
         return aResult;
     };
@@ -1598,7 +1598,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getActivityPriceSurcharges = function (sProjectId, sLanguage) {
+    this.getActivityPriceSurcharges = async function (sProjectId, sLanguage) {
 
         var sStatement = ` 
 				select	surcharges.rule_id, 
@@ -1652,7 +1652,7 @@ function Project(dbConnection, hQuery) {
 						and project.user_id = ?;	
 		`;
 
-        var aResult = dbConnection.executeQuery(sStatement, sLanguage, sLanguage, sLanguage, sLanguage, sProjectId, $.getPlcUsername());
+        var aResult = await dbConnection.executeQuery(sStatement, sLanguage, sLanguage, sLanguage, sLanguage, sProjectId, $.getPlcUsername());
 
         return aResult;
     };
@@ -1670,7 +1670,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getMaterialPriceSurcharges = function (sProjectId, sLanguage) {
+    this.getMaterialPriceSurcharges = async function (sProjectId, sLanguage) {
 
         var sStatement = ` 
 				select	surcharges.rule_id, 
@@ -1729,7 +1729,7 @@ function Project(dbConnection, hQuery) {
 						and project.user_id = ?;	
 		`;
 
-        var aResult = dbConnection.executeQuery(sStatement, sLanguage, sLanguage, sLanguage, sLanguage, sLanguage, sProjectId, $.getPlcUsername());
+        var aResult = await dbConnection.executeQuery(sStatement, sLanguage, sLanguage, sLanguage, sLanguage, sLanguage, sProjectId, $.getPlcUsername());
 
         return aResult;
     };
@@ -1746,7 +1746,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getOverlappingAccountsInProjectSurcharges = (sProjectId, sBusinessObjectType) => {
+    this.getOverlappingAccountsInProjectSurcharges = async (sProjectId, sBusinessObjectType) => {
         var sDefinitionTable;
         var sGroupingStatement;
         let sUserId = $.getPlcUsername();
@@ -1818,7 +1818,7 @@ function Project(dbConnection, hQuery) {
 				where 	project.project_id = ? and project.user_id = ?;	
 		`;
 
-        var aResult = dbConnection.executeQuery(sStatement, sProjectId, sUserId, sProjectId, sUserId);
+        var aResult = await dbConnection.executeQuery(sStatement, sProjectId, sUserId, sProjectId, sUserId);
 
         return aResult;
     };
@@ -1834,7 +1834,7 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.getTotalQuantityDefinitions = sProjectId => {
+    this.getTotalQuantityDefinitions = async sProjectId => {
         let sStmt = `
 			select 	total_quantities.calculation_id,
 					total_quantities.calculation_version_id,
@@ -1847,7 +1847,7 @@ function Project(dbConnection, hQuery) {
 					on calculation.project_id = project.project_id
 			where project.project_id = ? and project.user_id = ?;
 		`;
-        var aResult = dbConnection.executeQuery(sStmt, sProjectId, $.getPlcUsername());
+        var aResult = await dbConnection.executeQuery(sStmt, sProjectId, $.getPlcUsername());
         return aResult;
     };
 
@@ -1872,8 +1872,8 @@ function Project(dbConnection, hQuery) {
 
 
 
-    this.checkProjectsExist = (aProjectsIds, sUserId) => {
-        const aExistingProjects = dbConnection.executeQuery(`select project_id from "sap.plc.db.authorization::privileges.v_project_read" where project_id in ('${ aProjectsIds.join("','") }') and USER_ID = '${ sUserId }'`).map(project => project.PROJECT_ID);
+    this.checkProjectsExist = async (aProjectsIds, sUserId) => {
+        const aExistingProjects = await dbConnection.executeQuery(`select project_id from "sap.plc.db.authorization::privileges.v_project_read" where project_id in ('${ aProjectsIds.join("','") }') and USER_ID = '${ sUserId }'`).map(project => project.PROJECT_ID);
         const aInvalidIds = aProjectsIds.filter(id => !aExistingProjects.includes(id));
         if (aInvalidIds.length > 0) {
             const sClientMsg = 'At least one of the projects does not exist.';
@@ -1900,17 +1900,17 @@ function Project(dbConnection, hQuery) {
 								values (?, ?);`;
 
         for (property in oProjectMasterdata) {
-            oProjectMasterdata[property].forEach(value => {
-                dbConnection.executeUpdate(sStmtInsert, property, value);
+            oProjectMasterdata[property].forEach(async value => {
+                await dbConnection.executeUpdate(sStmtInsert, property, value);
             });
         }
 
-        const procedure = dbConnection.loadProcedure(Procedures.materdata_references_validator);
+        const procedure = await dbConnection.loadProcedure(Procedures.materdata_references_validator);
         procedure(dTimestamp, sControllingAreaId);
 
         const sStmtCheckErrors = `select * from "${ Tables.gtt_masterdata_validator }" where
 									"COLUMN_ID" IN ('${ aPropertiesToBeChecked.join("','") }');`;
-        const aErrors = dbConnection.executeQuery(sStmtCheckErrors);
+        const aErrors = await dbConnection.executeQuery(sStmtCheckErrors);
 
         if (aErrors.length > 0) {
             let sLogMessage = `Error while checking masterdata references. `;
@@ -1924,7 +1924,7 @@ function Project(dbConnection, hQuery) {
 
 
         const sStmtDelete = `DELETE FROM "${ Tables.gtt_masterdata_validator }";`;
-        dbConnection.executeUpdate(sStmtDelete);
+        await dbConnection.executeUpdate(sStmtDelete);
     };
 }
 Project.prototype = Object.create(Project.prototype);

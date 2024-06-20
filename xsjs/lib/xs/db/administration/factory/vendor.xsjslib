@@ -79,7 +79,7 @@ function Vendor(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by VENDOR_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.VENDOR_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.VENDOR_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;

@@ -37,16 +37,16 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest(oRequest);
+            return validateGetRequest(oRequest);
         case $.net.http.POST:
-            return await validatePostRequest();
+            return validatePostRequest();
         case $.net.http.PUT:
-            return await validatePutRequest();
+            return validatePutRequest();
         case $.net.http.DEL:
-            return await validateCloseOpenDeleteRequest();
+            return validateCloseOpenDeleteRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }`;
                 $.trace.error(sLogMessage);
@@ -54,13 +54,13 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
             }
         }
 
-        async function validateGetRequest(oRequest) {
+        function validateGetRequest(oRequest) {
             //check the filter parameter
-            await checkURLParameters(oRequest.parameters);
+            checkURLParameters(oRequest.parameters);
             return utils.checkEmptyBody(oRequest.body);
         }
 
-        async function checkURLParameters(oParameters) {
+        function checkURLParameters(oParameters) {
             //check autocomplete parameter
             if (!helpers.isNullOrUndefined(oParameters.get('searchAutocomplete'))) {
                 var sTextFromAutocomplete = oParameters.get('searchAutocomplete');
@@ -98,47 +98,47 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
             }
         }
 
-        async function validateCreateRequest() {
+        function validateCreateRequest() {
             const oProj = utils.tryParseJson(oRequest.body.asString());
             // PATH is not part of the metadata validation. It must have a custom validation.
-            await utils.checkMandatoryProperties(oProj, ['PATH']);
-            await validatePath(oProj.PATH);
+            utils.checkMandatoryProperties(oProj, ['PATH']);
+            validatePath(oProj.PATH);
 
-            await validateBasedOnMetadata(_.omit(oProj, ['PATH']));
+            validateBasedOnMetadata(_.omit(oProj, ['PATH']));
             return oProj;
         }
 
-        async function validatePutRequest() {
+        function validatePutRequest() {
             const oProj = utils.tryParseJson(oRequest.body.asString());
 
-            const oValidatedProject = await validateBasedOnMetadata(_.omit(oProj, [
+            const oValidatedProject = validateBasedOnMetadata(_.omit(oProj, [
                 'TARGET_PATH',
                 'PATH'
             ]));
             if (oProj.TARGET_PATH || oProj.PATH) {
-                await utils.checkMandatoryProperties(oProj, [
+                utils.checkMandatoryProperties(oProj, [
                     'TARGET_PATH',
                     'PATH'
                 ]);
-                await validatePath(oProj.TARGET_PATH);
-                await validatePath(oProj.PATH);
+                validatePath(oProj.TARGET_PATH);
+                validatePath(oProj.PATH);
                 oValidatedProject.TARGET_PATH = oProj.TARGET_PATH;
                 oValidatedProject.PATH = oProj.PATH;
             }
             return oValidatedProject;
         }
 
-        async function validatePostRequest() {
+        function validatePostRequest() {
 
             switch (mValidatedParameters.action) {
             case 'close':
-                return await validateCloseOpenDeleteRequest();
+                return validateCloseOpenDeleteRequest();
             case 'create':
-                return await validateCreateRequest();
+                return validateCreateRequest();
             case 'open':
-                return await validateCloseOpenDeleteRequest();
+                return validateCloseOpenDeleteRequest();
             case Constants.ProjectServiceParameters.action.values.calculate_lifecycle_versions:
-                return await validateCalculateLifecycleRequest();
+                return validateCalculateLifecycleRequest();
             default: {
                     const sLogMessage = `Unknown value for parameter action: ${ mValidatedParameters.action }. Cannot validate `;
                     $.trace.error(sLogMessage);
@@ -147,7 +147,7 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
             }
         }
 
-        async function validateCalculateLifecycleRequest() {
+        function validateCalculateLifecycleRequest() {
             if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = `If parameter ${ Constants.ProjectServiceParameters.action.name } is set to ${ mValidatedParameters.action }, also the parameter ${ Constants.ProjectServiceParameters.id.name } must be set.`;
                 $.trace.error(sLogMessage);
@@ -162,22 +162,22 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
             }
         }
 
-        async function validateCloseOpenDeleteRequest() {
+        function validateCloseOpenDeleteRequest() {
             var oProj = utils.tryParseJson(oRequest.body.asString());
 
-            await utils.checkMandatoryProperties(oProj, aCloseOpenDeleteMandatoryPropertiesStatic);
+            utils.checkMandatoryProperties(oProj, aCloseOpenDeleteMandatoryPropertiesStatic);
             utils.checkInvalidProperties(oProj, aCloseOpenDeleteMandatoryPropertiesStatic);
 
             return oProj;
         }
 
-        async function validatePath(sPath) {
-            const genericSyntaxValidator = await new GenericSyntaxValidator();
-            await genericSyntaxValidator.validateValue(sPath, 'String', null, false);
+        function validatePath(sPath) {
+            const genericSyntaxValidator = new GenericSyntaxValidator();
+            genericSyntaxValidator.validateValue(sPath, 'String', null, false);
             helpers.validatePath(sPath);
         }
 
-        async function validateBasedOnMetadata(oProj) {
+        function validateBasedOnMetadata(oProj) {
             var oProjectMedatada = metadataProvider.get(BusinessObjectTypes.Project, BusinessObjectTypes.Project, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
 
 
@@ -188,15 +188,15 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
                 metadata: oProjectMedatada
             });
 
-            await ProjectService.checkProjectTimes(oValidatedProject.PROJECT_ID, oValidatedProject.START_OF_PRODUCTION, oValidatedProject.END_OF_PRODUCTION);
-            await ProjectService.checkProjectTimes(oValidatedProject.PROJECT_ID, oValidatedProject.START_OF_PROJECT, oValidatedProject.END_OF_PROJECT);
+            ProjectService.checkProjectTimes(oValidatedProject.PROJECT_ID, oValidatedProject.START_OF_PRODUCTION, oValidatedProject.END_OF_PRODUCTION);
+            ProjectService.checkProjectTimes(oValidatedProject.PROJECT_ID, oValidatedProject.START_OF_PROJECT, oValidatedProject.END_OF_PROJECT);
 
-            await checkNonTemporaryMasterdataReferences(oValidatedProject);
+            checkNonTemporaryMasterdataReferences(oValidatedProject);
 
             return oValidatedProject;
         }
 
-        async function checkNonTemporaryMasterdataReferences(oProject) {
+        function checkNonTemporaryMasterdataReferences(oProject) {
 
 
 
@@ -209,13 +209,13 @@ function ProjectValidator(oPersistency, sSessionId, metadataProvider, utils) {
             }
 
             var oExistingNonTemporaryMasterdata = oPersistency.Project.getExistingNonTemporaryMasterdata(mFunctionParameter);
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['CONTROLLING_AREA_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.CONTROLLING_AREAS, 'CONTROLLING_AREA_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['COSTING_SHEET_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.COSTING_SHEETS, 'COSTING_SHEET_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['COMPONENT_SPLIT_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.COMPONENT_SPLITS, 'COMPONENT_SPLIT_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['REPORT_CURRENCY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.CURRENCIES, 'CURRENCY_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['EXCHANGE_RATE_TYPE_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['MATERIAL_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.MATERIAL_PRICE_STRATEGIES, 'PRICE_DETERMINATION_STRATEGY_ID'));
-            await utils.checkNonTemporaryMasterdataReferences(oProject, ['ACTIVITY_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.ACTIVITY_PRICE_STRATEGIES, 'PRICE_DETERMINATION_STRATEGY_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['CONTROLLING_AREA_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.CONTROLLING_AREAS, 'CONTROLLING_AREA_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['COSTING_SHEET_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.COSTING_SHEETS, 'COSTING_SHEET_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['COMPONENT_SPLIT_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.COMPONENT_SPLITS, 'COMPONENT_SPLIT_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['REPORT_CURRENCY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.CURRENCIES, 'CURRENCY_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['EXCHANGE_RATE_TYPE_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['MATERIAL_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.MATERIAL_PRICE_STRATEGIES, 'PRICE_DETERMINATION_STRATEGY_ID'));
+            utils.checkNonTemporaryMasterdataReferences(oProject, ['ACTIVITY_PRICE_STRATEGY_ID'], oPersistency.Helper.createValueSetFromResult(oExistingNonTemporaryMasterdata.ACTIVITY_PRICE_STRATEGIES, 'PRICE_DETERMINATION_STRATEGY_ID'));
             return oProject;
         }
 

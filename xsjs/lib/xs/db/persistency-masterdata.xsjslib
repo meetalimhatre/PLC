@@ -6,8 +6,8 @@ let administration;
 /**
  * Provides persistency operations of masterdata.
  */
-async function Masterdata(dbConnection, hQuery) {
-    this.administration = await new Administration(dbConnection, hQuery);
+function Masterdata(dbConnection, hQuery) {
+    this.administration = new Administration(dbConnection, hQuery);
     /**
      * Gets masterdata for a calculation version
      * @param {string} sLanguage - the logon language
@@ -17,11 +17,11 @@ async function Masterdata(dbConnection, hQuery) {
      *  @returns {oReturnObject} -  Returns an object containing all the masterdata objects,
      *                              found in the database for the calculation version.
      */
-    this.getMasterdata = (sLanguage, iCalculationVersionId, sUserId) => {
+    this.getMasterdata = async (sLanguage, iCalculationVersionId, sUserId) => {
         const aCalculationVersionIds = [];
         aCalculationVersionIds.push({ CALCULATION_VERSION_ID: iCalculationVersionId });
         const calculationVersionMasterdata = dbConnection.loadProcedure(Procedures.p_calculation_version_get_masterdata);
-        const result = calculationVersionMasterdata(sLanguage, aCalculationVersionIds, sUserId);
+        const result = await calculationVersionMasterdata(sLanguage, aCalculationVersionIds, sUserId);
 
         const oReturnObject = this.administration.fillResultContainer(result);
         return oReturnObject;

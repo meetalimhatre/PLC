@@ -82,7 +82,7 @@ module.exports.Items = function ($) {
         }
 
         // Referenced calculation version setting
-        oPersistency.Item.updateReferencedCalculationVersionID(aItemToUpdateReferencedVersion, sSessionId);
+        await oPersistency.Item.updateReferencedCalculationVersionID(aItemToUpdateReferencedVersion, sSessionId);
         _.each(aItemToUpdateReferencedVersion, function (iItemToUpdateReferencedVersion) {
             mItemsForPayload[iItemToUpdateReferencedVersion.ITEM_ID] = iItemToUpdateReferencedVersion.ITEM_ID;
         });
@@ -114,7 +114,7 @@ module.exports.Items = function ($) {
         var aCachedOldItems = getCachedOldItemsInUpdateValidation(aBodyItems, sSessionId);
         // since this is an update request, the entities that shall be updated must exist; check that all items are in the database and that they reference the same version; 
         //use only mDbItems to access items for the sake of performance, it contains additional properties, which are not included in the request object
-        var mDbItems = await checkItemsForUpdate(aBodyItems, iCvId, oPersistency, aCachedOldItems);
+        var mDbItems = checkItemsForUpdate(aBodyItems, iCvId, oPersistency, aCachedOldItems);
 
         that.setDefaultValueForIsManualField(aBodyItems, oPersistency, mDbItems);
 
@@ -123,14 +123,14 @@ module.exports.Items = function ($) {
         var mItemsForPayload = {};
 
         //decide the processing steps, skip the unnecessary steps
-        var oProcessingSteps = await determineProcessingSteps(aBodyItems, mDbItems);
+        var oProcessingSteps = determineProcessingSteps(aBodyItems, mDbItems);
         var aItemsToChangeActiveState = oProcessingSteps.changeActiveState;
         var aItemsWithSameActiveState = oProcessingSteps.sameActiveState;
         var aItemsToUpdate = oProcessingSteps.updateItems;
         var aItemsUpdateMasterdata = oProcessingSteps.updateMasterdata;
 
         // enable delta update for calculation engine, return results only for changed items
-        oPersistency.Item.insertChangedItemIdForAFL(aBodyItems);
+        await oPersistency.Item.insertChangedItemIdForAFL(aBodyItems);
 
         // Special case: if nothing has changed and nothings needs to be done, just return
         if (aItemsToChangeActiveState.length === 0 && aItemsWithSameActiveState.length === 0 && aItemsToUpdate.length === 0 && aItemsUpdateMasterdata.length === 0)
@@ -138,7 +138,7 @@ module.exports.Items = function ($) {
 
         // trigger activate/deactivate procedure for items with changed active state
         if (aItemsToChangeActiveState.length > 0) {
-            var aItemsActiveStateChanged = oPersistency.Item.setActiveStates(aItemsToChangeActiveState, iCvId, sSessionId);
+            var aItemsActiveStateChanged = await oPersistency.Item.setActiveStates(aItemsToChangeActiveState, iCvId, sSessionId);
 
             _.each(aItemsActiveStateChanged, function (oItemChangedActiveState) {
                 mItemsForPayload[oItemChangedActiveState.ITEM_ID] = oItemChangedActiveState.ITEM_ID;
@@ -176,14 +176,14 @@ module.exports.Items = function ($) {
         }
 
         var iCvIsDirty = aUpdatedItemsDb.length > 0 ? 1 : 0;
-        oPersistency.CalculationVersion.setDirty(iCvId, sSessionId, sUserId, iCvIsDirty);
+        await oPersistency.CalculationVersion.setDirty(iCvId, sSessionId, sUserId, iCvIsDirty);
     };
 
 
 
 
 
-    async function checkItemsForUpdate(aBodyItems, iCvId, oPersistency, aCachedOldItems) {
+    function checkItemsForUpdate(aBodyItems, iCvId, oPersistency, aCachedOldItems) {
         var aOldItems = aCachedOldItems;
         if (helpers.isNullOrUndefined(aOldItems)) {
 
@@ -309,7 +309,7 @@ module.exports.Items = function ($) {
             let bSomethingElseChanged = false;
             for (var i = 0; i < aItemKeys.length - 1; i++) {
                 const bKeyExistsInDecimalList = aDecimalList.includes(aItemKeys[i]);
-                if (bKeyExistsInDecimalList && await DecimalsNotEqual(oBodyItem[aItemKeys[i]], mDbItems[oBodyItem.ITEM_ID][aItemKeys[i]])) {
+                if (bKeyExistsInDecimalList && DecimalsNotEqual(oBodyItem[aItemKeys[i]], mDbItems[oBodyItem.ITEM_ID][aItemKeys[i]])) {
                     bSomethingElseChanged = true;
                     break;
                 } else if (bKeyExistsInDecimalList) {
@@ -323,7 +323,7 @@ module.exports.Items = function ($) {
             return bSomethingElseChanged;
         };
 
-        _.each(aBodyItems, async function (oBodyItem) {
+        _.each(aBodyItems, function (oBodyItem) {
 
             this.checkIfIsActiveChanged(oBodyItem);
             this.checkIfDisablingAccountDeterminationIsNeeded(oBodyItem);
@@ -349,7 +349,7 @@ module.exports.Items = function ($) {
 
 
 
-                    var bMasterdataUpdated = await isMasterdataChangeContained(oBodyItem);
+                    var bMasterdataUpdated = isMasterdataChangeContained(oBodyItem);
                     if (bMasterdataUpdated === true) {
                         aItemsUpdateMasterdata.push(oBodyItem);
                     }
@@ -386,14 +386,14 @@ module.exports.Items = function ($) {
             var mAutomaticallyDeterminedValues = {};
 
 
-            var aInputValueDetermination = await getItemsRequireValueDetermination(aItemsToUpdate, mDbItems);
+            var aInputValueDetermination = getItemsRequireValueDetermination(aItemsToUpdate, mDbItems);
             if (aInputValueDetermination.length > 0) {
-                var oAutomaticallyDeterminedValuesResult = oPersistency.Item.automaticValueDetermination(aInputValueDetermination, iCvId, sSessionId);
+                var oAutomaticallyDeterminedValuesResult = await oPersistency.Item.automaticValueDetermination(aInputValueDetermination, iCvId, sSessionId);
 
                 _.each(oAutomaticallyDeterminedValuesResult.VALUES, function (oDeterminedValuesItem) {
                     mAutomaticallyDeterminedValues[oDeterminedValuesItem.ITEM_ID] = oDeterminedValuesItem;
                 });
-                await ItemService.processValueDeterminationMessages(oAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
+                ItemService.processValueDeterminationMessages(oAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
             }
 
 
@@ -448,7 +448,7 @@ module.exports.Items = function ($) {
         }
         const oChangedPropertiesSet = new Set();
 
-        aItems.forEach((oItem, index) => {
+        aItems.forEach(async (oItem, index) => {
             let iNewCategoryId;
             let iOldCategoryId;
 
@@ -462,7 +462,7 @@ module.exports.Items = function ($) {
                 }
                 iNewCategoryId = oItem.ITEM_CATEGORY_ID;
                 iOldCategoryId = mDbItems[oItem.ITEM_ID].ITEM_CATEGORY_ID;
-                oInvalidPropertiesForNewCategory = await getInvalidPropertiesForNewCategory(iNewCategoryId, iOldCategoryId, mValidColumnsPerCategory);
+                oInvalidPropertiesForNewCategory = getInvalidPropertiesForNewCategory(iNewCategoryId, iOldCategoryId, mValidColumnsPerCategory);
             }
 
             const oAutomaticallyDeterminedItemValues = mAutomaticallyDeterminedValues[oItem.ITEM_ID] || {};
@@ -518,7 +518,7 @@ module.exports.Items = function ($) {
                 aMissingProperties.forEach(property => oItem[property] = oDbItem[property]);
             });
 
-            oPersistency.Item.massUpdate(aItems, sSessionId);
+            await oPersistency.Item.massUpdate(aItems, sSessionId);
         }
     }
 
@@ -613,16 +613,16 @@ module.exports.Items = function ($) {
 
         var aCreatedItems = await createItems(aParameters, aItemsToCreate, iCvId, iImport, mPayloadItems, oServiceOutput, oPersistency);
 
-        var aItems = await itemValues(mPayloadItems.Items);
+        var aItems = itemValues(mPayloadItems.Items);
         var oPayloadItems = mPayloadItems.CompressedItems;
 
-        var mSessionDetails = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
+        var mSessionDetails = await oPersistency.Session.getSessionDetails(sSessionId, sUserId);
         let bAddResponseBody = helpers.isNullOrUndefined(aParameters.noResponseBody) || aParameters.noResponseBody === false;
 
 
 
 
-        const aItemsWithMasterdataChanges = _.filter(aBodyItems, oBodyItem => await isMasterdataChangeContained(oBodyItem));
+        const aItemsWithMasterdataChanges = _.filter(aBodyItems, oBodyItem => isMasterdataChangeContained(oBodyItem));
         if (aItemsWithMasterdataChanges.length > 0 && bAddResponseBody) {
             await addMasterdataToResponse(aItems, iCvId, mSessionDetails, sSessionId, oServiceOutput, oPersistency);
         }
@@ -684,14 +684,14 @@ module.exports.Items = function ($) {
             'LAST_MODIFIED_ON': new Date(),
             'LAST_MODIFIED_BY': sUserId
         });
-        var mDbItem = await checkItemsForUpdate([oRequestParent], iCvId, oPersistency);
+        var mDbItem = checkItemsForUpdate([oRequestParent], iCvId, oPersistency);
 
-        var aInputValueDetermination = await getItemsRequireValueDetermination([oRequestParent], mDbItem);
+        var aInputValueDetermination = getItemsRequireValueDetermination([oRequestParent], mDbItem);
         var aAutomaticallyDeterminedValuesResult = oPersistency.Item.automaticValueDetermination(aInputValueDetermination, iCvId, sSessionId);
         if (aAutomaticallyDeterminedValuesResult.VALUES.length === 1) {
             aAutomaticallyDeterminedValuesResult.VALUES[0].ITEM_DESCRIPTION = oRequestParent.ITEM_DESCRIPTION;
             _.extend(oRequestParent, aAutomaticallyDeterminedValuesResult.VALUES[0]);
-            await ItemService.processValueDeterminationMessages(aAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
+            ItemService.processValueDeterminationMessages(aAutomaticallyDeterminedValuesResult.MESSAGES, oServiceOutput);
         }
 
 
@@ -710,7 +710,7 @@ module.exports.Items = function ($) {
         }
 
 
-        oPersistency.Item.markItemForDeletion(sSessionId, oRequestParent, false);
+        await oPersistency.Item.markItemForDeletion(sSessionId, oRequestParent, false);
 
         mPayloadItems[oRequestParent.ITEM_ID] = oPersistency.Item.getItem(oRequestParent.ITEM_ID, iCvId, sSessionId);
         var aItemsToCreate = _.reject(aBodyItems, function (oBodyItem) {
@@ -756,7 +756,7 @@ module.exports.Items = function ($) {
 
 
         if (aItemsToCreate.length > 0) {
-            var oDefaultSettings = oPersistency.CalculationVersion.getProjectPropertiesForCalculationVersion(aItemsToCreate[0].CALCULATION_VERSION_ID);
+            var oDefaultSettings = await oPersistency.CalculationVersion.getProjectPropertiesForCalculationVersion(aItemsToCreate[0].CALCULATION_VERSION_ID);
             if (!helpers.isNullOrUndefined(oDefaultSettings.REPORT_CURRENCY_ID)) {
                 _.each(aItemsToCreate, async function (oItem) {
                     helpers.setNonEmptyProperties(oItem, oDefaultSettings, ['TARGET_COST_CURRENCY_ID']);
@@ -784,7 +784,7 @@ module.exports.Items = function ($) {
             aMessages = Array.from(oProcedureResult.OT_MESSAGES);
         }
 
-        await ItemService.processValueDeterminationMessages(aMessages, oServiceOutput);
+        ItemService.processValueDeterminationMessages(aMessages, oServiceOutput);
 
         if (bCompressedResult) {
             let oCreatedItemsCompressed = helpers.transposeResultArray(oProcedureResult.OT_NEW_ITEMS, true);
@@ -831,7 +831,7 @@ module.exports.Items = function ($) {
 
 
 
-    this.remove = function (aBodyItems, aParameters, oServiceOutput, oPersistency) {
+    this.remove = async function (aBodyItems, aParameters, oServiceOutput, oPersistency) {
         var iIsDirty = 0;
         var iCalcVersionId = aBodyItems[0].CALCULATION_VERSION_ID;
 
@@ -840,7 +840,7 @@ module.exports.Items = function ($) {
         var aItemsCheckActiveState = [];
         var aParentItem = [];
 
-        var aPriceSourceIds = oPersistency.Item.getPriceSourceBySourceType(PriceSourceType.Manual);
+        var aPriceSourceIds = await oPersistency.Item.getPriceSourceBySourceType(PriceSourceType.Manual);
         var sPriceSourceId = aPriceSourceIds[0].PRICE_SOURCE_ID;
         _.each(aBodyItems, async function (oBodyItem, iIndex) {
 
@@ -862,7 +862,7 @@ module.exports.Items = function ($) {
 
         var aItemIdsForPayload = _.values(mItemsForPayload);
         if (aItemIdsForPayload.length > 0) {
-            oServiceOutput.setTransactionalData(oPersistency.Item.getItems(_.values(mItemsForPayload), iCalcVersionId, sSessionId));
+            oServiceOutput.setTransactionalData( oPersistency.Item.getItems(_.values(mItemsForPayload), iCalcVersionId, sSessionId));
         }
 
 
@@ -870,7 +870,7 @@ module.exports.Items = function ($) {
         oPersistency.CalculationVersion.setDirty(iCalcVersionId, sSessionId, sUserId, iIsDirty);
 
 
-        oPersistency.Item.insertChangedItemIdForAFL(aParentItem);
+        await oPersistency.Item.insertChangedItemIdForAFL(aParentItem);
 
         oServiceOutput.setStatus($.net.http.OK);
     };
@@ -880,8 +880,8 @@ module.exports.Items = function ($) {
 
 
     async function deleteItem(oBodyItem, sPriceSourceId, mItemsForPayload, oPersistency) {
-        var oItemDb = oPersistency.Item.getItem(oBodyItem.ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, sSessionId);
-        var oResult = oPersistency.Item.markItemForDeletion(sSessionId, oBodyItem, true);
+        var oItemDb = await oPersistency.Item.getItem(oBodyItem.ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, sSessionId);
+        var oResult = await oPersistency.Item.markItemForDeletion(sSessionId, oBodyItem, true);
         if (oResult.DELETED_ITEM_COUNT === 0) {
             var oMessageDetails = new MessageDetails();
             oMessageDetails.addItemObjs({ id: oBodyItem.ITEM_ID });
@@ -891,8 +891,8 @@ module.exports.Items = function ($) {
             $.trace.error(sServerMsg);
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg, oMessageDetails);
         }
-        var oParentItem = oPersistency.Item.getItem(oItemDb.PARENT_ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, sSessionId);
-        var bParentItemSubitemState = oPersistency.Item.hasItemChildren(oParentItem, sSessionId);
+        var oParentItem = await oPersistency.Item.getItem(oItemDb.PARENT_ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, sSessionId);
+        var bParentItemSubitemState = await oPersistency.Item.hasItemChildren(oParentItem, sSessionId);
 
 
         if (bParentItemSubitemState === false) {
@@ -930,11 +930,11 @@ module.exports.Items = function ($) {
 
 
 
-    function addMasterdataToResponse(aItems, iCvId, mSessionDetails, sSessionId, oServiceOutput, oPersistency) {
+    async function addMasterdataToResponse(aItems, iCvId, mSessionDetails, sSessionId, oServiceOutput, oPersistency) {
         const aItemIds = _.map(aItems, function (oItem) {
             return _.pick(oItem, 'ITEM_ID');
         });
-        const mItemMasterdata = oPersistency.Administration.getMasterdataOnItemLevel(iCvId, mSessionDetails.language, sSessionId, aItemIds);
+        const mItemMasterdata = await oPersistency.Administration.getMasterdataOnItemLevel(iCvId, mSessionDetails.language, sSessionId, aItemIds);
 
         oServiceOutput.addMasterdata(mItemMasterdata);
     }
@@ -942,7 +942,7 @@ module.exports.Items = function ($) {
 
 
 
-    function addReferencesDataToResponse(mSessionDetails, oServiceOutput, oPersistency) {
+    async function addReferencesDataToResponse(mSessionDetails, oServiceOutput, oPersistency) {
         var oReferenceVersions = {
             referencesdata: {
                 PROJECTS: [],
@@ -951,7 +951,7 @@ module.exports.Items = function ($) {
                 MASTERDATA: {}
             }
         };
-        var oReferencedVersios = oPersistency.CalculationVersion.getReferencedVersionDetails(oReferenceVersions, mSessionDetails.language);
+        var oReferencedVersios = await oPersistency.CalculationVersion.getReferencedVersionDetails(oReferenceVersions, mSessionDetails.language);
         oServiceOutput.setReferencesData(oReferencedVersios.referencesdata);
     }
 
@@ -965,8 +965,8 @@ module.exports.Items = function ($) {
         oPricesForItem[BusinessObjectsEntities.ACTIVITY_PRICE_ENTITIES] = [];
 
         if (aParameters.getPrices === true) {
-            var mSessionDetails = oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
-            oPricesForItem = oPersistency.Item.getPricesForItem(sSessionId, aParameters.calculation_version_id, aParameters.id, mSessionDetails.language);
+            var mSessionDetails = await oPersistency.Session.getSessionDetails($.getPlcUsername(), $.getPlcUsername());
+            oPricesForItem = await oPersistency.Item.getPricesForItem(sSessionId, aParameters.calculation_version_id, aParameters.id, mSessionDetails.language);
         }
         oServiceOutput.setMasterdata(oPricesForItem.masterdata);
         oServiceOutput.setTransactionalData(oPricesForItem.transactionaldata);
@@ -996,7 +996,7 @@ module.exports.Items = function ($) {
 
 
 
-        const oMetadata = oPersistency.Item.getFormulasAndRollupsForStandardAndCustomFields();
+        const oMetadata = await oPersistency.Item.getFormulasAndRollupsForStandardAndCustomFields();
 
         const oParentItemIds = new Set(await oPersistency.Item.getParentItemIds(aItems[0].CALCULATION_VERSION_ID, sSessionId));
         _.each(aItems, oItem => {
@@ -1138,7 +1138,7 @@ module.exports.Items = function ($) {
             }
         });
 
-        let aMaterialBaseUomIds = oPersistency.Item.getExistingMaterialBaseUomIds(new Date(), aMaterialIds);
+        let aMaterialBaseUomIds = await oPersistency.Item.getExistingMaterialBaseUomIds(new Date(), aMaterialIds);
 
         aItems.forEach(oItem => {
 
@@ -1176,19 +1176,19 @@ module.exports.Items = function ($) {
 
         let mValidCustomFieldsWithDefaultValuesPerCategory;
         let oGeneralDefaultValues = {};
-        aItems.forEach((oItem, index) => {
+        aItems.forEach( async(oItem, index) => {
             let iNewCategoryId;
             let iOldCategoryId;
             let oNewValidCustomFieldsWithDefaultValuesForNewCategory = {};
             if (_.has(oItem, 'ITEM_CATEGORY_ID')) {
 
                 if (mValidCustomFieldsWithDefaultValuesPerCategory === undefined) {
-                    oGeneralDefaultValues.ReportingCurrency = oPersistency.CalculationVersion.getWithoutItems([iCvId], sSessionId)[0].REPORT_CURRENCY_ID;
+                    oGeneralDefaultValues.ReportingCurrency = await oPersistency.CalculationVersion.getWithoutItems([iCvId], sSessionId)[0].REPORT_CURRENCY_ID;
                     mValidCustomFieldsWithDefaultValuesPerCategory = metadataProvider.getCustomFieldsWithDefaultValuesForCategories(BusinessObjectTypes.Item, BusinessObjectTypes.Item, oPersistency, oGeneralDefaultValues);
                 }
                 iNewCategoryId = oItem.ITEM_CATEGORY_ID;
                 iOldCategoryId = mDbItems[oItem.ITEM_ID].ITEM_CATEGORY_ID;
-                oNewValidCustomFieldsWithDefaultValuesForNewCategory = await getNewValidCustomFieldsWithDefaultValuesForNewCategory(iNewCategoryId, iOldCategoryId, mValidCustomFieldsWithDefaultValuesPerCategory, _.keys(oItem));
+                oNewValidCustomFieldsWithDefaultValuesForNewCategory = getNewValidCustomFieldsWithDefaultValuesForNewCategory(iNewCategoryId, iOldCategoryId, mValidCustomFieldsWithDefaultValuesPerCategory, _.keys(oItem));
                 _.extend(oItem, oNewValidCustomFieldsWithDefaultValuesForNewCategory);
             }
         });

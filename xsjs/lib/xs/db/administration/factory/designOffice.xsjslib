@@ -54,7 +54,7 @@ function DesignOffice(dbConnection, hQuery, sObjectName) {
 
             stmt += ` order by DESIGN_OFFICE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.DESIGN_OFFICE_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.DESIGN_OFFICE_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;

@@ -69,7 +69,7 @@ function ExchangeRateType(dbConnection, hQuery, hQueryRepl, oConfiguration) {
         if (sTextFromAutocomplete === '') {
             try {
                 var procedure = dbConnection.loadProcedure(Procedures.exchange_rate_type_read);
-                var result = procedure(sLanguage, sMasterDataDate, sSQLstring, iNoRecords, iSkipRecords);
+                var result = await procedure(sLanguage, sMasterDataDate, sSQLstring, iNoRecords, iSkipRecords);
                 oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_ENTITIES] = Array.slice(result.OT_EXCHANGE_RATE_TYPE);
                 oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_TEXT_ENTITIES] = Array.slice(result.OT_EXCHANGE_RATE_TYPE_TEXT);
 
@@ -111,7 +111,7 @@ function ExchangeRateType(dbConnection, hQuery, hQueryRepl, oConfiguration) {
             }
             sStmt += ` order by EXCHANGE_RATE_TYPE_ID`;
             sStmt += ` limit ${ iNoRecords } offset ${ iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(sStmt));
+            oReturnObject[BusinessObjectsEntities.EXCHANGE_RATE_TYPE_ENTITIES] = _.values( await dbConnection.executeQuery(sStmt));
         }
         return oReturnObject;
     };

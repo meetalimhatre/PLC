@@ -171,7 +171,7 @@ const mRenamedBusinessObjects = new Map(aRenamedBusinessObjects);
  * The conditions are checked for renamed business objects, renamed columns, removed columns and renamed paths and then adapted.
  * Returns the condition in the adapted state.
  */
-async function updateFrontendSettings(oCurrentCondition) {
+function updateFrontendSettings(oCurrentCondition) {
     const oConditionToUpdate = oCurrentCondition;
     if (!helpers.isNullOrUndefined(oConditionToUpdate.FIELD)) {
         oConditionToUpdate.FIELD.BUSINESS_OBJECT = mRenamedBusinessObjects.get(oCurrentCondition.FIELD.BUSINESS_OBJECT) || oCurrentCondition.FIELD.BUSINESS_OBJECT;
@@ -195,25 +195,25 @@ async function updateFrontendSettings(oCurrentCondition) {
     return oConditionToUpdate;
 }
 
-async function replaceFieldsFilterSetting(oSetting) {
+function replaceFieldsFilterSetting(oSetting) {
     const oUpdatedSettingContent = oSetting;
     if (!helpers.isNullOrUndefined(oSetting.CONDITIONS)) {
-        oSetting.CONDITIONS.forEach(async(oCondition, iIndex) => {
-            oUpdatedSettingContent.CONDITIONS[iIndex] = await updateFrontendSettings(oCondition);
+        oSetting.CONDITIONS.forEach((oCondition, iIndex) => {
+            oUpdatedSettingContent.CONDITIONS[iIndex] = updateFrontendSettings(oCondition);
         });
     }
     return $.util.codec.encodeBase64(JSON.stringify(oUpdatedSettingContent));
 }
 
-async function replaceFieldsMassChangeSetting(oSetting) {
+function replaceFieldsMassChangeSetting(oSetting) {
     const oUpdatedSettingContent = oSetting;
     if (!helpers.isNullOrUndefined(oSetting.FILTER_CONFIGURATION) && !helpers.isNullOrUndefined(oSetting.FILTER_CONFIGURATION.CONDITIONS)) {
-        oSetting.FILTER_CONFIGURATION.CONDITIONS.forEach(async(oCondition, iIndex) => {
-            oUpdatedSettingContent.FILTER_CONFIGURATION.CONDITIONS[iIndex] = await updateFrontendSettings(oCondition);
+        oSetting.FILTER_CONFIGURATION.CONDITIONS.forEach((oCondition, iIndex) => {
+            oUpdatedSettingContent.FILTER_CONFIGURATION.CONDITIONS[iIndex] = updateFrontendSettings(oCondition);
         });
     }
     if (!helpers.isNullOrUndefined(oUpdatedSettingContent.CHANGE_CONFIGURATION)) {
-        oUpdatedSettingContent.CHANGE_CONFIGURATION = await updateFrontendSettings(oSetting.CHANGE_CONFIGURATION);
+        oUpdatedSettingContent.CHANGE_CONFIGURATION = updateFrontendSettings(oSetting.CHANGE_CONFIGURATION);
     }
     return $.util.codec.encodeBase64(JSON.stringify(oUpdatedSettingContent));
 }
@@ -223,12 +223,12 @@ async function replaceFieldsMassChangeSetting(oSetting) {
  * If anything has changed for a given entry, it's SETTING_ID and encoded SETTING_CONTENT are inserted into a map that is afterwards returned.
  * @param aDatabaseFrontendSettings - array that contains all frontend settings with the type FILTER or MASSCHANGE found in the t_frontend_settings table
  */
-async function findFieldsToReplace(aDatabaseFrontendSettings) {
+function findFieldsToReplace(aDatabaseFrontendSettings) {
     const mSettingsToUpdate = new Map();
-    await aDatabaseFrontendSettings.forEach(async oSetting => {
+    aDatabaseFrontendSettings.forEach( oSetting => {
         if (!helpers.isNullOrUndefined(oSetting.SETTING_CONTENT)) {
             const oSettingContentDecoded = JSON.parse(helpers.arrayBufferToString($.util.codec.decodeBase64(oSetting.SETTING_CONTENT)));
-            const sChangedSettingContentEncoded = oSetting.SETTING_TYPE === 'FILTER' ? await replaceFieldsFilterSetting(oSettingContentDecoded) : await replaceFieldsMassChangeSetting(oSettingContentDecoded);
+            const sChangedSettingContentEncoded = oSetting.SETTING_TYPE === 'FILTER' ? replaceFieldsFilterSetting(oSettingContentDecoded) : replaceFieldsMassChangeSetting(oSettingContentDecoded);
             if (sChangedSettingContentEncoded !== oSetting.SETTING_CONTENT) {
                 mSettingsToUpdate.set(oSetting.SETTING_ID, sChangedSettingContentEncoded);
             }
@@ -257,7 +257,7 @@ function generateUpdateStatement(sCurrentSchema, mSettingsToUpdate) {
 
 async function check(oCurrentConnection) {
     try {
-        oConnection = $.hdb.getConnection({
+        oConnection =await  $.hdb.getConnection({
             'sqlcc': 'xsjs.sqlcc_config',
             'pool': true,
             'treatDateAsUTC': true
@@ -278,9 +278,9 @@ async function run(oCurrentConnection) {
     const aDatabaseFrontendSettings = Array.from(oCurrentConnection.executeQuery(`select SETTING_ID, SETTING_NAME, SETTING_TYPE, SETTING_CONTENT
                                                                                         from "${ sCurrentSchema }"."${ sFrontendSettingsTable }"
                                                                                   where SETTING_TYPE = 'FILTER' or SETTING_TYPE = 'MASSCHANGE'`));
-    const mSettingsToUpdate = await findFieldsToReplace(aDatabaseFrontendSettings);
+    const mSettingsToUpdate = findFieldsToReplace(aDatabaseFrontendSettings);
     if (mSettingsToUpdate.size > 0) {
-        const sUpdateFrontendSettingsStatement = await generateUpdateStatement(sCurrentSchema, mSettingsToUpdate);
+        const sUpdateFrontendSettingsStatement = generateUpdateStatement(sCurrentSchema, mSettingsToUpdate);
         oCurrentConnection.executeUpdate(sUpdateFrontendSettingsStatement);
     }
     return true;
@@ -290,14 +290,14 @@ async function getCurrentSchema(oCurrentConnection) {
     return (await oCurrentConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`))[0].CURRENT_SCHEMA;
 }
 
-function closeSqlConnection(oConnection) {
+async function closeSqlConnection(oConnection) {
     if (oConnection.close) {
-        oConnection.close();
+        await oConnection.close();
     }
 }
 
 async function clean(oCurrentConnection) {
-    closeSqlConnection(oConnection);
+    await closeSqlConnection(oConnection);
     return true;
 }
 export default {helpers,sFrontendSettingsTable,oConnection,aRemovedColumns,aRenamedColumns,aRenamedBusinessObjects,aRenamedPaths,mRenamedColumns,mRenamedBusinessObjects,updateFrontendSettings,replaceFieldsFilterSetting,replaceFieldsMassChangeSetting,findFieldsToReplace,generateUpdateStatement,check,run,getCurrentSchema,closeSqlConnection,clean};

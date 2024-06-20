@@ -6,7 +6,7 @@ const GenericSyntaxValidator = $.require('./genericSyntaxValidator').GenericSynt
 const helpers = $.require('../util/helpers');
 
 function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
-    this.validate = async function validate(oRequest, mValidatedParameters) {
+    this.validate = function validate(oRequest, mValidatedParameters) {
         function validateGetRequest() {
             oUtils.checkEmptyBody(oRequest.body);
         }
@@ -16,12 +16,12 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
         const aExistingExchangeRates = getExistingNoTemporaryMasterdata(oNonTemporaryMasterdata.EXCHANGE_RATE_TYPES, 'EXCHANGE_RATE_TYPE_ID');
         const aExistingUOMs = getExistingNoTemporaryMasterdata(oNonTemporaryMasterdata.UNIT_OF_MEASURES, 'UOM_ID');
 
-        async function checkNonTemporaryMasterdataReferences(oVariant) {
+        function checkNonTemporaryMasterdataReferences(oVariant) {
              oUtils.checkNonTemporaryMasterdataReferences(oVariant, ['REPORT_CURRENCY_ID'], aExistingCurrencies);
              oUtils.checkNonTemporaryMasterdataReferences(oVariant, ['EXCHANGE_RATE_TYPE_ID'], aExistingExchangeRates);
             return oVariant;
         }
-        async function checkVariant(oVariant, aVariantMetadata) {
+        function checkVariant(oVariant, aVariantMetadata) {
             const bChangesAccepted = oVariant.CHANGES_ACCEPTED;
             const oVariantToValidate = _.omit(oVariant, [
                 'ITEMS',
@@ -33,7 +33,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
                 subitemState: -1,
                 metadata: aVariantMetadata
             });
-            await checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
+            checkNonTemporaryMasterdataReferences(oSyntacticallyCorrectVariant);
             if (!helpers.isNullOrUndefined(bChangesAccepted)) {
                 const genericSyntaxValidator =  new GenericSyntaxValidator();
                 oSyntacticallyCorrectVariant.CHANGES_ACCEPTED =  genericSyntaxValidator.validateValue(bChangesAccepted, 'BooleanInt', null, false);
@@ -41,7 +41,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             return oSyntacticallyCorrectVariant;
         }
 
-        async function checkVariantItems(aVariantItems, aVariantItemMetadata) {
+        function checkVariantItems(aVariantItems, aVariantItemMetadata) {
             const aSyntacticallyCorrectVariantItems = [];
             aVariantItems.forEach(oVariantItem => {
                 const oSyntacticallyCorrectItem = oUtils.checkEntity({
@@ -56,7 +56,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             });
             return aSyntacticallyCorrectVariantItems;
         }
-        async function validateUpdateOrderRequest(oBody) {
+        function validateUpdateOrderRequest(oBody) {
             const genericSyntaxValidator =  new GenericSyntaxValidator();
             const aValidatedVariantIds = [];
             oBody.forEach(oVariantId => {
@@ -76,7 +76,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             });
             return aValidatedVariantIds;
         }
-        async function changeMandatoryMetadataAttribute(aVariantMetadata, sAttribute, bIsMandatory) {
+        function changeMandatoryMetadataAttribute(aVariantMetadata, sAttribute, bIsMandatory) {
             const aVariantMetadataAdapted = aVariantMetadata;
             if (aVariantMetadataAdapted) {
                 const iIndex = aVariantMetadata.indexOf(_.find(aVariantMetadata, oMetadata => oMetadata.COLUMN_ID === sAttribute));
@@ -86,7 +86,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             }
             return aVariantMetadata;
         }
-        async function getPatchVariantMetadata(oBody) {
+        function getPatchVariantMetadata(oBody) {
             let aVariantMetadata = oMetadataProvider.get(BusinessObjectTypes.Variant, BusinessObjectTypes.Variant, null, null, oPersistency);
 
             /*
@@ -118,22 +118,22 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
         *   - if there is only one path variable: calculation_version_id, then the request is for update order
         *     and it only contains VARIANT_IDs
         */
-        async function validatePatchRequest() {
+        function validatePatchRequest() {
             const oBody = oUtils.tryParseJson(oRequest.body.asString());
             const bIsPatchUpdateOrder = mValidatedParameters.calculation_version_id && !mValidatedParameters.variant_id;
             const bIsPatchUpdateVariant = mValidatedParameters.calculation_version_id && mValidatedParameters.variant_id;
 
             if (bIsPatchUpdateOrder) {
-                return await validateUpdateOrderRequest(oBody);
+                return validateUpdateOrderRequest(oBody);
             }
 
             if (bIsPatchUpdateVariant) {
-                const aVariantMetadata = await getPatchVariantMetadata(oBody);
-                const oSyntacticallyCorrectVariant = await checkVariant(oBody, aVariantMetadata);
+                const aVariantMetadata = getPatchVariantMetadata(oBody);
+                const oSyntacticallyCorrectVariant = checkVariant(oBody, aVariantMetadata);
 
                 if (oBody.ITEMS) {
                     const aVariantItemMetadata = oMetadataProvider.get(BusinessObjectTypes.VariantItem, BusinessObjectTypes.VariantItem, null, null, oPersistency); //eslint-disable-line
-                    oSyntacticallyCorrectVariant.ITEMS = await checkVariantItems(oBody.ITEMS, aVariantItemMetadata);
+                    oSyntacticallyCorrectVariant.ITEMS = checkVariantItems(oBody.ITEMS, aVariantItemMetadata);
                 }
 
                 return oSyntacticallyCorrectVariant;
@@ -143,7 +143,7 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             throw new PlcException(MessageLibrary.Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
-        async function checkVariantHasItems(oVariant) {
+        function checkVariantHasItems(oVariant) {
             if (!oVariant.ITEMS) {
                 const sDeveloperInfo = "Mandatory field 'ITEMS' missing";
                 const sClientInfo = 'Mandatory field missing';
@@ -152,12 +152,12 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
             }
         }
 
-        async function validatePostRequest() {
+        function validatePostRequest() {
             const oVariant = oUtils.tryParseJson(oRequest.body.asString());
             const aVariantMetadata = oMetadataProvider.get(BusinessObjectTypes.Variant, BusinessObjectTypes.Variant, null, null, oPersistency);
             const aVariantItemMetadata = oMetadataProvider.get(BusinessObjectTypes.VariantItem, BusinessObjectTypes.VariantItem, null, null, oPersistency); //eslint-disable-line
 
-            await checkVariantHasItems(oVariant);
+            checkVariantHasItems(oVariant);
 
             if (_.isNull(oVariant.IS_SELECTED)) {
                 const sDeveloperInfo = "Field 'IS_SELECTED' is not nullable";
@@ -166,8 +166,8 @@ function VariantValidator(oPersistency, oMetadataProvider, oUtils) {
                 throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientInfo);
             }
 
-            const oSyntacticallyCorrectVariant = await checkVariant(oVariant, aVariantMetadata);
-            oSyntacticallyCorrectVariant.ITEMS = await checkVariantItems(oVariant.ITEMS, aVariantItemMetadata);
+            const oSyntacticallyCorrectVariant = checkVariant(oVariant, aVariantMetadata);
+            oSyntacticallyCorrectVariant.ITEMS = checkVariantItems(oVariant.ITEMS, aVariantItemMetadata);
             // check to see if is_selected is on the request, if it is null -> decline request
             return oSyntacticallyCorrectVariant;
         }

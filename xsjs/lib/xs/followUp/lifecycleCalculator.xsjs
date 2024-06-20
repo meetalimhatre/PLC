@@ -14,10 +14,10 @@ const Constants = $.require('../util/constants');
  *  
  * @param  {type} mParameters Map of parameters passed by the Follow-up. Must contain a property TASK_ID (check in {@link LifecycleCalculator}).
  */
-function calculateLifecycleVersions(mParameters) {
+async function calculateLifecycleVersions(mParameters) {
     var iTaskId = mParameters.TASK_ID;
-    var oPersistency = new Persistency(oConnectionFactory.getConnection());
-    var oTaskService = new TaskService($, oPersistency);
+    var oPersistency = new Persistency( await oConnectionFactory.getConnection());
+    var oTaskService = await new TaskService($, oPersistency);
     var bOverwriteManualVersions = mParameters.OVERWRITE_MANUAL_VERSION;
     var sOneTimeCostItemDescription = helpers.isNullOrUndefinedOrEmpty(mParameters.ONE_TIME_COST_ITEM_DESCRIPTION) === true ? Constants.OneTimeCostItemDescription : mParameters.ONE_TIME_COST_ITEM_DESCRIPTION;
 

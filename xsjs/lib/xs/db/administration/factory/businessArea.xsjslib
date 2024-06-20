@@ -60,7 +60,7 @@ function BusinessArea(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.BUSINESS_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.BUSINESS_AREA_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.BUSINESS_AREA_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
 
         return oReturnObject;

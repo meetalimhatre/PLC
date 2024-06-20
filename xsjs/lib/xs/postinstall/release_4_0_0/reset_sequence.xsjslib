@@ -21,11 +21,11 @@ async function run(oCurrentConnection) {
     let oConnection = getConnection();
     let aSequences = await oConnection.executeQuery(`SELECT SEQUENCE_NAME FROM "SYS"."M_SEQUENCES" WHERE "SCHEMA_NAME" = '${ sXSCSchema }'`);
     let sCurrentSchema = await getCurrentSchema(oCurrentConnection);
-    aSequences.forEach(element => {
+    aSequences.forEach(async element => {
         //get each sequence current number in PLC XSC version
-        let iSequenceValue = (oConnection.executeQuery(`SELECT "${ sXSCSchema }"."${ element.SEQUENCE_NAME }".nextval as newid FROM DUMMY`))[0].NEWID;
+        let iSequenceValue = (await oConnection.executeQuery(`SELECT "${ sXSCSchema }"."${ element.SEQUENCE_NAME }".nextval as newid FROM DUMMY`))[0].NEWID;
         //update each sequence current number to XSA version
-        oCurrentConnection.executeUpdate(`ALTER SEQUENCE "${ sCurrentSchema }"."${ element.SEQUENCE_NAME }" RESTART WITH ${ iSequenceValue }`);
+        await oCurrentConnection.executeUpdate(`ALTER SEQUENCE "${ sCurrentSchema }"."${ element.SEQUENCE_NAME }" RESTART WITH ${ iSequenceValue }`);
     });
     return true;
 }

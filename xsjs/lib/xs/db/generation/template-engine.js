@@ -8,7 +8,7 @@ const MessageLibrary = require('../../../xs/util/message');
 const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
@@ -17,24 +17,24 @@ async function logError(msg) {
  * The compile() function takes a template string and a context object to produce a result string.
  * See http://handlebarsjs.com for more details. 
  */
-async function TemplateEngine() {
+function TemplateEngine() {
 
     var options = { noEscape: true };
 
-    await templateHelpers.registerHelpers(Handlebars);
-    await templateMasterdataHelpers.registerHelpers(Handlebars);
+    templateHelpers.registerHelpers(Handlebars);
+    templateMasterdataHelpers.registerHelpers(Handlebars);
 
-    this.compile = async function (sTemplate, oContext) {
+    this.compile = function (sTemplate, oContext) {
 
         if (!_.isString(sTemplate)) {
             const sLogMessage = 'Template must be a string.';
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
         if (helpers.isNullOrUndefined(oContext)) {
             const sLogMessage = 'Context must an object.';
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
 
@@ -47,7 +47,7 @@ async function TemplateEngine() {
         } catch (e) {
             const sClientMsg = 'Error happened in TemplateEngine. Refer to server log.';
             const sServerMsg = `${ sClientMsg } Error: ${ e.message }`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sClientMsg);
         }
 

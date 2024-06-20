@@ -40,7 +40,7 @@ module.exports.Administration = function ($) {
             var administration = oPersistency.Administration.getAdministration(oParameters, mSessionDetails.language, new Date());
             if (oParameters.business_object === sVendor) {
                 $.trace.error(`[INFO] Vendor table is read by user: [${ sUserId }] on [${ new Date().toString() }]`);
-                await auditLog.read({
+                auditLog.read({
                     type: sVendor,
                     id: { key: `TimeStamp: [${ new Date().toString() }]` }
                 }).attribute({
@@ -58,7 +58,7 @@ module.exports.Administration = function ($) {
             }
             if (oParameters.business_object === sCustomer) {
                 $.trace.error(`[INFO] Customer table is read by user: [${ sUserId }] on [${ new Date().toString() }]`);
-                await auditLog.read({
+                auditLog.read({
                     type: sCustomer,
                     id: { key: `TimeStamp: [${ new Date().toString() }]` }
                 }).attribute({
@@ -98,7 +98,7 @@ module.exports.Administration = function ($) {
  * @param oPersistency     {object} - instance of persistency
  * @returns oServiceOutput {object} - the response
  */
-    this.edit = async function (oBodyData, oParameters, oServiceOutput, oPersistency) {
+    this.edit = function (oBodyData, oParameters, oServiceOutput, oPersistency) {
 
         var oResultSet = {};
         var oResultSetInsert = {};
@@ -195,7 +195,7 @@ module.exports.Administration = function ($) {
             oResultSet = oPersistency.Administration.batchAdministration(oBodyData.BOBJECT);
             if (sObjectName === sVendor) {
                 $.trace.error(`[INFO] Vendor table is maintained by user: [${ sUserId }] on [${ new Date().toString() }]`);
-                const message = (await auditLog.update({
+                const message = (auditLog.update({
                     type: sVendor,
                     id: { key: `TimeStamp: [${ sMasterDataDate.toString() }]` }
                 })).attribute({
@@ -208,13 +208,13 @@ module.exports.Administration = function ($) {
                     role: 'VendorEdit'
                 }).by(`[${ sUserId }]`);
                 message.logPrepare(function (err) {
-                    message.logSuccess(async function (err) {
+                    message.logSuccess( function (err) {
                         if (err) {
                             $.trace.error(`Edit Vendor. Error when logging success using AuditLog`);
                         }
                     });
 
-                    message.logFailure(async function (err) {
+                    message.logFailure( function (err) {
                         if (err) {
                             $.trace.error(`Edit Vendor. Error when logging failure using AuditLog`);
                         }
@@ -223,7 +223,7 @@ module.exports.Administration = function ($) {
             }
             if (sObjectName === sCustomer) {
                 $.trace.error(`[INFO] Customer table is maintained by user: [${ sUserId }] on [${ new Date().toString() }]`);
-                const message = (await auditLog.update({
+                const message = (auditLog.update({
                     type: sCustomer,
                     id: { key: `TimeStamp: [${ sMasterDataDate.toString() }]` }
                 })).attribute({
@@ -236,13 +236,13 @@ module.exports.Administration = function ($) {
                     role: 'CustEdit'
                 }).by(`[${ sUserId }]`);
                 message.logPrepare(function (err) {
-                    message.logSuccess(async function (err) {
+                    message.logSuccess( function (err) {
                         if (err) {
                             $.trace.error(`Edit Customer. Error when logging success using AuditLog`);
                         }
                     });
 
-                    message.logFailure(async function (err) {
+                    message.logFailure( function (err) {
                         if (err) {
                             $.trace.error(`Edit Customer. Error when logging failure using AuditLog`);
                         }

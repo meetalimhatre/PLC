@@ -22,7 +22,7 @@ var sUserId = $.getPlcUsername();
 
 var Procedures = Object.freeze({ account_group_read: 'sap.plc.db.administration.procedures::p_account_group_read' });
 
-async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
+function AccountGroup(dbConnection, hQuery, hQueryRepl) {
 
     this.helper = new Helper($, hQuery, dbConnection);
     this.metadata = new Metadata($, hQuery, null, sUserId);
@@ -119,7 +119,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
 
         try {
             var procedure = dbConnection.loadProcedure(Procedures.account_group_read);
-            var result = procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring, noRecords, noSkipRecords);
+            var result = await procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring, noRecords, noSkipRecords);
 
             oReturnObject[BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES] = Array.slice(result.OT_ACCOUNT_GROUPS);
             oReturnObject[BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES] = Array.slice(result.OT_ACCOUNT_GROUPS_TEXT);
@@ -165,7 +165,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES].push(oResultDelete);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.DELETE, oResult);
             }
         });
 
@@ -177,7 +177,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES].push(oTextResultDelete);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES, e, Operation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES, e, Operation.DELETE, oResult);
             }
         });
 
@@ -275,7 +275,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES].push(oAccGrResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.CREATE, oResult);
             }
         });
 
@@ -288,7 +288,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES].push(oTextResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.CREATE, oResult);
             }
         });
 
@@ -301,7 +301,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES].push(oAccRangeResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES, e, Operation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES, e, Operation.CREATE, oResult);
             }
         });
 
@@ -415,7 +415,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 }
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES, e, Operation.UPDATE, oResult);
             }
         });
 
@@ -429,7 +429,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES].push(oTextResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES, e, Operation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_GROUP_TEXT_ENTITIES, e, Operation.UPDATE, oResult);
             }
         });
 
@@ -440,7 +440,7 @@ async function AccountGroup(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES].push(oAccountRangeResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES, e, Operation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.ACCOUNT_RANGES_ENTITIES, e, Operation.UPDATE, oResult);
             }
         });
 

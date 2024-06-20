@@ -9,12 +9,12 @@ module.exports.Logout = function ($) {
         var sSessionId = $.getPlcUsername();
         var sUserId = $.getPlcUsername();
 
-        var iDeletedSession = oPersistency.Session.deleteSession(sSessionId, sUserId);
+        var iDeletedSession = await oPersistency.Session.deleteSession(sSessionId, sUserId);
         if (iDeletedSession === 0) {
             const sLogMessage = 'No session found!';
             $.trace.error(sLogMessage);
         }
-        oPersistency.Session.deleteOutdatedEntries();
+        await oPersistency.Session.deleteOutdatedEntries();
         return oServiceOutput;
     };
 

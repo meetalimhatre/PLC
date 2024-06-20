@@ -68,7 +68,7 @@ function CostCenter(dbConnection, hQuery, sObjectName) {
             stmt += ` order by plcTable.COST_CENTER_ID, plcTable.CONTROLLING_AREA_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
 
-            oReturnObject[BusinessObjectsEntities.COST_CENTER_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.COST_CENTER_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
 
         }
 

@@ -41,7 +41,7 @@ var aErrorFieldsInTemporaryTables = [
 /**
    Base Class for Masterdata Objects
  */
-async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBadData) {
+function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBadData) {
 
     this.helper = new Helper($, hQuery, dbConnection);
     this.metadata = new Metadata($, hQuery, null, $.getPlcUsername());
@@ -261,7 +261,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
             currentUser: $.getPlcUsername(),
             fieldsMain: _.difference(this.helper.getColumnsForTable(Resources[sObjectName].dbobjects.plcTable), aAuditFieldsForVersionedEntries),
             fieldsText: _.union(Resources[sObjectName].configuration.aKeyColumns, Resources[sObjectName].configuration.aTextColumns, ['LANGUAGE']),
-            fieldsCustom: await fillFieldsCustomContextProperty(this.aMetadataFields),
+            fieldsCustom: fillFieldsCustomContextProperty(this.aMetadataFields),
             usedInBusinessObjects: await fillUsedInBusinessObjectsContextProperty(Resources[sObjectName].configuration.UsedInBusinessObjects),
             referencedObjects: await fillReferencedObjectsContextProperty(Resources[sObjectName].configuration.ReferencedObjects),
             ignoreBadData: this.ignoreBadData
@@ -514,13 +514,13 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 
 
 
-    function generateAndExecuteSql(packageName, templateName, oContext) {
+    async function generateAndExecuteSql(packageName, templateName, oContext) {
         var sql;
         const templatePath = path.resolve(appRoot, 'lib', packageName.replace(/\./g, '/'), templateName);
         const sTemplate = fs.readFileSync(templatePath, { encoding: 'utf8' });
         sql = oTemplateEngine.compile(sTemplate, oContext);
         if (sql != '') {
-            dbConnection.executeUpdate(sql);
+            await dbConnection.executeUpdate(sql);
         }
     }
 
@@ -532,7 +532,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 
 
 
-    function checkAndInsertIntoTemporaryTable(oBatchItems, sOperation, sObjectType, oContext) {
+    async function checkAndInsertIntoTemporaryTable(oBatchItems, sOperation, sObjectType, oContext) {
         var aBatchItems;
         var sTempTableName;
         var aTableColumns;
@@ -586,7 +586,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         });
 
         var sStmt = aStmtBuilder.join(' ');
-        dbConnection.executeUpdate(sStmt, aInsertValues);
+         await dbConnection.executeUpdate(sStmt, aInsertValues);
     }
 
 
@@ -597,11 +597,11 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
     async function deleteTemporaryTableContent(sObjectName) {
 
         var sStmt = 'DELETE FROM "' + Resources[sObjectName].dbobjects.tempTable + '"';
-        dbConnection.executeUpdate(sStmt);
+        await dbConnection.executeUpdate(sStmt);
 
         if (await hasBusinessObjectText(sObjectName)) {
             sStmt = 'DELETE FROM "' + Resources[sObjectName].dbobjects.tempTextTable + '"';
-            dbConnection.executeUpdate(sStmt);
+            await dbConnection.executeUpdate(sStmt);
         }
     }
 
@@ -661,7 +661,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         that.checkMandatoryNotNullProperties(oEntry, aMandatoryProperties);
     };
 
-    MasterDataBaseObject.prototype.checkMandatoryNotNullProperties = async function (oEntry, aMandatoryProperties, aObjMissingProperties) {
+    MasterDataBaseObject.prototype.checkMandatoryNotNullProperties = function (oEntry, aMandatoryProperties, aObjMissingProperties) {
         aObjMissingProperties = aObjMissingProperties || [];
         let aObjNullMandatoryProperties = [];
 
@@ -795,9 +795,9 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
 
         var sStmt = aStmtBuilder.join(' ');
         if (sOperation === Operation.DELETE) {
-            aMaintainedEntries = dbConnection.executeQuery(sStmt, '', sOperation);
+            aMaintainedEntries = await dbConnection.executeQuery(sStmt, '', sOperation);
         } else {
-            aMaintainedEntries = dbConnection.executeQuery(sStmt, sMasterDataDate, '', sOperation);
+            aMaintainedEntries = await dbConnection.executeQuery(sStmt, sMasterDataDate, '', sOperation);
         }
 
         return Array.slice(aMaintainedEntries);
@@ -824,7 +824,7 @@ async function MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBa
         }
 
         var sSelectStatement = 'select * from "' + sTempTable + "\" where ERROR_CODE <> ''";
-        var aErrorEntries = dbConnection.executeQuery(sSelectStatement);
+        var aErrorEntries = await dbConnection.executeQuery(sSelectStatement);
 
         _.each(aErrorEntries, async function (oErrorEntry, iIndex) {
             var oResult = {};

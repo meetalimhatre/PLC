@@ -5,11 +5,11 @@ const btoa = $.require('btoa');
 const cloudUtil = $.require('../../util/cloudUtil');
 const helpers = $.require('../../util/helpers');
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 

@@ -237,7 +237,7 @@ function registerHelpers(Handlebars) {
     // list custom fields with currency
     Handlebars.registerHelper('ddl_customFieldsCurrency', function ddl_customFieldsCurrency(oBusinessObject) {
         let sFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields,  function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '' && value.rollupTypeId !== 0 && value.propertyType === 7) {
                 sFields += ', "' + value.refUomCurrencyColumnId + '" NVARCHAR(3)';
             }
@@ -327,18 +327,18 @@ function registerHelpers(Handlebars) {
     // set *IS_MANUAL = 0 and *MANUAL = NULL for custom field that have a rollup type > 0
     Handlebars.registerHelper('customFieldsWithRollupType', function rollupCustomFields(oBusinessObject) {
         var sCustomFieldsRollup = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields,  function (value, key) {
             if (value.rollupTypeId !== 0) {
                 if (value.propertyType == 7) {
                     sCustomFieldsRollup += ` itemExt.${ value.refUomCurrencyColumnId } = :lv_report_currency_id,`;
                 }
                 sCustomFieldsRollup += ' itemExt.' + key + '_MANUAL = CASE ';
-                sCustomFieldsRollup += ' WHEN item.ITEM_CATEGORY_ID IN ' + await getItemCategories(value.itemCategories);
+                sCustomFieldsRollup += ' WHEN item.ITEM_CATEGORY_ID IN ' + getItemCategories(value.itemCategories);
                 sCustomFieldsRollup += ' THEN NULL ';
                 sCustomFieldsRollup += ' ELSE itemExt.' + key + '_MANUAL ';
                 sCustomFieldsRollup += ' END,';
                 sCustomFieldsRollup += ' itemExt.' + key + '_IS_MANUAL = CASE ';
-                sCustomFieldsRollup += ' WHEN item.ITEM_CATEGORY_ID IN ' + await getItemCategories(value.itemCategories);
+                sCustomFieldsRollup += ' WHEN item.ITEM_CATEGORY_ID IN ' + getItemCategories(value.itemCategories);
                 sCustomFieldsRollup += ' THEN 0 ';
                 sCustomFieldsRollup += ' ELSE itemExt.' + key + '_IS_MANUAL ';
                 sCustomFieldsRollup += ' END,';
@@ -357,7 +357,7 @@ function registerHelpers(Handlebars) {
         let sFinalStmt = '';
         let iIndex = 0;
 
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields,  function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '' && value.rollupTypeId !== 0 && value.propertyType === 7) {
                 if (iIndex !== 0) {
                     sFields += ',';
@@ -377,7 +377,7 @@ function registerHelpers(Handlebars) {
 
     Handlebars.registerHelper('customFieldsWithCurrency', function customFieldsWithCurrency(oBusinessObject) {
         let sFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields,  function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '' && value.rollupTypeId !== 0 && value.propertyType === 7) {
                 sFields += ` ,"${ value.refUomCurrencyColumnId }" `;
             }
@@ -388,7 +388,7 @@ function registerHelpers(Handlebars) {
     // set default values for: *_MANUAL(if it's not a calculated value), *_IS_MANUAL, *_UNIT(report_currency_id or default unit of measure)
     Handlebars.registerHelper('customFieldsDefaultValuesSelect', function defaultValuesCustomFieldsSelect(oBusinessObject) {
         var sCustomDefaultValues = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             var itemsCategoriesManual = value.itemCategories;
             if (value.itemCategoriesFormula !== undefined) {
                 itemsCategoriesManual = _.difference(itemsCategoriesManual, value.itemCategoriesFormula);
@@ -396,7 +396,7 @@ function registerHelpers(Handlebars) {
             //set *_MANUAL
             if (_.size(itemsCategoriesManual) !== 0 && value.defaultValue !== null) {
                 sCustomDefaultValues += ', CASE ';
-                sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + await getItemCategories(itemsCategoriesManual);
+                sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + getItemCategories(itemsCategoriesManual);
                 sCustomDefaultValues += ' AND ' + key + '_MANUAL IS NULL ';
                 sCustomDefaultValues += ' AND :iv_setDefaultValues = 1 ';
                 sCustomDefaultValues += ' THEN ';
@@ -412,7 +412,7 @@ function registerHelpers(Handlebars) {
             //set *_UNIT
             if (value.propertyType === 6 || value.propertyType === 7) {
                 sCustomDefaultValues += ', CASE ';
-                sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + await getItemCategories(value.itemCategories);
+                sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + getItemCategories(value.itemCategories);
                 sCustomDefaultValues += ' AND ' + key + '_UNIT IS NULL ';
                 sCustomDefaultValues += ' AND :iv_setDefaultValues = 1 ';
                 if (value.propertyType === 7 && !value.isMasterdataField)
@@ -432,13 +432,13 @@ function registerHelpers(Handlebars) {
             if (!value.isMasterdataField) {
                 sCustomDefaultValues += ', CASE ';
                 if (_.size(itemsCategoriesManual) !== 0) {
-                    sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + await getItemCategories(itemsCategoriesManual);
+                    sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + getItemCategories(itemsCategoriesManual);
                     sCustomDefaultValues += ' AND ' + key + '_IS_MANUAL IS NULL ';
                     sCustomDefaultValues += ' AND :iv_setDefaultValues = 1 ';
                     sCustomDefaultValues += ' THEN 1 ';
                 }
                 if (value.itemCategoriesFormula !== undefined && _.size(value.itemCategoriesFormula) !== 0) {
-                    sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + await getItemCategories(value.itemCategoriesFormula);
+                    sCustomDefaultValues += ' WHEN items.ITEM_CATEGORY_ID IN ' + getItemCategories(value.itemCategoriesFormula);
                     sCustomDefaultValues += ' AND ' + key + '_IS_MANUAL IS NULL ';
                     sCustomDefaultValues += ' AND :iv_setDefaultValues = 1 ';
                     sCustomDefaultValues += ' THEN 0 ';
@@ -452,7 +452,7 @@ function registerHelpers(Handlebars) {
     // set default values for: one time cost
     Handlebars.registerHelper('customFieldsOneTimeCost', function defaultValuesCustomFieldsSelect(oBusinessObject) {
         var sCustomOneTimeCost = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             var itemsCategoriesManual = value.itemCategories;
             if (value.itemCategoriesFormula !== undefined) {
                 itemsCategoriesManual = _.difference(itemsCategoriesManual, value.itemCategoriesFormula);
@@ -514,7 +514,7 @@ function registerHelpers(Handlebars) {
     // calculation views: used in table function, list custom fields with data types output
     Handlebars.registerHelper('cv_customFieldsTableFunctList', function cv_customFieldsTableFunctList(oBusinessObject) {
         var sCustomFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             sCustomFields += ', "' + key + '" ' + value.dataType.toUpperCase();
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 sCustomFields += ', "' + value.refUomCurrencyColumnId + '" NVARCHAR(3)';
@@ -547,7 +547,7 @@ function registerHelpers(Handlebars) {
 	 */
     Handlebars.registerHelper('cv_customFieldsTableFunctSelect', function cv_customFieldsTableFunct(oBusinessObject) {
         var sCustomFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             if (value.isMasterdataField) {
                 sCustomFields += ', plcExtTable.' + key + '_MANUAL as ' + key;
             } else {
@@ -602,7 +602,7 @@ function registerHelpers(Handlebars) {
     Handlebars.registerHelper('cv_customFieldsAttrXml', function cv_customFieldsAttrXml(oBusinessObject) {
         var sCustomFields = '';
         var sObjectName = oBusinessObject.fileName;
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 sCustomFields += '<attribute id="' + value.refUomCurrencyColumnId + '" attributeHierarchyActive="false" displayAttribute="false">\n';
                 sCustomFields += '<descriptions defaultDescription="' + value.refUomCurrencyColumnId + '"/>\n';
@@ -626,7 +626,7 @@ function registerHelpers(Handlebars) {
     Handlebars.registerHelper('cv_customFieldsMeasureXml', function cv_customFieldsMeasureXml(oBusinessObject) {
         var sCustomFields = '';
         var sObjectName = oBusinessObject.fileName;
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 if (value.propertyType == 6) {
                     sCustomFields += '<measure id="' + key + '" semanticType="quantity" aggregationType="sum" measureType="quantity">\n';
@@ -647,7 +647,7 @@ function registerHelpers(Handlebars) {
 	 */
     Handlebars.registerHelper('cv_customFieldsViewAttrXml', function cv_customFieldsViewAttrXml(oBusinessObject) {
         var sCustomFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             sCustomFields += '<viewAttribute id="' + key + '"/>\n';
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 sCustomFields += '<viewAttribute id="' + value.refUomCurrencyColumnId + '"/>\n';
@@ -661,7 +661,7 @@ function registerHelpers(Handlebars) {
 	 */
     Handlebars.registerHelper('cv_customFieldsMappingXml', function cv_customFieldsMappingXml(oBusinessObject) {
         var sCustomFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             sCustomFields += '<mapping xsi:type="Calculation:AttributeMapping" target="' + key + '" source="' + key + '"/>\n';
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 sCustomFields += '<mapping xsi:type="Calculation:AttributeMapping" target="' + value.refUomCurrencyColumnId + '" source="' + value.refUomCurrencyColumnId + '"/>\n';
@@ -675,7 +675,7 @@ function registerHelpers(Handlebars) {
 	 */
     Handlebars.registerHelper('cv_customFieldsAttrVXml', function cv_customFieldsVAttrXml(oBusinessObject) {
         var sCustomFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields, function (value, key) {
             if (!helpers.isNullOrUndefined(value.refUomCurrencyColumnId) && value.refUomCurrencyColumnId !== '') {
                 sCustomFields += '<attribute id="' + value.refUomCurrencyColumnId + '" attributeHierarchyActive="false" displayAttribute="false">\n';
                 sCustomFields += '<descriptions defaultDescription="' + value.refUomCurrencyColumnId + '"/>\n';
@@ -693,7 +693,7 @@ function registerHelpers(Handlebars) {
 
     Handlebars.registerHelper('cv_customFieldsAttributesBomCompare', function cv_customFieldsAttributesBomCompare(oBusinessObject) {
         var sPlcFields = '';
-        _.each(oBusinessObject.customFields, async function (value, key) {
+        _.each(oBusinessObject.customFields,  function (value, key) {
             let sBomVersion2DisplayName = !helpers.isNullOrUndefined(value.displayName) && value.displayName.length > 0 ? `${ value.displayName }_BOMC2` : `${ key }_BOMC2`;
             sPlcFields += `<attribute id="${ key }"  displayAttribute="false" attributeHierarchyActive="false">
 							<descriptions defaultDescription="${ value.displayName }"/>

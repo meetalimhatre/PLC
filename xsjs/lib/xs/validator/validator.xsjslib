@@ -46,7 +46,7 @@ function Validator(oPersistency, sSessionId, Resources) {
      *  @throws {ValidationException} - if a validation step fails
      * @throws {ArgumentException} - if the given arguments are not valid for this methods.
      */
-    this.validate = async function (oValdiatorInput, oServiceOutput) {
+    this.validate = function (oValdiatorInput, oServiceOutput) {
         if (!(oValdiatorInput instanceof ValidatorInput)) {
             const sLogMessage = 'oValidatorInput has to be an instance of ValidatorInput.';
             $.trace.error(sLogMessage);
@@ -57,11 +57,11 @@ function Validator(oPersistency, sSessionId, Resources) {
         }
 
         const UrlValidator = $.require('./urlValidator').UrlValidator;
-        const mValidatedParameters = (await new UrlValidator(Resources)).validateUrl(oValdiatorInput.request, oValdiatorInput.definitionKey);
+        const mValidatedParameters = ( new UrlValidator(Resources)).validateUrl(oValdiatorInput.request, oValdiatorInput.definitionKey);
         const sBoType = Resources[oValdiatorInput.definitionKey][oValdiatorInput.method].businessObjectType;
         const BuisnessObjectValidatorFactory = $.import('xs.validator', 'businessObjectValidatorFactory').BusinessObjectValidatorFactory;
         const oBoValidator = BuisnessObjectValidatorFactory.createBusinessObjectValidator(sBoType, oPersistency, sSessionId);
-        const aValidatedBusinessObjects = await oBoValidator.validate(oValdiatorInput.request, mValidatedParameters, oServiceOutput);
+        const aValidatedBusinessObjects = oBoValidator.validate(oValdiatorInput.request, mValidatedParameters, oServiceOutput);
 
         bValidationSuccess = true;
 

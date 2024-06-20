@@ -13,7 +13,7 @@ module.exports = {
     containsCycle
 };
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
@@ -38,7 +38,7 @@ async function unrollPrivilegesOnObjectUpdate(oConnection, sObjectType, sObjectI
     if (sObjectType.toUpperCase() !== authorizationManager.BusinessObjectTypes.Project.toUpperCase()) {
         const oMessageDetails = new MessageDetails();
         const sLogMessage = `Object type ${ sObjectId } for privileges not supported.`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
     }
 
@@ -50,7 +50,7 @@ async function unrollPrivilegesOnObjectUpdate(oConnection, sObjectType, sObjectI
         withError = false;
     } catch (e) {
         const sLogMessage = `Error occured on unrolling privileges for type ${ sObjectType } and id ${ sObjectId } (cf. SQL log).`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         withError = true;
     }
 
@@ -94,7 +94,7 @@ async function unrollPrivileges(oConnection, aObjects) {
         withError = false;
     } catch (e) {
         const sLogMessage = `Error occured on unrolling privileges for objects ${ aObjects } (cf. SQL log).`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         withError = true;
     }
 
@@ -143,7 +143,7 @@ async function getObjectsFromGroupPrivileges(oConnection, sUsergroupId) {
         oRet['withError'] = false;
     } catch (e) {
         const sLogMessage = `Error occured on reading objects for usergroup ${ sUsergroupId } (cf. SQL log).`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         oRet['withError'] = true;
     }
 
@@ -179,7 +179,7 @@ async function containsCycle(oConnection) {
         await oConnection.executeQuery(stmt);
     } catch (e) {
         const sLogMessage = `Error occured reading group relations (e.g., cycle detected) (cf. SQL log).`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         return true;
     }
     return false;

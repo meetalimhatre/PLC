@@ -61,7 +61,7 @@ function DbArtefactController($, dbConnection) {
     /**
      * Map semantic data types used in t_metadata table to SQL data types.
      */
-    async function mapSemanticToSqlDatatype(sSemanticDatatype, sSemanticDatatypeAttributes) {
+    function mapSemanticToSqlDatatype(sSemanticDatatype, sSemanticDatatypeAttributes) {
         let parseResult;
 
         switch (sSemanticDatatype) {
@@ -89,7 +89,7 @@ function DbArtefactController($, dbConnection) {
      * Check if a table name is valid according to an regexp.
      * Otherwise, an exception is thrown.
      */
-    async function checkTableName(sTableName) {
+    function checkTableName(sTableName) {
         if (!oValidTableNameRegexp.test(sTableName)) {
             let developerInfo = 'table has an invalid name: ' + sTableName;
             $.trace.error(developerInfo);
@@ -108,7 +108,7 @@ function DbArtefactController($, dbConnection) {
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
         }
         let mKeys = {};
-        let result = dbConnection.executeQuery('select column_name, data_type_name, length, scale, index_type from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
+        let result = await dbConnection.executeQuery('select column_name, data_type_name, length, scale, index_type from sys.table_columns where schema_name=CURRENT_SCHEMA and table_name=?', sFullTableName);
 
         for (let row in result) {
             let sDataType = result[row].DATA_TYPE_NAME;
@@ -199,7 +199,7 @@ function DbArtefactController($, dbConnection) {
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
         }
         let mKeys = {};
-        let result = dbConnection.executeQuery('select columns.column_name, data_type_name, length, scale from sys.table_columns columns inner join sys.index_columns indices ' + 'on columns.column_name = indices.column_name and columns.table_name = indices.table_name and columns.schema_name = indices.schema_name ' + "where columns.schema_name=CURRENT_SCHEMA and columns.table_name=? and constraint='PRIMARY KEY'", sFullTableName);
+        let result = await dbConnection.executeQuery('select columns.column_name, data_type_name, length, scale from sys.table_columns columns inner join sys.index_columns indices ' + 'on columns.column_name = indices.column_name and columns.table_name = indices.table_name and columns.schema_name = indices.schema_name ' + "where columns.schema_name=CURRENT_SCHEMA and columns.table_name=? and constraint='PRIMARY KEY'", sFullTableName);
         for (let row in result) {
             var sDataType = result[row].DATA_TYPE_NAME;
             if (result[row].DATA_TYPE_NAME === 'NVARCHAR') {
@@ -254,10 +254,10 @@ function DbArtefactController($, dbConnection) {
      *   }
      */
     this.createContextObject = async function () {
-        let result = dbConnection.executeQuery('select a.business_object, a.column_id, a.rollup_type_id, a.semantic_data_type, a.semantic_data_type_attributes, a.ref_uom_currency_column_id, b.property_type, c.display_name from "' + Tables.metadata + '" a left outer join "' + Tables.metadata + '" b on b.column_id = a.ref_uom_currency_column_id ' + 'left outer join "' + Tables.metadata_text + '" c on c.column_id = a.column_id and c.path = a.path ' + "where a.is_custom=1 and (a.uom_currency_flag IS NULL or a.uom_currency_flag <> 1) and c.language = 'EN'");
+        let result = await dbConnection.executeQuery('select a.business_object, a.column_id, a.rollup_type_id, a.semantic_data_type, a.semantic_data_type_attributes, a.ref_uom_currency_column_id, b.property_type, c.display_name from "' + Tables.metadata + '" a left outer join "' + Tables.metadata + '" b on b.column_id = a.ref_uom_currency_column_id ' + 'left outer join "' + Tables.metadata_text + '" c on c.column_id = a.column_id and c.path = a.path ' + "where a.is_custom=1 and (a.uom_currency_flag IS NULL or a.uom_currency_flag <> 1) and c.language = 'EN'");
         let context = {};
         // copy static metadata about BOs into context object
-        let mBusinessObjectsMetadata = await getBusinessObjectsMetadata();
+        let mBusinessObjectsMetadata = getBusinessObjectsMetadata();
         for (let boName in mBusinessObjectsMetadata) {
 
             context[boName] = {
@@ -301,7 +301,7 @@ function DbArtefactController($, dbConnection) {
             if (field.rollupTypeId !== 0) {
                 boMetadata.hasRollups = true;
             }
-            field.dataType = await mapSemanticToSqlDatatype(row.SEMANTIC_DATA_TYPE, row.SEMANTIC_DATA_TYPE_ATTRIBUTES);
+            field.dataType = mapSemanticToSqlDatatype(row.SEMANTIC_DATA_TYPE, row.SEMANTIC_DATA_TYPE_ATTRIBUTES);
             field.refUomCurrencyColumnId = row.REF_UOM_CURRENCY_COLUMN_ID;
             field.propertyType = row.PROPERTY_TYPE;
             field.displayName = row.DISPLAY_NAME;
@@ -314,7 +314,7 @@ function DbArtefactController($, dbConnection) {
             }
         }
 
-        let resultAttributes = dbConnection.executeQuery('select distinct meta.path, meta.business_object, meta.column_id, attr.item_category_id, attr.default_value, ' + 'attrUnit.default_value as default_value_unit, metaUnit.property_type  ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.metadataItemAttributes + '" as attr ' + 'on meta.business_object = attr.business_object ' + 'and meta.path = attr.path ' + 'and meta.column_id = attr.column_id ' + 'left outer join "' + Tables.metadata + '" as metaUnit ' + 'on meta.ref_uom_currency_business_object = metaUnit.business_object ' + 'and meta.ref_uom_currency_path = metaUnit.path ' + 'and meta.ref_uom_currency_column_id = metaUnit.column_id ' + 'and metaUnit.is_custom=1 ' + 'left outer join "' + Tables.metadataItemAttributes + '" as attrUnit ' + 'on metaUnit.business_object = attrUnit.business_object ' + 'and metaUnit.path = attrUnit.path ' + 'and metaUnit.column_id = attrUnit.column_id ' + 'where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1)');
+        let resultAttributes = await dbConnection.executeQuery('select distinct meta.path, meta.business_object, meta.column_id, attr.item_category_id, attr.default_value, ' + 'attrUnit.default_value as default_value_unit, metaUnit.property_type  ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.metadataItemAttributes + '" as attr ' + 'on meta.business_object = attr.business_object ' + 'and meta.path = attr.path ' + 'and meta.column_id = attr.column_id ' + 'left outer join "' + Tables.metadata + '" as metaUnit ' + 'on meta.ref_uom_currency_business_object = metaUnit.business_object ' + 'and meta.ref_uom_currency_path = metaUnit.path ' + 'and meta.ref_uom_currency_column_id = metaUnit.column_id ' + 'and metaUnit.is_custom=1 ' + 'left outer join "' + Tables.metadataItemAttributes + '" as attrUnit ' + 'on metaUnit.business_object = attrUnit.business_object ' + 'and metaUnit.path = attrUnit.path ' + 'and metaUnit.column_id = attrUnit.column_id ' + 'where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1)');
 
         for (let rowName in resultAttributes) {
             row = resultAttributes[rowName];
@@ -339,7 +339,7 @@ function DbArtefactController($, dbConnection) {
             field.propertyType = row.PROPERTY_TYPE;
         }
 
-        let resultFormula = dbConnection.executeQuery('select meta.PATH,meta.BUSINESS_OBJECT,meta.COLUMN_ID, formula.ITEM_CATEGORY_ID ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.formula + '" as formula ' + 'on meta.path=formula.path ' + 'and meta.business_object=formula.business_object ' + 'and meta.column_id=formula.column_id ' + ' where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1) ' + 'and formula.is_formula_used = 1');
+        let resultFormula = await dbConnection.executeQuery('select meta.PATH,meta.BUSINESS_OBJECT,meta.COLUMN_ID, formula.ITEM_CATEGORY_ID ' + 'from "' + Tables.metadata + '" as meta ' + 'inner join "' + Tables.formula + '" as formula ' + 'on meta.path=formula.path ' + 'and meta.business_object=formula.business_object ' + 'and meta.column_id=formula.column_id ' + ' where meta.is_custom=1 ' + 'and (meta.uom_currency_flag IS NULL or meta.uom_currency_flag <> 1) ' + 'and formula.is_formula_used = 1');
 
 
         for (let rowName in resultFormula) {
@@ -380,10 +380,10 @@ function DbArtefactController($, dbConnection) {
      * For temporary tables "SESSION_ID" is added to the set of primary keys.
      * sTableNameSuffix    "_ext", "_temporary_ext", "_ext_staging"
      */
-    async function hdiGenerateTableContent(oBusinessObject, sTableNameSuffix, bDoDelete) {
+    function hdiGenerateTableContent(oBusinessObject, sTableNameSuffix, bDoDelete) {
         let mPrimaryKeys = oBusinessObject.primaryKeys;
 
-        await checkTableName(oBusinessObject.tableName + sTableNameSuffix);
+        checkTableName(oBusinessObject.tableName + sTableNameSuffix);
 
         let sSql = 'column table "' + oBusinessObject.tableName + sTableNameSuffix + '" (';
         if (sTableNameSuffix === '_temporary_ext') {
@@ -420,7 +420,7 @@ function DbArtefactController($, dbConnection) {
         return sSql;
     }
 
-    async function prepareExtensionTables(aUpsertList, bDoDelete) {
+    function prepareExtensionTables(aUpsertList, bDoDelete) {
         for (let sBusinessObjectName in oContext) {
             let oBusinessObject = oContext[sBusinessObjectName];
             if (helpers.isNullOrUndefined(oBusinessObject.tableName)) {
@@ -429,32 +429,32 @@ function DbArtefactController($, dbConnection) {
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
             }
 
-            await $.trace.info('processing extension tables for business object ' + sBusinessObjectName);
+            $.trace.info('processing extension tables for business object ' + sBusinessObjectName);
             if (helpers.isNullOrUndefined(oBusinessObject.primaryKeys)) {
                 let developerInfo = 'extension table was not defined for business object ' + sBusinessObjectName;
                 $.trace.error(developerInfo);
                 throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
             }
 
-            let sPathInContainer = await getBetterName(oBusinessObject.tableName + '_ext.hdbtable');
-            let sContent = await hdiGenerateTableContent(oBusinessObject, '_ext', bDoDelete);
+            let sPathInContainer = getBetterName(oBusinessObject.tableName + '_ext.hdbtable');
+            let sContent = hdiGenerateTableContent(oBusinessObject, '_ext', bDoDelete);
             aUpsertList.push({
                 PATH: sPathInContainer,
                 CONTENT: sContent
             });
 
-            sPathInContainer = await getBetterName(oBusinessObject.tableName + '_temporary_ext.hdbtable');
+            sPathInContainer = getBetterName(oBusinessObject.tableName + '_temporary_ext.hdbtable');
             if (oBusinessObject.hasTemporaryTable) {
-                let sContent = await hdiGenerateTableContent(oBusinessObject, '_temporary_ext', bDoDelete);
+                let sContent = hdiGenerateTableContent(oBusinessObject, '_temporary_ext', bDoDelete);
                 aUpsertList.push({
                     PATH: sPathInContainer,
                     CONTENT: sContent
                 });
             }
 
-            sPathInContainer = await getBetterName(oBusinessObject.tableName + '_ext_staging.hdbtable');
+            sPathInContainer = getBetterName(oBusinessObject.tableName + '_ext_staging.hdbtable');
             if (oBusinessObject.hasStagingTable) {
-                let sContent = await hdiGenerateTableContent(oBusinessObject, '_ext_staging', bDoDelete);
+                let sContent = hdiGenerateTableContent(oBusinessObject, '_ext_staging', bDoDelete);
                 aUpsertList.push({
                     PATH: sPathInContainer,
                     CONTENT: sContent
@@ -463,10 +463,10 @@ function DbArtefactController($, dbConnection) {
         }
     }
 
-    async function prepareDbArtefact(sDbArtifactName, aUpsertList, sSuffix) {
-        let mDbArtefactsMetadata = await getDbArtefactsMetadata();
+    function prepareDbArtefact(sDbArtifactName, aUpsertList, sSuffix) {
+        let mDbArtefactsMetadata = getDbArtefactsMetadata();
         let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
-        await $.trace.info('processing prepare db artefacts ' + sDbArtifactName);
+        $.trace.info('processing prepare db artefacts ' + sDbArtifactName);
         if (helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
             let developerInfo = 'DB artefact ' + sDbArtifactName + ' has no defined template';
             $.trace.error(developerInfo);
@@ -482,9 +482,9 @@ function DbArtefactController($, dbConnection) {
             sPathInContainer = sContainerSrcRootPath + 'afl/' + oDbArtefact.name + sSuffix;
         } else {
             if (helpers.isNullOrUndefined(oDbArtefact.name)) {
-                sPathInContainer = await getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
+                sPathInContainer = getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
             } else {
-                sPathInContainer = await getBetterName(oDbArtefact.name + sSuffix);
+                sPathInContainer = getBetterName(oDbArtefact.name + sSuffix);
             }
         }
         aUpsertList.push({
@@ -497,9 +497,9 @@ function DbArtefactController($, dbConnection) {
 
 
     async function deleteDbArtefact(sDbArtifactName, aDeleteList, sSuffix) {
-        let mDbArtefactsMetadata = await getDbArtefactsMetadata();
+        let mDbArtefactsMetadata = getDbArtefactsMetadata();
         let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
-        await $.trace.info('processing delete db artefacts ' + sDbArtifactName);
+        $.trace.info('processing delete db artefacts ' + sDbArtifactName);
         if (helpers.isNullOrUndefinedOrEmpty(oDbArtefact.templateName) || helpers.isNullOrUndefinedOrEmpty(oDbArtefact.packageName)) {
             let developerInfo = 'DB artefact ' + sDbArtifactName + ' has no defined template';
             $.trace.error(developerInfo);
@@ -512,9 +512,9 @@ function DbArtefactController($, dbConnection) {
             sPathInContainer = sContainerSrcRootPath + 'afl/' + oDbArtefact.name + sSuffix;
         } else {
             if (helpers.isNullOrUndefined(oDbArtefact.name)) {
-                sPathInContainer = await getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
+                sPathInContainer = getBetterName(oDbArtefact.packageName + '::' + sDbArtifactName + sSuffix);
             } else {
-                sPathInContainer = await getBetterName(oDbArtefact.name + sSuffix);
+                sPathInContainer = getBetterName(oDbArtefact.name + sSuffix);
             }
         }
         aDeleteList.push(sPathInContainer);
@@ -582,14 +582,14 @@ function DbArtefactController($, dbConnection) {
 
     async function setContext() {
         if (helpers.isNullOrUndefined(oContext)) {
-            oContext = that.createContextObject();
+            oContext = await that.createContextObject();
         }
     }
 
 
 
 
-    function acquireExclusiveLock() {
+    async function  acquireExclusiveLock() {
         if (!bIsLocked) {
 
 
@@ -636,13 +636,13 @@ function DbArtefactController($, dbConnection) {
             if (!helpers.isNullOrUndefined(sWhatRunnedIt) && sWhatRunnedIt == 'PreUpgrade') {
                 await insertInstallationLogsOnUpgrade('finished');
             }
-            await closeHDIConnection(false);
+            closeHDIConnection(false);
         } catch (err) {
             $.trace.error('error hdiModifyFiles: ' + err);
             if (!helpers.isNullOrUndefined(sWhatRunnedIt) && sWhatRunnedIt == 'PreUpgrade') {
                 await insertInstallationLogsOnUpgrade('error');
             }
-            await closeHDIConnection(true);
+            closeHDIConnection(true);
             oContext = null;
             let developerInfo = 'hdiModifyFiles error: ' + err;
             throw new PlcException(messageCode.GENERAL_UNEXPECTED_EXCEPTION, developerInfo);
@@ -691,11 +691,11 @@ function DbArtefactController($, dbConnection) {
         bHDIOpened = false;
     }
 
-    async function prepareAnalyticPrivilege(aUpsertList, bDummy) {
+    function prepareAnalyticPrivilege(aUpsertList, bDummy) {
         var sViewPrivilege = '<?xml version="1.0" encoding="UTF-8"?>\n' + '<Privilege:analyticPrivilege xmlns:Privilege="http://www.sap.com/ndb/BiModelPrivilege.ecore" id="sap.plc.analytics.viewsCF::ap_analytics_general_cust" privilegeType="SQL_ANALYTIC_PRIVILEGE" schemaVersion="1.1">\n' + '<descriptions defaultDescription="ap_analytics_general_cust"/>\n' + '<securedModels>\n' + '    <modelUri>sap.plc.analytics.viewsCF::V_EXT_DUMMY_CUST</modelUri>\n';
 
         if (!bDummy) {
-            let mDbArtefactsMetadata = await getDbArtefactsMetadata();
+            let mDbArtefactsMetadata = getDbArtefactsMetadata();
             for (let sDbArtifactName in mDbArtefactsMetadata) {
                 let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
 
@@ -725,31 +725,31 @@ function DbArtefactController($, dbConnection) {
         if (!bDoDelete) {
             await loadAndCheckCustomFields();
         }
-        await prepareExtensionTables(aUpsertList, bDoDelete);
+        prepareExtensionTables(aUpsertList, bDoDelete);
 
 
-        let mDbArtefactsMetadata = await getDbArtefactsMetadata();
+        let mDbArtefactsMetadata = getDbArtefactsMetadata();
         for (let sDbArtifactName in mDbArtefactsMetadata) {
             let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
 
             if (oDbArtefact.type === 'hdbcalculationview') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbcalculationview');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbcalculationview');
             } else if (oDbArtefact.type === 'hdbfunction') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbfunction');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbfunction');
             } else if (oDbArtefact.type === 'SQLScript') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbprocedure');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbprocedure');
             } else if (oDbArtefact.type === 'Table') {
                 if (sDbArtifactName.startsWith('gtt_')) {
-                    await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbdropcreatetable');
+                    prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbdropcreatetable');
                 } else {
-                    await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbtable');
+                    prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbtable');
                 }
             } else if (oDbArtefact.type === 'TableType' || oDbArtefact.type === 'Structure') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbtabletype');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbtabletype');
             } else if (oDbArtefact.type === 'SQLView') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbview');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbview');
             } else if (oDbArtefact.type === 'AFL') {
-                await prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbafllangprocedure');
+                prepareDbArtefact(sDbArtifactName, aUpsertList, '.hdbafllangprocedure');
             } else {
                 let developerInfo = 'unknown DB artefact type: ' + oDbArtefact.type;
                 $.trace.error(developerInfo);
@@ -757,7 +757,7 @@ function DbArtefactController($, dbConnection) {
             }
         }
 
-        await prepareAnalyticPrivilege(aUpsertList, false);
+        prepareAnalyticPrivilege(aUpsertList, false);
 
         aUpsertList.push({
             PATH: sContainerSrcRootPath + '.hdinamespace',
@@ -775,13 +775,13 @@ function DbArtefactController($, dbConnection) {
         await hdiModifyFiles(aUpsertList, []);
 
         for (let boName in oContext) {
-            that.clearExtensionTables(oContext[boName], bDoDelete);
+            await that.clearExtensionTables(oContext[boName], bDoDelete);
         }
         oContext = null;
     }
 
-    function getSchema() {
-        return dbConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
+    async function getSchema() {
+        return await dbConnection.executeQuery(`SELECT CURRENT_SCHEMA FROM DUMMY`)[0].CURRENT_SCHEMA;
     }
 
     async function getHDICredentials() {
@@ -855,7 +855,7 @@ function DbArtefactController($, dbConnection) {
         let aDeleteList = [];
         let aUpsertList = [];
 
-        let mDbArtefactsMetadata = await getDbArtefactsMetadata();
+        let mDbArtefactsMetadata = getDbArtefactsMetadata();
 
         for (let sDbArtifactName in mDbArtefactsMetadata) {
             let oDbArtefact = mDbArtefactsMetadata[sDbArtifactName];
@@ -872,7 +872,7 @@ function DbArtefactController($, dbConnection) {
                 await deleteDbArtefact(sDbArtifactName, aDeleteList, '.hdbafllangprocedure');
             }
         }
-        await prepareAnalyticPrivilege(aUpsertList, true);
+        prepareAnalyticPrivilege(aUpsertList, true);
 
 
         await hdiModifyFiles(aUpsertList, aDeleteList, sWhatRunnedIt);

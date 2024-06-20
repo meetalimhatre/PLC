@@ -24,7 +24,7 @@ async function run(request, response) {
     $.getPlcUsername = () => $.session.getUsername() || 'TECHNICAL_USER';
     if (request.method === $.net.http.GET) {
         if (Object.keys(request.parameters).length === 0) {
-            await redirect();
+            redirect();
         } else if (request.parameters.get('info') === 'check') {
             await info.checkPreviousInstallationRun(response, dbConnection);
         } else if (request.parameters.get('info') === 'env') {
@@ -41,11 +41,11 @@ async function run(request, response) {
     }
 }
 
-async function checkPostinstallPrivilege() {
+function checkPostinstallPrivilege() {
     return $.session.hasAppPrivilege(oPrivileges.admin);
 }
 
-async function redirect() {
+function redirect() {
     $.response.contentType = 'html/text';
     $.response.status = $.net.http.MOVED_PERMANENTLY;
     $.response.headers.set('location', '/admin/tools/index.html');

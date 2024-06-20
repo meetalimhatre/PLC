@@ -9,7 +9,7 @@ async function checkAvailability($, oRequest, oResponse) {
         return;
     }
 
-    const oTenantDBClients = await tenantUtil.getAllProvisionedTenantDBClients();
+    const oTenantDBClients = tenantUtil.getAllProvisionedTenantDBClients();
     const aDBClients = oTenantDBClients.clients;
     if (aDBClients.length === 0) {
         oResponse.status = $.net.http.OK;

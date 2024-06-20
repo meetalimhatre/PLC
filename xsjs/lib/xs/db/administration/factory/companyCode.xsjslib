@@ -66,7 +66,7 @@ function CompanyCode(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.COMPANY_CODE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            const rsCompanyCodes = dbConnection.executeQuery(stmt);
+            const rsCompanyCodes = await dbConnection.executeQuery(stmt);
             oReturnObject[BusinessObjectsEntities.COMPANY_CODE_ENTITIES] = _.values(rsCompanyCodes);
 
 
@@ -123,7 +123,7 @@ async function getCompanyCodeEntities(aCompanyCodesIds, masterdataTimestamp, sLa
  				 	and (plcTextTable._VALID_TO > '${ masterdataTimestamp }' or plcTextTable._VALID_TO is null)  
  				 where plcTable._VALID_FROM <= '${ masterdataTimestamp }' and (plcTable._VALID_TO > '${ masterdataTimestamp }' or plcTable._VALID_TO is null)
  				 	and  ( plcTable.COMPANY_CODE_ID in ('${ aCompanyCodesIds }') )`;
-        return _.values(dbConnection.executeQuery(stmt));
+        return _.values(await dbConnection.executeQuery(stmt));
     }
     return [];
 }

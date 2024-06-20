@@ -1,5 +1,5 @@
-const oInstanceMananger = require('@sap/instance-manager');
-const async = require('@sap/async-xsjs');
+const oInstanceMananger = require('instance-manager');
+const async = require('async');
 const oXsEnv = require('@sap/xsenv');
 const options = oXsEnv.getServices({ 'hana': { tag: 'hana' } });
 const postgres = require('./postgres-cf').postgres;
@@ -24,8 +24,8 @@ var tables = Object.freeze({ database: 't_tenant' });
  * @returns {aTenants} array of provisioned tenants: 
  * [{sub_account_id, global_account_id, sub_domain, database_id, hdi_container_id, state, created_on, last_modified_on}]
  */
-async function getProvisionedTenants() {
-    var postGresClient = await module.exports.getConnection(); // "module.exports." is for easy mock in testing
+function getProvisionedTenants() {
+    var postGresClient = module.exports.getConnection(); // "module.exports." is for easy mock in testing
     const sSql = `SELECT sub_account_id, sub_domain, created_on FROM ${ tables.database } WHERE STATE = 3`;
     var aTenants = [];
     try {
@@ -44,11 +44,11 @@ async function getProvisionedTenants() {
  * sTenantID: tenant subaccount id
  * status: update satus
  */
-async function updateTenantStatus(sTenantID, sStatus) {
+function updateTenantStatus(sTenantID, sStatus) {
     if (!sTenantID) {
         throw new Error('emtpy tenant id input for tenant status update');
     }
-    var postGresClient = await module.exports.getConnection();
+    var postGresClient = module.exports.getConnection();
     let sUpdateSql = `UPDATE ${ tables.database } SET STATE = ${ sStatus } WHERE SUB_ACCOUNT_ID = '${ sTenantID }'`;
     try {
         postGresClient.executeUpdate(sUpdateSql);
@@ -59,7 +59,7 @@ async function updateTenantStatus(sTenantID, sStatus) {
     }
 }
 
-async function getConnection() {
+function getConnection() {
     var oPostgresConfig = oXsEnv.cfServiceCredentials({ label: 'postgresql-db' });
     return postgres(oPostgresConfig);
 }
@@ -68,11 +68,11 @@ async function getConnection() {
  * Get all tenants credentials
  * @returns {aTenantInfo} array of tenant info: [{tenant_id, credentials}]
  */
-async function getAllTenantRelatedInfo() {
+function getAllTenantRelatedInfo() {
     let aTenantInfo = [];
     try {
         aTenantInfo = async.waterfall.sync([
-            async function (callback) {
+            function (callback) {
                 oInstanceMananger.create(options.hana, callback);
             },
             function (oInstMananger, callback) {
@@ -91,7 +91,7 @@ async function getAllTenantRelatedInfo() {
 * get connection for a specific tenant ID 
 * @returns hdb connection
 */
-async function getConnectionByTenantID(sTenantID) {
+function getConnectionByTenantID(sTenantID) {
     let oInstance = async.waterfall.sync([
         callback => {
             oInstanceMananger.create(options['hana'], callback);
@@ -107,7 +107,7 @@ async function getConnectionByTenantID(sTenantID) {
  * get clients for all provisioned tenant DB 
  * @returns object {message, client: [{tenantId, tenantName, client}]}
  */
-async function getAllProvisionedTenantDBClients() {
+function getAllProvisionedTenantDBClients() {
     let oResult = {
         message: '',
         clients: []
@@ -123,7 +123,7 @@ async function getAllProvisionedTenantDBClients() {
 
     const aTenantInfos = module.exports.getAllTenantRelatedInfo();
 
-    aTenants.forEach(async function (tenant) {
+    aTenants.forEach( function (tenant) {
         let sTenantId = tenant.sub_account_id;
         let dCreatedOn = tenant.created_on;
         let tenantInfo = aTenantInfos.find(o => o.tenant_id === sTenantId);

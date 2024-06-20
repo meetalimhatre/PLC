@@ -47,7 +47,7 @@ const Sequences = Object.freeze({
     costing_sheet_overhead_row_formula: 'sap.plc.db.sequence::s_costing_sheet_overhead_row_formula'
 });
 
-async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
+function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
     this.helper = new Helper($, hQuery, dbConnection);
     this.metadata = new Metadata($, hQuery, null, sUserId);
@@ -103,7 +103,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         try {
             var procedure = dbConnection.loadProcedure(Procedures.costing_sheet_row_read);
-            var result = procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring);
+            var result = await procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring);
 
             oReturnObject[BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES] = Array.slice(result.OT_COSTING_SHEET_ROW);
             oReturnObject[BusinessObjectsEntities.COSTING_SHEET_ROW_TEXT_ENTITIES] = Array.slice(result.OT_COSTING_SHEET_ROW__TEXT);
@@ -150,7 +150,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetOverheadRowItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ROW_ENTITIES];
         _.each(aCostingSheetOverheadRowItems, async function (oRecord) {
             try {
-                var oResultDelete = that.removeCostingSheetOverheadRowRow(oRecord, sMasterDataDate);
+                var oResultDelete = await that.removeCostingSheetOverheadRowRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ROW_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -160,7 +160,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetOverheadItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ENTITIES];
         _.each(aCostingSheetOverheadItems, async function (oRecord) {
             try {
-                var oResultDelete = that.removeCostingSheetOverheadRow(oRecord, sMasterDataDate);
+                var oResultDelete = await that.removeCostingSheetOverheadRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -170,7 +170,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetRowBaseRowItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_BASE_ROW_ENTITIES];
         _.each(aCostingSheetRowBaseRowItems, async function (oRecord) {
             try {
-                var oResultDelete = that.removeCostingSheetBaseRowRow(oRecord, sMasterDataDate);
+                var oResultDelete = await that.removeCostingSheetBaseRowRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_BASE_ROW_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -180,7 +180,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetRowBaseItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES];
         _.each(aCostingSheetRowBaseItems, async function (oRecord) {
             try {
-                var oResultDelete = that.removeCostingSheetBaseRow(oRecord, sMasterDataDate);
+                var oResultDelete = await that.removeCostingSheetBaseRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -190,7 +190,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aBatchMainItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES];
         _.each(aBatchMainItems, async function (oRecord) {
             try {
-                var oResultDelete = that.removeCostingSheetRowRow(oRecord, sMasterDataDate);
+                var oResultDelete = await that.removeCostingSheetRowRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -211,7 +211,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES] = [];
         _.each(aBatchDependenciesItems, async function (oRecord) {
             try {
-                var oCostingSheetRowDependenciesResultDelete = that.removeCostingSheetRowDependencies(oRecord, sMasterDataDate);
+                var oCostingSheetRowDependenciesResultDelete = await that.removeCostingSheetRowDependencies(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES, e, MessageOperation.DELETE, oResult);
@@ -247,7 +247,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         oResult = apiHelpers.removeRow(oCostingSheetOverhead, sMasterDataDate, oConfiguration, hQuery);
 
         //delete entries from table t_costing_sheet_overhead_row
-        var iDeletedRecords = apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverheadRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetOverhead, sMasterDataDate, hQuery);
+        var iDeletedRecords = await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverheadRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetOverhead, sMasterDataDate, hQuery);
 
         return oResult;
 
@@ -277,7 +277,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ]
         };
 
-        that.deleteCostingSheetOverheadRowFormula(oCostingSheetOverheadRow, oConfiguration);
+        await that.deleteCostingSheetOverheadRowFormula(oCostingSheetOverheadRow, oConfiguration);
 
         return apiHelpers.removeRow(oCostingSheetOverheadRow, sMasterDataDate, oConfiguration, hQuery);
 
@@ -332,7 +332,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         oResult = apiHelpers.removeRow(oCostingSheetBase, sMasterDataDate, oConfiguration, hQuery);
 
         //delete entries from table t_costing_sheet_base_row
-        var iDeletedRecords = apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBaseRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetBase, sMasterDataDate, hQuery);
+        var iDeletedRecords = await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBaseRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetBase, sMasterDataDate, hQuery);
 
         return oResult;
 
@@ -395,7 +395,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         var oResult = [];
         var aFieldsValuesCostingSheetRowTable = apiHelpers.getColumnKeyValues(oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetRow);
-        var aCostingSheetRowRecords = apiHelpers.findValidEntriesInTable(Resources[sCostingSheetRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetRowTable, sMasterDataDate, hQuery);
+        var aCostingSheetRowRecords = await apiHelpers.findValidEntriesInTable(Resources[sCostingSheetRow].dbobjects.plcTable, oConfiguration.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetRowTable, sMasterDataDate, hQuery);
 
 
         oResult = apiHelpers.removeRow(oCostingSheetRow, sMasterDataDate, oConfiguration, hQuery);
@@ -403,21 +403,21 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         if (aCostingSheetRowRecords.length !== 0) {
             if (!helpers.isNullOrUndefined(aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID)) {
                 that.deleteCostingSheetOverheadFormulas(aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID);
-                apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverheadRow].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID], sMasterDataDate, hQuery);
-                apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverhead].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID], sMasterDataDate, hQuery);
+                await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverheadRow].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID], sMasterDataDate, hQuery);
+                await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetOverhead].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_OVERHEAD_ID], sMasterDataDate, hQuery);
             }
         }
 
         //delete entries from table t_costing_sheet_base
         if (aCostingSheetRowRecords.length !== 0) {
             if (!helpers.isNullOrUndefined(aCostingSheetRowRecords[0].COSTING_SHEET_BASE_ID)) {
-                apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBaseRow].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_BASE_ID], sMasterDataDate, hQuery);
-                apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBase].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_BASE_ID], sMasterDataDate, hQuery);
+                await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBaseRow].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_BASE_ID], sMasterDataDate, hQuery);
+                await apiHelpers.updateEntriesWithValidToInTable(Resources[sCostingSheetBase].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, [aCostingSheetRowRecords[0].COSTING_SHEET_BASE_ID], sMasterDataDate, hQuery);
             }
         }
 
         //remove all dependencies for this row
-        this.removeAllDependeciesforCostingSheetRow(oCostingSheetRow, sMasterDataDate);
+        await this.removeAllDependeciesforCostingSheetRow(oCostingSheetRow, sMasterDataDate);
 
         return oResult;
     };
@@ -465,7 +465,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         aValues.push(oRecord.COSTING_SHEET_ID);
         aValues.push(oRecord.COSTING_SHEET_ROW_ID);
 
-        hQuery.statement(aStmtBuilder.join('')).execute(aValues);
+        await hQuery.statement(aStmtBuilder.join('')).execute(aValues);
     };
 
     /**
@@ -483,7 +483,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         aValues.push(oRecord.COSTING_SHEET_ID);
         aValues.push(oRecord.SOURCE_ROW_ID);
         aValues.push(oRecord.TARGET_ROW_ID);
-        hQuery.statement(aStmtBuilder.join('')).execute(aValues);
+        await hQuery.statement(aStmtBuilder.join('')).execute(aValues);
     };
 
     /**
@@ -499,13 +499,13 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         aValues.push(oRecord.COSTING_SHEET_ID);
         aValues.push(oRecord.COSTING_SHEET_ROW_ID);
         aValues.push(oRecord.LANGUAGE);
-        hQuery.statement(aStmtBuilder.join('')).execute(aValues);
+        await hQuery.statement(aStmtBuilder.join('')).execute(aValues);
     };
 
     this.validateFormulaString = async function () {
 
         var checkFormulaProcedure = dbConnection.loadProcedure(Procedures.checkFormula);
-        var result = checkFormulaProcedure();
+        var result = await checkFormulaProcedure();
         if (_.isArray(result.ERRORS) && result.ERRORS.length > 0) {
             var formulaUsed = {};
             var arrayOfErrors = [];
@@ -551,11 +551,11 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
                 if (helpers.isNullOrUndefined(oRecord.FORMULA_ID) && helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION) && helpers.isNullOrUndefined(oRecord.OVERHEAD_CUSTOM)) {
 
-                    that.deleteCostingSheetOverheadRowFormula(oRecord);
+                    await that.deleteCostingSheetOverheadRowFormula(oRecord);
 
                 } else {
 
-                    let dbFormulaId = that.getCostingSheetOverheadRowFormulaId(oRecord);
+                    let dbFormulaId = await that.getCostingSheetOverheadRowFormulaId(oRecord);
                     if (dbFormulaId != oRecord.FORMULA_ID) {
                         const sLogMessage = `Formula id is not found`;
                         $.trace.error(sLogMessage);
@@ -575,12 +575,12 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
                     if (helpers.isNullOrUndefined(oRecord.FORMULA_ID)) {
 
-                        oRecord.FORMULA_ID = that.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row_formula);
+                        oRecord.FORMULA_ID = await that.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row_formula);
                         oCostingSheetOverheadRowFormulaRecord.FORMULA_ID = oRecord.FORMULA_ID;
-                        that.insertCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
+                        await that.insertCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
                     } else {
 
-                        that.updateCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
+                        await that.updateCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
                     }
                 }
 
@@ -616,7 +616,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetRowBaseRowItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_BASE_ROW_ENTITIES];
         _.each(aCostingSheetRowBaseRowItems, async function (oRecord) {
             try {
-                var oResultUpdate = that.updateCostingSheetBaseRowRow(oRecord, sMasterDataDate);
+                var oResultUpdate = await that.updateCostingSheetBaseRowRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_BASE_ROW_ENTITIES].push(oResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -627,7 +627,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetRowBaseItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES];
         _.each(aCostingSheetRowBaseItems, async function (oRecord) {
             try {
-                var oResultUpdate = that.updateCostingSheetBaseRow(oRecord, sMasterDataDate);
+                var oResultUpdate = await that.updateCostingSheetBaseRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES].push(oResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -639,12 +639,12 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         _.each(aBatchMainItems, async function (oRecord) {
             try {
                 apiHelpers.checkColumns(oRecord, aMetadataFields);
-                var oMainResultUpdate = that.updateCostingSheetRowRow(oRecord, sMasterDataDate);
+                var oMainResultUpdate = await that.updateCostingSheetRowRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES].push(oMainResultUpdate);
                 if (!_.isEmpty(aFoundPlcRecordsAccountGroup)) {
                     oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES].push(aFoundPlcRecordsAccountGroup);
                 }
-                that.removeAllDependeciesforCostingSheetRow(oRecord, sMasterDataDate);
+                await that.removeAllDependeciesforCostingSheetRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES, e, MessageOperation.UPDATE, oResult);
@@ -655,7 +655,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         _.each(aBatchTextItems, async function (oRecord) {
             try {
                 that.removeTextIfExists(oRecord, sMasterDataDate);
-                var oTextResultUpdate = that.insertCostingSheetRowTextRow(oRecord, sMasterDataDate);
+                var oTextResultUpdate = await that.insertCostingSheetRowTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_TEXT_ENTITIES].push(oTextResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -668,7 +668,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         _.each(aBatchDepItems, async function (oRecord) {
             try {
                 that.removeDependecyIfExists(oRecord, sMasterDataDate);
-                var oDependenciesResultInsert = that.insertCostingSheetRowDependenciesRow(oRecord, sMasterDataDate);
+                var oDependenciesResultInsert = await that.insertCostingSheetRowDependenciesRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES].push(oDependenciesResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -702,9 +702,9 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ]
         };
 
-        var oResult = apiHelpers.updateRow(oCostingSheetOverheadRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        var oResult = await apiHelpers.updateRow(oCostingSheetOverheadRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
-        this.checkReferenceObjectsCostingSheetOverheadRow(oCostingSheetOverheadRow, sMasterDataDate);
+        await this.checkReferenceObjectsCostingSheetOverheadRow(oCostingSheetOverheadRow, sMasterDataDate);
 
         return oResult;
 
@@ -729,7 +729,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             aPartialKeyPlcTableColumns: ['COSTING_SHEET_OVERHEAD_ID']
         };
 
-        var oResult = apiHelpers.updateRow(oCostingSheetOverhead, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        var oResult = await apiHelpers.updateRow(oCostingSheetOverhead, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
         return oResult;
 
@@ -755,7 +755,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             aPartialKeyPlcTableColumns: ['COSTING_SHEET_BASE_ID']
         };
 
-        var oResult = apiHelpers.updateRow(oCostingSheetBaseRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        var oResult = await apiHelpers.updateRow(oCostingSheetBaseRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
         return oResult;
 
@@ -780,7 +780,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             aPartialKeyPlcTableColumns: ['COSTING_SHEET_BASE_ID']
         };
 
-        var oResult = apiHelpers.updateRow(oCostingSheetBase, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        var oResult = await apiHelpers.updateRow(oCostingSheetBase, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
         return oResult;
 
@@ -814,7 +814,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             oConfiguration.aFieldsNotNull.push('ACCOUNT_GROUP_AS_BASE_ID');
         }
 
-        await checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow);
+        checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow);
 
 
         var iRowType = oCostingSheetRow.COSTING_SHEET_ROW_TYPE;
@@ -824,9 +824,9 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             oCostingSheetRow.IS_RELEVANT_FOR_TOTAL3 = 1;
         }
 
-        var oResult = apiHelpers.updateRow(oCostingSheetRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        var oResult = await apiHelpers.updateRow(oCostingSheetRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
-        this.checkReferenceObjectsCostingSheetRow(oCostingSheetRow, sMasterDataDate);
+        await this.checkReferenceObjectsCostingSheetRow(oCostingSheetRow, sMasterDataDate);
 
         return oResult;
 
@@ -837,7 +837,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    async function checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow) {
+    function checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow) {
 
 
         var sCostingSheetRowType = oCostingSheetRow.COSTING_SHEET_ROW_TYPE;
@@ -871,11 +871,11 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.checkReferenceObjectsCostingSheetRow = function (oCostingSheetRow, sMasterDataDate) {
+    this.checkReferenceObjectsCostingSheetRow = async function (oCostingSheetRow, sMasterDataDate) {
 
-        this.checkReferenceObjectsCostingSheetBase(oCostingSheetRow, sMasterDataDate);
-        this.checkReferenceObjectsCostingSheetOverhead(oCostingSheetRow, sMasterDataDate);
-        this.checkReferenceObjectsAccountGroup(oCostingSheetRow, sMasterDataDate);
+        await this.checkReferenceObjectsCostingSheetBase(oCostingSheetRow, sMasterDataDate);
+        await this.checkReferenceObjectsCostingSheetOverhead(oCostingSheetRow, sMasterDataDate);
+        await this.checkReferenceObjectsAccountGroup(oCostingSheetRow, sMasterDataDate);
 
     };
 
@@ -893,7 +893,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             const aKeyFieldsRefObjectPlcTable = ['CONTROLLING_AREA_ID'];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oControllingArea = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oControllingArea, sMasterDataDate, BusinessObjectTypes.ControllingArea, hQuery);
+            await apiHelpers.checkObjectExists(oControllingArea, sMasterDataDate, BusinessObjectTypes.ControllingArea, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.COMPANY_CODE_ID) && oCostingSheetOverheadRow.COMPANY_CODE_ID !== '') {
@@ -902,7 +902,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             const aKeyFieldsRefObjectPlcTable = ['COMPANY_CODE_ID'];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oCompanyCode = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oCompanyCode, sMasterDataDate, BusinessObjectTypes.CompanyCode, hQuery);
+            await apiHelpers.checkObjectExists(oCompanyCode, sMasterDataDate, BusinessObjectTypes.CompanyCode, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.BUSINESS_AREA_ID) && oCostingSheetOverheadRow.BUSINESS_AREA_ID !== '') {
@@ -911,7 +911,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             const aKeyFieldsRefObjectPlcTable = ['BUSINESS_AREA_ID'];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oBusinessArea = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oBusinessArea, sMasterDataDate, BusinessObjectTypes.BusinessArea, hQuery);
+            await apiHelpers.checkObjectExists(oBusinessArea, sMasterDataDate, BusinessObjectTypes.BusinessArea, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.PROFIT_CENTER_ID) && oCostingSheetOverheadRow.PROFIT_CENTER_ID !== '') {
@@ -926,7 +926,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oProfitCenter = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oProfitCenter, sMasterDataDate, BusinessObjectTypes.ProfitCenter, hQuery);
+            await apiHelpers.checkObjectExists(oProfitCenter, sMasterDataDate, BusinessObjectTypes.ProfitCenter, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.PLANT_ID) && oCostingSheetOverheadRow.PLANT_ID !== '') {
@@ -935,7 +935,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             const aKeyFieldsRefObjectPlcTable = ['PLANT_ID'];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oPlant = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oPlant, sMasterDataDate, BusinessObjectTypes.Plant, hQuery);
+            await apiHelpers.checkObjectExists(oPlant, sMasterDataDate, BusinessObjectTypes.Plant, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.ACTIVITY_TYPE_ID) && oCostingSheetOverheadRow.ACTIVITY_TYPE_ID !== '') {
@@ -950,7 +950,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oActivityType = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oActivityType, sMasterDataDate, BusinessObjectTypes.ActivityType, hQuery);
+            await apiHelpers.checkObjectExists(oActivityType, sMasterDataDate, BusinessObjectTypes.ActivityType, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.COST_CENTER_ID) && oCostingSheetOverheadRow.COST_CENTER_ID !== '') {
@@ -965,7 +965,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oCostCenter = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oCostCenter, sMasterDataDate, BusinessObjectTypes.CostCenter, hQuery);
+            await apiHelpers.checkObjectExists(oCostCenter, sMasterDataDate, BusinessObjectTypes.CostCenter, hQuery);
         }
 
         if (!helpers.isNullOrUndefined(oCostingSheetOverheadRow.WORK_CENTER_ID) && oCostingSheetOverheadRow.WORK_CENTER_ID !== '') {
@@ -980,7 +980,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ];
             const aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheetOverheadRow);
             const oWorkCenter = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
-            apiHelpers.checkObjectExists(oWorkCenter, sMasterDataDate, BusinessObjectTypes.WorkCenter, hQuery);
+            await apiHelpers.checkObjectExists(oWorkCenter, sMasterDataDate, BusinessObjectTypes.WorkCenter, hQuery);
         }
     };
 
@@ -1007,7 +1007,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         if (!helpers.isNullOrUndefined(oCostingSheetRow.COSTING_SHEET_BASE_ID)) {
             var aFieldsValuesCostingSheetBasePlcTable = apiHelpers.getColumnKeyValues(oConfigurationBase.aPartialKeyPlcTableColumns, oCostingSheetRow);
-            var aFoundPlcRecords = apiHelpers.findValidEntriesInTable(CostingSheetResources[sCostingSheetBase].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetBasePlcTable, sMasterDataDate, hQuery);
+            var aFoundPlcRecords = await apiHelpers.findValidEntriesInTable(CostingSheetResources[sCostingSheetBase].dbobjects.plcTable, oConfigurationBase.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetBasePlcTable, sMasterDataDate, hQuery);
             if (aFoundPlcRecords.length === 0) {
                 const sLogMessage = `No costing sheet base found in t_costing_sheet_base.`;
                 $.trace.error(sLogMessage);
@@ -1058,7 +1058,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         oMessageDetails.administrationObjType = AdministrationObjType.MAIN_OBJ;
         if (!helpers.isNullOrUndefined(oCostingSheetRow.COSTING_SHEET_OVERHEAD_ID)) {
             aFieldsValuesCostingSheetOverheadPlcTable = apiHelpers.getColumnKeyValues(oConfigurationOverhead.aPartialKeyPlcTableColumns, oCostingSheetRow);
-            aFoundPlcRecords = apiHelpers.findValidEntriesInTable(CostingSheetResources[sCostingSheetOverhead].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetOverheadPlcTable, sMasterDataDate, hQuery);
+            aFoundPlcRecords = await apiHelpers.findValidEntriesInTable(CostingSheetResources[sCostingSheetOverhead].dbobjects.plcTable, oConfigurationOverhead.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetOverheadPlcTable, sMasterDataDate, hQuery);
             if (aFoundPlcRecords.length === 0) {
                 const sLogMessage = `No costing sheet overhead found in t_costing_sheet_overhead`;
                 $.trace.error(sLogMessage);
@@ -1068,7 +1068,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         if (!helpers.isNullOrUndefined(oCostingSheetRow.CREDIT_ACCOUNT_ID)) {
             aFieldsValuesCostingSheetOverheadPlcTable = apiHelpers.getColumnKeyValues(oConfigurationOverhead.aOtherNonTemporaryPlcTableColumns, oCostingSheetRow);
-            aFoundPlcRecords = apiHelpers.findValidEntriesInTable(Resources[sAccount].dbobjects.plcTable, oConfigurationAccount.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetOverheadPlcTable, sMasterDataDate, hQuery);
+            aFoundPlcRecords = await apiHelpers.findValidEntriesInTable(Resources[sAccount].dbobjects.plcTable, oConfigurationAccount.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetOverheadPlcTable, sMasterDataDate, hQuery);
             if (aFoundPlcRecords.length === 0) {
                 const sLogMessage = `No valid account found in t_account`;
                 $.trace.error(sLogMessage);
@@ -1097,7 +1097,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         if (!helpers.isNullOrUndefined(oCostingSheetRow.ACCOUNT_GROUP_AS_BASE_ID)) {
             var aFieldsValuesCostingSheetAccountGroupPlcTable = apiHelpers.getColumnKeyValues(oConfiguration.aPartialKeyPlcTableColumns, oCostingSheetRow);
-            var aFoundPlcRecords = apiHelpers.findValidEntriesInTable(Resources[sAccountGroup].dbobjects.plcTable, oConfigurationAccountGroup.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetAccountGroupPlcTable, sMasterDataDate, hQuery);
+            var aFoundPlcRecords = await apiHelpers.findValidEntriesInTable(Resources[sAccountGroup].dbobjects.plcTable, oConfigurationAccountGroup.aPartialKeyPlcTableColumns, aFieldsValuesCostingSheetAccountGroupPlcTable, sMasterDataDate, hQuery);
             if (aFoundPlcRecords.length === 0) {
                 const sLogMessage = `No account group base found in t_account_group`;
                 $.trace.error(sLogMessage);
@@ -1123,7 +1123,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             return costingSheetRow.COSTING_SHEET_OVERHEAD_ID === oRecord.COSTING_SHEET_OVERHEAD_ID;
         });
 
-        const oCostingSheet = dbConnection.executeQuery(`select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_costing_sheet" where COSTING_SHEET_ID = '${ oCostingSheetRow.COSTING_SHEET_ID }' and (_VALID_TO is null or _VALID_TO > '${ sMasterDataDate }')`);
+        const oCostingSheet = await dbConnection.executeQuery(`select CONTROLLING_AREA_ID from "sap.plc.db::basis.t_costing_sheet" where COSTING_SHEET_ID = '${ oCostingSheetRow.COSTING_SHEET_ID }' and (_VALID_TO is null or _VALID_TO > '${ sMasterDataDate }')`);
         oRecord.CONTROLLING_AREA_ID = oCostingSheet.length > 0 && !helpers.isNullOrUndefined(oCostingSheet[0].CONTROLLING_AREA_ID) ? oCostingSheet[0].CONTROLLING_AREA_ID : null;
         return oRecord;
     }
@@ -1134,7 +1134,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    async function checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies) {
+    function checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies) {
         var aCostingSheetRowsResultMap = new Map();
 
         aCostingSheetRowsResults.forEach(row => {
@@ -1209,10 +1209,10 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 					AND _VALID_FROM <= ?
 			`;
 
-            var aCostingSheetRowsResults = dbConnection.executeQuery(sStmt, sMasterDataDate, sMasterDataDate);
+            var aCostingSheetRowsResults = await dbConnection.executeQuery(sStmt, sMasterDataDate, sMasterDataDate);
 
             try {
-                await checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
+                checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
             } catch (e) {
                 oResult.hasErrors = true;
                 apiHelpers.createResponse(e.details.record, BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES, e, MessageOperation.UPDATE, oResult);
@@ -1232,7 +1232,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 					AND _VALID_FROM <= ?
 			`;
 
-            var aCostingSheetRowDependencies = dbConnection.executeQuery(sStmtDependencies, sMasterDataDate, sMasterDataDate);
+            var aCostingSheetRowDependencies = await dbConnection.executeQuery(sStmtDependencies, sMasterDataDate, sMasterDataDate);
 
             var aUniqueRowsFromDependencies = new Set();
             aCostingSheetRowDependencies.forEach(oDependecy => {
@@ -1251,10 +1251,10 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 						AND _VALID_FROM <= ?
 				`;
 
-                var aCostingSheetRowsResults = dbConnection.executeQuery(sStmtRows, sMasterDataDate, sMasterDataDate);
+                var aCostingSheetRowsResults = await dbConnection.executeQuery(sStmtRows, sMasterDataDate, sMasterDataDate);
 
                 try {
-                    await checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
+                    checkTotalFlagsForDependencies(aCostingSheetRowsResults, aCostingSheetRowDependencies);
                 } catch (e) {
                     oResult.hasErrors = true;
                     apiHelpers.createResponse(e.details.record, BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES, e, MessageOperation.UPDATE, oResult);
@@ -1288,7 +1288,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.insert = async function (oBatchItems, sMasterDataDate) {
+    this.insert = function (oBatchItems, sMasterDataDate) {
 
         var oResult = initResults();
 
@@ -1302,7 +1302,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
                 if (!helpers.isNullOrUndefined(oRecord.CREDIT_ACCOUNT_ID)) {
                     oRecord = await getControllingAreaId(oBatchItems, oRecord, sMasterDataDate);
                 }
-                var oResultInsert = that.insertCostingSheetOverheadRow(oRecord, sMasterDataDate);
+                var oResultInsert = await that.insertCostingSheetOverheadRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ENTITIES].push(oResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -1322,7 +1322,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
                 let oCostingSheetOverheadRowFormulaResultRecord;
                 if (!helpers.isNullOrUndefined(oRecord.FORMULA_STRING) || !helpers.isNullOrUndefined(oRecord.OVERHEAD_CUSTOM)) {
-                    oRecord.FORMULA_ID = that.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row_formula);
+                    oRecord.FORMULA_ID = await that.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row_formula);
                     if (!helpers.isNullOrUndefined(oRecord.OVERHEAD_CUSTOM)) {
 
                         that.checkOverheadCustomField(oRecord);
@@ -1334,9 +1334,9 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
                         OVERHEAD_CUSTOM: oRecord.OVERHEAD_CUSTOM,
                         FORMULA_ID: oRecord.FORMULA_ID
                     };
-                    that.insertCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaResultRecord);
+                    await that.insertCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaResultRecord);
                 }
-                let oResultInsert = that.insertCostingSheetOverheadRowRow(_.omit(oRecord, [
+                let oResultInsert = await that.insertCostingSheetOverheadRowRow(_.omit(oRecord, [
                     'FORMULA_STRING',
                     'FORMULA_DESCRIPTION',
                     'OVERHEAD_CUSTOM'
@@ -1362,7 +1362,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aCostingSheetRowBaseItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES];
         _.each(aCostingSheetRowBaseItems, async function (oRecord) {
             try {
-                var oResultInsert = that.insertCostingSheetBaseRow(oRecord, sMasterDataDate);
+                var oResultInsert = await that.insertCostingSheetBaseRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_BASE_ENTITIES].push(oResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -1375,7 +1375,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             try {
                 oRecord.COSTING_SHEET_BASE_ID = oCostingSheetRowBaseId[oRecord.COSTING_SHEET_BASE_ID] != null ? oCostingSheetRowBaseId[oRecord.COSTING_SHEET_BASE_ID] : null;
 
-                var oResultInsert = that.insertCostingSheetBaseRowRow(oRecord, sMasterDataDate);
+                var oResultInsert = await that.insertCostingSheetBaseRowRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_BASE_ROW_ENTITIES].push(oResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -1394,7 +1394,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
                     oRecord.COSTING_SHEET_OVERHEAD_ID = oCostingSheetOverheadId[oRecord.COSTING_SHEET_OVERHEAD_ID];
                 }
 
-                var oMainResultInsert = that.insertCostingSheetRowRow(oRecord, sMasterDataDate);
+                var oMainResultInsert = await that.insertCostingSheetRowRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_ENTITIES].push(oMainResultInsert);
                 if (!_.isEmpty(aFoundPlcRecordsAccountGroup)) {
                     oResult.entities[BusinessObjectsEntities.ACCOUNT_GROUP_ENTITIES].push(aFoundPlcRecordsAccountGroup);
@@ -1408,7 +1408,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_ROW_TEXT_ENTITIES];
         _.each(aBatchTextItems, async function (oRecord) {
             try {
-                var oTextResultInsert = that.insertCostingSheetRowTextRow(oRecord, sMasterDataDate);
+                var oTextResultInsert = await that.insertCostingSheetRowTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_TEXT_ENTITIES].push(oTextResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -1420,7 +1420,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES] = [];
         _.each(aBatchDepItems, async function (oRecord) {
             try {
-                var oDependenciesResultInsert = that.insertCostingSheetRowDependenciesRow(oRecord, sMasterDataDate);
+                var oDependenciesResultInsert = await that.insertCostingSheetRowDependenciesRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ROW_DEPENDENCIES_ENTITIES].push(oDependenciesResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
@@ -1460,7 +1460,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         apiHelpers.checkMandatoryProperties(oCostingSheetOverheadRow, aPartialKeyPlcTableColumns);
 
-        var iOverheadRowId = this.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row);
+        var iOverheadRowId = await this.helper.getNextSequenceID(Sequences.costing_sheet_overhead_row);
 
         this.helper.setHQuery(hQuery);
         var aExcludeProperies = [];
@@ -1485,8 +1485,8 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         oCostingSheetOverheadRowId[oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ROW_ID] = iOverheadRowId;
 
-        var oResult = this.helper.insertNewEntity(oCostingSheetOverheadRow, oSettings);
-        this.checkReferenceObjectsCostingSheetOverheadRow(oResult, sMasterDataDate);
+        var oResult = await this.helper.insertNewEntity(oCostingSheetOverheadRow, oSettings);
+        await this.checkReferenceObjectsCostingSheetOverheadRow(oResult, sMasterDataDate);
 
         return oResult;
     };
@@ -1495,7 +1495,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.checkOverheadCustomField = async function (oRecord) {
+    this.checkOverheadCustomField = function (oRecord) {
 
         let aMetadataCustomFieldResult = {};
         let aCustomFieldFormulas = [];
@@ -1546,13 +1546,13 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.insertCostingSheetOverheadRowFormula = function (oCostingSheetOverheadRowFormula) {
+    this.insertCostingSheetOverheadRowFormula = async function (oCostingSheetOverheadRowFormula) {
 
         const sStmt = `INSERT INTO "${ Tables.costing_sheet_overhead_row_formula }"
 			(FORMULA_ID, FORMULA_STRING, FORMULA_DESCRIPTION, OVERHEAD_CUSTOM )
 			VALUES (?, ?, ?, ? )`;
 
-        dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_ID, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM);
+        await dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_ID, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM);
     };
 
 
@@ -1561,13 +1561,13 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.updateCostingSheetOverheadRowFormula = function (oCostingSheetOverheadRowFormula) {
+    this.updateCostingSheetOverheadRowFormula = async function (oCostingSheetOverheadRowFormula) {
 
         const sStmt = `UPDATE "${ Tables.costing_sheet_overhead_row_formula }"
 			SET FORMULA_DESCRIPTION = ?, FORMULA_STRING = ?, OVERHEAD_CUSTOM = ?
 			WHERE FORMULA_ID = ? `;
 
-        dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM, oCostingSheetOverheadRowFormula.FORMULA_ID);
+        await dbConnection.executeUpdate(sStmt, oCostingSheetOverheadRowFormula.FORMULA_DESCRIPTION, oCostingSheetOverheadRowFormula.FORMULA_STRING, oCostingSheetOverheadRowFormula.OVERHEAD_CUSTOM, oCostingSheetOverheadRowFormula.FORMULA_ID);
     };
 
 
@@ -1576,9 +1576,9 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.deleteCostingSheetOverheadRowFormula = function (oCostingSheetOverheadRow) {
+    this.deleteCostingSheetOverheadRowFormula = async function (oCostingSheetOverheadRow) {
 
-        let iCostingSheetOverheadRowFormulaId = that.getCostingSheetOverheadRowFormulaId(oCostingSheetOverheadRow);
+        let iCostingSheetOverheadRowFormulaId = await that.getCostingSheetOverheadRowFormulaId(oCostingSheetOverheadRow);
 
         let oCostingSheetOverheadRowFormulaRecord = {
             FORMULA_STRING: null,
@@ -1586,7 +1586,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             OVERHEAD_CUSTOM: null,
             FORMULA_ID: iCostingSheetOverheadRowFormulaId
         };
-        return that.updateCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
+        return await that.updateCostingSheetOverheadRowFormula(oCostingSheetOverheadRowFormulaRecord);
     };
 
 
@@ -1613,7 +1613,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
 
 
-    this.getCostingSheetOverheadRowFormulaId = function (oCostingSheetOverheadRow) {
+    this.getCostingSheetOverheadRowFormulaId = async function (oCostingSheetOverheadRow) {
 
         let sCostingSheetOverheadRowTableName = CostingSheetResources[sCostingSheetOverheadRow].dbobjects.plcTable;
 
@@ -1622,7 +1622,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 			 COSTING_SHEET_OVERHEAD_ROW_ID = ? AND
 			 COSTING_SHEET_OVERHEAD_ID = ?`;
 
-        return dbConnection.executeQuery(sCostingSheetOverheadRowStmt, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ROW_ID, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ID)[0].FORMULA_ID;
+        return await dbConnection.executeQuery(sCostingSheetOverheadRowStmt, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ROW_ID, oCostingSheetOverheadRow.COSTING_SHEET_OVERHEAD_ID)[0].FORMULA_ID;
     };
 
 
@@ -1654,7 +1654,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         apiHelpers.checkMandatoryProperties(oCostingSheetOverhead, aPartialKeyPlcTableColumns);
 
-        var iOverheadId = this.helper.getNextSequenceID(Sequences.costing_sheet_overhead);
+        var iOverheadId = await this.helper.getNextSequenceID(Sequences.costing_sheet_overhead);
 
         this.helper.setHQuery(hQuery);
         var aExcludeProperies = [];
@@ -1677,7 +1677,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         oCostingSheetOverheadId[oCostingSheetOverhead.COSTING_SHEET_OVERHEAD_ID] = iOverheadId;
 
-        var oResult = this.helper.insertNewEntity(_.omit(oCostingSheetOverhead, 'CONTROLLING_AREA_ID'), oSettings);
+        var oResult = await this.helper.insertNewEntity(_.omit(oCostingSheetOverhead, 'CONTROLLING_AREA_ID'), oSettings);
         oResult.CONTROLLING_AREA_ID = !helpers.isNullOrUndefined(oCostingSheetOverhead.CONTROLLING_AREA_ID) ? oCostingSheetOverhead.CONTROLLING_AREA_ID : null;
         this.checkReferenceObjectsCostingSheetOverhead(oResult, sMasterDataDate);
 
@@ -1746,7 +1746,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             GENERATED_PROPERTIES: oGeneratedValues
         };
 
-        var oResult = this.helper.insertNewEntity(oCostingSheetBaseRow, oSettings);
+        var oResult = await this.helper.insertNewEntity(oCostingSheetBaseRow, oSettings);
 
         return oResult;
 
@@ -1778,7 +1778,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
 
         apiHelpers.checkMandatoryProperties(oCostingSheetBase, aPartialKeyPlcTableColumns);
 
-        var iCostingSheetBaseId = this.helper.getNextSequenceID(Sequences.costing_sheet_base);
+        var iCostingSheetBaseId = await this.helper.getNextSequenceID(Sequences.costing_sheet_base);
 
         this.helper.setHQuery(hQuery);
         var aExcludeProperies = [];
@@ -1801,7 +1801,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
         };
 
         oCostingSheetRowBaseId[oCostingSheetBase.COSTING_SHEET_BASE_ID] = iCostingSheetBaseId;
-        var oResult = this.helper.insertNewEntity(oCostingSheetBase, oSettings);
+        var oResult =await this.helper.insertNewEntity(oCostingSheetBase, oSettings);
 
         return oResult;
     };
@@ -1838,7 +1838,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
 
-        await checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow);
+        checkIfBaseRowsUpdateReadOnlyFields(oCostingSheetRow);
 
 
         var iRowType = oCostingSheetRow.COSTING_SHEET_ROW_TYPE;
@@ -1848,7 +1848,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             oCostingSheetRow.IS_RELEVANT_FOR_TOTAL3 = 1;
         }
 
-        var oResult = apiHelpers.insertRow(oCostingSheetRow, sMasterDataDate, oConfiguration, hQuery, hQueryRepl, this.helper);
+        var oResult = await apiHelpers.insertRow(oCostingSheetRow, sMasterDataDate, oConfiguration, hQuery, hQueryRepl, this.helper);
 
 
         this.checkReferenceObjectsCostingSheetRow(oResult, sMasterDataDate);
@@ -1879,7 +1879,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             ],
             aTextColumns: ['COSTING_SHEET_ROW_DESCRIPTION']
         };
-        return apiHelpers.insertTextRow(oCostingSheetRowTextRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
+        return await apiHelpers.insertTextRow(oCostingSheetRowTextRow, sMasterDataDate, oConfiguration, hQuery, this.helper);
 
     };
 
@@ -1914,7 +1914,7 @@ async function CostingSheetRow(dbConnection, hQuery, hQueryRepl) {
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage, oMessageDetails);
         }
 
-        var oResult = apiHelpers.insertRow(oCostingSheetDependencies, sMasterDataDate, oConfiguration, hQuery, hQueryRepl, this.helper);
+        var oResult = await apiHelpers.insertRow(oCostingSheetDependencies, sMasterDataDate, oConfiguration, hQuery, hQueryRepl, this.helper);
 
         return oResult;
 

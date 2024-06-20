@@ -94,13 +94,13 @@ module.exports.Variants = function ($) {
             if (oDatabaseItem) {
                 oItemToUpsert = _.extend(oDatabaseItem, _.omit(oCurrentItem, 'VARIANT_ID', 'ITEM_ID'));
             } else {
-                oItemToUpsert = await expandToDefaultVariantItem(oCurrentItem, iVariantId);
+                oItemToUpsert = expandToDefaultVariantItem(oCurrentItem, iVariantId);
             }
 
             return oItemToUpsert;
         });
 
-        oPersistency.Variant.upsertVariantItems(iVariantId, aItemsToUpsert, iCalculationVersionId);
+        await oPersistency.Variant.upsertVariantItems(iVariantId, aItemsToUpsert, iCalculationVersionId);
     }
     /**
  * Function that checks that before creating the variant and the items that the items in the request
@@ -108,7 +108,7 @@ module.exports.Variants = function ($) {
  * This avoids that variants could be created out of sync with the base version.
  */
     async function checkItemsMapToBaseVersion(oPersistency, aRequestVariantItems, iCalculationVersionId) {
-        const aBaseVersionItemIds = oPersistency.Variant.getBaseVersionItems(iCalculationVersionId);
+        const aBaseVersionItemIds = await oPersistency.Variant.getBaseVersionItems(iCalculationVersionId);
         if (aBaseVersionItemIds.length !== aRequestVariantItems.length) {
             let sClientMsg = 'Variant contains too many or too few items compared to the base version.';
             sClientMsg += 'Each base version item must have a correspondent variant item (1:1)';
@@ -172,7 +172,7 @@ module.exports.Variants = function ($) {
      */
         const aItemsToUpsert = oVariantToCreate.ITEMS.map(oCurrentItem => {
             let oItemToUpsert = {};
-            oItemToUpsert = await expandToDefaultVariantItem(oCurrentItem, iVariantId);
+            oItemToUpsert = expandToDefaultVariantItem(oCurrentItem, iVariantId);
             return oItemToUpsert;
         });
         await VariantService.checkQuantityStateValues(oPersistency, aItemsToUpsert, iCalculationVersionId);
@@ -195,7 +195,7 @@ module.exports.Variants = function ($) {
     /**
  * In order to set an optimistic lock, check if the user is trying to update the latest version of the variant
  */
-    async function checkIsCurrentVersion(aRequestVariants, aDatabaseVariants) {
+    function checkIsCurrentVersion(aRequestVariants, aDatabaseVariants) {
         const mRequestVariants = new Map(aRequestVariants.map(oVariant => [
             oVariant.VARIANT_ID,
             oVariant
@@ -235,8 +235,8 @@ module.exports.Variants = function ($) {
         const dTimestamp = new Date();
         const bChangesAccepted = oRequestVariant.CHANGES_ACCEPTED === 1;
 
-        await VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
-        await VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
 
         const oVariantToUpdate = _.omit(oRequestVariant, [
             'ITEMS',
@@ -252,8 +252,8 @@ module.exports.Variants = function ($) {
             $.trace.error(sLogMessage);
             throw new PlcException(MessageCode.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage);
         }
-        await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
-        await checkIsCurrentVersion([oVariantToUpdate], [oBeforeVariant]);
+        VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
+        checkIsCurrentVersion([oVariantToUpdate], [oBeforeVariant]);
 
         await VariantService.isVariantNameUnique(oVariantToUpdate.VARIANT_NAME, iCalculationVersionId, oPersistency, iVariantId);
         const aItemsToUpdate = oRequestVariant.ITEMS;
@@ -327,7 +327,7 @@ module.exports.Variants = function ($) {
         }
         await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
         await checkIsCurrentVersion(aRequestVariantIds, aDatabaseVariants);
-        const aOrderedVariants = await orderVariants(aVariantIds);
+        const aOrderedVariants = orderVariants(aVariantIds);
         await oPersistency.Variant.update(aOrderedVariants, aDatabaseVariants, iCalculationVersionId);
         const aReturnedVariants = await oPersistency.Variant.getVariants(iCalculationVersionId, aVariantIds);
         const oOutputVariants = aReturnedVariants.map(oReturnedVariant => _.omit(oReturnedVariant, 'VARIANT_ORDER'));
@@ -339,12 +339,12 @@ module.exports.Variants = function ($) {
  * Handles a HTTP DELETE request to remove a variant and it's items.
  * If the deleted variant is the last variant that belongs to the given version, then the type of version is changed to 1 (Base)
  */
-    this.remove = async function (oRequestVariant, mParameters, oServiceOutput, oPersistency) {
+    this.remove =async function (oRequestVariant, mParameters, oServiceOutput, oPersistency) {
         const iCalculationVersionId = mParameters.calculation_version_id;
 
-        await VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
-        await VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
-        await VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
+        VariantService.checkConcurrentVariantMatrixLock(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotLifecycleVersion(oPersistency, iCalculationVersionId);
+        VariantService.checkVersionIsNotFrozen(oPersistency, iCalculationVersionId);
 
         const iVariantId = mParameters.variant_id;
         const iDeleteResult = oPersistency.Variant.deleteVariant(iCalculationVersionId, iVariantId);

@@ -31,7 +31,7 @@ function AddinConfigurationValidator(oPersistency, sSessionId, metadataProvider,
 	this.validate = async function(oRequest, mValidatedParameters) {
 		switch (oRequest.method) {
 			case $.net.http.GET:							// Read Configuration
-				return  await validateGetRequest();
+				return validateGetRequest();
 			case $.net.http.POST:						  // Update Configuration
 				return await validateCreateRequest();
 			case $.net.http.PUT:						  // Update Configuration
@@ -43,7 +43,7 @@ function AddinConfigurationValidator(oPersistency, sSessionId, metadataProvider,
 			}
 		}
 
-		async function validateGetRequest() {
+		function validateGetRequest() {
 			
 			// Check if Version matches definition
 			helpers.validateAddinVersionString(mValidatedParameters.version);
@@ -76,7 +76,7 @@ function AddinConfigurationValidator(oPersistency, sSessionId, metadataProvider,
 
 			// Validate configuration items
 			oValidatedAddinConfiguration.CONFIG_DATA = [];
-			await validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem);
+			validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem);
 
 			return oValidatedAddinConfiguration;
 		}
@@ -105,29 +105,29 @@ function AddinConfigurationValidator(oPersistency, sSessionId, metadataProvider,
 
 			// Validate configuration items
 			oValidatedAddinConfiguration.CONFIG_DATA = [];
-			await validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem);
+			validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem);
 
 			return oValidatedAddinConfiguration;
 		}
 
 		//Generic function to validate config data of an addin
-		async function validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem){
+		function validateAddinConfigData(oAddinConfiguration, oValidatedAddinConfiguration, oMetadataForConfigurationItem){
 			 _.each(oAddinConfiguration.CONFIG_DATA, async function(oConfigItem, iIndex) {
-				let oConfigKeyValidated = await validateAddinConfigurationFields( _.omit(oConfigItem, 'CONFIG_VALUE')  , oMetadataForConfigurationItem, ['CONFIG_KEY'], [], 'included');
-				let oConfigValueValidated = await validateAddinConfigurationFields( _.omit(oConfigItem, 'CONFIG_KEY'), oMetadataForConfigurationItem, ['CONFIG_VALUE'], [], 'includedWithBlanks');
+				let oConfigKeyValidated = validateAddinConfigurationFields( _.omit(oConfigItem, 'CONFIG_VALUE')  , oMetadataForConfigurationItem, ['CONFIG_KEY'], [], 'included');
+				let oConfigValueValidated = validateAddinConfigurationFields( _.omit(oConfigItem, 'CONFIG_KEY'), oMetadataForConfigurationItem, ['CONFIG_VALUE'], [], 'includedWithBlanks');
 				oValidatedAddinConfiguration.CONFIG_DATA.push({...oConfigKeyValidated, ...oConfigValueValidated});
 			});
 		}
 
 		// Generic Configuration Item validation method: field checks / metadata conversion
-		async function validateAddinConfigurationFields(oAddinConfigFields, oMetadata, aMandatoryFields, aOptionalFields, sMode) {
+		function validateAddinConfigurationFields(oAddinConfigFields, oMetadata, aMandatoryFields, aOptionalFields, sMode) {
 
 			// Check if only mandatory and optional properties are available.
-			await utils.checkMandatoryProperties(oAddinConfigFields, aMandatoryFields, sMode);
-			await utils.checkInvalidProperties(oAddinConfigFields, aMandatoryFields.concat(aOptionalFields));
+			utils.checkMandatoryProperties(oAddinConfigFields, aMandatoryFields, sMode);
+			utils.checkInvalidProperties(oAddinConfigFields, aMandatoryFields.concat(aOptionalFields));
 
 			// Make general field checks and convert the field value based on metadata
-			var oValidatedAddin = await utils.checkEntity({
+			var oValidatedAddin = utils.checkEntity({
 				entity : oAddinConfigFields,
 				categoryId : -1,
 				subitemState : -1,

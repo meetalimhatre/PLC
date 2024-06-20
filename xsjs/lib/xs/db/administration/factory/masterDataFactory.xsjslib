@@ -4,8 +4,8 @@ let imps = {};
 // lazy load xsjslib files in factory
 let lazyImport = function (libfilename, objectname) {
     Object.defineProperty(imps, objectname, {
-        get: async function () {
-            return await (async () => {
+        get: function () {
+            return  ( () => {
                 let _objectname = '_' + objectname;
                 if (!(_objectname in this)) {
                     this[_objectname] = $.import('xs.db.administration.factory', libfilename)[objectname];
@@ -52,72 +52,72 @@ lazyImport('workCenter', 'WorkCenter');
 
 function MasterDataObjectHandlerFactory(dbConnection, hQuery) {
 
-    this.createBusinessObject = async function (sObjectName, sIgnoreBadData) {
+    this.createBusinessObject = function (sObjectName, sIgnoreBadData) {
         switch (sObjectName) {
         case BusinessObjectTypes.Account:
-            return await new imps.Account(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Account(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ActivityPrice:
             return new imps.ActivityPrice(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ActivityType:
-            return await new imps.ActivityType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.ActivityType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.BusinessArea:
-            return await new imps.BusinessArea(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.BusinessArea(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Process:
-            return await new imps.Process(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Process(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.CompanyCode:
-            return await new imps.CompanyCode(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.CompanyCode(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ConfidenceLevel:
-            return await new imps.ConfidenceLevel(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.ConfidenceLevel(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ControllingArea:
-            return await new imps.ControllingArea(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.ControllingArea(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.CostCenter:
-            return await new imps.CostCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.CostCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.CurrencyConversion:
-            return await new imps.CurrencyConversion(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.CurrencyConversion(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Currency:
-            return await new imps.Currency(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Currency(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Customer:
-            return await new imps.Customer(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Customer(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Dimension:
-            return await new imps.Dimension(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Dimension(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Document:
-            return await new imps.Document(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Document(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.DocumentStatus:
-            return await new imps.DocumentStatus(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.DocumentStatus(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.DocumentType:
-            return await new imps.DocumentType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.DocumentType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.DesignOffice:
-            return await new imps.DesignOffice(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.DesignOffice(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Language:
-            return await new imps.Language(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Language(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Material:
-            return await new imps.Material(dbConnection, hQuery, sObjectName, sIgnoreBadData, sIgnoreBadData);
+            return  new imps.Material(dbConnection, hQuery, sObjectName, sIgnoreBadData, sIgnoreBadData);
         case BusinessObjectTypes.MaterialAccountDetermination:
-            return await new imps.MaterialAccountDetermination(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.MaterialAccountDetermination(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.MaterialGroup:
-            return await new imps.MaterialGroup(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.MaterialGroup(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.MaterialPlant:
-            return await new imps.MaterialPlant(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.MaterialPlant(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.MaterialPrice:
             return new imps.MaterialPrice(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.MaterialType:
-            return await new imps.MaterialType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.MaterialType(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.OverheadGroup:
-            return await new imps.OverheadGroup(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.OverheadGroup(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Plant:
-            return await new imps.Plant(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Plant(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ProfitCenter:
-            return await new imps.ProfitCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.ProfitCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.UnitOfMeasure:
-            return await new imps.UnitOfMeasure(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.UnitOfMeasure(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.ValuationClass:
-            return await new imps.ValuationClass(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.ValuationClass(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.Vendor:
-            return await new imps.Vendor(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.Vendor(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         case BusinessObjectTypes.WorkCenter:
-            return await new imps.WorkCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.WorkCenter(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         default:
-            return await new imps.MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBadData);
+            return  new imps.MasterDataBaseObject(dbConnection, hQuery, sObjectName, sIgnoreBadData);
         }
     };
 }

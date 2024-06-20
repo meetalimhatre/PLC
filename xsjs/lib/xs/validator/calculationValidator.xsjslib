@@ -21,7 +21,7 @@ const Code = MessageLibrary.Code;
  * @constructor
  */
 
-async function CalculationValidator(oPersistency, sSessionId, metadataProvider, utils) {
+function CalculationValidator(oPersistency, sSessionId, metadataProvider, utils) {
 
     var genericSyntaxValidator = new GenericSyntaxValidator();
     const itemValidator = new ItemValidator($, oPersistency, sSessionId, $.getPlcUsername(), metadataProvider, utils);
@@ -47,7 +47,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         // self needed, because this context needed from outside of the nested functions
         const self = this;
 
@@ -55,16 +55,16 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.PUT:
-            return await validateUpdateRequest();
+            return validateUpdateRequest();
         case $.net.http.POST:
             if (mValidatedParameters.action == 'create')
-                return await validateCreateRequest();
+                return validateCreateRequest();
             else if (mValidatedParameters.action == 'copy-version')
-                return await validateCopyVersionRequest();
+                return validateCopyVersionRequest();
             else
                 break;
         case $.net.http.DEL:
-            return await validateDeleteRequest();
+            return validateDeleteRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -76,7 +76,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
             var aCalcs = utils.tryParseJson(oRequest.body.asString());
             var aValidatedCalcs = [];
             _.each(aCalcs, async function (oCalc) {
-                await utils.checkMandatoryProperties(oCalc, aDeleteMandatoryPropertiesStatic);
+                utils.checkMandatoryProperties(oCalc, aDeleteMandatoryPropertiesStatic);
                 utils.checkInvalidProperties(oCalc, aDeleteMandatoryPropertiesStatic);
 
                 var oValidatedCalc = {};
@@ -101,7 +101,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
             return aValidatedCalcs;
         }
 
-        async function validateCreateRequest() {
+        function validateCreateRequest() {
             var aCalcs = utils.tryParseJson(oRequest.body.asString());
             var oCalculationMetadata = metadataProvider.get(BusinessObjectTypes.Calculation, BusinessObjectTypes.Calculation, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
             var oCalculationVersionMetadata = metadataProvider.get(BusinessObjectTypes.CalculationVersion, BusinessObjectTypes.CalculationVersion, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
@@ -110,9 +110,9 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
 
             var aValidatedCalcs = [];
             let aItemInvalidmasterdataReferences = [];
-            _.each(aCalcs, async function (oCalc) {
+            _.each(aCalcs, function (oCalc) {
 
-                await utils.checkMandatoryProperties(oCalc, ['CALCULATION_VERSIONS']);
+                utils.checkMandatoryProperties(oCalc, ['CALCULATION_VERSIONS']);
                 if (!(_.isArray(oCalc.CALCULATION_VERSIONS) && oCalc.CALCULATION_VERSIONS.length === 1)) {
                     const sLogMessage = 'Calculation does not contain an array with 1 entry named CALCULATION_VERSIONS. Cannot validate.';
                     $.trace.error(sLogMessage);
@@ -120,7 +120,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
                 }
 
                 var oCv = oCalc.CALCULATION_VERSIONS[0];
-                await utils.checkMandatoryProperties(oCv, ['ITEMS']);
+                utils.checkMandatoryProperties(oCv, ['ITEMS']);
                 if (!(_.isArray(oCv.ITEMS) && oCv.ITEMS.length === 1)) {
                     const sLogMessage = 'Inital calculation version does not contain an array with 1 entry named ITEMS. Cannot validate.';
                     $.trace.error(sLogMessage);
@@ -175,7 +175,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
             return aValidatedCalcs;
         }
 
-        async function validateCopyVersionRequest() {
+        function validateCopyVersionRequest() {
             if (helpers.isNullOrUndefined(mValidatedParameters.id)) {
                 const sLogMessage = "Parameter 'id' is missing.";
                 $.trace.error(sLogMessage);
@@ -183,7 +183,7 @@ async function CalculationValidator(oPersistency, sSessionId, metadataProvider, 
             }
 
             var oProject = utils.tryParseJson(oRequest.body.asString());
-            await utils.checkMandatoryProperties(oProject, aCopyVersionMandatoryPropertiesStatic);
+            utils.checkMandatoryProperties(oProject, aCopyVersionMandatoryPropertiesStatic);
             utils.checkInvalidProperties(oProject, aCopyVersionMandatoryPropertiesStatic);
 
             var oValidatedProject = {};

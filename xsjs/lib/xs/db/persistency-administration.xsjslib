@@ -49,7 +49,7 @@ var sUserId;
 const sSessionId = sUserId = $.getPlcUsername();
 
 
-async function Administration(dbConnection, hQuery, hQueryRepl) {
+function Administration(dbConnection, hQuery, hQueryRepl) {
 
     this.misc =  new imps.Misc($, hQuery, sUserId, dbConnection);
     var that = this;
@@ -73,12 +73,12 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
         async function setLockStatus(sBusinessObjectType) {
             var oLockStatus = {};
             if (vLock === true || vLock === 'true') {
-                var aLockObjects = parentScope.getLock(sBusinessObjectType);
+                var aLockObjects = await parentScope.getLock(sBusinessObjectType);
                 if (aLockObjects.length > 0) {
                     oLockStatus[ServiceMetaInformation.UserId] = aLockObjects[0][ServiceMetaInformation.UserId];
                     oLockStatus[ServiceMetaInformation.IsLocked] = 1;
                 } else {
-                    parentScope.setLock([sBusinessObjectType]);
+                    await parentScope.setLock([sBusinessObjectType]);
                     oLockStatus[ServiceMetaInformation.IsLocked] = 0;
                 }
             }
@@ -362,7 +362,7 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
     this.getMasterdataOnItemLevel = async function (iCvId, sLanguage, sSessionId, aItems) {
 
         try {
-            var procedure = dbConnection.loadProcedure(Procedures.calculation_configuration_masterdata_read);
+            var procedure = await dbConnection.loadProcedure(Procedures.calculation_configuration_masterdata_read);
 
             //fill temporary table with items ids: "sap.plc.db::temp.t_item_ids"
             var aStmtBuilderDelete = ['DELETE FROM "' + TempTables.t_item_ids + '" '];
@@ -420,8 +420,8 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
 	 * 
 	 * @param   {string} sObjectName  - business object name
 	*/
-    this.getLock = function (sObjectName) {
-        return that.misc.getLock(sObjectName, sUserId);
+    this.getLock = async function (sObjectName) {
+        return await that.misc.getLock(sObjectName, sUserId);
     };
 
     /**
@@ -429,10 +429,10 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
 	 * 
 	 * @param   {string} sObjectName  - business object name
 	*/
-    this.setLock = function (aObjectNames) {
-        that.misc.lockTableTLockExclusive();
-        _.each(aObjectNames, function (sObjectName, iIndex) {
-            that.misc.setLock(sObjectName, sUserId);
+    this.setLock = async function (aObjectNames) {
+        await that.misc.lockTableTLockExclusive();
+        _.each(aObjectNames,async function (sObjectName, iIndex) {
+            await that.misc.setLock(sObjectName, sUserId);
         });
     };
 
@@ -441,7 +441,7 @@ async function Administration(dbConnection, hQuery, hQueryRepl) {
 	 * 
 	 * @param   {string} sObjectName  - business object name
 	*/
-    this.throwLockedError = async function (sObjectName) {
+    this.throwLockedError = function (sObjectName) {
         const sLogMessage = `Business Object ${ sObjectName } is locked. Cannot be modified.`;
         $.trace.error(sLogMessage);
         throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);

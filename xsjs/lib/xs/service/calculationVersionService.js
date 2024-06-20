@@ -33,7 +33,7 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
     /** Runs new calculation for a calculation version and adds the result to output
 	 * 
 	 */
-    async function runCalculation() {
+    function runCalculation() {
         const oResult = oPersistency.CalculationVersion.getCalculationResults(iCalculationVersionId, sSessionId);
         oCalculationResult = {};
 
@@ -69,7 +69,7 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
                 var oErrorCode = CalcEngineErrors[error.ERROR_CODE];
             } else {
                 const sLogMessage = `Invalid error code. See backend log for details. Invalid error code: ${ error.ERROR_CODE }.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(MessageCode.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
             }
             if (_.isMatch('FAKE_CUSTOM_BOOL', oDetails.calculationEngineObj.columnId)) {
@@ -87,15 +87,15 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
 	 * The calculation version can appear in different parts of the request or response.
 	 * 
 	 */
-    async function determineCalculationVersion() {
+    function determineCalculationVersion() {
         var iValidVersionId;
 
-        async function tryGetExistingCalculationVersionId(iVersion) {
+        function tryGetExistingCalculationVersionId(iVersion) {
             iValidVersionId = iVersion;
             return helpers.isNullOrUndefined(iVersion) === false;
         }
 
-        async function tryGetVersionFromRequestBody() {
+        function tryGetVersionFromRequestBody() {
             if (oValidatedRequestContent.data !== undefined && oValidatedRequestContent.data[0] !== undefined) {
                 if (tryGetExistingCalculationVersionId(oValidatedRequestContent.data[0].CALCULATION_VERSION_ID) === true) {
                     return true;
@@ -105,7 +105,7 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
         }
 
         // Central logic on selecting the version id from different parts of request or response
-        if (oValidatedRequestContent.parameters.action !== ServiceParameters.Copy && oValidatedRequestContent.parameters.action !== CalculationServiceParameters.CopyVersion && await tryGetExistingCalculationVersionId(oValidatedRequestContent.parameters.id) === true) {
+        if (oValidatedRequestContent.parameters.action !== ServiceParameters.Copy && oValidatedRequestContent.parameters.action !== CalculationServiceParameters.CopyVersion && tryGetExistingCalculationVersionId(oValidatedRequestContent.parameters.id) === true) {
             return iValidVersionId;
         } else if (tryGetVersionFromRequestBody() === true) {
             return iValidVersionId;
@@ -130,11 +130,11 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
 
 
     if (_.isBoolean(oValidatedRequestContent.parameters.calculate) && oValidatedRequestContent.parameters.calculate === true) {
-        iCalculationVersionId = await determineCalculationVersion();
+        iCalculationVersionId = determineCalculationVersion();
 
         if (iCalculationVersionId === undefined) {
             const sLogMessage = 'Calculation version to be calculated was not identified.';
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(MessageCode.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         } else {
             if (oPersistency.CalculationVersion.isFrozen(iCalculationVersionId) === true && oPersistency.CalculationVersion.isDirty(iCalculationVersionId, sSessionId, sUserId) === false) {
@@ -160,7 +160,7 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
                 }
             } else {
                 // for other cases, the calculation results should be calculated
-                await runCalculation();
+                runCalculation();
             }
 
             oServiceOutput.setCalculationResult(oCalculationResult);
@@ -177,18 +177,18 @@ async function addCalculatedValuesToOutput(oValidatedRequestContent, oServiceOut
  * @throws {PlcException}
  *             If calculation version exists only in calculation version temporary table.
  */
-async function checkIfVersionExists(oPersistency, sSessionId, iCalculationVersionId, oMessageDetails) {
+function checkIfVersionExists(oPersistency, sSessionId, iCalculationVersionId, oMessageDetails) {
     var bCalcVersionExist = oPersistency.CalculationVersion.exists(iCalculationVersionId);
     if (!bCalcVersionExist) {
         bCalcVersionExist = oPersistency.CalculationVersion.existsCVTemp(iCalculationVersionId, sSessionId);
         if (bCalcVersionExist) {
             const sLogMessage = 'The version is a temporary calculation version. Please save the calculation version and try again.';
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(MessageCode.CALCULATIONVERSION_IS_TEMPORARY_ERROR, sLogMessage);
         } else {
             const sClientMsg = 'Calculation version not found.';
             const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(MessageCode.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
         }
     }
@@ -200,11 +200,11 @@ async function checkIfVersionExists(oPersistency, sSessionId, iCalculationVersio
  * @throws {PlcException} -
  *             If calculation no longer exists.
  */
-async function checkIfCalculationExists(oPersistency, iCalculationId, oMessageDetails) {
+function checkIfCalculationExists(oPersistency, iCalculationId, oMessageDetails) {
     if (!oPersistency.Calculation.exists(iCalculationId)) {
         const sClientMsg = 'Calculation not found.';
         const sServerMsg = `${ sClientMsg } Calculation id: ${ iCalculationId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg);
     }
 }
@@ -214,12 +214,12 @@ async function checkIfCalculationExists(oPersistency, iCalculationId, oMessageDe
  * @throws {PlcException} -
  *             If calculation version is frozen.
  */
-async function checkIsVersionFrozen(oPersistency, iCalculationVersionId) {
+function checkIsVersionFrozen(oPersistency, iCalculationVersionId) {
     if (oPersistency.CalculationVersion.isFrozen(iCalculationVersionId)) {
         const oMessageDetails = new MessageDetails().addCalculationVersionObjs({ id: iCalculationVersionId });
         const sClientMsg = 'Calculation version is frozen.';
         const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.CALCULATIONVERSION_IS_FROZEN_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -227,7 +227,7 @@ async function checkIsVersionFrozen(oPersistency, iCalculationVersionId) {
 /**
  * Check if calculation version is of type lifecycle.
  */
-async function checkIsLifecycleVersion(oPersistency, sSessionId, iCalculationVersionId, bCheckTemporaryTable) {
+function checkIsLifecycleVersion(oPersistency, sSessionId, iCalculationVersionId, bCheckTemporaryTable) {
     bCheckTemporaryTable = bCheckTemporaryTable ? bCheckTemporaryTable : false;
     const bIsLifecycleVersion = oPersistency.CalculationVersion.isLifecycleVersion(iCalculationVersionId, bCheckTemporaryTable) === true;
     const bIsManualLifecycleVersion = oPersistency.CalculationVersion.isManualLifecycleVersion(iCalculationVersionId, bCheckTemporaryTable) === true;
@@ -235,7 +235,7 @@ async function checkIsLifecycleVersion(oPersistency, sSessionId, iCalculationVer
         const oMessageDetails = new MessageDetails().addCalculationVersionObjs({ id: iCalculationVersionId });
         const sClientMsg = 'Calculation version is of type lifecycle.';
         const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalculationVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.CALCULATIONVERSION_IS_LIFECYCLE_VERSION_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -243,7 +243,7 @@ async function checkIsLifecycleVersion(oPersistency, sSessionId, iCalculationVer
 /**
  * Check if any lifecycle version of given base version is referenced by any other version
  */
-async function checkLifecycleVersionsOfBaseVersionReferenced(oPersistency, iCalculationVersionId) {
+function checkLifecycleVersionsOfBaseVersionReferenced(oPersistency, iCalculationVersionId) {
 
     let aReferencedLifecycleVersions = oPersistency.CalculationVersion.getLifecycleMasterVersionsForBaseVersion(iCalculationVersionId);
 
@@ -270,7 +270,7 @@ async function checkLifecycleVersionsOfBaseVersionReferenced(oPersistency, iCalc
 
         const sClientMsg = 'Lifecycle versions of base calculation version are referenced by other versions and cannot be deleted.';
         const sServerMsg = `${ sClientMsg } Base calculation version id: ${ iCalculationVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.LIFECYCLE_CALCULATIONVERSION_IS_SOURCE_VERSION_ERROR, sClientMsg, new MessageDetails().addLifecycleCalculationVersionReferenceObjs(oMessageDetails));
     }
 }
@@ -279,10 +279,10 @@ async function checkLifecycleVersionsOfBaseVersionReferenced(oPersistency, iCalc
 /**
  * Check if lifecycle calculation is running for the project of the given base version.
  */
-async function checkIsLifecycleCalculationRunningForBaseVersion(oPersistency, sSessionId, iCalculationVersionId) {
+function checkIsLifecycleCalculationRunningForBaseVersion(oPersistency, sSessionId, iCalculationVersionId) {
     let sProjectId = oPersistency.CalculationVersion.getProjectPropertiesForCalculationVersion(iCalculationVersionId, false).PROJECT_ID;
 
-    await ProjectService.checkLifecycleCalculationRunningForProject(oPersistency, sProjectId);
+    ProjectService.checkLifecycleCalculationRunningForProject(oPersistency, sProjectId);
 }
 
 /**
@@ -290,10 +290,10 @@ async function checkIsLifecycleCalculationRunningForBaseVersion(oPersistency, sS
  * @throws {PlcException}
  *             If calculation version name is not unique.
  */
-async function isNameUnique(oPersistency, iCalculationId, iCalculationVersionId, sCalcVersionName, oMessageDetails) {
-    if (!await oPersistency.CalculationVersion.isNameUnique(iCalculationId, iCalculationVersionId, sCalcVersionName)) {
+function isNameUnique(oPersistency, iCalculationId, iCalculationVersionId, sCalcVersionName, oMessageDetails) {
+    if (! oPersistency.CalculationVersion.isNameUnique(iCalculationId, iCalculationVersionId, sCalcVersionName)) {
         const sLogMessage = `Calculation version name not unique: ${ sCalcVersionName }.`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(MessageCode.CALCULATIONVERSION_NAME_NOT_UNIQUE_ERROR, sLogMessage, oMessageDetails);
     }
 }
@@ -303,11 +303,11 @@ async function isNameUnique(oPersistency, iCalculationId, iCalculationVersionId,
  * @throws {PlcException}
  *             If calculation version is not opened and locked.
  */
-async function isOpenedAndLockedInSession(oPersistency, sSessionId, iCalcVersionId, oMessageDetails) {
+function isOpenedAndLockedInSession(oPersistency, sSessionId, iCalcVersionId, oMessageDetails) {
     if (!oPersistency.CalculationVersion.isOpenedAndLockedInSessionAndContext(sSessionId, iCalcVersionId, Constants.CalculationVersionLockContext.CALCULATION_VERSION)) {
         const sClientMsg = 'Calculation version not opened and locked.';
         const sServerMsg = `${ sClientMsg } Calculation version id: ${ iCalcVersionId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.CALCULATIONVERSION_NOT_WRITABLE_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -317,7 +317,7 @@ async function isOpenedAndLockedInSession(oPersistency, sSessionId, iCalcVersion
  * {@linkcode persistency#openCalculationVersion} function and additionally basic data for component split and costing sheet. All data is
  * combined and returned in one sole object.
  */
-async function prepareOutput(oReadCalculationOutput, bOmitItems) {
+function prepareOutput(oReadCalculationOutput, bOmitItems) {
     var oOutputObject = oReadCalculationOutput.version;
     if (bOmitItems === false || helpers.isNullOrUndefined(bOmitItems)) {
         oOutputObject.ITEMS = oReadCalculationOutput.items;
@@ -354,7 +354,7 @@ function addVersionStillOpenMessageDetails(oCvOpenDetails, aOpenVersions) {
     });
 }
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 

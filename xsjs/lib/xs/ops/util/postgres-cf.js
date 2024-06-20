@@ -2,7 +2,7 @@
 // So is fit for xsjs
 
 const {Client} = require('pg');
-const async = require('@sap/async-xsjs');
+const async = require('async');
 
 var Postgres = function (credentials, autoCommit = true) {
     this.config = {
@@ -83,8 +83,8 @@ Postgres.prototype.execute = function () {
  *            array - returns an array of the queried results.
  */
 
-Postgres.prototype.executeQuery = function () {
-    return this.execute.apply(this, arguments).rows;
+Postgres.prototype.executeQuery = async function () {
+    return await this.execute.apply(this, arguments).rows;
 };
 
 /**
@@ -99,10 +99,10 @@ Postgres.prototype.executeQuery = function () {
 
 Postgres.prototype.executeUpdate = async function () {
     if (this.autoCommit) {
-        return this.execute.apply(this, arguments).rowCount;
+        return await this.execute.apply(this, arguments).rowCount;
     }
     try {
-        this.begin();
+        await this.begin();
         return this.execute.apply(this, arguments).rowCount;
     } catch (err) {
         console.log(err);
@@ -127,8 +127,8 @@ Postgres.prototype.commit = async function () {
     await this.execute('COMMIT');
 };
 
-Postgres.prototype.close = function () {
-    this.client.end();
+Postgres.prototype.close = async function () {
+    await this.client.end();
 };
 
 function postgres(credentials, autoCommit) {

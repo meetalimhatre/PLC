@@ -124,7 +124,7 @@ async function HDIClient($, sContainer, oCredentials) {
         }
     };
 
-    async function addPathContent(oPathSets, aPendingPathContentList, oPathContent) {
+    function addPathContent(oPathSets, aPendingPathContentList, oPathContent) {
         if (oPathContent.PATH.charAt(oPathContent.PATH.length - 1) === '/') {
             return;
         }

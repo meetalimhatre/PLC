@@ -13,17 +13,17 @@ const TaskType = Constants.TaskType;
 const TaskStatus = Constants.TaskStatus;
 const LifecycleInterval = Constants.LifecycleInterval;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
-async function logInfo(msg) {
+function logInfo(msg) {
     helpers.logInfo(msg);
 }
 
 /**
  * Checks if the start (e.g. of production or project) is earlier than end for the given project. If not, an error is thrown.
  */
-async function checkProjectTimes(sProjectId, sStart, sEnd) {
+function checkProjectTimes(sProjectId, sStart, sEnd) {
 
     // do following checks only if both inputs are dates
     if (helpers.isNullOrUndefined(sStart) === true || helpers.isNullOrUndefined(sEnd) === true) {
@@ -35,7 +35,7 @@ async function checkProjectTimes(sProjectId, sStart, sEnd) {
     if (dStart.getTime() > dEnd.getTime()) {
         const sClientMsg = `Wrong properties for project: start ${ dStart } is later than end ${ dEnd }.`;
         const sServerMsg = `${ sClientMsg } Project id: ${ sProjectId }`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.GENERAL_VALIDATION_ERROR, sClientMsg);
     }
 }
@@ -43,15 +43,15 @@ async function checkProjectTimes(sProjectId, sStart, sEnd) {
 /**
  * Checks if lifecycle calculation runs for the given project.
  */
-async function checkLifecycleCalculationRunningForProject(oPersistency, sProjectId) {
+function checkLifecycleCalculationRunningForProject(oPersistency, sProjectId) {
     let aExistingCalculationTasks = oPersistency.Task.get(null, TaskType.CALCULATE_LIFECYCLE_VERSIONS, null);
-    let oRunningTasksForProject = await getCalculationTasksForProject(aExistingCalculationTasks, sProjectId);
+    let oRunningTasksForProject = getCalculationTasksForProject(aExistingCalculationTasks, sProjectId);
 
     if (!helpers.isNullOrUndefined(oRunningTasksForProject)) {
         let oMessageDetails = new MessageDetails().addProjectObjs({ id: sProjectId });
         const sClientMsg = 'Calculation version/calculation/project cannot not be deleted because project is running lifecycle calculation.';
         const sServerMsg = `${ sClientMsg } Project id: ${ sProjectId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.GENERAL_ENTITY_PART_OF_CALCULATION_ERROR, sClientMsg, oMessageDetails);
     }
 }
@@ -60,7 +60,7 @@ async function checkLifecycleCalculationRunningForProject(oPersistency, sProject
 /**
  * Checks if the list of existing calculation tasks contains the given project.
  */
-async function getCalculationTasksForProject(aExistingCalculationTasks, sProjectId) {
+function getCalculationTasksForProject(aExistingCalculationTasks, sProjectId) {
     if (aExistingCalculationTasks.length > 0) {
         let oRunningTasksForProject = _.find(aExistingCalculationTasks, oExistingTask => {
             var bIsInactive = oExistingTask.STATUS === TaskStatus.INACTIVE;
@@ -116,7 +116,7 @@ async function getCalculationTaskForProjectSplitedByUsers(aExistingCalculationTa
  * @param  {type} iLifecycleInterval The {@link LifecycleInterval} for which the lifecycle_period_from shall be calculated
  * @return {number}    The lifecycle_period_from value (integer with the number of months from 1900-01-01)
  */
-async function calculateLifecyclePeriodFrom(dDate, iLifecycleInterval) {
+async function f(dDate, iLifecycleInterval) {
     iLifecycleInterval = iLifecycleInterval || LifecycleInterval.YEARLY;
     var iPeriodForFirstOfJanuary = (dDate.getFullYear() - 1900) * 12;
     switch (iLifecycleInterval) {
@@ -165,7 +165,7 @@ async function checkIsWritable(sProjectId, sUserId, oPersistency) {
     if (oPersistency.Project.isOpenedInSession(sProjectId, sUserId, true) === false) {
         const sClientMsg = 'Project is not opened in write-mode. Quantities cannot be updated.';
         const sServerMsg = `${ sClientMsg } Project id: ${ sProjectId } `;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageCode.PROJECT_NOT_WRITABLE_ERROR, sClientMsg);
     }
 }

@@ -191,7 +191,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	 * Returns the names+types+defaultValues of the master data custom fields
 	 * @returns {object} oMasterdataCustomFields - an object containing names+types+defaultValues of masterdata custom fields in item_ext table
 	 */
-    this.getMasterdataCustomFields = function () {
+    this.getMasterdataCustomFields = async function () {
 
         var oMasterdataCustomFields = {
             COLUMNS: [],
@@ -211,7 +211,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 						and item.column_id LIKE_REGEXPR '^(CAPR|CWCE|CMPR|CMPL|CMAT|CCEN)_[A-Z][A-Z0-9_]*$'
 						order by column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
         var aMetadataFields = Array.from(oQueryResult);
 
         _.each(aMetadataFields, function (oMetadataField, iIndex) {
@@ -262,7 +262,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	 * @returns {array} - An array of objects with the properties <code>ITEM_CATEGORY_ID</code>, <code>COLUMN_ID</code>, <code>DEFAULT_VALUE</code>
 	 *                    <code>UOM_CURRENCY_FLAG</code> and <code>PROPERTY_TYPE</code> .
 	 */
-    this.getCustomFieldsWithDefaultValuesForCategories = (sPath, sBusinessObject) => {
+    this.getCustomFieldsWithDefaultValuesForCategories = async (sPath, sBusinessObject) => {
         const sStmt = `select distinct 
 		item.column_id, item.item_category_id, item.default_value, header.uom_currency_flag, header.property_type
 		from "${ Tables.metadataItemAttributes }" as item
@@ -274,7 +274,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 		and header.is_custom = 1
 		order by item_category_id, column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, sPath, sBusinessObject);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, sPath, sBusinessObject);
 
         return Array.from(oQueryResult);
     };
@@ -427,7 +427,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	 * @throws {PlcException}
 	 *             if any exceptional state during the communication with the database occurs
 	 */
-    this.create = async function (oMeta) {
+    this.create = function (oMeta) {
         var oResult;
         var refMetadata;
         // check if referenced UOM exists
@@ -458,12 +458,12 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	 *
 	 * @returns {boolean} true if ref UOM exists, false if not
 	 */
-    this.getRefMetadata = function (oMeta) {
+    this.getRefMetadata = async function (oMeta) {
         const sSelectStatementRefMetadata = `select PATH, BUSINESS_OBJECT, COLUMN_ID, IS_CUSTOM, ROLLUP_TYPE_ID, SIDE_PANEL_GROUP_ID, DISPLAY_ORDER, TABLE_DISPLAY_ORDER, REF_UOM_CURRENCY_PATH, REF_UOM_CURRENCY_BUSINESS_OBJECT,
 	                                                REF_UOM_CURRENCY_COLUMN_ID, UOM_CURRENCY_FLAG, SEMANTIC_DATA_TYPE, SEMANTIC_DATA_TYPE_ATTRIBUTES, PROPERTY_TYPE, IS_IMMUTABLE_AFTER_SAVE, IS_REQUIRED_IN_MASTERDATA, IS_WILDCARD_ALLOWED,
 	                                                IS_USABLE_IN_FORMULA, RESOURCE_KEY_DISPLAY_NAME, RESOURCE_KEY_DISPLAY_DESCRIPTION, CREATED_ON, CREATED_BY, LAST_MODIFIED_ON, LAST_MODIFIED_BY, VALIDATION_REGEX_ID 
 	                                            from "${ Tables.metadata }" where PATH = ? and BUSINESS_OBJECT = ? and COLUMN_ID = ?`;
-        const aRefMetadata = dbConnection.executeQuery(sSelectStatementRefMetadata, oMeta.REF_UOM_CURRENCY_PATH, oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT, oMeta.REF_UOM_CURRENCY_COLUMN_ID);
+        const aRefMetadata = await dbConnection.executeQuery(sSelectStatementRefMetadata, oMeta.REF_UOM_CURRENCY_PATH, oMeta.REF_UOM_CURRENCY_BUSINESS_OBJECT, oMeta.REF_UOM_CURRENCY_COLUMN_ID);
         return aRefMetadata[0];
     };
 
@@ -590,7 +590,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 	 *
 	 * @returns {array} an array of formulas that were inserted into database
 	 */
-    this.createFormulas = async function (oMeta) {
+    this.createFormulas = function (oMeta) {
         var aFormulas = [];
         var oSettingsFormulas = {
             TABLE: Tables.formula,
@@ -722,7 +722,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
     /**
 	 * retrieve datatypeattributes based on datatype
 	 */
-    this.getSemanticDataTypeAttribute = async function (sSemanticDataType) {
+    this.getSemanticDataTypeAttribute = function (sSemanticDataType) {
         switch (sSemanticDataType) {
         case 'String':
             return constants.SemanticDataTypeAttributes.String;
@@ -747,7 +747,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
     /**
 	 * retrieve datatypeattributes based on datatype
 	 */
-    this.getPropertyType = async function (sSemanticDataType, oRefMeta) {
+    this.getPropertyType = function (sSemanticDataType, oRefMeta) {
         /* in case created field is type currency, set the property type to be Price = 1*/
         if (!helpers.isNullOrUndefined(oRefMeta)) {
             if (oRefMeta.PROPERTY_TYPE === 7) {
@@ -1086,7 +1086,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    checkCFTextIsValid = async function (oMeta, aMetaNames, aMetaValues, aKeys) {
+    checkCFTextIsValid = function (oMeta, aMetaNames, aMetaValues, aKeys) {
         aKeys.forEach(sKey => {
             const iDescriptionPosition = aMetaNames.indexOf(sKey);
             const aIllegalChars = ['&'];
@@ -1111,7 +1111,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.updateFormulas = async function (oMeta) {
+    this.updateFormulas = function (oMeta) {
         var oFormulaObj = {};
         var aFormulas = [];
 
@@ -1318,14 +1318,14 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.checkIsUsedInCostingSheetFormula = function (customField) {
+    this.checkIsUsedInCostingSheetFormula = async function (customField) {
         var oCheckStatement = `SELECT DISTINCT overhead_row.COSTING_SHEET_OVERHEAD_ID, overhead_row.COSTING_SHEET_OVERHEAD_ROW_ID FROM "${ Tables.costingSheetOverheadRowFormula }" formula, "${ Tables.costingSheetOverheadRow }" overhead_row
 								WHERE formula.FORMULA_ID = overhead_row.FORMULA_ID AND
 								formula.FORMULA_STRING LIKE_REGEXPR to_nvarchar(?)`;
 
         var sRegularExpression = '\\$' + customField + '([^0-9a-zA-Z_]|$)';
 
-        return dbConnection.executeQuery(oCheckStatement, sRegularExpression);
+        return await dbConnection.executeQuery(oCheckStatement, sRegularExpression);
     };
 
 
@@ -1333,13 +1333,13 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.checkIsUsedAsOverheadCustom = function (oMeta) {
+    this.checkIsUsedAsOverheadCustom = async function (oMeta) {
         let sColumn = oMeta.COLUMN_ID;
         const oCheckStatement = `SELECT TOP 1 formula.OVERHEAD_CUSTOM FROM "${ Tables.costingSheetOverheadRowFormula }" formula
 		                          INNER JOIN "${ Tables.costingSheetOverheadRow }" overhead_row
 		                          ON formula.FORMULA_ID = overhead_row.FORMULA_ID 
 								  WHERE overhead_row._VALID_TO IS NULL AND formula.OVERHEAD_CUSTOM LIKE ?`;
-        return dbConnection.executeQuery(oCheckStatement, sColumn);
+        return await dbConnection.executeQuery(oCheckStatement, sColumn);
     };
 
 
@@ -1610,7 +1610,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
         var dbConnection = await that.getConnection();
         var checkFormulaProcedure = dbConnection.loadProcedure(Procedures.checkFormula);
 
-        var result = checkFormulaProcedure();
+        var result = await checkFormulaProcedure();
 
         if (_.isArray(result.ERRORS) && result.ERRORS.length > 0) {
             var formulaUsed = {};
@@ -1699,7 +1699,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.getMetadata = function (aBody) {
+    this.getMetadata = async function (aBody) {
 
         var query = 'select PATH, BUSINESS_OBJECT, COLUMN_ID from "' + Tables.metadata + '"';
         if (aBody.length > 0) {
@@ -1711,14 +1711,14 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
                 }
             });
         }
-        return dbConnection.executeQuery(query);
+        return await dbConnection.executeQuery(query);
     };
 
 
 
 
 
-    this.getAllCustomFieldsNamesAsArray = function () {
+    this.getAllCustomFieldsNamesAsArray = async function () {
         const aAllCustomFields = [];
         const sStmt = `select column_id from "${ Tables.metadata }"
 						where path = ? and business_object = ?
@@ -1726,7 +1726,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 						and column_id LIKE_REGEXPR '^(CUST|CAPR|CWCE|CMPR|CMPL|CMAT|CCEN)_[A-Z][A-Z0-9_]*$'
 						order by column_id`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, BusinessObjectTypes.Item, BusinessObjectTypes.Item);
         const aMetadataFields = Array.from(oQueryResult);
 
         _.each(aMetadataFields, function (oMetadataField, iIndex) {
@@ -1744,11 +1744,11 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.checkIfFormulaContainsString = function (sString) {
+    this.checkIfFormulaContainsString = async function (sString) {
         const sStmt = `select formula_id from "${ Tables.formula }"
 						where formula_string like '%${ sString }%'`;
 
-        return dbConnection.executeQuery(sStmt).length > 0;
+        return await dbConnection.executeQuery(sStmt).length > 0;
     };
 
 
@@ -1759,7 +1759,7 @@ async function Metadata($, hQuery, dbConnection, sUserId) {
 
 
 
-    this.createCustomFieldEntriesForReplicationTool = async function (aCustomFieldsToCreate) {
+    this.fdeleteCustomFieldEntriesFromReplicationTool = async function (aCustomFieldsToCreate) {
         if (aCustomFieldsToCreate.length > 0) {
             let aColumnNames = aCustomFieldsToCreate.map(o => o.COLUMN_ID);
             let sColumns = "'" + aColumnNames.join("','") + "'";

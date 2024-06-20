@@ -27,8 +27,8 @@ const aValidEntities = [
     'PROJECT'
 ];
 
-async function RetentionPeriodsValidator($, utils) {
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+function RetentionPeriodsValidator($, utils) {
+    var genericSyntaxValidator = new GenericSyntaxValidator();
 
     /**
 	 * This function validates the request body of the given oRequest object (instance of $.request). Depending on
@@ -45,16 +45,16 @@ async function RetentionPeriodsValidator($, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return await validatePostPutRequest();
+            return validatePostPutRequest();
         case $.net.http.PUT:
-            return await validatePostPutRequest();
+            return validatePostPutRequest();
         case $.net.http.DEL:
-            return await validateDeleteRequest();
+            return validateDeleteRequest();
         default: {
                 let sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -62,9 +62,9 @@ async function RetentionPeriodsValidator($, utils) {
             }
         }
 
-        async function validatePostPutRequest() {
+        function validatePostPutRequest() {
             let aBody = utils.tryParseJson(oRequest.body.asString());
-            await checkArray(aBody);
+            checkArray(aBody);
             aBody.forEach(oRetentionPeriod => {
                  utils.checkMandatoryProperties(oRetentionPeriod, aMandatoryProperties);
                 utils.checkInvalidProperties(oRetentionPeriod, aValidProperties);
@@ -97,17 +97,17 @@ async function RetentionPeriodsValidator($, utils) {
             return aBody;
         }
 
-        async function validateDeleteRequest() {
+        function validateDeleteRequest() {
             let aBody = utils.tryParseJson(oRequest.body.asString());
-            await checkArray(aBody);
+            checkArray(aBody);
             aBody.forEach(oRetentionPeriod => {
-                 utils.checkMandatoryProperties(oRetentionPeriod, aMandatoryProperties);
+                utils.checkMandatoryProperties(oRetentionPeriod, aMandatoryProperties);
                 utils.checkInvalidProperties(oRetentionPeriod, aMandatoryProperties);
             });
             return aBody;
         }
 
-        async function checkArray(aBody) {
+        function checkArray(aBody) {
             if (!Array.isArray(aBody) || aBody.length === 0) {
                 let sLogMessage = `Body is not an array or is an empty array.`;
                 $.trace.error(sLogMessage);

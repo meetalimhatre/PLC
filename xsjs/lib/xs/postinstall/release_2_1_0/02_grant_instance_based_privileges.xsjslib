@@ -53,7 +53,7 @@ async function update(oConnection, sUserList) {
     await oConnection.executeUpdate(sUpsertUser);
 
     //unroll privileges for related objects
-    var withErrors =  authorizationUnroller.unrollPrivilegesOnGroupUpdate(await oConnection, sUserGroupId);
+    var withErrors = await authorizationUnroller.unrollPrivilegesOnGroupUpdate( oConnection, sUserGroupId);
 
     return !withErrors;
 }

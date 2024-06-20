@@ -77,7 +77,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
     if (bLogEmpty) {
         let oSecondaryConnection;
         try {
-            oSecondaryConnection =  $.hdb.getConnection({
+            oSecondaryConnection = await  $.hdb.getConnection({
                 'sqlcc': 'xsjs.sqlcc_config',
                 'pool': true,
                 'treatDateAsUTC': true
@@ -93,7 +93,7 @@ async function getPrepareForUpgradeInfo(request, oConnection) {
                     logs: sMessage + '"SAP_PLC"."sap.plc.db::basis.t_log".'
                 };
             } else {
-                return  getPrepareForUpgradeInfo(request, oConnection);
+                return await getPrepareForUpgradeInfo(request, oConnection);
             }
         } catch (e) {
             var sMessage = 'An error occurred when checking version information of previous PLC. ';

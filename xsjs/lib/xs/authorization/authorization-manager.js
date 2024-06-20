@@ -77,7 +77,7 @@ async function getUserPrivilege(sBusinessObjectType, sBusinessObjectId, oConnect
     if (!_.includes(BusinessObjectTypes, sBusinessObjectType)) {
         let oMessageDetails = new MessageDetails();
         const sLogMessage = `Invalid BusinessObjectType passed: (${ sBusinessObjectType }).`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
     }
 
@@ -118,13 +118,13 @@ async function getUserPrivilege(sBusinessObjectType, sBusinessObjectId, oConnect
         }
 
         if (parseInt(aCount[0].ROWCOUNT) === 0) {
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sClientMsg, oMessageDetails);
         } else {
             let oMessageDetails = new MessageDetails();
             const sClientMsg = `User does not have any privilege for the requested object of type ${ sBusinessObjectType }.`;
             const sServerMsg = `${ sClientMsg } Object id: ${ sBusinessObjectId }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_ACCESS_DENIED, sClientMsg, oMessageDetails);
         }
 
@@ -155,7 +155,7 @@ async function checkPrivilege(sBusinessObjectType, sBusinessObjectId, sPrivilege
     if (!_.has(Privileges, sPrivilege)) {
         let oMessageDetails = new MessageDetails();
         const sClientMsg = `Invalid Privilege passed: (${ sPrivilege }).`;
-        await logError(sClientMsg);
+        logError(sClientMsg);
         throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sClientMsg, oMessageDetails);
     }
 
@@ -166,13 +166,13 @@ async function checkPrivilege(sBusinessObjectType, sBusinessObjectId, sPrivilege
 
         const sClientMsg = `User does not have the required privilege (${ sPrivilege }) for the requested object of type ${ sBusinessObjectType }.`;
         const sServerMsg = `${ sClientMsg } Id: ${ sBusinessObjectId }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(Code.GENERAL_ACCESS_DENIED, sClientMsg, oMessageDetails);
     }
 
 }
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 

@@ -18,7 +18,7 @@ module.exports.Task = function ($) {
         var taskService = await new TaskService($, oPersistency);
         await updateActivityTimeNoSessionRequired(sSessionId, sUserId, oPersistency);
 
-        taskService.updateInactiveTasksOnTimeout(sUserId, null);
+        await taskService.updateInactiveTasksOnTimeout(sUserId, null);
 
         var aTasks;
         if (!helpers.isNullOrUndefined(mParameters.id)) {
@@ -37,8 +37,8 @@ module.exports.Task = function ($) {
         return oServiceOutput;
     };
 
-    function updateActivityTimeNoSessionRequired(sSessionId, sUserId, oPersistency) {
-        let bCheckSessionIsOpened = oPersistency.Session.isSessionOpened(sSessionId, sUserId);
+    async function updateActivityTimeNoSessionRequired(sSessionId, sUserId, oPersistency) {
+        let bCheckSessionIsOpened = await oPersistency.Session.isSessionOpened(sSessionId, sUserId);
         if (bCheckSessionIsOpened) {
             const details = oPersistency.Session.getSessionDetails(sSessionId, sUserId);
             if (details.lifetime > constants.ActivityTimeUpdateFrequency) {

@@ -13,7 +13,7 @@ const helpers = $.require('../../util/helpers');
 async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
     if (helpers.isNullOrUndefined(oConnection)) {
         const oConnectionFactory = new ($.require('../../db/connection/connection')).ConnectionFactory($);
-        oConnection = oConnectionFactory.getConnection();
+        oConnection = await oConnectionFactory.getConnection();
     }
     const oOutputData = {};
 
@@ -181,7 +181,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      * Generates the output messages presented to the used. Writes directly oResponse, which is passed as constructor argument.
      *      
      */
-    async function generateResponse() {
+    function generateResponse() {
         $.trace.error(`Generating script output...`);
         const aResponseBuffer = [];
 
@@ -311,7 +311,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
      *  4. Check for overlaps again. If overlaps are still there, there need an overlap with different data and the function is producing 
      *   an error; got to 1
      */
-    this.fix = async () => {
+    this.fix = () => {
         try {
             const aMasterdataTables = this.getMasterdataTables();
             aMasterdataTables.forEach((sTableName, iIndex) => {
@@ -336,7 +336,7 @@ async function MasterdataOverlapFixer(oRequest, oResponse, oConnection) {
                 oConnection.commit();
                 $.trace.error(`Commited`);
             });
-            await generateResponse();
+            generateResponse();
 
         } catch (e) {
             $.trace.error(`Exception during execution: ${ e.message || e.msg }`);

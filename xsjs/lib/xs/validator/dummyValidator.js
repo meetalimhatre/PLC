@@ -4,19 +4,19 @@ const MessageLibrary = require('../util/message');
 const PlcException = MessageLibrary.PlcException;
 const Code = MessageLibrary.Code;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
-async function DummyValidator(aHttpMethods) {
+function DummyValidator(aHttpMethods) {
 
     if (!_.isArray(aHttpMethods)) {
         const sLogMessage = 'aHttpMethods needs to be an array';
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
     }
 
-    this.validate = async function (oRequest) {
+    this.validate = function (oRequest) {
         var oBody = null;
         if (oRequest.body !== undefined) {
             try {
@@ -24,7 +24,7 @@ async function DummyValidator(aHttpMethods) {
             } catch (e) {
                 const sClientMsg = 'Cannot parse string to JSON.';
                 const sServerMsg = `${ sClientMsg } Tried to parse: ${ oRequest.body.asString() }`;
-                await logError(sServerMsg);
+                logError(sServerMsg);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
             }
         }

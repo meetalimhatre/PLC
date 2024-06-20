@@ -58,7 +58,7 @@ async function DefaultSettings(dbConnection, hQuery, hQueryRepl) {
         if (iEntryExists == 1) {
             try {
                 var procedure = dbConnection.loadProcedure(Procedures.default_settings_read);
-                var result = procedure(sLanguage, sMasterDataDate, sUserId);
+                var result = await procedure(sLanguage, sMasterDataDate, sUserId);
 
                 oReturnObject[DefaultSettingsEntities.CONTROLLING_AREA] = Array.slice(result.TT_CONTROLLING_AREA)[0];
                 oReturnObject[DefaultSettingsEntities.COMPANY_CODE] = Array.slice(result.TT_COMPANY_CODE)[0];

@@ -22,7 +22,7 @@ module.exports.DataProtection = function ($) {
         const oPersonalDataTypes = oPersistency.DataProtection.oPersonalDataTypes;
 
         async function findFormulasContainingRefernencesToThisDataSubject(sSubjectId, sSubjectType) {
-            const aFormulaIdsReferencingTheDataSubject = oPersistency.DataProtection.findFormulasThatContainPersonalData(sSubjectId, sSubjectType);
+            const aFormulaIdsReferencingTheDataSubject = await oPersistency.DataProtection.findFormulasThatContainPersonalData(sSubjectId, sSubjectType);
             if (aFormulaIdsReferencingTheDataSubject.length > 0) {
                 const oMessageDetails = new MessageDetails();
                 oMessageDetails.setMessageText('Some formulas use personal data. Deleting this data may have affected your calculation results.');
@@ -49,20 +49,20 @@ module.exports.DataProtection = function ($) {
         async function handleDeletePersonalDataFromProjectRequest() {
             if (!helpers.isNullOrUndefined(oBodyData.PROJECT_ID)) {
                 const sProjectId = oBodyData.PROJECT_ID.toUpperCase();
-                oPersistency.DataProtection.removePersonalDataFromProject(sProjectId);
+                await oPersistency.DataProtection.removePersonalDataFromProject(sProjectId);
             }
         }
 
         async function handleDeleteUserIdRequest() {
             async function deleteUserIdFromGroupsAndProjects(sUserId) {
-                oPersistency.DataProtection.deleteInstanceBasedUserIds(sUserId);
-                oPersistency.DataProtection.deleteUserIds(sUserId);
+                await oPersistency.DataProtection.deleteInstanceBasedUserIds(sUserId);
+                await oPersistency.DataProtection.deleteUserIds(sUserId);
                 await findFormulasContainingRefernencesToThisDataSubject(sUserId, oPersonalDataTypes.User);
             }
 
             if (!helpers.isNullOrUndefined(oBodyData.USER_ID)) {
                 const sUserId = oBodyData.USER_ID.toUpperCase();
-                oPersistency.DataProtection.removeReferencesToUserIds(sUserId);
+                await oPersistency.DataProtection.removeReferencesToUserIds(sUserId);
                 await deleteUserIdFromGroupsAndProjects(sUserId);
             }
         }
@@ -83,12 +83,12 @@ module.exports.DataProtection = function ($) {
  *
  * @returns oServiceOutput {object} - response containing: table name, column name, entity and counter for the given entity
  */
-    this.post = function (oBodyData, oParameters, oServiceOutput, oPersistency) {
+    this.post = async function (oBodyData, oParameters, oServiceOutput, oPersistency) {
         const sEntityID = oBodyData.ENTITY.toUpperCase();
         const sEntityType = oBodyData.ENTITY_TYPE.toUpperCase();
         var oResponseBody = {
-            'occurrences': oPersistency.DataProtection.getPersonalData(sEntityID, sEntityType),
-            'retention': oPersistency.DataProtection.getRetentionData(sEntityID, sEntityType)
+            'occurrences': await oPersistency.DataProtection.getPersonalData(sEntityID, sEntityType),
+            'retention': await oPersistency.DataProtection.getRetentionData(sEntityID, sEntityType)
         };
         oServiceOutput.setBody(oResponseBody);
     };

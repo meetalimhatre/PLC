@@ -34,7 +34,7 @@ module.exports.ConnectionFactory = ConnectionFactory;
 let oPlatform = ''; // can be either "CF" for Cloud Foundry, or "XSA-OP" for XSA onPremise
 let oRuntimeCredentialsXsaOp = null;
 
-let checkGetRuntimeCredentials = async function () {
+let checkGetRuntimeCredentials = function () {
     if (oPlatform === '') {
         oPlatform = isCloud() ? 'CF' : 'XSA-OP';
     }
@@ -70,7 +70,7 @@ module.exports.getContainerSchema = async function ($) {
             'treatDateAsUTC': true,
             'enableColumnIndices': false
         });
-        schema = connection.executeQuery('SELECT CURRENT_SCHEMA FROM DUMMY')[0].CURRENT_SCHEMA;
+        schema = await connection.executeQuery('SELECT CURRENT_SCHEMA FROM DUMMY')[0].CURRENT_SCHEMA;
     }
 
     return schema;

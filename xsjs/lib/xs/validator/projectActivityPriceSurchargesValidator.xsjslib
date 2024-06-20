@@ -67,7 +67,7 @@ function ProjectActivityPriceSurchargesValidator(oPersistency, utils) {
         async function validateUpdateRequest() {
             var aProjectActivityPriceSurcharges = utils.parseCheckProjectDetails(oRequest);
 
-            _.each(aProjectActivityPriceSurcharges, async function (oProjectSurcharges) {
+            _.each(aProjectActivityPriceSurcharges, function (oProjectSurcharges) {
                 utils.checkArrayProperties(oProjectSurcharges, aSurchargeMandatoryProperties, aSurchargeValidProperties, {
                     PLANT_ID: [
                         'String',
@@ -101,7 +101,7 @@ function ProjectActivityPriceSurchargesValidator(oPersistency, utils) {
                     $.trace.error(sLogMessage);
                     throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
                 }
-                _.each(oProjectSurcharges.PERIOD_VALUES, async function (oSurchargeValue) {
+                _.each(oProjectSurcharges.PERIOD_VALUES, function (oSurchargeValue) {
                     utils.checkArrayProperties(oSurchargeValue, aValueMandatoryProperties, aValueValidProperties, {
                         LIFECYCLE_PERIOD_FROM: [
                             'Integer',
@@ -137,7 +137,7 @@ function ProjectActivityPriceSurchargesValidator(oPersistency, utils) {
             if (oPersistency.Project.exists(mValidatedParameters.id)) {
                 // Check that referenced masterdata does exist; note that the for surcharges placeholders can be used, for this reason those placeholders are added to the set
                 // of valid values; for plants also the value for no plants ("") is allowed
-                oPersistency.Project.checkMasterdataReferences(oProjectMasterdata, mValidatedParameters, aPropertiesToBeChecked);
+                await oPersistency.Project.checkMasterdataReferences(oProjectMasterdata, mValidatedParameters, aPropertiesToBeChecked);
             }
 
             return aProjectActivityPriceSurcharges;

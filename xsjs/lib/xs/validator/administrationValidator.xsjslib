@@ -20,7 +20,7 @@ const aNotMaintainableBusinessObjects = $.require('../util/masterdataResources')
 const MasterDataObjectHandlerProxy = $.import('xs.db.administration.proxy', 'masterDataProxy').MasterDataObjectHandlerProxy;
 const MasterdataResource = $.require('../util/masterdataResources').MasterdataResource;
 const GenericSyntaxValidator = $.require('./genericSyntaxValidator').GenericSyntaxValidator;
-var genericSyntaxValidator = await new GenericSyntaxValidator();
+var genericSyntaxValidator = new GenericSyntaxValidator();
 
 var trace = $.trace;
 /**
@@ -29,9 +29,9 @@ var trace = $.trace;
  * 
  * @constructor
  */
-async function AdministrationValidator(oPersistency, sSessionId, metadataProvider, utils) {
+function AdministrationValidator(oPersistency, sSessionId, metadataProvider, utils) {
 
-    async function checkURLParameters(oParameters) {
+    function checkURLParameters(oParameters) {
 
         //check autocomplete parameter
         if (!helpers.isNullOrUndefined(oParameters.get('searchAutocomplete'))) {
@@ -90,7 +90,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
 
     async function validatePostRequest(oRequest, mValidatedParameters) {
         //check the autocomplete and filter parameter
-        await checkURLParameters(oRequest.parameters);
+        checkURLParameters(oRequest.parameters);
 
         var sBusinessObjectParameter = oRequest.parameters.get('business_object');
         var sIgnoreBadDataParameter = oRequest.parameters.get('ignoreBadData');
@@ -105,22 +105,22 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
 
-        _.each(oRequestBodyData, async function (value, key) {
+        _.each(oRequestBodyData, function (value, key) {
             if (_.includes(aNotMaintainableBusinessObjects, sBusinessObjectParameter)) {
                 const sLogMessage = `Business object ${ sBusinessObjectParameter } cannot be maintained!`;
                 trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             }
             if (key == BatchOperation.CREATE) {
-                await checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
-                await createCustomChecks(sBusinessObjectParameter, value);
+                checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
+                createCustomChecks(sBusinessObjectParameter, value);
             } else if (key == BatchOperation.UPSERT) {
-                await checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
+                checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
             } else if (key == BatchOperation.UPDATE) {
-                await checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
-                await updateCustomChecks(sBusinessObjectParameter, value);
+                checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
+                updateCustomChecks(sBusinessObjectParameter, value);
             } else if (key == BatchOperation.DELETE) {
-                await checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
+                checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, value);
             } else {
                 const sLogMessage = `Unknown property of the request object for masterdata: ${ key }`;
                 trace.error(sLogMessage);
@@ -154,13 +154,13 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
 
         if (sBusinessObjectParameter === BusinessObjectTypes.CurrencyConversion) {
             if (!helpers.isNullOrUndefined(oRequestBodyData.CREATE)) {
-                await checkCurrency(oRequestBodyData.CREATE);
+                checkCurrency(oRequestBodyData.CREATE);
             }
             if (!helpers.isNullOrUndefined(oRequestBodyData.UPDATE)) {
-                await checkCurrency(oRequestBodyData.UPDATE);
+                checkCurrency(oRequestBodyData.UPDATE);
             }
             if (!helpers.isNullOrUndefined(oRequestBodyData.UPSERT)) {
-                await checkCurrency(oRequestBodyData.UPSERT);
+                checkCurrency(oRequestBodyData.UPSERT);
             }
         }
 
@@ -181,7 +181,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
 	 * @param sBusinessObjectParameter - business_object parameter from the request URL
 	 * @param oValue - object that must be checked for valid properties
 	 */
-    async function checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, oValue) {
+    function checkBusinessObjectinBodyIntegrity(sBusinessObjectParameter, oValue) {
         var keys = Object.keys(oValue);
 
         if (helpers.isNullOrUndefined(MasterDataObjectsAllowedReqBodyEntities.get(sBusinessObjectParameter))) {
@@ -202,27 +202,27 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
         return true;
     }
 
-    async function validateGetRequest(oRequest) {
+    function validateGetRequest(oRequest) {
         //check the autocomplete and filter parameter
-        await checkURLParameters(oRequest.parameters);
+        checkURLParameters(oRequest.parameters);
         return utils.checkEmptyBody(oRequest.body);
     }
 
-    async function createCustomChecks(sBusinessObjectParameter, oValue) {
+    function createCustomChecks(sBusinessObjectParameter, oValue) {
 
         if (sBusinessObjectParameter === BusinessObjectTypes.CostingSheet) {
-            await createCostingSheetCustomChecks(oValue);
+            createCostingSheetCustomChecks(oValue);
         }
     }
 
-    async function validateUseDefaultFixedCostPortion(oRecord) {
+    function validateUseDefaultFixedCostPortion(oRecord) {
 
         if (!helpers.isNullOrUndefined(oRecord.USE_DEFAULT_FIXED_COST_PORTION)) {
-            await genericSyntaxValidator.validateValue(oRecord.USE_DEFAULT_FIXED_COST_PORTION, 'BooleanInt', false, undefined);
+            genericSyntaxValidator.validateValue(oRecord.USE_DEFAULT_FIXED_COST_PORTION, 'BooleanInt', false, undefined);
         }
     }
 
-    async function validateCreditFixedCostPortion(oRecord) {
+    function validateCreditFixedCostPortion(oRecord) {
 
         if (!helpers.isNullOrUndefined(oRecord.CREDIT_FIXED_COST_PORTION) && (oRecord.CREDIT_FIXED_COST_PORTION < 0 || oRecord.CREDIT_FIXED_COST_PORTION > 100)) {
             const sClientMsg = 'Value must be between 0 and 100';
@@ -232,7 +232,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
         }
     }
 
-    async function validateCostingSheetRowFormula(oRecord, isCreate) {
+    function validateCostingSheetRowFormula(oRecord, isCreate) {
         if (isCreate) {
             if (helpers.isNullOrUndefined(oRecord.FORMULA_STRING) && !helpers.isNullOrUndefined(oRecord.FORMULA_DESCRIPTION)) {
                 const sLogMessage = `Formula string is mandatory when comment is added`;
@@ -254,42 +254,42 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
         }
     }
 
-    async function createCostingSheetCustomChecks(oValue) {
+    function createCostingSheetCustomChecks(oValue) {
 
         var aCostingSheetOverheadItems = oValue[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ENTITIES];
         _.each(aCostingSheetOverheadItems, async function (oRecord) {
 
-            await validateUseDefaultFixedCostPortion(oRecord);
+            validateUseDefaultFixedCostPortion(oRecord);
         });
 
         var aCostingSheetOverheadRowItems = oValue[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ROW_ENTITIES];
         _.each(aCostingSheetOverheadRowItems, async function (oRecord) {
 
-            await validateCreditFixedCostPortion(oRecord);
-            await validateCostingSheetRowFormula(oRecord, true);
+            validateCreditFixedCostPortion(oRecord);
+            validateCostingSheetRowFormula(oRecord, true);
         });
     }
 
-    async function updateCustomChecks(sBusinessObjectParameter, oValue) {
+    function updateCustomChecks(sBusinessObjectParameter, oValue) {
 
         if (sBusinessObjectParameter === BusinessObjectTypes.CostingSheet) {
-            await updateCostingSheetCustomChecks(oValue);
+            updateCostingSheetCustomChecks(oValue);
         }
     }
 
-    async function updateCostingSheetCustomChecks(oValue) {
+    function updateCostingSheetCustomChecks(oValue) {
 
         var aCostingSheetOverheadItems = oValue[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ENTITIES];
-        _.each(aCostingSheetOverheadItems, async function (oRecord) {
+        _.each(aCostingSheetOverheadItems, function (oRecord) {
 
-            await validateUseDefaultFixedCostPortion(oRecord);
+            validateUseDefaultFixedCostPortion(oRecord);
         });
 
         var aCostingSheetOverheadRowItems = oValue[BusinessObjectsEntities.COSTING_SHEET_OVERHEAD_ROW_ENTITIES];
-        _.each(aCostingSheetOverheadRowItems, async function (oRecord) {
+        _.each(aCostingSheetOverheadRowItems, function (oRecord) {
 
-            await validateCreditFixedCostPortion(oRecord);
-            await validateCostingSheetRowFormula(oRecord, false);
+            validateCreditFixedCostPortion(oRecord);
+            validateCostingSheetRowFormula(oRecord, false);
         });
     }
 
@@ -312,7 +312,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
     this.validate = async function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest(oRequest);
+            return validateGetRequest(oRequest);
         case $.net.http.POST:
             return await validatePostRequest(oRequest, mValidatedParameters);
         default: {
@@ -330,7 +330,7 @@ async function AdministrationValidator(oPersistency, sSessionId, metadataProvide
 	 * @param aCurrency -
 	 *         The currency conversion entities array
 	 */
-    async function checkCurrency(aCurrency) {
+    function checkCurrency(aCurrency) {
         let aCurrencyConversionEntities = aCurrency.CURRENCY_CONVERSION_ENTITIES;
         if (_.isArray(aCurrencyConversionEntities) && aCurrencyConversionEntities.length > 0) {
             aCurrencyConversionEntities.forEach(oCurrencyConversion => {

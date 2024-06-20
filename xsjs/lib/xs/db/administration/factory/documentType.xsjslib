@@ -54,7 +54,7 @@ function DocumentType(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by DOCUMENT_TYPE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.DOCUMENT_TYPE_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
         return oReturnObject;
     };
@@ -84,7 +84,7 @@ async function getDocumentTypeEntities(aDocumentTypeIds, masterdataTimestamp, oP
 						where plcTable._VALID_FROM <= '${ masterdataTimestamp }'
 							and ( plcTable._VALID_TO > '${ masterdataTimestamp }' or plcTable._VALID_TO is null)
                	        AND plcTable.DOCUMENT_TYPE_ID in ('${ aDocumentTypeIds }')`;
-        return _.values(await bConnection.executeQuery(stmt));
+        return _.values(await dbConnection.executeQuery(stmt));
     }
     return [];
 }

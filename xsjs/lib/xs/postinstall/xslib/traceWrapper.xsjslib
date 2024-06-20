@@ -2,15 +2,15 @@
 const trace = $.import('xs.postinstall.xslib', 'trace');
 const _ = $.require('lodash');
 const whoAmI = 'xs.postinstall.xslib.traceWrapper';
-async function fatal(line) {
-    await trace.fatal(whoAmI, line);
+function fatal(line) {
+    trace.fatal(whoAmI, line);
 }
-async function debug(line) {
-    await trace.debug(whoAmI, line);
+function debug(line) {
+    trace.debug(whoAmI, line);
 }
 
 
-async function stringify_exception(ex) {
+function stringify_exception(ex) {
     var eString = '';
     if (ex.constructor === Array) {
         _.each(ex, function (ex_it) {
@@ -37,8 +37,8 @@ async function stringify_exception(ex) {
     return eString;
 }
 
-async function log_exception(ex) {
-    await fatal(await stringify_exception(ex));
+function log_exception(ex) {
+    fatal(stringify_exception(ex));
 }
 
 function checkPrivilege(oReqiuredPrivilege) {
@@ -51,7 +51,7 @@ function checkPrivilege(oReqiuredPrivilege) {
 }
 
 
-async function wrap_request_handler(request_handler) {
+function wrap_request_handler(request_handler) {
     // This will wrap a request handler for tracing.
 
     var result = null;
@@ -60,10 +60,10 @@ async function wrap_request_handler(request_handler) {
         start = parseInt(new Date().getTime(), 10);
         // call the request handler
         result = request_handler(true);
-        await debug('result: ' + JSON.stringify(result));
+        debug('result: ' + JSON.stringify(result));
 
     } catch (e) {
-        await log_exception(e);
+        log_exception(e);
 
         if (e.code && e.code === 258) {
             $.response.status = $.net.http.UNAUTHORIZED;
@@ -79,7 +79,7 @@ async function wrap_request_handler(request_handler) {
         $.response.contentType = 'text/plain';
         var current = parseInt(new Date().getTime(), 10);
         var elapsed = 'Total Execution Time: ' + (current - start) + ' ms\n\n';
-        $.response.setBody(elapsed + cookies + await trace.getTransientTrace() + '\n');
+        $.response.setBody(elapsed + cookies + trace.getTransientTrace() + '\n');
         $.response.status = $.net.http.OK;
         return result;
     } catch (e) {

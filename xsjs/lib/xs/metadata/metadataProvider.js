@@ -16,7 +16,7 @@ const aFrontendOnlyMetadata = ['PRICE_SPLIT_COMPONENTS'];
 
 var Procedures = Object.freeze({ p_metadata_get_for_item: 'sap.plc.db.administration.procedures::p_metadata_get_for_item' });
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
@@ -54,7 +54,7 @@ function MetadataProvider() {
         //   - to increase xsjs instance concurrent throughput
         if (Constants.BusinessObjectTypes.Item === sPath && Constants.BusinessObjectTypes.Item === sBusinessObject && null === sColumnId && null === bIsCustom) {
             var fnGetMetadata = (await oPersistency.getConnection()).loadProcedure(Procedures.p_metadata_get_for_item);
-            var oResults = fnGetMetadata(sSessionId, sUserId).$resultSets;
+            var oResults = await fnGetMetadata(sSessionId, sUserId).$resultSets;
 
             aMetadataFields = oResults[0];
             aMetadataText = oResults[1];
@@ -134,7 +134,7 @@ function MetadataProvider() {
             aDbAttributes = _.filter(aMetadataAttributes, function (oMetadaAttribute) {
                 return oMetadaAttribute.COLUMN_ID === metadataObj.COLUMN_ID && oMetadaAttribute.PATH === metadataObj.PATH && oMetadaAttribute.BUSINESS_OBJECT === metadataObj.BUSINESS_OBJECT;
             });
-            metadataObj.ATTRIBUTES = bPathStartsWithItem || await bVariantItemWithQuantity() ? await computeCompleteItemMetadataAttributes(aDbAttributes) : aDbAttributes;
+            metadataObj.ATTRIBUTES = bPathStartsWithItem || bVariantItemWithQuantity() ? computeCompleteItemMetadataAttributes(aDbAttributes) : aDbAttributes;
             if (bVariantItemWithQuantity()) {
                 metadataObj.ATTRIBUTES.push(aDbAttributes[0]);
             }
@@ -183,10 +183,10 @@ function MetadataProvider() {
         _.each(aDbMetadataAttributes, async function (oDbAttribute) {
             if (oDbAttribute.ITEM_CATEGORY_ID === -1) {
                 for (var iCategoryId = 0; iCategoryId < iItemCategoryCount; iCategoryId++) {
-                    await computeCategroyMetadata(iCategoryId, oDbAttribute);
+                    computeCategroyMetadata(iCategoryId, oDbAttribute);
                 }
             } else {
-                await computeCategroyMetadata(oDbAttribute.ITEM_CATEGORY_ID, oDbAttribute);
+                computeCategroyMetadata(oDbAttribute.ITEM_CATEGORY_ID, oDbAttribute);
             }
         });
 
@@ -380,7 +380,7 @@ function MetadataProvider() {
 
 
 
-                await generateTableDisplayOrder(aBatchItems, oPersistency);
+                generateTableDisplayOrder(aBatchItems, oPersistency);
 
                 _.each(aBatchItems, async function (oMeta) {
                     try {
@@ -507,7 +507,7 @@ function MetadataProvider() {
 
                     const sClientMsg = 'Exception when generating custom fields using DbArtefactController.';
                     const sServerMsg = `${ sClientMsg } \nException: ${ e }`;
-                    await logError(sServerMsg);
+                    logError(sServerMsg);
                     throw new PlcException(Code.GENERAL_GENERATION_EXCEPTION, sClientMsg, oMessageDetails);
                 }
             }
@@ -569,7 +569,7 @@ function MetadataProvider() {
 
 
 
-    async function generateTableDisplayOrder(aBatchItems, oPersistency) {
+    function generateTableDisplayOrder(aBatchItems, oPersistency) {
         var oRefField = {};
         var iTableDisplayOrder = 0;
         var aFields = _.filter(aBatchItems, function (oMeta) {
@@ -611,7 +611,7 @@ function MetadataProvider() {
 
 
 
-    async function createItemMetadata(oMeta) {
+    function createItemMetadata(oMeta) {
         var oItemCategory = Constants.ItemCategory;
         var oMetaItem = JSON.parse(JSON.stringify(oMeta));
         oMetaItem.PATH = 'Item';
@@ -681,7 +681,7 @@ function MetadataProvider() {
             break;
         default: {
                 const sLogMessage = `Custom fields are not maintainable for this masterdata object.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
             }
         }
@@ -712,7 +712,7 @@ function MetadataProvider() {
             var oMessageDetails = new MessageDetails();
             oMessageDetails.addMetadataObjs(oMeta);
             const sLogMessage = `An entry for column ${ oMeta.COLUMN_ID } of ${ oMeta.BUSINESS_OBJECT } object with the path ${ oMeta.PATH } already exists in the database.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR, sLogMessage, oMessageDetails);
         }
 
@@ -743,7 +743,7 @@ function MetadataProvider() {
             var oMessageDetails = new MessageDetails();
             oMessageDetails.addMetadataObjs(oMeta);
             const sLogMessage = `There is no entry for column ${ oMeta.COLUMN_ID } of ${ oMeta.BUSINESS_OBJECT } object with the path ${ oMeta.PATH }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage, oMessageDetails);
         }
 
@@ -781,7 +781,7 @@ function MetadataProvider() {
             var oMessageDetails = new MessageDetails();
             oMessageDetails.addMetadataObjs(oMeta);
             const sLogMessage = `There is no entry for column ${ sColumn } of ${ sObject } object with the path ${ sPath }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_ENTITY_NOT_FOUND_ERROR, sLogMessage, oMessageDetails);
         }
 
@@ -798,7 +798,7 @@ function MetadataProvider() {
 
             const sClientMsg = `Cannot delete field ${ oMeta } since it used in other formulas`;
             const sServerMsg = `${ sClientMsg } Used in formulas: ${ oMessageDetails.formulaObjs }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sClientMsg, oMessageDetails);
         }
 
@@ -818,7 +818,7 @@ function MetadataProvider() {
 
             const sClientMsg = `The field ${ oMeta.COLUMN_ID } is referenced in a costing sheet overhead rule formula.`;
             const sServerMsg = `${ sClientMsg } Costing sheet overhead rules: ${ JSON.stringify(aIsUsedInCostingSheetFormula) }`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(Code.CUSTOM_FIELD_REFERENCED_IN_COSTING_SHEET_FORMULA_ERROR, sClientMsg);
         }
     }
@@ -832,7 +832,7 @@ function MetadataProvider() {
                 let oMessageDetails = new MessageDetails();
                 oMessageDetails.addMetadataObjs(oMeta);
                 const sLogMessage = `The field ${ oMeta.COLUMN_ID } is referenced in a costing sheet overhead custom.`;
-                await logError(sLogMessage);
+                logError(sLogMessage);
                 throw new PlcException(Code.CUSTOM_FIELD_REFERENCED_IN_COSTING_SHEET_OVERHEAD_ERROR, sLogMessage, oMessageDetails);
             }
         }

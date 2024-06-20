@@ -37,12 +37,12 @@ function PrivilegeValidator(oPersistency, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters, oServiceOutput) {
+    this.validate = function (oRequest, mValidatedParameters, oServiceOutput) {
         switch (oRequest.method) {
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return await validateBatchRequest();
+            return validateBatchRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -50,7 +50,7 @@ function PrivilegeValidator(oPersistency, utils) {
             }
         }
 
-        async function validateBatchRequest() {
+        function validateBatchRequest() {
             var oPrivilege = utils.tryParseJson(oRequest.body.asString());
             //mandatory and valid properties for the object
             var aMandatoryProperties = [
@@ -77,7 +77,7 @@ function PrivilegeValidator(oPersistency, utils) {
             var aValidPropertiesDeleteGroup = ['GROUP_ID'];
 
             //check mandatory properties and invalid properties for privilege object
-            await utils.checkMandatoryProperties(oPrivilege, aMandatoryProperties);
+            utils.checkMandatoryProperties(oPrivilege, aMandatoryProperties);
             utils.checkInvalidProperties(oPrivilege, aValidProperties);
 
             //check that on the request we have at least one operation
@@ -103,13 +103,13 @@ function PrivilegeValidator(oPersistency, utils) {
 
             //check the batch operations
             if (_.has(oPrivilege, 'CREATE')) {
-                oIdsCreate = await validateBodyForOperation(oPrivilege.CREATE, aValidPropertiesCreateUpdateUser, aValidPropertiesCreateUpdateGroup, MessageLibrary.Operation.CREATE, aResultErrors);
+                oIdsCreate = validateBodyForOperation(oPrivilege.CREATE, aValidPropertiesCreateUpdateUser, aValidPropertiesCreateUpdateGroup, MessageLibrary.Operation.CREATE, aResultErrors);
             }
             if (_.has(oPrivilege, 'UPDATE')) {
-                oIdsUpdate = await validateBodyForOperation(oPrivilege.UPDATE, aValidPropertiesCreateUpdateUser, aValidPropertiesCreateUpdateGroup, MessageLibrary.Operation.UPDATE, aResultErrors);
+                oIdsUpdate = validateBodyForOperation(oPrivilege.UPDATE, aValidPropertiesCreateUpdateUser, aValidPropertiesCreateUpdateGroup, MessageLibrary.Operation.UPDATE, aResultErrors);
             }
             if (_.has(oPrivilege, 'DELETE')) {
-                oIdsDelete = await validateBodyForOperation(oPrivilege.DELETE, aValidPropertiesDeleteUser, aValidPropertiesDeleteGroup, MessageLibrary.Operation.DELETE, aResultErrors);
+                oIdsDelete = validateBodyForOperation(oPrivilege.DELETE, aValidPropertiesDeleteUser, aValidPropertiesDeleteGroup, MessageLibrary.Operation.DELETE, aResultErrors);
             }
 
             if (aResultErrors.length > 0) {
@@ -149,7 +149,7 @@ function PrivilegeValidator(oPersistency, utils) {
             return oPrivilege;
         }
 
-        async function validateBodyForOperation(oObject, aMandatoryPropertiesUser, aMandatoryPropertiesGroup, operation, aResultErrors) {
+        function validateBodyForOperation(oObject, aMandatoryPropertiesUser, aMandatoryPropertiesGroup, operation, aResultErrors) {
             var aUserIds = [];
             var aGroupIds = [];
 
@@ -164,8 +164,8 @@ function PrivilegeValidator(oPersistency, utils) {
                     utils.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, AuthObjectTypes.privilegeObject, oObject, ValidationInfoCode.NOT_ARRAY, aResultErrors);
                 } else {
 
-                    _.each(oObject.USER_PRIVILEGES, async function (oObjectPrivilege) {
-                        await checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryPropertiesUser, operation, aResultErrors);
+                    _.each(oObject.USER_PRIVILEGES, function (oObjectPrivilege) {
+                        checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryPropertiesUser, operation, aResultErrors);
                         utils.checkUserId(oObjectPrivilege, operation, AuthObjectTypes.privilegeObject, aResultErrors);
                         if (aResultErrors.length === 0) {
                             aUserIds.push(oObjectPrivilege.USER_ID.toUpperCase());
@@ -179,7 +179,7 @@ function PrivilegeValidator(oPersistency, utils) {
                     utils.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, AuthObjectTypes.privilegeObject, oObject, ValidationInfoCode.NOT_ARRAY, aResultErrors);
                 } else {
                     _.each(oObject.GROUP_PRIVILEGES, async function (oObjectPrivilege) {
-                        await checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryPropertiesGroup, operation, aResultErrors);
+                        checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryPropertiesGroup, operation, aResultErrors);
                         if (aResultErrors.length === 0) {
                             aGroupIds.push(oObjectPrivilege.GROUP_ID.toUpperCase());
                         }
@@ -193,9 +193,9 @@ function PrivilegeValidator(oPersistency, utils) {
             };
         }
 
-        async function checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryProperties, operation, aResultErrors) {
+        function checkMandatoryAndInvalidProperties(oObjectPrivilege, aMandatoryProperties, operation, aResultErrors) {
             try {
-                await utils.checkMandatoryProperties(oObjectPrivilege, aMandatoryProperties);
+                utils.checkMandatoryProperties(oObjectPrivilege, aMandatoryProperties);
             } catch (e) {
                 utils.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, AuthObjectTypes.privilegeObject, oObjectPrivilege, ValidationInfoCode.MISSING_MANDATORY_PROPERTY, aResultErrors);
             }

@@ -8,9 +8,9 @@ let imps = {};
 // lazy load validator .xsjslib/.js
 let importValidator = function (libfilename, objectname) {
     Object.defineProperty(imps, objectname, {
-        get: async function () {
+        get: function () {
 
-            return await (async () => {
+            return ( () => {
                 let _objectname = '_' + objectname;
                 if (!(_objectname in this)) {
                     if (libfilename.endsWith('.js')) {
@@ -59,11 +59,11 @@ importValidator('variantGeneratorValidator', 'VariantGeneratorValidator');
  * Static factory object that provides a function to create a BusinessObjectValidator based on a given sObjectType
  */
 var BusinessObjectValidatorFactory = Object.freeze({
-    async createBusinessObjectValidator(sObjectType, oPersistency, sSessionId) {
-        let getUtils = async function () {
+    createBusinessObjectValidator(sObjectType, oPersistency, sSessionId) {
+        let getUtils = function () {
             return new BusinessObjectValidatorUtils(sObjectType);
         };
-        let getMetadataProvider = async function () {
+        let getMetadataProvider = function () {
             return new MetadataProvider();
         };
 

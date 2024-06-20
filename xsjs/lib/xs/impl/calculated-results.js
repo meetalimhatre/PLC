@@ -7,7 +7,7 @@ module.exports.CalculatedResults = function ($) {
  * If calculate!=true, the calculated results are read from the tables;
  */
 
-    this.get = async function (oBodyData, mParameters, oServiceOutput, oPersistency) {
+    this.get = function (oBodyData, mParameters, oServiceOutput, oPersistency) {
         var iCalculationVersionId = helpers.toPositiveInteger(mParameters.id);
 
         if (helpers.isNullOrUndefined(mParameters.calculate) || mParameters.calculate !== true) {

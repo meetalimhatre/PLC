@@ -217,7 +217,7 @@ function SimilarPartsSearch($, dbConnection) {
         } finally {
             // drop similar parts search procedure
             if (sProcedureName) {
-                oDbArtefactController.hdiDeleteFiles(['src/dynamic/db/' + sProcedureName.split('::')[1] + '.hdbprocedure']);
+                await oDbArtefactController.hdiDeleteFiles(['src/dynamic/db/' + sProcedureName.split('::')[1] + '.hdbprocedure']);
             }
         }
     };
@@ -237,13 +237,13 @@ function SimilarPartsSearch($, dbConnection) {
      */
     async function buildSearchProcedure(oSearchParameter, sUserId, sLanguage, iCalculationVersionId) {
         // build similar parts search procedure content
-        let oProcedureObject = await buildSearchComponents(oSearchParameter, sUserId, sLanguage, iCalculationVersionId);
+        let oProcedureObject = buildSearchComponents(oSearchParameter, sUserId, sLanguage, iCalculationVersionId);
         // activate procedure content
         let aUpsertList = [{
                 PATH: 'src/dynamic/db/' + oProcedureObject.Name.split('::')[1] + '.hdbprocedure',
                 CONTENT: oProcedureObject.Statement
             }];
-        oDbArtefactController.hdiUpsertFiles(aUpsertList);
+        await oDbArtefactController.hdiUpsertFiles(aUpsertList);
         return oProcedureObject;
     }
 
@@ -259,7 +259,7 @@ function SimilarPartsSearch($, dbConnection) {
         let result;
         try {
             let fnSimilarPartsSearchProcedure = dbConnection.loadProcedure(oProcedureObject.Name);
-            result = fnSimilarPartsSearchProcedure();
+            result = await fnSimilarPartsSearchProcedure();
             result = result.$resultSets.slice(-1)[0];
         } catch (e) {
             const sLogMessage = `Run similar parts search procedure failed: ${ e.message || e.msg }.`;
@@ -350,26 +350,26 @@ function SimilarPartsSearch($, dbConnection) {
      *              oProcedureObject        - includes procedure content and all search attributes
      *
      */
-    async function buildSearchComponents(oSearchParameter, sUserId, sLanguage, iCalculationVersionId) {
+    function buildSearchComponents(oSearchParameter, sUserId, sLanguage, iCalculationVersionId) {
         let sProcedureName = `sap.plc.db::SEARCH_SIMILAR_PARTS_${ _.now() }`;
-        let aSearchComponents = _.keys(SimilarPartsSourceTypes).map(async type => {
+        let aSearchComponents = _.keys(SimilarPartsSourceTypes).map( type => {
             return {
                 'Type': type.toLowerCase(),
                 'Source': oSearchParameter.Source[type],
-                'Valid': await isValidDataSource(oSearchParameter.Source[type])
+                'Valid': isValidDataSource(oSearchParameter.Source[type])
             };
         });
 
         // If "TimeRange" is not provided, default is no time range limitation on
         // calculation versions or master data.
-        await buildDataSourceComponent(sUserId, aSearchComponents, oSearchParameter.Source.TimeRange, iCalculationVersionId);
-        await buildMetadataComponent(aSearchComponents, sUserId, sLanguage);
-        await buildFrequencyComponent(aSearchComponents);
+        buildDataSourceComponent(sUserId, aSearchComponents, oSearchParameter.Source.TimeRange, iCalculationVersionId);
+        buildMetadataComponent(aSearchComponents, sUserId, sLanguage);
+        buildFrequencyComponent(aSearchComponents);
 
 
-        let oAttrComponent = await buildAttributeComponents(aSearchComponents, oSearchParameter.Attributes, sLanguage, sUserId);
+        let oAttrComponent = buildAttributeComponents(aSearchComponents, oSearchParameter.Attributes, sLanguage, sUserId);
 
-        await buildScoreComponent(aSearchComponents);
+        buildScoreComponent(aSearchComponents);
 
         let sStatement = `
         PROCEDURE "${ sProcedureName }"()
@@ -460,18 +460,18 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-    async function buildDataSourceComponent(sUserId, aSearchComponents, oTimeRange, iCalculationVersionId) {
+    function buildDataSourceComponent(sUserId, aSearchComponents, oTimeRange, iCalculationVersionId) {
         let oExtTimeRange = { Enabled: false };
         if (!helpers.isNullOrUndefined(oTimeRange)) {
             _.extend(oExtTimeRange, oTimeRange, { Enabled: true });
         }
 
-        _.each(aSearchComponents, async function (oComponent) {
+        _.each(aSearchComponents, function (oComponent) {
             if (oComponent.Valid) {
                 if (oComponent.Type === SimilarPartsSourceTypes.CalculationVersions) {
-                    oComponent.Source = await buildCalculationVersionSource(sUserId, oComponent.Source, oExtTimeRange, iCalculationVersionId);
+                    oComponent.Source = buildCalculationVersionSource(sUserId, oComponent.Source, oExtTimeRange, iCalculationVersionId);
                 } else if (oComponent.Type === SimilarPartsSourceTypes.MasterData) {
-                    oComponent.Source = await buildMasterDataSource(oComponent.Source, oExtTimeRange);
+                    oComponent.Source = buildMasterDataSource(oComponent.Source, oExtTimeRange);
                 }
             }
         });
@@ -489,11 +489,11 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildCalculationVersionSource(sUserId, oCalculationVersions, oTimeRange, iCalculationVersionId) {
+        function buildCalculationVersionSource(sUserId, oCalculationVersions, oTimeRange, iCalculationVersionId) {
 
 
             if (!helpers.isNullOrUndefined(oCalculationVersions.OnlyCurrent) && oCalculationVersions.OnlyCurrent === 1) {
-                return await buildCurrentCalculationVersion(sUserId, iCalculationVersionId);
+                return buildCurrentCalculationVersion(sUserId, iCalculationVersionId);
             }
             return `
             lt_${ SimilarPartsSourceTypes.CalculationVersions }_source =
@@ -503,10 +503,10 @@ function SimilarPartsSearch($, dbConnection) {
                 WHERE
                     USER_ID = '${ sUserId }'
                     ${ oTimeRange.Enabled ? `AND LAST_MODIFIED_ON BETWEEN '${ oTimeRange.FromTime }' AND '${ oTimeRange.ToTime }'` : '' }
-                    ${ await isValidChildSource(oCalculationVersions.ProjectIds) ? `AND PROJECT_ID IN ('${ oCalculationVersions.ProjectIds.join("', '") }')` : '' }
-                    ${ await isValidChildSource(oCalculationVersions.CalculationIds) ? `AND CALCULATION_ID IN (${ oCalculationVersions.CalculationIds.join(',') })` : '' }
-                    ${ await isValidChildSource(oCalculationVersions.CalculationVersionIds) ? `AND CALCULATION_VERSION_ID IN (${ oCalculationVersions.CalculationVersionIds.join(',') })` : '' }
-                    ${ await isValidChildSource(oCalculationVersions.ExcludeCalculationVersionIds) ? `AND CALCULATION_VERSION_ID NOT IN (${ oCalculationVersions.ExcludeCalculationVersionIds.join(',') })` : '' }
+                    ${ isValidChildSource(oCalculationVersions.ProjectIds) ? `AND PROJECT_ID IN ('${ oCalculationVersions.ProjectIds.join("', '") }')` : '' }
+                    ${ isValidChildSource(oCalculationVersions.CalculationIds) ? `AND CALCULATION_ID IN (${ oCalculationVersions.CalculationIds.join(',') })` : '' }
+                    ${ isValidChildSource(oCalculationVersions.CalculationVersionIds) ? `AND CALCULATION_VERSION_ID IN (${ oCalculationVersions.CalculationVersionIds.join(',') })` : '' }
+                    ${ isValidChildSource(oCalculationVersions.ExcludeCalculationVersionIds) ? `AND CALCULATION_VERSION_ID NOT IN (${ oCalculationVersions.ExcludeCalculationVersionIds.join(',') })` : '' }
             `;
         }
 
@@ -519,7 +519,7 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildMasterDataSource(oMasterData, oTimeRange) {
+        function buildMasterDataSource(oMasterData, oTimeRange) {
             let sStatement = `
             lt_${ SimilarPartsSourceTypes.MasterData }_source =
                 SELECT material.MATERIAL_ID
@@ -528,8 +528,8 @@ function SimilarPartsSearch($, dbConnection) {
                 WHERE
                     material.MATERIAL_ID IS NOT NULL
                     ${ oTimeRange.Enabled ? `AND material._VALID_FROM BETWEEN '${ oTimeRange.FromTime }' AND '${ oTimeRange.ToTime }'` : '' }
-                    ${ await isValidChildSource(oMasterData.MaterialTypes) ? `AND material.MATERIAL_TYPE_ID IN ('${ oMasterData.MaterialTypes.join("', '") }')` : '' }
-                    ${ await isValidChildSource(oMasterData.MaterialGroups) ? `AND material.MATERIAL_GROUP_ID IN ('${ oMasterData.MaterialGroups.join("','") }')` : '' }
+                    ${ isValidChildSource(oMasterData.MaterialTypes) ? `AND material.MATERIAL_TYPE_ID IN ('${ oMasterData.MaterialTypes.join("', '") }')` : '' }
+                    ${ isValidChildSource(oMasterData.MaterialGroups) ? `AND material.MATERIAL_GROUP_ID IN ('${ oMasterData.MaterialGroups.join("','") }')` : '' }
             `;
             return sStatement;
         }
@@ -576,12 +576,12 @@ function SimilarPartsSearch($, dbConnection) {
 
 
     function buildMetadataComponent(aSearchComponents, sUserId, sLanguage) {
-        _.each(aSearchComponents, async function (oComponent) {
+        _.each(aSearchComponents, function (oComponent) {
             if (oComponent.Valid) {
                 if (oComponent.Type === SimilarPartsSourceTypes.CalculationVersions) {
-                    oComponent.Metadata = await buildCalculationVersionsMetadata();
+                    oComponent.Metadata = buildCalculationVersionsMetadata();
                 } else if (oComponent.Type === SimilarPartsSourceTypes.MasterData) {
-                    oComponent.Metadata = await buildMasterDataMetadata();
+                    oComponent.Metadata =  buildMasterDataMetadata();
                 }
             }
         });
@@ -688,12 +688,12 @@ function SimilarPartsSearch($, dbConnection) {
 
 
     function buildFrequencyComponent(aSearchComponents) {
-        _.each(aSearchComponents, async function (oComponent) {
+        _.each(aSearchComponents, function (oComponent) {
             if (oComponent.Valid) {
                 if (oComponent.Type === SimilarPartsSourceTypes.CalculationVersions) {
-                    oComponent.Frequency = await buildCalculationVersionsFrequency();
+                    oComponent.Frequency =  buildCalculationVersionsFrequency();
                 } else if (oComponent.Type === SimilarPartsSourceTypes.MasterData) {
-                    oComponent.Frequency = await buildMasterDataFrequency();
+                    oComponent.Frequency =  buildMasterDataFrequency();
                 }
             }
         });
@@ -751,7 +751,7 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-    async function buildAttributeComponents(aSearchComponents, aAttributes, sLanguage, sUserId) {
+    function buildAttributeComponents(aSearchComponents, aAttributes, sLanguage, sUserId) {
 
         let aTempNewAttributes = [];
         _.each(aAttributes, function (oAttr) {
@@ -769,7 +769,7 @@ function SimilarPartsSearch($, dbConnection) {
         let aSplittedAttributeNames = [];
 
         let aSearchAttributes = [];
-        _.each(aTempNewAttributes, async function (oAttribute) {
+        _.each(aTempNewAttributes, function (oAttribute) {
 
 
 
@@ -777,7 +777,7 @@ function SimilarPartsSearch($, dbConnection) {
             if (_.find(aSearchComponents, function (oComp) {
                     return oComp.Type === sSourceType;
                 }).Valid) {
-                let aParsedResults = await buildAttributeComponent(oAttribute, sSourceType);
+                let aParsedResults = buildAttributeComponent(oAttribute, sSourceType);
                 let aParsedAttributeNames = _.map(aParsedResults, 'FullName');
                 if (oAttribute.IsFuzzySearch === 0) {
                     aSplittedAttributeNames = _.union(aSplittedAttributeNames, aParsedAttributeNames);
@@ -833,18 +833,18 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildAttributeComponent(oAttribute, sSourceType) {
+        function buildAttributeComponent(oAttribute, sSourceType) {
             if (sSourceType === SimilarPartsSourceTypes.MasterData) {
                 if (oAttribute.IsFuzzySearch === 1) {
-                    return await buildFuzzySearchForMasterData(oAttribute);
+                    return buildFuzzySearchForMasterData(oAttribute);
                 } else {
-                    return await buildStringPatternCompareForMasterData(oAttribute);
+                    return buildStringPatternCompareForMasterData(oAttribute);
                 }
             } else if (sSourceType === SimilarPartsSourceTypes.CalculationVersions) {
                 if (oAttribute.IsFuzzySearch === 1) {
-                    return await buildFuzzySearchForCalculationVersions(oAttribute);
+                    return buildFuzzySearchForCalculationVersions(oAttribute);
                 } else {
-                    return await buildStringPatternCompareForCalculationVersions(oAttribute);
+                    return buildStringPatternCompareForCalculationVersions(oAttribute);
                 }
             }
         }
@@ -859,14 +859,14 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFixedDecimalFuzzyScore(oAttribute) {
+        function buildFixedDecimalFuzzyScore(oAttribute) {
             if (oAttribute.Option.scoreFunction === SupportedScoreFunctions.Linear) {
                 let slope = (1 - oAttribute.Option.scoreFunctionDecay) / oAttribute.Option.scoreFunctionScale;
-                let h = await max(0, `ABS(${ oAttribute.Name } - ${ oAttribute.Value }) - ${ oAttribute.Option.scoreFunctionOffset }`);
-                return await max(`1 - ${ slope } * ${ h }`, 0);
+                let h = max(0, `ABS(${ oAttribute.Name } - ${ oAttribute.Value }) - ${ oAttribute.Option.scoreFunctionOffset }`);
+                return max(`1 - ${ slope } * ${ h }`, 0);
             } else if (oAttribute.Option.scoreFunction === SupportedScoreFunctions.Gaussian) {
-                let variance = -Math.pow(oAttribute.Option.scoreFunctionScale, 2) / (2 * await Math.log(oAttribute.Option.scoreFunctionDecay));
-                let h = await max(0, `ABS(${ oAttribute.Name } - ${ oAttribute.Value }) - ${ oAttribute.Option.scoreFunctionOffset }`);
+                let variance = -Math.pow(oAttribute.Option.scoreFunctionScale, 2) / (2 * Math.log(oAttribute.Option.scoreFunctionDecay));
+                let h = max(0, `ABS(${ oAttribute.Name } - ${ oAttribute.Value }) - ${ oAttribute.Option.scoreFunctionOffset }`);
                 return `POWER(${ Math.E }, - POWER(${ h }, 2) / (2 * (${ variance })))`;
             } else if (oAttribute.Option.scoreFunction === SupportedScoreFunctions.Logarithmic) {
                 if (oAttribute.Option.scoreFunctionBase <= 1) {
@@ -898,13 +898,13 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzyScore(sDataType, oAttribute) {
+        function buildFuzzyScore(sDataType, oAttribute) {
             if (_.includes(SupportedSqlTypes.String, sDataType)) {
                 return 'SCORE()';
             } else if (_.includes(SupportedSqlTypes.Numeric, sDataType)) {
                 return 'SCORE()';
             } else if (_.includes(SupportedSqlTypes.FixedDecimal, sDataType)) {
-                return await buildFixedDecimalFuzzyScore(oAttribute);
+                return buildFixedDecimalFuzzyScore(oAttribute);
             } else if (_.includes(SupportedSqlTypes.Date, sDataType)) {
                 return `SCORE()`;
             } else if (_.includes(SupportedSqlTypes.Boolean, sDataType)) {
@@ -944,7 +944,7 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzyContains(sDataType, oAttribute) {
+        function buildFuzzyContains(sDataType, oAttribute) {
             if (_.includes(SupportedSqlTypes.String, sDataType)) {
                 if (oAttribute.SourceType === SimilarPartsSourceTypes.CalculationVersions) {
 
@@ -957,11 +957,11 @@ function SimilarPartsSearch($, dbConnection) {
                     return `CONTAINS(${ bIsMaterialId ? 'material.' : '' }${ oAttribute.Name }, '${ oAttribute.Value }', ${ bIsMaterailDescription ? `${ FuzzyParameters.description }` : `${ FuzzyParameters.not_description }` })`;
                 }
             } else if (_.includes(SupportedSqlTypes.Numeric, sDataType)) {
-                return `CONTAINS(${ oAttribute.Name }, ${ oAttribute.Value }, ${ await buildFuzzySearchOptions(oAttribute.Option) })`;
+                return `CONTAINS(${ oAttribute.Name }, ${ oAttribute.Value }, ${ buildFuzzySearchOptions(oAttribute.Option) })`;
             } else if (_.includes(SupportedSqlTypes.FixedDecimal, sDataType)) {
                 return '1 = 1';
             } else if (_.includes(SupportedSqlTypes.Date, sDataType)) {
-                return `CONTAINS(${ oAttribute.Name }, '${ oAttribute.Value }', ${ await buildFuzzySearchOptions(oAttribute.Option) })`;
+                return `CONTAINS(${ oAttribute.Name }, '${ oAttribute.Value }', ${ buildFuzzySearchOptions(oAttribute.Option) })`;
             } else if (_.includes(SupportedSqlTypes.Boolean, sDataType)) {
                 return '1 = 1';
             } else if (_.includes(SupportedSqlTypes.Text, sDataType)) {
@@ -1007,10 +1007,10 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzySearchForCalculationVersions(oAttribute) {
+        function buildFuzzySearchForCalculationVersions(oAttribute) {
 
-            let sAttributeName = await buildAttributeName(oAttribute);
-            let sJoinSourceClause = await buildJoinClause(SimilarPartsSourceTypes.CalculationVersions);
+            let sAttributeName = buildAttributeName(oAttribute);
+            let sJoinSourceClause = buildJoinClause(SimilarPartsSourceTypes.CalculationVersions);
 
             let bIsCustomField = _.find(oAttribute.Metadata, oMetadata => oMetadata.BUSINESS_OBJECT === SupportedBusinessObjectTypes.Item).IS_CUSTOM;
             let sStatement = `
@@ -1024,7 +1024,7 @@ function SimilarPartsSearch($, dbConnection) {
                     FROM
                         (
                             SELECT
-                                DISTINCT item.CALCULATION_VERSION_ID, item.MATERIAL_ID${ await buildCastAttributeName(oAttribute) }, ${ await buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
+                                DISTINCT item.CALCULATION_VERSION_ID, item.MATERIAL_ID${ buildCastAttributeName(oAttribute) }, ${ buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
                             FROM
                                 :lt_${ SimilarPartsSourceTypes.CalculationVersions }_source AS source,
                                 "${ Tables.item }" AS item
@@ -1034,7 +1034,7 @@ function SimilarPartsSearch($, dbConnection) {
                                 ${ bIsCustomField ? `AND item.CALCULATION_VERSION_ID = item_ext.CALCULATION_VERSION_ID
                                 AND item.ITEM_ID = item_ext.ITEM_ID` : '' }
                                 AND item.MATERIAL_ID IS NOT NULL
-                                AND ${ await buildFuzzyContains(oAttribute.DataType, oAttribute) }
+                                AND ${ buildFuzzyContains(oAttribute.DataType, oAttribute) }
                         )
                     GROUP BY
                         MATERIAL_ID${ sAttributeName }
@@ -1059,13 +1059,13 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildStringPatternCompareForCalculationVersions(oAttribute) {
+        function buildStringPatternCompareForCalculationVersions(oAttribute) {
             let sFieldPattern = oAttribute.Pattern.Value;
             let aGroupStmts = [];
             for (let i = 0; i < oAttribute.Pattern.Groups.length; i++) {
                 let oGroup = oAttribute.Pattern.Groups[i];
                 let sSubFieldName = oGroup.Name;
-                let sDict = await buildDictionary(oGroup, sFieldPattern, oAttribute.Value);
+                let sDict = buildDictionary(oGroup, sFieldPattern, oAttribute.Value);
                 let sStatement = `
                 SELECT MATERIAL_ID,
                     STRING_AGG(${ sSubFieldName } || ' (' || ${ sSubFieldName }_FREQUENCY || ')', '${ MultipleValuesSeparator }') AS ${ sSubFieldName }_COUNT,
@@ -1090,7 +1090,7 @@ function SimilarPartsSearch($, dbConnection) {
             }
 
 
-            aGroupStmts[0].Overview = await buildOverviewStringPatternForCalculationVersions(oAttribute);
+            aGroupStmts[0].Overview = buildOverviewStringPatternForCalculationVersions(oAttribute);
             return aGroupStmts;
         }
 
@@ -1101,10 +1101,10 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildOverviewStringPatternForCalculationVersions(oAttribute) {
+        function buildOverviewStringPatternForCalculationVersions(oAttribute) {
             let sFieldPattern = oAttribute.Pattern.Value;
             let bIsCustomField = _.find(oAttribute.Metadata, oMetadata => oMetadata.BUSINESS_OBJECT === SupportedBusinessObjectTypes.Item).IS_CUSTOM;
-            let sJoinSourceClause = await buildJoinClause(SimilarPartsSourceTypes.CalculationVersions);
+            let sJoinSourceClause = buildJoinClause(SimilarPartsSourceTypes.CalculationVersions);
             let aSubFieldKeys = new RegExp(oAttribute.Pattern.Value).exec(oAttribute.Value);
             let aSubFields = oAttribute.Pattern.Groups.map(oGroup => {
                 let sSubFieldValue = _.find(oGroup.Dict, function (dict) {
@@ -1148,11 +1148,11 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzySearchForMasterData(oAttribute) {
+        function buildFuzzySearchForMasterData(oAttribute) {
             if (oAttribute.Name === 'MATERIAL_ID' || !_.isEmpty(_.intersection(_.values(MaterialTables), oAttribute.TableSource))) {
-                return await buildFuzzySearchForMaterials(oAttribute);
+                return buildFuzzySearchForMaterials(oAttribute);
             } else {
-                return await buildFuzzySearchForMaterialPrices(oAttribute);
+                return buildFuzzySearchForMaterialPrices(oAttribute);
             }
         }
 
@@ -1162,8 +1162,8 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzySearchForMaterials(oAttribute) {
-            let sAttributeName = await buildAttributeName(oAttribute);
+        function buildFuzzySearchForMaterials(oAttribute) {
+            let sAttributeName = buildAttributeName(oAttribute);
             let bIsCustomField = _.find(oAttribute.Metadata, oMetadata => oMetadata.BUSINESS_OBJECT === SupportedBusinessObjectTypes.Material).IS_CUSTOM;
             let sStatement = `
             SELECT
@@ -1176,7 +1176,7 @@ function SimilarPartsSearch($, dbConnection) {
                 FROM
                 (
                     SELECT
-                        material.MATERIAL_ID ${ await buildCastAttributeName(oAttribute) }, ${ await buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
+                        material.MATERIAL_ID ${ buildCastAttributeName(oAttribute) }, ${ buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
                     FROM
                         "${ Tables.material }" AS material
                     INNER JOIN :lt_${ SimilarPartsSourceTypes.MasterData }_source AS source
@@ -1188,7 +1188,7 @@ function SimilarPartsSearch($, dbConnection) {
                         ON material.MATERIAL_ID = material__text.MATERIAL_ID
                         AND material__text.LANGUAGE = '${ sLanguage }'
                     WHERE
-                        ${ await buildFuzzyContains(oAttribute.DataType, oAttribute) }
+                        ${ buildFuzzyContains(oAttribute.DataType, oAttribute) }
                 )
                 GROUP BY MATERIAL_ID ${ sAttributeName }
             ) GROUP BY MATERIAL_ID
@@ -1207,8 +1207,8 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildFuzzySearchForMaterialPrices(oAttribute) {
-            let sAttributeName = await buildAttributeName(oAttribute);
+        function buildFuzzySearchForMaterialPrices(oAttribute) {
+            let sAttributeName = buildAttributeName(oAttribute);
             let bIsCustomField = _.find(oAttribute.Metadata, oMetadata => oMetadata.BUSINESS_OBJECT === SupportedBusinessObjectTypes.MaterialPrice).IS_CUSTOM;
             let sStatement = `
             SELECT
@@ -1221,7 +1221,7 @@ function SimilarPartsSearch($, dbConnection) {
                 FROM
                 (
                     SELECT
-                        plcTable.MATERIAL_ID ${ await buildCastAttributeName(oAttribute) }, ${ await buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
+                        plcTable.MATERIAL_ID ${ buildCastAttributeName(oAttribute) }, ${ buildFuzzyScore(oAttribute.DataType, oAttribute) } AS ${ oAttribute.Name }_SCORE
                     FROM
                         "${ Tables.material_price }" AS plcTable
                     INNER JOIN :lt_${ SimilarPartsSourceTypes.MasterData }_source AS source
@@ -1236,7 +1236,7 @@ function SimilarPartsSearch($, dbConnection) {
                         ON plcTable.PRICE_ID = plcExtTable.PRICE_ID                        
                         AND plcTable._VALID_FROM = plcExtTable._VALID_FROM` : '' }
                     WHERE
-                        ${ await buildFuzzyContains(oAttribute.DataType, oAttribute) }
+                        ${ buildFuzzyContains(oAttribute.DataType, oAttribute) }
                 )
                 GROUP BY MATERIAL_ID ${ sAttributeName }
             ) GROUP BY MATERIAL_ID
@@ -1255,13 +1255,13 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildStringPatternCompareForMasterData(oAttribute) {
+        function buildStringPatternCompareForMasterData(oAttribute) {
             let sFieldPattern = oAttribute.Pattern.Value;
             let aGroupStmts = [];
             for (let i = 0; i < oAttribute.Pattern.Groups.length; i++) {
                 let oGroup = oAttribute.Pattern.Groups[i];
                 let sSubFieldName = oGroup.Name;
-                let sDict = await buildDictionary(oGroup, sFieldPattern, oAttribute.Value);
+                let sDict = buildDictionary(oGroup, sFieldPattern, oAttribute.Value);
                 let sStatement = `
                 SELECT MATERIAL_ID,
                     STRING_AGG(${ sSubFieldName } || ' (' || ${ sSubFieldName }_FREQUENCY || ')', '${ MultipleValuesSeparator }') AS ${ sSubFieldName }_COUNT,
@@ -1285,7 +1285,7 @@ function SimilarPartsSearch($, dbConnection) {
             }
 
 
-            aGroupStmts[0].Overview = await buildOverviewStringPatternForMasterData(oAttribute);
+            aGroupStmts[0].Overview = buildOverviewStringPatternForMasterData(oAttribute);
             return aGroupStmts;
         }
 
@@ -1296,11 +1296,11 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-        async function buildOverviewStringPatternForMasterData(oAttribute) {
+        function buildOverviewStringPatternForMasterData(oAttribute) {
             if (oAttribute.Name === 'MATERIAL_ID' || !_.isEmpty(_.intersection(_.values(MaterialTables), oAttribute.TableSource))) {
-                return await buildOverviewStringPatternForMaterials(oAttribute);
+                return buildOverviewStringPatternForMaterials(oAttribute);
             } else {
-                return await buildOverviewStringPatternForMaterialPrices(oAttribute);
+                return buildOverviewStringPatternForMaterialPrices(oAttribute);
             }
         }
 
@@ -1473,7 +1473,7 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-    async function isValidDataSource(oSource) {
+    function isValidDataSource(oSource) {
         return !helpers.isNullOrUndefined(oSource) && helpers.isPlainObject(oSource);
     }
 
@@ -1485,7 +1485,7 @@ function SimilarPartsSearch($, dbConnection) {
 
 
 
-    async function isValidChildSource(aChildSource) {
+    function isValidChildSource(aChildSource) {
         return !helpers.isNullOrUndefined(aChildSource) && _.isArray(aChildSource) && aChildSource.length > 0;
     }
 }

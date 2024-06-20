@@ -14,7 +14,7 @@ const helpers = require('../util/helpers');
  * @constructor
  * @return {type}  description 
  */
-async function TaskService($, oPersistency) {
+function TaskService($, oPersistency) {
     var sCurrentUserId = $.getPlcUsername();
     var oDefaultPersistency = oPersistency.Task;
 
@@ -22,32 +22,32 @@ async function TaskService($, oPersistency) {
     /**
 	 * Get all tasks of a specific user.
 	 */
-    this.getByUser = (sUserId, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
+    this.getByUser = async (sUserId, oDbConnection) => {
+        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(sUserId, null, null, null));
     };
 
     /**
 	 * Get all tasks for a certain type (ex. project).
 	 */
-    this.getByType = (sType, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
+    this.getByType =async (sType, oDbConnection) => {
+        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(null, sType, null, null));
     };
 
     /**
 	 * Get all tasks for a certain type (ex. project) with a certain status (ex. Active).
 	 */
-    this.getByTypeAndStatus = (sType, sTaskStatus, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
+    this.getByTypeAndStatus = async (sType, sTaskStatus, oDbConnection) => {
+        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
         return _.values(oPersistencyToUse.get(null, sType, null, sTaskStatus));
     };
 
     /**
 	 * Get a certain task by id for the current user.
 	 */
-    this.getById = (iTypeId, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
+    this.getById = async (iTypeId, oDbConnection) => {
+        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
         return oPersistencyToUse.get(null, null, iTypeId, null)[0];
     };
 
@@ -56,8 +56,8 @@ async function TaskService($, oPersistency) {
 	 * This function removes any task that is active or inactive and the CURRENT_TIMESTAMP - START DATE > TIMEOUT_TIME
 	 */
 
-    this.updateInactiveTasksOnTimeout = (sUserId, oProjectParameters, oDbConnection) => {
-        let oPersistencyToUse = oDbConnection !== undefined ?  createPersistency(oDbConnection) : oDefaultPersistency;
+    this.updateInactiveTasksOnTimeout = async (sUserId, oProjectParameters, oDbConnection) => {
+        let oPersistencyToUse = oDbConnection !== undefined ? await createPersistency(oDbConnection) : oDefaultPersistency;
         oPersistencyToUse.updateInactiveTasksOnTimeout(sUserId, oProjectParameters);
     };
 

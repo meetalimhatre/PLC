@@ -71,7 +71,7 @@ function ActivityType(dbConnection, hQuery, sObjectName) {
             }
             stmt += ` order by plcTable.ACTIVITY_TYPE_ID`;
             stmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.ACTIVITY_TYPE_ENTITIES] = _.values(dbConnection.executeQuery(stmt));
+            oReturnObject[BusinessObjectsEntities.ACTIVITY_TYPE_ENTITIES] = _.values( await dbConnection.executeQuery(stmt));
         }
         return oReturnObject;
     };

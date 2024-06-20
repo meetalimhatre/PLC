@@ -1,10 +1,10 @@
 const constants = $.require('../../util/constants');
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 

@@ -63,7 +63,7 @@ let clearCachedOldItemsInUpdateValidation = async function (sessionId) {
  * 
  * @constructor
  */
-async function ItemValidator($, persistency, sessionId, userName, metadataProvider, utils) {
+function ItemValidator($, persistency, sessionId, userName, metadataProvider, utils) {
     clearCachedOldItemsInUpdateValidation(sessionId);
 
     var aMandatoryPropertiesStatic = [
@@ -72,7 +72,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
     ];
     var aMandatoryPropertiesStaticCreate = _.union(aMandatoryPropertiesStatic, ['IS_ACTIVE']);
     var aMandatoryPropertiesStaticReferencedVersion = _.union(aMandatoryPropertiesStatic, ['REFERENCED_CALCULATION_VERSION_ID']);
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+    var genericSyntaxValidator = new GenericSyntaxValidator();
 
     /**
 	 * This function validates the request body of the given oRequest object (instance of $.request). Depending on oRequest.method a
@@ -141,13 +141,13 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                 $.trace.error(sLogMessage);
                 throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
             } else {
-                await genericSyntaxValidator.validateValue(mValidatedParameters.id, 'PositiveInteger', undefined, true);
+                genericSyntaxValidator.validateValue(mValidatedParameters.id, 'PositiveInteger', undefined, true);
             }
 
 
         }
-        async function checkCalculationVersion(aBodyItems) {
-            var aItemsRefDifferentCv = _.filter(aBodyItems, async function (oBodyItem) {
+        function checkCalculationVersion(aBodyItems) {
+            var aItemsRefDifferentCv = _.filter(aBodyItems, function (oBodyItem) {
                 if (helpers.isNullOrUndefined(oBodyItem.CALCULATION_VERSION_ID)) {
                     const sClientMsg = `Missing mandatory property "CALCULATION_VERSION_ID" during validation.`;
                     $.trace.error(sClientMsg);
@@ -180,12 +180,12 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
 		 * @param {array}
 		 *            aBodyItems - An array containing JS objects for every item entity that shall be updated.
 		 */
-        async function checkReferencedCalculationVersion(aBodyItems) {
+        function checkReferencedCalculationVersion(aBodyItems) {
             _.each(aBodyItems, async function (oBodyItem) {
-                if (_.has(oBodyItem, 'ITEM_CATEGORY_ID') && await genericSyntaxValidator.validateValue(oBodyItem.ITEM_CATEGORY_ID, 'PositiveInteger', undefined, true) === constants.ItemCategory.ReferencedVersion) {
+                if (_.has(oBodyItem, 'ITEM_CATEGORY_ID') && genericSyntaxValidator.validateValue(oBodyItem.ITEM_CATEGORY_ID, 'PositiveInteger', undefined, true) === constants.ItemCategory.ReferencedVersion) {
 
-                    await utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesStaticReferencedVersion);
-                    var iReferencedVersionId = await genericSyntaxValidator.validateValue(oBodyItem.REFERENCED_CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
+                    utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesStaticReferencedVersion);
+                    var iReferencedVersionId = genericSyntaxValidator.validateValue(oBodyItem.REFERENCED_CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
                     // Check for self-reference
                     if (oBodyItem.CALCULATION_VERSION_ID === iReferencedVersionId) {
                         const sClientMsg = `The selected calculation version cannot be referenced because this would lead to a circular dependency. ` + `Please select another calculation version.`;
@@ -224,7 +224,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                 var aCalculationVersionIds = _.map(aItemsRefCalcVers, 'REFERENCED_CALCULATION_VERSION_ID');
 
                 // get distinct controlling area of referenced calculation versions
-                var aControllingAreas = persistency.CalculationVersion.getControllingAreasForCalculationVersions(aCalculationVersionIds);
+                var aControllingAreas = await persistency.CalculationVersion.getControllingAreasForCalculationVersions(aCalculationVersionIds);
 
                 var aDifferentControllingAreas = _.filter(aControllingAreas, function (sControllingArea) {
                     return sControllingArea !== oDefaultSettings.CONTROLLING_AREA_ID;
@@ -239,20 +239,20 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
             }
         }
 
-        async function validateDeleteRequests() {
+        function validateDeleteRequests() {
             var aBodyItems = utils.tryParseJson(oRequest.body.asString());
-            await checkCalculationVersion(aBodyItems);
+            checkCalculationVersion(aBodyItems);
 
             var aValidatedItems = [];
             _.each(aBodyItems, async function (oBodyItem, iIndex) {
 
-                await utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesStatic);
+                utils.checkMandatoryProperties(oBodyItem, aMandatoryPropertiesStatic);
                 utils.checkInvalidProperties(oBodyItem, aMandatoryPropertiesStatic);
 
                 // run syntax check on properties and construct return object
                 var oValidatedItem = {};
-                oValidatedItem.ITEM_ID = await genericSyntaxValidator.validateValue(oBodyItem.ITEM_ID, 'PositiveInteger', undefined, true);
-                oValidatedItem.CALCULATION_VERSION_ID = await genericSyntaxValidator.validateValue(oBodyItem.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
+                oValidatedItem.ITEM_ID = genericSyntaxValidator.validateValue(oBodyItem.ITEM_ID, 'PositiveInteger', undefined, true);
+                oValidatedItem.CALCULATION_VERSION_ID = genericSyntaxValidator.validateValue(oBodyItem.CALCULATION_VERSION_ID, 'PositiveInteger', undefined, true);
 
                 aValidatedItems.push(oValidatedItem);
             });
@@ -263,31 +263,31 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
         async function validateCreateRequest() {
             var aBodyItems = utils.tryParseJson(oRequest.body.asString());
 
-            await checkCalculationVersion(aBodyItems);
+            checkCalculationVersion(aBodyItems);
 
-            var oItemTree = await createItemsTree(aBodyItems);
-            await validateItemStructure(aBodyItems, oItemTree);
-            await checkReferencedCalculationVersion(aBodyItems);
+            var oItemTree = createItemsTree(aBodyItems);
+            validateItemStructure(aBodyItems, oItemTree);
+            checkReferencedCalculationVersion(aBodyItems);
             await checkControllingAreaOfReferencedCalculationVersion(aBodyItems);
             return await validateItemsCreate(aBodyItems, oItemTree.itemTree);
         }
 
         async function validateUpdateRequest() {
             var aBodyItems = utils.tryParseJson(oRequest.body.asString());
-            await checkCalculationVersion(aBodyItems);
-            await checkReferencedCalculationVersion(aBodyItems);
+            checkCalculationVersion(aBodyItems);
+            checkReferencedCalculationVersion(aBodyItems);
             return await validateItemsUpdate(aBodyItems);
         }
 
         /**
          * Counts all items reachable in the tree starting from the top node. 
          */
-        async function countItems(mItems, iItemId) {
+        function countItems(mItems, iItemId) {
             iCount++;
             var value = mItems.get(iItemId);
 
-            value.aChildren.forEach(async function (oItem) {
-                await countItems(mItems, oItem.iItemId);
+            value.aChildren.forEach( function (oItem) {
+                countItems(mItems, oItem.iItemId);
             });
         }
 
@@ -295,13 +295,13 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
          * Checks if the number of items in the tree is equal to the number of items 
          * in the request body.
          */
-        async function checkItemsTree(aBodyItems, oItemTree) {
+        function checkItemsTree(aBodyItems, oItemTree) {
             //build map Item->Children
             var iTopNodeId = oItemTree.topNodeId;
 
             //count reachable children from top node
             iCount = 0;
-            await countItems(oItemTree.itemTree, iTopNodeId);
+            countItems(oItemTree.itemTree, iTopNodeId);
             if (iCount !== aBodyItems.length) {
                 const sClientMsg = `Item structure to be created is not a valid tree structure.`;
                 $.trace.error(`${ sClientMsg } Expected ${ aBodyItems.length } items in tree, found ${ iCount }.`);
@@ -309,7 +309,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
             }
         }
 
-        async function validateItemStructure(aBodyItems, oItemTree) {
+        function validateItemStructure(aBodyItems, oItemTree) {
             // Hierarchy Check: Only one tree of items may be created at once Only "replace" mode is supported currently
             if (aBodyItems.length > 1) {
                 if (mValidatedParameters[ServiceParameters.mode.name] !== ServiceParameters.mode.values.normal) {
@@ -334,14 +334,14 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                         }
 
                         // ensure that root item exists and position is not changed
-                        await compareWithItemToReplace(aRootItems[0]);
+                        compareWithItemToReplace(aRootItems[0]);
                     }
 
                     // make sure that no item is in the list twice (e.g. to have two parents) and that PREDECESSOR_ITEM_IDs are valid if
                     // provided
                     var oItemIDs = {};
                     var oPredecessorIDs = {};
-                    _.each(aBodyItems, async function (oItem) {
+                    _.each(aBodyItems, function (oItem) {
                         if (oItemIDs.hasOwnProperty(oItem.ITEM_ID)) {
                             const sClientMsg = `Item structure to be created is not a valid tree structure. It contains loops by having two parents on one item. Item Id: ${ oItem.ITEM_ID }.`;
                             $.trace.error(sClientMsg);
@@ -360,7 +360,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
                         }
                     });
 
-                    await checkItemsTree(aBodyItems, oItemTree);
+                    checkItemsTree(aBodyItems, oItemTree);
                 } else {
                     let aItemParents = [];
                     let iPositiveParent = 0;
@@ -415,7 +415,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
 		 * Compares the new item with the old one to be replaced. Checks, that the old item actually exists and that PARENT_ITEM_ID,
 		 * PREDECESSOR_ITEM_ID and ITEM_CATEGORY_ID are not changed.
 		 */
-        async function compareWithItemToReplace(oNewItem) {
+        function compareWithItemToReplace(oNewItem) {
             // find all referenced existing items in the calculation-version, i.e. make sure the old item exists and references the same
             // items
             var oExistingRootItem = persistency.Item.getItem(oNewItem.ITEM_ID, oNewItem.CALCULATION_VERSION_ID, sessionId);
@@ -480,7 +480,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
 		 *      }
 		 *  as value. This is used to faster validate item structures for create item.
 		 */
-        async function createItemsTree(aBodyItems) {
+        function createItemsTree(aBodyItems) {
             var iTopNodeId;
             var bTopNodeFound = false;
             var mItems = new Map();
@@ -726,7 +726,7 @@ async function ItemValidator($, persistency, sessionId, userName, metadataProvid
 	 * @param oNonTemporaryMasterdata The ResultSet object containing all allowed values for masterdata references. This is a parameter because the data should be retrieved only once per validation.
 	 * @param oMetaData Object containing metadata. Needed to determine custom fields with masterdata references. This is a parameter in order to re-use already retrieved metadata.
 	 */
-    this.checkMasterdataReferences = async function (aItems, oNonTemporaryMasterdata, oMetaData) {
+    this.checkMasterdataReferences = function (aItems, oNonTemporaryMasterdata, oMetaData) {
         const aCustomUoMs = utils.getCustomUoMFields(oMetaData);
         const aCustomCurrencies = utils.getCustomCurrencyFields(oMetaData);
 

@@ -31,8 +31,7 @@
     "npm-force-resolutions": "^0.0.10",
     "pg": "^8.7.3",
     "semver": "7.5.1",
-    "xregexp": "5.1.1",
-    "@sap/hdbext": "^8.0.3"
+    "xregexp": "5.1.1"
   },
   "resolutions": {
     "semver": "7.5.1"

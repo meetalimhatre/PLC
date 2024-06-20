@@ -2,11 +2,11 @@ const sLayoutTable = 'sap.plc.db::basis.t_layout';
 const sLayoutColumnTable = 'sap.plc.db::basis.t_layout_column';
 const sLayoutPersonal = 'sap.plc.db::basis.t_layout_personal';
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
     return true;
 }
 
@@ -47,7 +47,7 @@ async function run(oConnection) {
         setLayoutType(oConnection);
         cleanUpInconsistentLayouts(oConnection);
         insertStandardBomCompareLayout(oConnection);
-        oConnection.commit();
+        await oConnection.commit();
     } catch (e) {
         console.log('error:', e.message);
         throw new Error(`Failed to adapt layouts: ${ e.message }`);

@@ -1019,8 +1019,8 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage);
         }
-        var bContainsOnlyNumbers = _.every(aCalculationVersionIds, async function (iCalcId) {
-            return await _.isNumber(iCalcId) && iCalcId % 1 === 0 && iCalcId >= 0;
+        var bContainsOnlyNumbers = _.every(aCalculationVersionIds, function (iCalcId) {
+            return _.isNumber(iCalcId) && iCalcId % 1 === 0 && iCalcId >= 0;
         });
         if (!bContainsOnlyNumbers) {
             const sLogMessage = 'aCalculationVersionIds can only contain positive numbers.';
@@ -1305,7 +1305,7 @@ async function CalculationVersion($, dbConnection, hQuery, sUserId) {
         });
 
         await checkCalculationVersionIdIsPositiveInteger(iCalculationVersionId);
-        if (!await _.isNumber(iCalculationId)) {
+        if (! _.isNumber(iCalculationId)) {
             const sLogMessage = 'iCalculationId must be a number.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);

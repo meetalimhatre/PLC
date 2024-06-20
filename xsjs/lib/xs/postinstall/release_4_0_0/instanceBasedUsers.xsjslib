@@ -10,7 +10,7 @@ function check(oConnection) {
 
 async function run(oConnection, oLibraryMeta, oRequestArgs) {
     try {
-        if (!await validateInstanceBasedUsers(oRequestArgs.file)) {
+        if (!validateInstanceBasedUsers(oRequestArgs.file)) {
             throw new Error(`empty user mapping file uploaded, please check your .csv file`);
         };
         const sSchema = await getCurrentSchema(oConnection);
@@ -27,7 +27,7 @@ async function run(oConnection, oLibraryMeta, oRequestArgs) {
  * replace all user_id in XSC with email in XSA
  * @param oMappingUserList {array} user mapping list
  */
-async function validateInstanceBasedUsers(oMappingUserList) {
+function validateInstanceBasedUsers(oMappingUserList) {
     if (!oMappingUserList || !oMappingUserList.length || oMappingUserList === 'no data') {
         return false;
     } else {

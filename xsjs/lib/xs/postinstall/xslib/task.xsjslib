@@ -24,16 +24,16 @@ var sTenantID = null;
 var taskObj = null;
 var currentLibCount = 0;
 
-async function error(line) {
-    await installTrace.error(whoAmI, line);
+function error(line) {
+    installTrace.error(whoAmI, line);
 }
 
-async function info(line) {
-    await installTrace.info(whoAmI, line);
+function info(line) {
+    installTrace.info(whoAmI, line);
 }
 
-async function debug(line) {
-    await installTrace.debug(whoAmI, line);
+function debug(line) {
+    installTrace.debug(whoAmI, line);
 }
 
 async function commit() {
@@ -48,7 +48,7 @@ function getTask() {
     return taskObj;
 }
 
-async function resetData() {
+function resetData() {
     taskObj = null;
     currentLibCount = 0;
 }
@@ -71,7 +71,7 @@ async function log(sVersion, sVersionSp, sVersionPatch, sName, sStep, sState) {
         await oConnection.executeUpdate(sLogStatement, sVersion, sVersionSp, sVersionPatch, sName, sNameTechnicalUser, sStep, sState);
         await commit();
     } catch (e) {
-        await error('insert data to t_installation_log table failed, can\'t log post-install data to database');
+        error('insert data to t_installation_log table failed, can\'t log post-install data to database');
         throw new Error("Can't log upgrade info to database");
     }
 }
@@ -80,7 +80,7 @@ async function getConnection(sTenantid) {
     return $.import(sPlatformConnection.substr(0, sPlatformConnection.lastIndexOf('.')), sPlatformConnection.substr(sPlatformConnection.lastIndexOf('.') + 1)).getConnection(null, sTenantid);
 }
 
-async function lockLog(sUserId) {
+function lockLog(sUserId) {
     try {
         oMisc.lockTableTLockExclusive();
         oMisc.setLock(sBusinessObjectTypes.Customfieldsformula, sUserId);
@@ -89,7 +89,7 @@ async function lockLog(sUserId) {
     }
 }
 
-async function deleteLogEntry(sUserId) {
+function deleteLogEntry(sUserId) {
     if (sUserId) {
         oMisc.releaseLock(sUserId);
     }
@@ -103,14 +103,14 @@ async function updateTaskStatus(oTask, oConnection) {
     await oConnection.close();
 }
 
-async function padLeft(sString) {
+function padLeft(sString) {
     return (sString + '     ').slice(0, 16);
 }
 
 async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
     await log(oLibraryMeta.version, oLibraryMeta.version_sp, oLibraryMeta.version_patch, oLibraryMeta.library_full_name, sMethod, 'started');
 
-    await info(await padLeft('execute ' + sMethod + ': ') + oLibraryMeta.library_full_name);
+    info( padLeft('execute ' + sMethod + ': ') + oLibraryMeta.library_full_name);
     var currentTimestamp = await getCurrentTimestamp(oConnection);
     try {
         var bOK = await oLibraryMeta.library[sMethod](oConnection, oLibraryMeta, requestArg);
@@ -130,8 +130,8 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
                 STATUS: status,
                 PROGRESS_STEP: currentLibCount,
                 PROGRESS_TOTAL: taskObj.PROGRESS_TOTAL,
-                STARTED: await convertDateToString(taskObj.STARTED),
-                LAST_UPDATED_ON: await convertDateToString(currentTimestamp),
+                STARTED: convertDateToString(taskObj.STARTED),
+                LAST_UPDATED_ON: convertDateToString(currentTimestamp),
                 ERROR_CODE: '0',
                 ERROR_DETAILS: null
             });
@@ -145,8 +145,8 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
                 STATUS: 'failed',
                 PROGRESS_STEP: currentLibCount,
                 PROGRESS_TOTAL: taskObj.PROGRESS_TOTAL,
-                STARTED: await convertDateToString(taskObj.STARTED),
-                LAST_UPDATED_ON: await convertDateToString(currentTimestamp),
+                STARTED: convertDateToString(taskObj.STARTED),
+                LAST_UPDATED_ON: convertDateToString(currentTimestamp),
                 ERROR_CODE: '-1',
                 ERROR_DETAILS: `${oLibraryMeta.description} ${sMethod} failed returning false`
             });
@@ -164,21 +164,21 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
             STATUS: 'failed',
             PROGRESS_STEP: currentLibCount,
             PROGRESS_TOTAL: taskObj.PROGRESS_TOTAL,
-            STARTED: await convertDateToString(taskObj.STARTED),
-            LAST_UPDATED_ON: await convertDateToString(currentTimestamp),
+            STARTED: convertDateToString(taskObj.STARTED),
+            LAST_UPDATED_ON: convertDateToString(currentTimestamp),
             ERROR_CODE: '-1',
             ERROR_DETAILS: error_detail.length > 200 ? error_detail.slice(0, 197) + '..' : error_detail
         });
         await rollback();
         await updateTaskStatus(taskObj, oConnection);
-        await error('execution terminated with an exception');
+        error('execution terminated with an exception');
         await log(oLibraryMeta.version, oLibraryMeta.version_sp, oLibraryMeta.version_patch, oLibraryMeta.library_full_name, sMethod, 'error');
         if (sMethod === 'run') {
             await genericCall(bTrace, oLibraryMeta, 'clean', requestArg);
         }
     }
     var sResultState = bOK ? 'finished' : 'error';
-    var sOut = await padLeft(sMethod + ' ' + sResultState + ': ') + oLibraryMeta.library_full_name;
+    var sOut = padLeft(sMethod + ' ' + sResultState + ': ') + oLibraryMeta.library_full_name;
     (bOK ? info : error)(sOut);
     await log(oLibraryMeta.version, oLibraryMeta.version_sp, oLibraryMeta.version_patch, oLibraryMeta.library_full_name, sMethod, sResultState);
     return bOK;
@@ -189,7 +189,7 @@ async function genericCall(bTrace, oLibraryMeta, sMethod, requestArg) {
  * @param {Date} Date format timestamp
  * @returns {Object} return string format timestamp
  */
-async function convertDateToString(oDate) {
+function convertDateToString(oDate) {
     if (oDate && typeof oDate !== 'string') {
         return oDate.toJSON();
     }
@@ -204,13 +204,13 @@ async function resetLockTable(oConnection, sUserId) {
 }
 
 async function execute(followUp, bTrace, aFilteredLibraries, sMethod, requestArg) {
-    await resetData();
+    resetData();
 
     oConnection = await getConnection(sTenantID);
     oConnection.setAutoCommit(true);
     sNameTechnicalUser = await getConnectionUsername(oConnection);
     await resetLockTable(oConnection, sNameTechnicalUser);
-    await lockLog(sNameTechnicalUser);
+    lockLog(sNameTechnicalUser);
     task = new pTask.Task(oConnection);
 
     //mock task data
@@ -228,14 +228,14 @@ async function execute(followUp, bTrace, aFilteredLibraries, sMethod, requestArg
             bOK = false;
             await rollback();
             await resetLockTable(oConnection, sNameTechnicalUser);
-            await deleteLogEntry(sNameTechnicalUser);
+            deleteLogEntry(sNameTechnicalUser);
 
             if (e.code === 146) {
                 // 146 - resource busy and acquire with NOWAIT specified
-                await error(`table "sap.plc.db::basis.t_installation_log" is locked - probably the setup is already running`);
+                error(`table "sap.plc.db::basis.t_installation_log" is locked - probably the setup is already running`);
                 throw new Error(`Unable to perform the operation. Probably the setup is already running`);
             } else {
-                await error('execution terminated with an internal exception:' + e.message);
+                error('execution terminated with an internal exception:' + e.message);
                 throw new Error('Eecution terminated with an internal exception. Check logs for more details');
 
             }
@@ -249,7 +249,7 @@ async function execute(followUp, bTrace, aFilteredLibraries, sMethod, requestArg
         await log(iVersion, iVersion_sp, iVersion_patch, sFinishRegister, '', 'finished');
     }
     await resetLockTable(oConnection, sNameTechnicalUser);
-    await deleteLogEntry(sNameTechnicalUser);
+    deleteLogEntry(sNameTechnicalUser);
     await oConnection.commit();
     if (oConnection.close) {
         await oConnection.close();
@@ -278,12 +278,12 @@ async function runBackgroundTask(args) {
         });
         return await execute(args.followUp, args.traceFlag, release, args.method, args.requestArg);
     } catch (e) {
-        await $.trace.info(JSON.stringify(e));
+        $.trace.info(JSON.stringify(e));
         args.followUp.STATUS = 'failed';
         args.followUp.ERROR_CODE = '-1';
         args.followUp.ERROR_DETAILS = e.message || 'Run background task failed, please check your post-install tool configuration';
-        args.followUp.STARTED = await convertDateToString(args.followUp.STARTED);
-        args.followUp.LAST_UPDATED_ON = await convertDateToString(args.followUp.LAST_UPDATED_ON);
+        args.followUp.STARTED = convertDateToString(args.followUp.STARTED);
+        args.followUp.LAST_UPDATED_ON =convertDateToString(args.followUp.LAST_UPDATED_ON);
         var odbConnection = await getConnection(sTenantID);
         var oTask = new pTask.Task(odbConnection).update(args.followUp);
         await odbConnection.commit();
@@ -302,7 +302,7 @@ async function taskInfo(request) {
 }
 
 async function getTaskInfo(request) {
-    const oParam = await processParameters(request);
+    const oParam = processParameters(request);
     const odbConnection = await getConnection(request.parameters.get('tenantid'));
     const oRes = await odbConnection.executeQuery(`
         select * 
@@ -325,7 +325,7 @@ async function getTaskInfo(request) {
     };
 }
 
-async function processParameters(request) {
+function processParameters(request) {
     const params = request.parameters;
     const oParam = {};
     for (let i = 0; i < params.length; i++) {

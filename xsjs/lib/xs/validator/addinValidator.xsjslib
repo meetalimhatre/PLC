@@ -18,9 +18,9 @@ const PlcException = MessageLibrary.PlcException;
  * @constructor
  */
 
-async function AddinValidator(oPersistency, sSessionId, metadataProvider, utils) {
+function AddinValidator(oPersistency, sSessionId, metadataProvider, utils) {
 
-    var genericSyntaxValidator = await new GenericSyntaxValidator();
+    var genericSyntaxValidator = new GenericSyntaxValidator();
 
     var aRegisterMandatoryPropertiesStatic = [
         'FULL_QUALIFIED_NAME',
@@ -49,16 +49,16 @@ async function AddinValidator(oPersistency, sSessionId, metadataProvider, utils)
         'STATUS'
     ];
 
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
-            return await validateGetRequest();
+            return validateGetRequest();
         case $.net.http.POST:
-            return await validateRegisterRequest();
+            return validateRegisterRequest();
         case $.net.http.PUT:
-            return await validateUpdateRequest();
+            return validateUpdateRequest();
         case $.net.http.DEL:
-            return await validateUnregisterRequest();
+            return validateUnregisterRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }`;
                 $.trace.error(sLogMessage);
@@ -66,26 +66,26 @@ async function AddinValidator(oPersistency, sSessionId, metadataProvider, utils)
             }
         }
 
-        async function validateGetRequest() {
+        function validateGetRequest() {
             // Check if request body is empty
             utils.checkEmptyBody(oRequest.body);
         }
 
-        async function validateRegisterRequest() {
+        function validateRegisterRequest() {
             var oAddin = utils.tryParseJson(oRequest.body.asString());
 
             // Perform generic field checks and transformations
-            return await validateAddinFields(oAddin, aRegisterMandatoryPropertiesStatic, aRegisterOptionalPropertiesStatic);
+            return validateAddinFields(oAddin, aRegisterMandatoryPropertiesStatic, aRegisterOptionalPropertiesStatic);
         }
 
-        async function validateUnregisterRequest() {
+        function validateUnregisterRequest() {
             var oAddin = utils.tryParseJson(oRequest.body.asString());
 
             // Perform generic field checks and transformations
-            return await validateAddinFields(oAddin, aUnregisterMandatoryPropertiesStatic, []);
+            return validateAddinFields(oAddin, aUnregisterMandatoryPropertiesStatic, []);
         }
 
-        async function validateUpdateRequest() {
+        function validateUpdateRequest() {
             var oAddin = utils.tryParseJson(oRequest.body.asString());
 
             // Status Activated|Registered is mandatory for update requests
@@ -98,18 +98,18 @@ async function AddinValidator(oPersistency, sSessionId, metadataProvider, utils)
             oAddin.STATUS = oAddin.STATUS.toLowerCase();
 
             // Perform generic field checks and transformations
-            var oValidatedAddinVersion = await validateAddinFields(oAddin, aUpdateMandatoryPropertiesStatic, []);
+            var oValidatedAddinVersion = validateAddinFields(oAddin, aUpdateMandatoryPropertiesStatic, []);
 
             return oValidatedAddinVersion;
         }
 
         // Generic Addin Item validation method: field checks / use of helpers to check for addin version / metadata conversion
-        async function validateAddinFields(oAddinFields, aMandatoryFields, aOptionalFields) {
+        function validateAddinFields(oAddinFields, aMandatoryFields, aOptionalFields) {
             // Fetch Addin Metadata
             var oMetadata = metadataProvider.get(BusinessObjectTypes.AddinVersion, BusinessObjectTypes.AddinVersion, null, null, oPersistency, $.getPlcUsername(), $.getPlcUsername());
 
             // Check if only mandatory and optional properties are available
-            await utils.checkMandatoryProperties(oAddinFields, aMandatoryFields);
+            utils.checkMandatoryProperties(oAddinFields, aMandatoryFields);
             utils.checkInvalidProperties(oAddinFields, aMandatoryFields.concat(aOptionalFields));
 
             // Check if version matches definition

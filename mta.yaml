@@ -6,7 +6,7 @@ version: 2.7.1
 modules:
   - name: xsac-plc-xsjs
     parameters:
-      memory: 1024M
+      memory: 2048M
     path: xsjs
     type: nodejs
     requires:
@@ -19,7 +19,7 @@ modules:
 
   - name: xsac-plc-db
     parameters:
-      memory: 1024M
+      memory: 2048M
     type: hdb
     path: db
     requires:

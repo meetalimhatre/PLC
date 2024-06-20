@@ -40,7 +40,7 @@ function Addin(dbConnection, hQuery) {
             'and a.addin_build_number = b.addin_build_number',
             'where a.addin_guid = ? and a.addin_major_version = ? and a.addin_minor_version = ? and a.addin_revision_number = ? and a.addin_build_number = ?;'
         ].join(' ');
-        var oResult = dbConnection.executeQuery(sAddinStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        var oResult = await dbConnection.executeQuery(sAddinStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         if (oResult.length > 1) {
             const sLogMessage = `Corrupted db entries for addin with guid '${ sGuid }' and version '${ aVersions.join('.') }'.`;
@@ -63,7 +63,7 @@ function Addin(dbConnection, hQuery) {
 	 *            sStatus - status of addins to be extracted
 	 * @returns {object} output - An array of addin versions
 	 */
-    this.getAddinsByStatus = function (sStatus) {
+    this.getAddinsByStatus = async function (sStatus) {
 
         var sWhere = '';
         if (sStatus === AddinStates.Activated) {
@@ -84,7 +84,7 @@ function Addin(dbConnection, hQuery) {
             'and a.addin_build_number = b.addin_build_number',
             sWhere
         ].join(' ');
-        var oResult = dbConnection.executeQuery(sAddinsStmt);
+        var oResult = await dbConnection.executeQuery(sAddinsStmt);
 
         return oResult;
     };
@@ -112,7 +112,7 @@ function Addin(dbConnection, hQuery) {
             'where addin_guid = ? and addin_major_version = ? and addin_minor_version = ? and addin_revision_number = ? and addin_build_number = ?;'
         ].join(' ');
 
-        var oAddinVersions = dbConnection.executeQuery(sAddinStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        var oAddinVersions = await dbConnection.executeQuery(sAddinStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         if (oAddinVersions.length > 1) {
             const sLogMessage = `Corrupted db entries for addin with guid '${ sGuid }' and version '${ aVersions.join('.') }'.`;
@@ -149,7 +149,7 @@ function Addin(dbConnection, hQuery) {
                 'where addin_guid=?',
                 'order by addin_major_version, addin_minor_version, addin_revision_number, addin_build_number desc;'
             ].join(' ');
-            var oPreviousVersions = dbConnection.executeQuery(stmt, sGuid);
+            var oPreviousVersions = await dbConnection.executeQuery(stmt, sGuid);
 
             var i = 0;
             while (i < oPreviousVersions.length && oResultAddinConfiguration === undefined) {
@@ -175,13 +175,13 @@ function Addin(dbConnection, hQuery) {
 	 *            sVersion - version string of the addin to delete
 	 * @returns {boolean} - true if addin exists, otherwise false
 	 */
-    this.versionExists = function (sGuid, aVersions) {
+    this.versionExists = async function (sGuid, aVersions) {
         var sCountStmt = [
             'select count(*) as rowcount',
             'from "' + Tables.version + '"',
             'where addin_guid = ? and addin_major_version = ? and addin_minor_version = ? and addin_revision_number = ? and addin_build_number = ?'
         ].join(' ');
-        var oCount = dbConnection.executeQuery(sCountStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        var oCount = await dbConnection.executeQuery(sCountStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         // check if any entries found
         return parseInt(oCount[0].ROWCOUNT) > 0;
@@ -240,26 +240,26 @@ function Addin(dbConnection, hQuery) {
 	 * @throws {PlcException} -
 	 *             If the execution of the call statement to execute procedure fails.
 	 */
-    this.unregister = function (sGuid, aVersions) {
+    this.unregister = async function (sGuid, aVersions) {
         var sWhere = 'where addin_guid = ? and addin_major_version = ? and addin_minor_version = ? and addin_revision_number = ? and addin_build_number = ?';
 
         var stmtVersion = [
             'delete from "' + Tables.version + '"',
             sWhere
         ].join(' ');
-        dbConnection.executeUpdate(stmtVersion, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        await dbConnection.executeUpdate(stmtVersion, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         var stmtConfigHeader = [
             'delete from "' + Tables.configuration_header + '"',
             sWhere
         ].join(' ');
-        dbConnection.executeUpdate(stmtConfigHeader, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        await dbConnection.executeUpdate(stmtConfigHeader, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         var stmtConfigItems = [
             'delete from "' + Tables.configuration_items + '"',
             sWhere
         ].join(' ');
-        dbConnection.executeUpdate(stmtConfigItems, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        await dbConnection.executeUpdate(stmtConfigItems, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         return;
     };
@@ -377,7 +377,7 @@ function Addin(dbConnection, hQuery) {
             'delete from "' + Tables.configuration_items + '"',
             'where addin_guid = ? and addin_major_version = ? and addin_minor_version = ? and addin_revision_number = ? and addin_build_number = ?'
         ].join(' ');
-        dbConnection.executeUpdate(sDeleteStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        await dbConnection.executeUpdate(sDeleteStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         // Insert new configuration items
         var aInsertArgs = [];
@@ -434,7 +434,7 @@ function Addin(dbConnection, hQuery) {
             'from "' + Tables.configuration_header + '"',
             'where 		addin_guid=? and addin_major_version=? and addin_minor_version=? and addin_revision_number=? and addin_build_number=?;'
         ].join(' ');
-        var oConfigHeader = dbConnection.executeQuery(sConfigHeaderStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        var oConfigHeader = await dbConnection.executeQuery(sConfigHeaderStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         switch (oConfigHeader.length) {
         case 0:
@@ -457,7 +457,7 @@ function Addin(dbConnection, hQuery) {
 	 *            aVersions - Addin Version as array including major / minor / revision / build numbers
 	 * @returns {array} output - An array that contains the configuration items
 	 */
-    function getAddinConfigurationItems(sGuid, aVersions) {
+    async function getAddinConfigurationItems(sGuid, aVersions) {
 
         // Get addin configuration items
         var sConfigItemsStmt = [
@@ -465,7 +465,7 @@ function Addin(dbConnection, hQuery) {
             'from "' + Tables.configuration_items + '"',
             'where addin_guid=? and addin_major_version=? and addin_minor_version=? and addin_revision_number=? and addin_build_number=?;'
         ].join(' ');
-        var oConfigItems = dbConnection.executeQuery(sConfigItemsStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
+        var oConfigItems = await dbConnection.executeQuery(sConfigItemsStmt, sGuid, aVersions[0], aVersions[1], aVersions[2], aVersions[3]);
 
         return oConfigItems;
     }
@@ -486,7 +486,7 @@ function Addin(dbConnection, hQuery) {
         }
 
         // Get configuration items if the header exists
-        var oConfigItems = await getAddinConfigurationItems(sGuid, aVersions);
+        var oConfigItems =  getAddinConfigurationItems(sGuid, aVersions);
 
         // Prepare result object
         var oResultObject = {

@@ -7,11 +7,11 @@ var PlcException = MessageLibrary.PlcException;
 
 
 // TODO: standardize error log format
-async function logError(msg) {
+function logError(msg) {
     console.error(new Date().toLocaleString(), '[ERROR]', msg);
 }
 ;
-async function logInfo(msg) {
+function logInfo(msg) {
     console.log(new Date().toLocaleString(), '[INFO]', msg);
 }
 ;
@@ -22,48 +22,48 @@ module.exports = {
     logInfo
 };
 
-async function isPositiveInteger(value) {
+function isPositiveInteger(value) {
     if (value === undefined || value === null) {
         return false;
     }
     return /^[1-9]+[0-9]*$/.test(value.toString());
 }
 
-async function IsNonNegativeInteger(value) {
+function IsNonNegativeInteger(value) {
     if (value === undefined || value === null) {
         return false;
     }
     return /^(0|[1-9]+[0-9]*)$/.test(value.toString());
 }
 
-async function toPositiveInteger(sValue) {
-    if (!await isPositiveInteger(sValue)) {
+function toPositiveInteger(sValue) {
+    if (!isPositiveInteger(sValue)) {
         const sLogMessage = 'sValue contains no valid positive integer.';
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(MessageLibrary.Code.GENERAL_UNEXPECTED_EXCEPTION.code, sLogMessage);
     }
     return parseInt(sValue, 10);
 }
 
-async function isNullOrUndefined(value) {
+function isNullOrUndefined(value) {
     return _.isNull(value) || _.isUndefined(value);
 }
 
-async function isNullOrUndefinedOrEmpty(value) {
+function isNullOrUndefinedOrEmpty(value) {
     return _.isNull(value) || _.isUndefined(value) || value === '' || _.isEmpty(value);
 }
 
-async function isPlainObject(oObject) {
-    return _.isObject(oObject) && !_.isArray(oObject) && !await _.isFunction(oObject);
+function isPlainObject(oObject) {
+    return _.isObject(oObject) && !_.isArray(oObject) && ! _.isFunction(oObject);
 }
 
-async function isEmptyObject(oObject) {
-    return await isPlainObject(oObject) && _.isEmpty(oObject);
+function isEmptyObject(oObject) {
+    return isPlainObject(oObject) && _.isEmpty(oObject);
 }
 
 /** Safe method for getting a value from an object by key
  */
-async function getValueOnKey(oObject, sKey) {
+function getValueOnKey(oObject, sKey) {
     if (isNullOrUndefined(oObject)) {
         return null;
     } else {
@@ -75,7 +75,7 @@ async function getValueOnKey(oObject, sKey) {
     }
 }
 
-async function arrayToLowerCase(aStringArray) {
+function arrayToLowerCase(aStringArray) {
     var aLowerCaseArray = [];
     _.each(aStringArray, function (sValue) {
         aLowerCaseArray.push(sValue.toLowerCase());
@@ -85,7 +85,7 @@ async function arrayToLowerCase(aStringArray) {
 
 /** Picks up an object from object of arrays (which are used e.g. for test data)
  */
-async function toObject(result, index) {
+function toObject(result, index) {
     //expect(result).toBeDefined();
 
     var convertedResult = {};
@@ -102,7 +102,7 @@ function setErrorResponse(iStatusCode, sMessage, oResponse) {
     oResponse.setBody(sMessage);
 }
 
-async function boolToInt(value) {
+function boolToInt(value) {
     if (isNullOrUndefined(value))
         return 0;
 
@@ -112,7 +112,7 @@ async function boolToInt(value) {
  * Splits incremental string like: TestVersionName (1) / TestVersionName (2)
  * @param sTextWithIncrement
  */
-async function splitIncrementalString(sTextWithIncrement) {
+function splitIncrementalString(sTextWithIncrement) {
     var sRegexIncremental = '^(.*) \\(([1-9][0-9]*)\\)$';
     var rPattern = new RegExp(sRegexIncremental);
     var aMatches = rPattern.exec(sTextWithIncrement);
@@ -133,9 +133,9 @@ async function splitIncrementalString(sTextWithIncrement) {
 /**
  * Function used to find first unused numeric suffix (numbers) in an array Of Strings: ["TestVersionName (1)" , "TestVersionName (5)]
  */
-async function findFirstUnusedSuffixInStringArray(sPrefix, iStartSuffix, aNamesWithPrefix) {
+function findFirstUnusedSuffixInStringArray(sPrefix, iStartSuffix, aNamesWithPrefix) {
     var sRegexSufixWithoutText = ' \\(([1-9][0-9]*)\\)';
-    var rSuffixPattern = new RegExp(await escapeStringForRegExp(sPrefix) + sRegexSufixWithoutText);
+    var rSuffixPattern = new RegExp(escapeStringForRegExp(sPrefix) + sRegexSufixWithoutText);
 
     //Filter an array having "<prefix> (<something>)" names and extract those which actually follow the "<prefix> (<number>)" pattern
     //Then and collect all the <number>s in an array.
@@ -148,7 +148,7 @@ async function findFirstUnusedSuffixInStringArray(sPrefix, iStartSuffix, aNamesW
     });
 
     /* Find first unused numeric suffix. */
-    var iSuffix = await findFirstUnusedSuffix(aSuffixes, iStartSuffix);
+    var iSuffix = findFirstUnusedSuffix(aSuffixes, iStartSuffix);
 
     return iSuffix;
 }
@@ -165,12 +165,12 @@ async function findFirstUnusedSuffixInStringArray(sPrefix, iStartSuffix, aNamesW
  * @returns {string} sPath - returns the vaidated path
  * @throws {PlcException} - if the path is invalid
  */
-async function validatePath(sPath) {
+function validatePath(sPath) {
     const pathRegex = /^\d+$|^\d+(\/\d+)+$/;
     if (!pathRegex.test(sPath) || sPath === '') {
         const sClientInfo = 'Invalid path.';
         const sDeveloperInfo = `${ sClientInfo } Path: ${ sPath }`;
-        await logError(sDeveloperInfo);
+        logError(sDeveloperInfo);
         throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientInfo);
     }
     return sPath;
@@ -182,7 +182,7 @@ async function validatePath(sPath) {
  * @param {string} sPath - input string that needs to be checked
  * @returns {boolean} true if string contains forward slash, false if it doesn't
  */
-async function hasForwardSlash(sPath) {
+function hasForwardSlash(sPath) {
     return /\//.test(sPath);
 }
 
@@ -191,14 +191,14 @@ async function hasForwardSlash(sPath) {
  * @param {string} sPath - input string
  * @returns {integer} returns the number after the last forward slash, if there is no forward slash the number inside the string will be returned.
  */
-async function getEntityIdFromPath(sPath) {
-    return await hasForwardSlash(sPath) ? parseInt(sPath.substr(sPath.lastIndexOf('/') + 1)) : parseInt(sPath);
+function getEntityIdFromPath(sPath) {
+    return hasForwardSlash(sPath) ? parseInt(sPath.substr(sPath.lastIndexOf('/') + 1)) : parseInt(sPath);
 }
 
 /**
  * Function used to find first unused numeric suffix (numbers) from a collection of numeric suffixes (numbers)
 */
-async function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
+function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
     /* Filter values smaller than iStartSuffix, then sort the array. */
     var aSuffixes = aAllSuffixes.filter(function (value, index, array) {
         return value > iStartSuffix;
@@ -223,21 +223,21 @@ async function findFirstUnusedSuffix(aAllSuffixes, iStartSuffix) {
  * @param oDefaultSettings
  * @param aPropertiesToSet
  */
-async function setNonEmptyProperties(oEntity, oValuesToSet, aPropertiesToSet) {
+function setNonEmptyProperties(oEntity, oValuesToSet, aPropertiesToSet) {
     // set properties to given values if they are not null
     _.each(aPropertiesToSet, async function (sProperty, iIndex) {
-        if (isNullOrUndefined(oEntity[sProperty]) && oValuesToSet[sProperty] !== '' && !await isNullOrUndefined(oValuesToSet[sProperty])) {
+        if (isNullOrUndefined(oEntity[sProperty]) && oValuesToSet[sProperty] !== '' && ! isNullOrUndefined(oValuesToSet[sProperty])) {
             oEntity[sProperty] = oValuesToSet[sProperty];
         }
     });
 
     //if SALES_PRICE_CURRENCY_ID is not set on project level, then for SALES_PRICE_CURRENCY_ID the REPORT_CURRENCY_ID of the project is taken
-    if (_.includes(aPropertiesToSet, 'SALES_PRICE_CURRENCY_ID') && await isNullOrUndefined(oEntity.SALES_PRICE_CURRENCY_ID) && await isNullOrUndefined(oValuesToSet.SALES_PRICE_CURRENCY_ID)) {
+    if (_.includes(aPropertiesToSet, 'SALES_PRICE_CURRENCY_ID') && isNullOrUndefined(oEntity.SALES_PRICE_CURRENCY_ID) && isNullOrUndefined(oValuesToSet.SALES_PRICE_CURRENCY_ID)) {
         oEntity.SALES_PRICE_CURRENCY_ID = oValuesToSet.REPORT_CURRENCY_ID;
     }
 
     //set TARGET_COST_CURRENCY_ID for the root item to the REPORT_CURRENCY_ID of the project
-    if (_.includes(aPropertiesToSet, 'TARGET_COST_CURRENCY_ID') && await isNullOrUndefined(oEntity.TARGET_COST_CURRENCY_ID)) {
+    if (_.includes(aPropertiesToSet, 'TARGET_COST_CURRENCY_ID') && isNullOrUndefined(oEntity.TARGET_COST_CURRENCY_ID)) {
         oEntity.TARGET_COST_CURRENCY_ID = oValuesToSet.REPORT_CURRENCY_ID;
     }
 }
@@ -245,9 +245,9 @@ async function setNonEmptyProperties(oEntity, oValuesToSet, aPropertiesToSet) {
 /**
  * Sets default values for calculation version.
  */
-async function setDefaultValuesForCalculationVersion(oCalculationVersion, oDefaultSettings) {
+function setDefaultValuesForCalculationVersion(oCalculationVersion, oDefaultSettings) {
     // Set default values for calculation version
-    await setNonEmptyProperties(oCalculationVersion, oDefaultSettings, [
+    setNonEmptyProperties(oCalculationVersion, oDefaultSettings, [
         'COSTING_SHEET_ID',
         'COMPONENT_SPLIT_ID',
         'CUSTOMER_ID',
@@ -263,7 +263,7 @@ async function setDefaultValuesForCalculationVersion(oCalculationVersion, oDefau
     ]);
 
 
-    await setNonEmptyProperties(oCalculationVersion.ITEMS[0], oDefaultSettings, [
+    setNonEmptyProperties(oCalculationVersion.ITEMS[0], oDefaultSettings, [
         'BUSINESS_AREA_ID',
         'COMPANY_CODE_ID',
         'PLANT_ID',
@@ -282,7 +282,7 @@ async function setDefaultValuesForCalculationVersion(oCalculationVersion, oDefau
 
 
 
-async function validateAddinVersionString(sVersion) {
+function validateAddinVersionString(sVersion) {
     if (sVersion === undefined) {
         return;
     }
@@ -291,15 +291,15 @@ async function validateAddinVersionString(sVersion) {
     if (aVersions.length !== 4) {
         const sClientMsg = 'Version string is invalid.';
         const sServerMsg = `${ sClientMsg } String: ${ sVersion }.`;
-        await logError(sServerMsg);
+        logError(sServerMsg);
         throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientMsg);
     }
 
     _.each(aVersions, async function (sVersionPart, iIndex) {
-        if (!await IsNonNegativeInteger(sVersionPart)) {
+        if (!IsNonNegativeInteger(sVersionPart)) {
             const sClientMsg = 'Part of version string is not a valid number.';
             const sServerMsg = `${ sClientMsg } String: ${ sVersion }, invalid part: ${ sVersionPart }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sClientMsg);
         }
     });
@@ -308,11 +308,11 @@ async function validateAddinVersionString(sVersion) {
 
 
 
-async function checkParameterString(sParameterValue, sRegEx) {
+function checkParameterString(sParameterValue, sRegEx) {
     var pattern = XRegExp(sRegEx);
     if (!pattern.test(sParameterValue)) {
         const sLogMessage = `${ sParameterValue } does not match valid syntax for parameter.`;
-        await logError(sLogMessage);
+        logError(sLogMessage);
         throw new PlcException(MessageLibrary.Code.GENERAL_VALIDATION_ERROR, sLogMessage);
     }
 }
@@ -322,7 +322,7 @@ async function checkParameterString(sParameterValue, sRegEx) {
 
 
 
-async function checkStringSQLInjection(sFilter) {
+function checkStringSQLInjection(sFilter) {
 
 
     var iSearchResult;
@@ -333,7 +333,7 @@ async function checkStringSQLInjection(sFilter) {
         if (iSearchResult !== -1) {
             const sClientMsg = 'Inconsistent data in filter string. See log for details.';
             const sServerMsg = `${ sClientMsg } Validation for SQL Injection failed - character found: ${ aValidation[k] }.`;
-            await logError(sServerMsg);
+            logError(sServerMsg);
             throw new PlcException(MessageLibrary.Code.GENERAL_UNEXPECTED_EXCEPTION, sClientMsg);
         }
     }
@@ -346,7 +346,7 @@ async function checkStringSQLInjection(sFilter) {
 
 
 
-async function deepFreeze(oObject) {
+function deepFreeze(oObject) {
     if (Object.isFrozen(oObject) === false) {
         Object.freeze(oObject);
     }
@@ -364,7 +364,7 @@ async function deepFreeze(oObject) {
 
 
 
-async function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
+function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
     var aItems = _.map(aDbResponse, function (oResult, key) {
 
         if (oResult !== 1) {
@@ -383,7 +383,7 @@ async function unsuccessfulItemsDbOperation(aBodyItems, aDbResponse) {
 
 
 
-async function arrayHasDuplicates(aArray) {
+function arrayHasDuplicates(aArray) {
     return aArray.length != _.uniq(aArray).length;
 }
 
@@ -404,7 +404,7 @@ async function arrayHasDuplicates(aArray) {
 
 
 
-async function transposeResultArray(input, bLeaveNullColumns) {
+function transposeResultArray(input, bLeaveNullColumns) {
     const output = {};
     if (input.length > 0) {
         const aColumnNames = Object.keys(input[0]);
@@ -432,7 +432,7 @@ async function transposeResultArray(input, bLeaveNullColumns) {
     return output;
 }
 
-async function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
+function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
     const output = {};
     if (input.length > 0) {
         const temp = [];
@@ -480,7 +480,7 @@ async function transposeResultArrayOfObjects(input, bLeaveNullColumns) {
 
 
 
-async function Utf8ArrayToStr(utf8Array) {
+function Utf8ArrayToStr(utf8Array) {
     var returnString, i, len;
     var char1, char2, char3;
 
@@ -516,8 +516,8 @@ async function Utf8ArrayToStr(utf8Array) {
 }
 ;
 
-async function arrayBufferToString(oArrayBuffer) {
-    return await Utf8ArrayToStr(new Uint8Array(oArrayBuffer));
+function arrayBufferToString(oArrayBuffer) {
+    return Utf8ArrayToStr(new Uint8Array(oArrayBuffer));
 }
 ;
 
@@ -528,7 +528,7 @@ async function arrayBufferToString(oArrayBuffer) {
 
 
 
-async function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
+function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
     _.each(Constants.aRegexSpecialChars, function (oRegexSpecialChar, iIndex) {
         var regex = new RegExp(oRegexSpecialChar.specialCharReplacement, 'g');
         sImputString = sImputString.replace(regex, oRegexSpecialChar.specialCharReplacement);
@@ -546,7 +546,7 @@ async function replaceSpecialCharsForSQLLikeRegexpr(sImputString) {
 
 
 
-async function checkForNonMasterdataValues(sProperty, sValue) {
+function checkForNonMasterdataValues(sProperty, sValue) {
     const aBusinessObjectsProperty = [
         'ACCOUNT_GROUP_ID',
         'MATERIAL_GROUP_ID',
@@ -592,8 +592,8 @@ async function checkForNonMasterdataValues(sProperty, sValue) {
     return false;
 }
 
-async function prepareSurchargesMasterdataValuesForValidation(aPropertiesToBeChecked, aProjectMaterialPriceSurcharges) {
-    let oProjectMasterdata = await transposeResultArrayOfObjects(aProjectMaterialPriceSurcharges);
+function prepareSurchargesMasterdataValuesForValidation(aPropertiesToBeChecked, aProjectMaterialPriceSurcharges) {
+    let oProjectMasterdata = transposeResultArrayOfObjects(aProjectMaterialPriceSurcharges);
     oProjectMasterdata = _.pick(oProjectMasterdata, aPropertiesToBeChecked);
     for (property in oProjectMasterdata) {
         oProjectMasterdata[property] = _.uniq(oProjectMasterdata[property]);
@@ -602,7 +602,7 @@ async function prepareSurchargesMasterdataValuesForValidation(aPropertiesToBeChe
     return oProjectMasterdata;
 }
 
-async function escapeStringForRegExp(sString) {
+function escapeStringForRegExp(sString) {
     return sString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 

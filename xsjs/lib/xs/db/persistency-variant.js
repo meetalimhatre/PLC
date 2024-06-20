@@ -56,7 +56,7 @@ async function Variant($, dbConnection, hQuery) {
                        and CONTEXT = ?
                        and SESSION_ID != ?
                        and IS_WRITEABLE = 1 `;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, VariantMatrixLockContext, sUserId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, VariantMatrixLockContext, sUserId);
         return oQueryResult.length > 0;
     };
 
@@ -115,12 +115,12 @@ async function Variant($, dbConnection, hQuery) {
 
         sStmt += ' order by VARIANT_ORDER ';
 
-        const oQueryResult = dbConnection.executeQuery(sStmt);
+        const oQueryResult = await dbConnection.executeQuery(sStmt);
         return Array.from(oQueryResult);
     };
 
     this.getVariants = async function getVariants(iCalculationVersionId, aVariantIds) {
-        return this.getVariantsInternal(iCalculationVersionId, aVariantIds, false);
+        return await this.getVariantsInternal(iCalculationVersionId, aVariantIds, false);
     };
 
     /**
@@ -160,7 +160,7 @@ async function Variant($, dbConnection, hQuery) {
      */
     this.getCopiedVariants = async function getCopiedVariants(iCalculationVersionId) {
         let aVariantIds;
-        return this.getVariantsInternal(iCalculationVersionId, aVariantIds, true);
+        return await this.getVariantsInternal(iCalculationVersionId, aVariantIds, true);
     };
 
     /**
@@ -176,7 +176,7 @@ async function Variant($, dbConnection, hQuery) {
         if (!_.isUndefined(aItemIds) && aItemIds.length > 0) {
             sStmt += `and "ITEM_ID" in (${ aItemIds.join() })`;
         }
-        const oQueryResult = dbConnection.executeQuery(sStmt, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iVariantId);
         return Array.from(oQueryResult);
     };
     /*
@@ -469,7 +469,7 @@ async function Variant($, dbConnection, hQuery) {
         const sStmt = `select ITEM_ID from "${ Tables.calculation_version_item }"
               where CALCULATION_VERSION_ID = ?`;
 
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId);
         return (helpers.transposeResultArray(oQueryResult)).ITEM_ID || [];
     };
 
@@ -518,8 +518,8 @@ async function Variant($, dbConnection, hQuery) {
         return await dbConnection.executeUpdate(sStmt, iVariantId);
     };
 
-    this.calculateVariant = (iCalculationVersionId, aVariants, aVariantItems) => {
-        const calculateVariantProcedure = dbConnection.loadProcedure(Procedures.p_calculate_variant);
+    this.calculateVariant = async (iCalculationVersionId, aVariants, aVariantItems) => {
+        const calculateVariantProcedure = await dbConnection.loadProcedure(Procedures.p_calculate_variant);
         const calculatedResults = calculateVariantProcedure({
             IV_CALCULATION_VERSION_ID: iCalculationVersionId,
             IT_VARIANT_ITEMS: aVariantItems,
@@ -537,8 +537,8 @@ async function Variant($, dbConnection, hQuery) {
      * @param {array} aVariants - array with variant ids for which the sum is calculated
      * @return {object} all calculated variants and the sum variant.
      */
-    this.calculateSumVariant = (iCalculationVersionId, sExchangeRateType, sReportCurrencyId, aVariants) => {
-        const calculateVariantProcedure = dbConnection.loadProcedure(Procedures.p_calculate_sum_variant);
+    this.calculateSumVariant =async (iCalculationVersionId, sExchangeRateType, sReportCurrencyId, aVariants) => {
+        const calculateVariantProcedure = await dbConnection.loadProcedure(Procedures.p_calculate_sum_variant);
         const calculatedResults = calculateVariantProcedure({
             IV_CALCULATION_VERSION_ID: iCalculationVersionId,
             IV_EXCHANGE_RATE_TYPE: sExchangeRateType,
@@ -824,7 +824,7 @@ async function Variant($, dbConnection, hQuery) {
                             and version_items.calculation_version_id = ?
                         where variant_items.VARIANT_ID = ?
                         and variant_items.IS_INCLUDED = 0;`;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iCalculationVersionId, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iCalculationVersionId, iVariantId);
         return Array.from(oQueryResult);
     };
 
@@ -843,7 +843,7 @@ async function Variant($, dbConnection, hQuery) {
                             and version_items.calculation_version_id = ?
                         where variant_items.VARIANT_ID = ?
                         and variant_items.IS_INCLUDED = 0;`;
-        const oQueryResult = dbConnection.executeQuery(sStmt, iGeneratedCalculationVersionId, iVariantId);
+        const oQueryResult = await dbConnection.executeQuery(sStmt, iGeneratedCalculationVersionId, iVariantId);
         return Array.from(oQueryResult);
     };
 
@@ -892,7 +892,7 @@ async function Variant($, dbConnection, hQuery) {
      * @return {boolean} true if sum variant exists for given calc version, false otherwise
      */
     this.checkSumVariantExists = async iVersionId => {
-        const aQueryResult = dbConnection.executeQuery(` select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = '${ iVersionId }' and VARIANT_TYPE = 1`);
+        const aQueryResult = await dbConnection.executeQuery(` select VARIANT_ID from "${ Tables.variant }" where CALCULATION_VERSION_ID = '${ iVersionId }' and VARIANT_TYPE = 1`);
         return aQueryResult.length !== 0;
     };
 

@@ -22,8 +22,8 @@ module.exports.Privileges = function ($) {
         //get privileges for entity id(for now project, later other business objects)
         switch (aParameters.entity_type) {
         case BusinessObjectTypes.Project:
-            aUserPrivileges = oPersistency.Privilege.getUserPrivileges(BusinessObjectTypes.Project, aParameters.entity_id, sUserId);
-            aGroupPrivileges = oPersistency.Privilege.getGroupPrivileges(BusinessObjectTypes.Project, aParameters.entity_id);
+            aUserPrivileges = await oPersistency.Privilege.getUserPrivileges(BusinessObjectTypes.Project, aParameters.entity_id, sUserId);
+            aGroupPrivileges = await oPersistency.Privilege.getGroupPrivileges(BusinessObjectTypes.Project, aParameters.entity_id);
             break;
         default: {
                 const sLogMessage = `Reading instance based privileges failed. Entity type ${ aParameters.entity_type } is not supported.`;
@@ -56,7 +56,7 @@ module.exports.Privileges = function ($) {
     this.edit = async function (oBodyItems, aParameters, oServiceOutput, oPersistency) {
 
         //check if project is opened for editing by the user - only one user can edit the project at a time
-        if (oBodyItems.ENTITY_TYPE === BusinessObjectTypes.Project && !oPersistency.Project.isOpenedInSession(oBodyItems.ENTITY_ID, sUserId, true)) {
+        if (oBodyItems.ENTITY_TYPE === BusinessObjectTypes.Project && ! await oPersistency.Project.isOpenedInSession(oBodyItems.ENTITY_ID, sUserId, true)) {
             const sLogMessage = `Project ${ oBodyItems.ENTITY_ID } is not opened in edit mode.`;
             $.trace.error(sLogMessage);
             throw new PlcException(Code.PROJECT_NOT_WRITABLE_ERROR, sLogMessage);
@@ -85,30 +85,30 @@ module.exports.Privileges = function ($) {
         if (!helpers.isNullOrUndefined(oBodyItems.CREATE)) {
             //create user privileges
             if (!helpers.isNullOrUndefined(oBodyItems.CREATE.USER_PRIVILEGES) && oBodyItems.CREATE.USER_PRIVILEGES.length > 0) {
-                const aItemsNotCreated = oPersistency.Privilege.insertUserPrivileges(oBodyItems.CREATE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotCreated = await oPersistency.Privilege.insertUserPrivileges(oBodyItems.CREATE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 //if there were user privileges that were not created throw error for each object
                 if (aItemsNotCreated.length > 0) {
-                    _.each(aItemsNotCreated, async function (oPrivilege) {
+                    _.each(aItemsNotCreated, function (oPrivilege) {
                         const sLogMessage = `User ${ oPrivilege.USER_ID } has already defined privilege.`;
                         $.trace.error(sLogMessage);
-                        await createMultipleErrorsResponse(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
+                        createMultipleErrorsResponse(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
                     });
                 }
             }
             //create group privileges
             if (!helpers.isNullOrUndefined(oBodyItems.CREATE.GROUP_PRIVILEGES) && oBodyItems.CREATE.GROUP_PRIVILEGES.length > 0) {
-                const aItemsNotCreated = oPersistency.Privilege.insertGroupPrivileges(oBodyItems.CREATE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotCreated = await oPersistency.Privilege.insertGroupPrivileges(oBodyItems.CREATE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 //if some group privileges were not created throw proper error for each object
                 if (aItemsNotCreated.length > 0) {
-                    _.each(aItemsNotCreated, async function (oPrivilege) {
+                    _.each(aItemsNotCreated, function (oPrivilege) {
                         if (oPrivilege.ERROR === 'notUnique') {
                             const sLogMessage = `Group ${ oPrivilege.GROUP_ID } has already a privilege defined.`;
                             $.trace.error(sLogMessage);
-                            await createMultipleErrorsResponse(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
+                            createMultipleErrorsResponse(Code.GENERAL_ENTITY_ALREADY_EXISTS_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
                         } else {
                             const sLogMessage = `Group ${ oPrivilege.GROUP_ID } does not exit in the system.`;
                             $.trace.error(sLogMessage);
-                            await createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
+                            createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.CREATE, oPrivilege, aResultErrors);
                         }
                     });
                 }
@@ -120,7 +120,7 @@ module.exports.Privileges = function ($) {
         if (!helpers.isNullOrUndefined(oBodyItems.DELETE)) {
             //delete user privileges
             if (!helpers.isNullOrUndefined(oBodyItems.DELETE.USER_PRIVILEGES) && oBodyItems.DELETE.USER_PRIVILEGES.length > 0) {
-                const aItemsNotDeleted = oPersistency.Privilege.deleteUserPrivileges(oBodyItems.DELETE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotDeleted = await oPersistency.Privilege.deleteUserPrivileges(oBodyItems.DELETE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 if (aItemsNotDeleted.length > 0) {
                     _.each(aItemsNotDeleted, async function (oPrivilege) {
                         const sLogMessage = `Could not find defined privilege for user ${ oPrivilege.USER_ID } to delete.`;
@@ -138,12 +138,12 @@ module.exports.Privileges = function ($) {
             }
             //delete group privileges
             if (!helpers.isNullOrUndefined(oBodyItems.DELETE.GROUP_PRIVILEGES) && oBodyItems.DELETE.GROUP_PRIVILEGES.length > 0) {
-                const aItemsNotDeleted = oPersistency.Privilege.deleteGroupPrivileges(oBodyItems.DELETE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotDeleted = await oPersistency.Privilege.deleteGroupPrivileges(oBodyItems.DELETE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 if (aItemsNotDeleted.length > 0) {
-                    _.each(aItemsNotDeleted, async function (oPrivilege) {
+                    _.each(aItemsNotDeleted, function (oPrivilege) {
                         const sLogMessage = `Could not find defined privilege for group ${ oPrivilege.GROUP_ID } to delete.`;
                         $.trace.error(sLogMessage);
-                        await createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.DELETE, oPrivilege, aResultErrors);
+                        createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.DELETE, oPrivilege, aResultErrors);
                     });
                 }
             }
@@ -154,12 +154,12 @@ module.exports.Privileges = function ($) {
         if (!helpers.isNullOrUndefined(oBodyItems.UPDATE)) {
             //update user privileges
             if (!helpers.isNullOrUndefined(oBodyItems.UPDATE.USER_PRIVILEGES) && oBodyItems.UPDATE.USER_PRIVILEGES.length > 0) {
-                const aItemsNotUpdated = oPersistency.Privilege.updateUserPrivileges(oBodyItems.UPDATE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotUpdated = await oPersistency.Privilege.updateUserPrivileges(oBodyItems.UPDATE.USER_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 if (aItemsNotUpdated.length > 0) {
                     _.each(aItemsNotUpdated, async function (oPrivilege) {
                         const sLogMessage = `Could not find defined privilege for user ${ oPrivilege.USER_ID } to update.`;
                         $.trace.error(sLogMessage);
-                        await createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.UPDATE, oPrivilege, aResultErrors);
+                        createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.UPDATE, oPrivilege, aResultErrors);
                     });
                 } else {
                     //check to see if there is at least one user left that has the ADMINISTRATION privilege for the project
@@ -172,12 +172,12 @@ module.exports.Privileges = function ($) {
             }
             //update group privileges
             if (!helpers.isNullOrUndefined(oBodyItems.UPDATE.GROUP_PRIVILEGES) && oBodyItems.UPDATE.GROUP_PRIVILEGES.length > 0) {
-                const aItemsNotUpdated = oPersistency.Privilege.updateGroupPrivileges(oBodyItems.UPDATE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
+                const aItemsNotUpdated = await oPersistency.Privilege.updateGroupPrivileges(oBodyItems.UPDATE.GROUP_PRIVILEGES, oBodyItems.ENTITY_TYPE, oBodyItems.ENTITY_ID);
                 if (aItemsNotUpdated.length > 0) {
-                    _.each(aItemsNotUpdated, async function (oPrivilege) {
+                    _.each(aItemsNotUpdated, function (oPrivilege) {
                         const sLogMessage = `Could not find defined privilege for group ${ oPrivilege.GROUP_ID } to update.`;
                         $.trace.error(sLogMessage);
-                        await createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.UPDATE, oPrivilege, aResultErrors);
+                        createMultipleErrorsResponse(Code.GENERAL_ENTITY_NOT_FOUND_ERROR.code, MessageLibrary.Operation.UPDATE, oPrivilege, aResultErrors);
                     });
                 }
             }

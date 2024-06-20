@@ -14,7 +14,7 @@ module.exports.Addins = function ($) {
  *
  * @returns {ServiceOutput} - an arry of ServiceOutput instances which encapsulates the payload produced by this method.
  */
-    this.get = async function (oBodyData, oParameters, oServiceOutput, oPersistency) {
+    this.get = function (oBodyData, oParameters, oServiceOutput, oPersistency) {
         var aAddinList = [];
         var sStatus = oParameters.status || AddinServiceParameters.Status.Values.Activated;
 
@@ -23,7 +23,7 @@ module.exports.Addins = function ($) {
 
         // Prepare Output
         _.each(oAddins, async function (oResult, iIndex) {
-            var oAddin = await prepareAddinObject(oResult);
+            var oAddin = prepareAddinObject(oResult);
             aAddinList.push(oAddin);
         });
 
@@ -33,7 +33,7 @@ module.exports.Addins = function ($) {
     /**
  * Handles HTTP POST requests to register an addin.
  */
-    this.register = async function (oAddinToRegister, oParameters, oServiceOutput, oPersistency) {
+    this.register = function (oAddinToRegister, oParameters, oServiceOutput, oPersistency) {
 
         var sGuid = oAddinToRegister.ADDIN_GUID;
         var sVersion = oAddinToRegister.ADDIN_VERSION;
@@ -49,13 +49,13 @@ module.exports.Addins = function ($) {
         oPersistency.Addin.register(oAddinToRegister);
 
         // Select and prepare addin for service response
-        oServiceOutput.setBody(await prepareAddinObject(oPersistency.Addin.getAddin(sGuid, aVersions)));
+        oServiceOutput.setBody( prepareAddinObject(oPersistency.Addin.getAddin(sGuid, aVersions)));
     };
 
     /**
  * Handles HTTP DELETE requests to unregister an addin.
  */
-    this.unregister = async function (oAddinToUnregister, oParameters, oServiceOutput, oPersistency) {
+    this.unregister = function (oAddinToUnregister, oParameters, oServiceOutput, oPersistency) {
 
         var sGuid = oAddinToUnregister.ADDIN_GUID;
         var sVersion = oAddinToUnregister.ADDIN_VERSION;
@@ -73,7 +73,7 @@ module.exports.Addins = function ($) {
     /**
  * Handles HTTP PUT requests to update the addin status (e.g. Activated)
  */
-    this.updateStatus = async function (oAddinToUpdate, oParameters, oServiceOutput, oPersistency) {
+    this.updateStatus = function (oAddinToUpdate, oParameters, oServiceOutput, oPersistency) {
         var sGuid = oAddinToUpdate.ADDIN_GUID;
         var sVersion = oAddinToUpdate.ADDIN_VERSION;
         var aVersions = sVersion.split('.');
@@ -82,7 +82,7 @@ module.exports.Addins = function ($) {
         var oDBVersion = {};
 
         if (oAddinVersion !== undefined) {
-            oDBVersion = await prepareAddinVersionObject(oAddinVersion);
+            oDBVersion = prepareAddinVersionObject(oAddinVersion);
         }
 
         // Does Addin Version exist?
@@ -101,7 +101,7 @@ module.exports.Addins = function ($) {
 
         // Is Addin status already set?
         if (oDBVersion.STATUS === oAddinToUpdate.STATUS) {
-            var oMessage = await new Message(MessageLibrary.Code.ADDIN_STATUS_ALREADY_SET_INFO, MessageLibrary.Severity.INFO);
+            var oMessage = new Message(MessageLibrary.Code.ADDIN_STATUS_ALREADY_SET_INFO, MessageLibrary.Severity.INFO);
             oServiceOutput.addMessage(oMessage);
             return;
         }
@@ -110,7 +110,7 @@ module.exports.Addins = function ($) {
         oPersistency.Addin.updateVersion(oAddinToUpdate);
 
         // Select and prepare addin for service response
-        oServiceOutput.setBody(await prepareAddinObject(oPersistency.Addin.getAddin(sGuid, aVersions)));
+        oServiceOutput.setBody( prepareAddinObject(oPersistency.Addin.getAddin(sGuid, aVersions)));
     };
 
     /**
@@ -122,8 +122,8 @@ module.exports.Addins = function ($) {
  * @returns {object} 
  *            object - Addin Version object prepared for Service Output
  */
-    async function prepareAddinObject(oAddinResult) {
-        return _.extend(await prepareAddinVersionObject(oAddinResult), {
+    function prepareAddinObject(oAddinResult) {
+        return _.extend( prepareAddinVersionObject(oAddinResult), {
             CONFIGURATION: {
                 CREATED_ON: oAddinResult.HEADER_CREATED_ON,
                 CREATED_BY: oAddinResult.HEADER_CREATED_BY,

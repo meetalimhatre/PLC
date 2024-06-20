@@ -23,9 +23,9 @@ async function run(oConnection) {
         const aCurrentPriceDeterminationStartegies = await oConnection.executeQuery(`SELECT DISTINCT PRICE_DETERMINATION_STRATEGY_ID, PRICE_DETERMINATION_STRATEGY_TYPE_ID from "${ sCurrentSchema }"."${ sPriceDetStrategyTable }"`);
         const aValues = await oConnection.executeQuery(`SELECT RULE_CODE, RULE_TYPE_ID, DEFAULT_PRIORITY FROM "${ sCurrentSchema }"."${ sPriceRuleTable }"`);
         aCurrentPriceDeterminationStartegies.forEach(oPriceDetStrategy => {
-            aValues.forEach(record => {
+            aValues.forEach(async record => {
                 if (oPriceDetStrategy.PRICE_DETERMINATION_STRATEGY_TYPE_ID === record.RULE_TYPE_ID) {
-                    oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDetStrategyRuleTable }"("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "RULE_CODE", "PRIORITY")
+                    await oConnection.executeUpdate(`INSERT INTO "${ sCurrentSchema }"."${ sPriceDetStrategyRuleTable }"("PRICE_DETERMINATION_STRATEGY_ID", "PRICE_DETERMINATION_STRATEGY_TYPE_ID", "RULE_CODE", "PRIORITY")
                     VALUES (?, ?, ?, ?)`, [[
                             oPriceDetStrategy.PRICE_DETERMINATION_STRATEGY_ID,
                             record.RULE_TYPE_ID,

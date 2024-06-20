@@ -107,7 +107,7 @@ module.exports.VariantGenerator = function ($) {
                 oExcludedItem.ITEM_ID,
                 oExcludedItem.PREDECESSOR_ITEM_ID
             ]));
-            const aItemsToUpdatePredecessor = await getPredecessorConditions(mExcludedVariantItems, aVersionItemsInexistentPredecessor);
+            const aItemsToUpdatePredecessor = getPredecessorConditions(mExcludedVariantItems, aVersionItemsInexistentPredecessor);
             oPersistency.Variant.updateVersionItemsPredecessors(iGeneratedCalculationVersionId, aItemsToUpdatePredecessor);
         }
 

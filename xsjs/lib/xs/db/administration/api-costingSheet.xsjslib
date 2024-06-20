@@ -113,25 +113,25 @@ async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 
         var aBatchMainItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ENTITIES] = [];
-        _.each(aBatchMainItems, async function (oRecord) {
+        _.each(aBatchMainItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oResultDelete = that.removeCostingSheetRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.DELETE, oResult);
             }
         });
 
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES] = [];
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultDelete = that.removeCostingSheetTextRow(oRecord, sMasterDataDate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.DELETE, oResult);
             }
         });
 
@@ -225,27 +225,27 @@ async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 
         var aBatchItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ENTITIES] = [];
-        _.each(aBatchItems, async function (oRecord) {
+        _.each(aBatchItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oResultUpdate = that.updateCostingSheetRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ENTITIES].push(oResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.UPDATE, oResult);
             }
         });
 
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES] = [];
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultUpdate = that.updateCostingSheetTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES].push(oTextResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.UPDATE, oResult);
             }
         });
 
@@ -307,12 +307,12 @@ async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 	 * @param   {object} oCostingSheet - entry that is checked
 	 * @param   {string} sMasterDataDate  - master data timestamp
 	 */
-    this.checkCreateReferenceObjects = async function (oCostingSheet, sMasterDataDate) {
+    this.checkCreateReferenceObjects = function (oCostingSheet, sMasterDataDate) {
 
         //take each referenced object
         var aFieldsMainPlcTable = ['CONTROLLING_AREA_ID'];//name in t_costing_sheet
         var aKeyFieldsRefObjectPlcTable = ['CONTROLLING_AREA_ID'];//name in t_controlling_area  
-        var aFieldsValuesMainPlcTable = await apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheet);
+        var aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oCostingSheet);
         var oControllingArea = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
         apiHelpers.checkObjectExists(oControllingArea, sMasterDataDate, BusinessObjectTypes.ControllingArea, hQuery);
 
@@ -340,27 +340,27 @@ async function CostingSheet(dbConnection, hQuery, hQueryRepl) {
 
         var aBatchMainItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ENTITIES] = [];
-        _.each(aBatchMainItems, async function (oRecord) {
+        _.each(aBatchMainItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oMainResultInsert = that.insertCostingSheetRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_ENTITIES].push(oMainResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_ENTITIES, e, MessageOperation.CREATE, oResult);
             }
         });
 
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES] = [];
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultInsert = that.insertCostingSheetTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES].push(oTextResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COSTING_SHEET_TEXT_ENTITIES, e, MessageOperation.CREATE, oResult);
             }
         });
 

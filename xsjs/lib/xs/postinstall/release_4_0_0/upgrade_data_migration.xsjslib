@@ -122,8 +122,8 @@ async function getSchemaName(oConnection) {
  * return {bollean} if is consistent in XSC and XSA
  */
 async function compareTableColumns(tableName, currentSchemaName) {
-    var currentTable =  getSchemaTableColumns(getTargetTableName(tableName), currentSchemaName);
-    var plcTable =  getXSCPLCTableColumns(tableName);
+    var currentTable = await getSchemaTableColumns(getTargetTableName(tableName), currentSchemaName);
+    var plcTable = await getXSCPLCTableColumns(tableName);
     if (currentTable.sort().join() === plcTable.sort().join()) {
         return true;
     } else {
@@ -170,14 +170,14 @@ async function getXSCPLCTableColumns(tableName) {
  */
 async function check(oConnection) {
     try {
-        oSqlccConnection =  $.hdb.getConnection({
+        oSqlccConnection = await $.hdb.getConnection({
             'sqlcc': 'xsjs.sqlcc_config',
             'pool': true,
             'treatDateAsUTC': true
         });
         return true;
     } catch (e) {
-         closeSqlConnection();
+        closeSqlConnection();
         throw e;
     }
 }
@@ -196,30 +196,30 @@ async function run(oConnection, oLibraryMeta, oRequestArgs) {
             var currentSchemaName = await getSchemaName(oConnection);
             migrateMetadataCustomFields(currentSchemaName, oSqlccConnection);
             for (var preIndex in preMigrationTableName) {
-                if (!compareTableColumns(preMigrationTableName[preIndex], currentSchemaName)) {
+                if (!await compareTableColumns(preMigrationTableName[preIndex], currentSchemaName)) {
                     //todo: special operation to make preMigration tables consistent
                     return false;
                 }
-                executeMigration(preMigrationTableName[preIndex], oRequestArgs.file, currentSchemaName);
+                await executeMigration(preMigrationTableName[preIndex], oRequestArgs.file, currentSchemaName);
             }
 
             var oDbArtefactController =  new DbArtefactController($, oConnection);
             oDbArtefactController.generateAllFiles();
             // migrate prices from t_activity_rate into t_activity_price and from t_price to t_material_price and their custom fields
-             migrateMaterialPrice(currentSchemaName, oSqlccConnection);
-             migrateActivityPrice(currentSchemaName, oSqlccConnection);
+            await migrateMaterialPrice(currentSchemaName, oSqlccConnection);
+            await migrateActivityPrice(currentSchemaName, oSqlccConnection);
 
             var plcTables = await getPLCTables();
 
             for (var index in plcTables) {
                 var tableName = plcTables[index];
                 if (!preMigrationTableName.includes(tableName) && !excludeTables.includes(tableName)) {
-                     executeMigration(tableName, oRequestArgs.file, currentSchemaName);
+                    await executeMigration(tableName, oRequestArgs.file, currentSchemaName);
                 }
             }
             return true;
         } catch (e) {
-             closeSqlConnection();
+            closeSqlConnection();
             const sServerMsg = `Error: ${ e.message || e.msg }`;
             $.trace.error(sServerMsg);
             throw e;
@@ -240,9 +240,9 @@ async function executeMigration(sTableName, oMappingUserList, currentSchemaName)
     console.log(sTableName);
     if (sTableName === 'sap.plc.db.calcengine::calcengine_signatures.t_afl_signature') {
 //the table t_afl_signature is a no primary key table which can't use upsert..select.. sql
-        oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sTableName }"`);
-        oSqlccConnection.executeUpdate(`INSERT INTO "${ sTableName }" SELECT * FROM "${ plcSchema }"."${ sTableName }"`);
-         oSqlccConnection.commit();
+        await oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sTableName }"`);
+        await oSqlccConnection.executeUpdate(`INSERT INTO "${ sTableName }" SELECT * FROM "${ plcSchema }"."${ sTableName }"`);
+        await oSqlccConnection.commit();
     } else {
         //check data model changes
         var aXSCColumns =  getSchemaTableColumns(sTableName, plcSchema);
@@ -266,12 +266,12 @@ async function executeMigration(sTableName, oMappingUserList, currentSchemaName)
             var iloops = Math.ceil(iRecordNumber / iTableThreshold);
             for (var i = 0; i < iloops; i++) {
                 var sLoopSql = sSql + ` LIMIT ${ iTableThreshold } OFFSET ${ i * iTableThreshold }`;
-                oSqlccConnection.executeUpdate(sLoopSql);
-                oSqlccConnection.commit();
+                await oSqlccConnection.executeUpdate(sLoopSql);
+                await oSqlccConnection.commit();
             }
         } else {
-            oSqlccConnection.executeUpdate(sSql);
-             oSqlccConnection.commit();
+            await oSqlccConnection.executeUpdate(sSql);
+            await oSqlccConnection.commit();
         }
 
     }
@@ -330,7 +330,7 @@ function closeSqlConnection() {
 /**
  * close connection
  */
-async function clean(oConnection) {
+function clean(oConnection) {
     closeSqlConnection();
     return true;
 }

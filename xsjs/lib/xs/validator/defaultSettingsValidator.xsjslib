@@ -56,18 +56,18 @@ function DefaultSettingsValidator(utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters) {
+    this.validate = function (oRequest, mValidatedParameters) {
         switch (oRequest.method) {
         case $.net.http.GET:
             utils.checkEmptyBody(oRequest.body);
-            return await validateSelectRequest();
+            return validateSelectRequest();
         case $.net.http.POST:
-            return await validateCreateUpdateRequest();
+            return validateCreateUpdateRequest();
         case $.net.http.PUT:
-            return await validateCreateUpdateRequest();
+            return validateCreateUpdateRequest();
         case $.net.http.DEL:
             utils.checkEmptyBody(oRequest.body);
-            return await checkType(mValidatedParameters);
+            return checkType(mValidatedParameters);
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -76,8 +76,8 @@ function DefaultSettingsValidator(utils) {
             }
         }
 
-        async function validateSelectRequest() {
-            await checkType(mValidatedParameters);
+        function validateSelectRequest() {
+            checkType(mValidatedParameters);
             if (mValidatedParameters.type.toUpperCase() === oLockTypes.global) {
                 if (mValidatedParameters.lock !== undefined) {
                     if (mValidatedParameters.lock !== true && mValidatedParameters.lock !== 'true' && mValidatedParameters.lock !== false && mValidatedParameters.lock !== 'false') {
@@ -90,7 +90,7 @@ function DefaultSettingsValidator(utils) {
             return;
         }
 
-        async function validateCreateUpdateRequest() {
+        function validateCreateUpdateRequest() {
             var oBodyEntities;
             try {
                 oBodyEntities = JSON.parse(oRequest.body.asString());
@@ -105,24 +105,24 @@ function DefaultSettingsValidator(utils) {
             _.each(_.keys(oBodyEntities), async function (property) {
                 switch (property) {
                 case DefaultSettingsMasterDataColumns.companyCodeId:
-                    await checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.companyCodeTuple);
+                    checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.companyCodeTuple);
                     break;
                 case DefaultSettingsMasterDataColumns.plantId:
-                    await checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.plantTuple);
+                    checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.plantTuple);
                     break;
                 case DefaultSettingsMasterDataColumns.componentSplitId:
-                    await checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.componentSplitTuple);
+                    checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.componentSplitTuple);
                     break;
                 case DefaultSettingsMasterDataColumns.costingSheetId:
-                    await checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.costingSheetTuple);
+                    checkRequiredProperties(oBodyEntities, oCreateUpdateMandatoryTuples.costingSheetTuple);
                     break;
                 }
             });
             return oBodyEntities;
         }
 
-        async function checkRequiredProperties(oEntity, aProperties) {
-            _.each(aProperties, async function (property) {
+        function checkRequiredProperties(oEntity, aProperties) {
+            _.each(aProperties, function (property) {
                 if (!_.has(oEntity, property)) {
                     const sLogMessage = `Mandatory property ${ property } is not present in entity ${ JSON.stringify(oEntity) }.`;
                     $.trace.error(sLogMessage);
@@ -132,7 +132,7 @@ function DefaultSettingsValidator(utils) {
             });
         }
 
-        async function checkType(mValidatedParameters) {
+        function checkType(mValidatedParameters) {
             const sLogMessage = 'GET/DELETE requests for default settings are valid only if type is specified (either GLOBAL or USER). Cannot validate.';
 
             if (typeof mValidatedParameters.type == 'undefined' || mValidatedParameters.type === '') {

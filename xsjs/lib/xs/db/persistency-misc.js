@@ -85,7 +85,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
             // (e.g: "I055799"."table__text")
             allLanguagesStmt = hQuery.statement(['select distinct ' + sLanguageFieldname + ' from ' + sTableName].join(' '));
         }
-        var aAllLanguagesWithProperies = allLanguagesStmt.execute();
+        var aAllLanguagesWithProperies = await allLanguagesStmt.execute();
 
         // create an array with the language property (from aAllLanguagesWithProperies)
         var aAllLanguages = _.map(aAllLanguagesWithProperies, sLanguageFieldname);
@@ -118,7 +118,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
 	 *            field shall be determined.
 	 * @returns {string} - The the language field name
 	 */
-    this.determineLanguageField = async function (sTableName) {
+    this.determineLanguageField = function (sTableName) {
 
         var aLanguageFields = constants.LanguageFields; // Array of possible language fields
 
@@ -172,7 +172,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
         var sAvailableLanguage = sIsoLanguage;
 
         var stmt = hQuery.statement('select top 1 message from "' + Tables.system_message + '" where language = (select ifnull(max(language),?)' + ' from "' + Tables.system_message + '" where language = ?)');
-        var result = stmt.execute(sDefaultLanguage, sAvailableLanguage);
+        var result = await stmt.execute(sDefaultLanguage, sAvailableLanguage);
         return result;
     };
 
@@ -183,7 +183,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
 	 * @returns {object} - SYS.DUMMY contains an "X" in the first column and row
 	 */
     this.ping = async function () {
-        return hQuery.statement('select * from "SYS"."DUMMY"').execute();
+        return await hQuery.statement('select * from "SYS"."DUMMY"').execute();
     };
 
     /**
@@ -199,7 +199,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
             'select SIDE_PANEL_GROUP_ID, SIDE_PANEL_GROUP_DISPLAY_ORDER, RESOURCE_KEY_GROUP_DESCRIPTION',
             '  from "' + Tables.group + '"'
         ].join(' '));
-        var aGroups = stmt.execute();
+        var aGroups = await stmt.execute();
         return aGroups;
     };
 
@@ -225,7 +225,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
             ' where LOCK_OBJECT = ?) and SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)> ',
             '( select "VALUE_IN_SECONDS" from "' + Tables.application_timeout + '" where APPLICATION_TIMEOUT_ID =?)'
         ].join(' '));
-        oStatementDelete.execute(sObject, sessionTimeout);
+        await oStatementDelete.execute(sObject, sessionTimeout);
 
 
         that.session.deleteOutdatedEntries();
@@ -234,10 +234,10 @@ function Misc($, hQuery, sUserId, dbConnection) {
 
         if (helpers.isNullOrUndefined(bIncludingCurrentUser) || bIncludingCurrentUser === false) {
             stmt += ' and USER_ID != ?';
-            return hQuery.statement(stmt).execute(sObject, sUserId);
+            return await hQuery.statement(stmt).execute(sObject, sUserId);
         }
 
-        return hQuery.statement(stmt).execute(sObject);
+        return await hQuery.statement(stmt).execute(sObject);
     };
 
 
@@ -259,7 +259,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
             ' where LOCK_OBJECT = ? and USER_ID != ?) and SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)<= ',
             '( select "VALUE_IN_SECONDS" from "' + Tables.application_timeout + '" where APPLICATION_TIMEOUT_ID =?)'
         ].join(' '));
-        var aLockingUsers = oSelectStatement.execute(sObject, sUserId, sessionTimeout);
+        var aLockingUsers = await oSelectStatement.execute(sObject, sUserId, sessionTimeout);
         return aLockingUsers;
     };
 
@@ -270,7 +270,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
     this.lockTableTLockExclusive = async function () {
         try {
             var stmt = hQuery.statement('lock table "' + Tables.lock + '" in exclusive mode ');
-            stmt.execute();
+            await stmt.execute();
         } catch (e) {
 			// TO DO , this can happened only if 2 times the lock is called for same user ( do nothing or implement some check here from M_TABLE_LOCKS ) - I309362
 		        }
@@ -294,25 +294,25 @@ function Misc($, hQuery, sUserId, dbConnection) {
             oStatementDelete = `delete from  "${ Tables.session }" where USER_ID in (select USER_ID from "${ Tables.lock }" where LOCK_OBJECT = ?) 
 								and SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)> ( select VALUE_IN_SECONDS from "${ Tables.application_timeout }"  where APPLICATION_TIMEOUT_ID =?) 
 								and USER_ID != ?`;
-            dbConnection.executeUpdate(oStatementDelete, sObject, sessionTimeout, sUserId);
+            await dbConnection.executeUpdate(oStatementDelete, sObject, sessionTimeout, sUserId);
         } else {
 
             oStatementDelete = `delete from  "${ Tables.session }"
 								where SECONDS_BETWEEN(LAST_ACTIVITY_TIME, CURRENT_UTCTIMESTAMP)> 
 				                ( select VALUE_IN_SECONDS from "${ Tables.application_timeout }" where APPLICATION_TIMEOUT_ID = ?) and USER_ID != ?`;
-            dbConnection.executeUpdate(oStatementDelete, sessionTimeout, sUserId);
+            await dbConnection.executeUpdate(oStatementDelete, sessionTimeout, sUserId);
         }
 
 
         that.session.deleteOutdatedEntries();
 
         var stmt = `select LOCK_OBJECT, USER_ID, LAST_UPDATED_ON from "${ Tables.lock }" where LOCK_OBJECT = ?`;
-        var aLock = dbConnection.executeQuery(stmt, sObject);
+        var aLock = await dbConnection.executeQuery(stmt, sObject);
 
 
         if (aLock.length === 0) {
             var stmtLock = `insert into "${ Tables.lock }" (LOCK_OBJECT, USER_ID, LAST_UPDATED_ON) values(?, ?, ?)`;
-            dbConnection.executeUpdate(stmtLock, sObject, sUserId, new Date());
+            await dbConnection.executeUpdate(stmtLock, sObject, sUserId, new Date());
         }
     };
 
@@ -330,7 +330,7 @@ function Misc($, hQuery, sUserId, dbConnection) {
         if (iRowCount > 0) {
             try {
                 stmt = `delete from "${ Tables.lock }" where USER_ID = ?`;
-                dbConnection.executeUpdate(stmt, sUserId);
+                await dbConnection.executeUpdate(stmt, sUserId);
             } catch (e) {
                 var oMessageDetails = new MessageDetails();
                 const sLogMessage = `Error during release lock.`;
@@ -354,10 +354,10 @@ function Misc($, hQuery, sUserId, dbConnection) {
         try {
 
             var stmt = hQuery.statement('select * from "' + Tables.default_settings + '" where USER_ID = ?');
-            var userSettings = stmt.execute(sUserId);
+            var userSettings = await stmt.execute(sUserId);
 
             stmt = hQuery.statement('select * from "' + Tables.default_settings + "\" where USER_ID = ''");
-            var globalSettings = stmt.execute();
+            var globalSettings = await stmt.execute();
 
             var result = {};
 
@@ -392,11 +392,11 @@ function Misc($, hQuery, sUserId, dbConnection) {
 
 
     this.getActiveUsers = async function () {
-        return hQuery.statement('select a.USER_ID, a.LANGUAGE, TO_DOUBLE(SECONDS_BETWEEN ( a.LAST_ACTIVITY_TIME , CURRENT_UTCTIMESTAMP ) ) as SECONDS_BETWEEN' + ' FROM  "sap.plc.db::basis.t_session" AS a, ' + ' "sap.plc.db::basis.t_application_timeout" AS b ' + " WHERE   b.APPLICATION_TIMEOUT_ID = 'SessionTimeout' AND " + ' SECONDS_BETWEEN ( a.LAST_ACTIVITY_TIME , CURRENT_UTCTIMESTAMP ) < b.VALUE_IN_SECONDS AND ' + ' a.LAST_ACTIVITY_TIME < CURRENT_UTCTIMESTAMP AND' + ' a.USER_ID <> ? ').execute(sUserId);
+        return await hQuery.statement('select a.USER_ID, a.LANGUAGE, TO_DOUBLE(SECONDS_BETWEEN ( a.LAST_ACTIVITY_TIME , CURRENT_UTCTIMESTAMP ) ) as SECONDS_BETWEEN' + ' FROM  "sap.plc.db::basis.t_session" AS a, ' + ' "sap.plc.db::basis.t_application_timeout" AS b ' + " WHERE   b.APPLICATION_TIMEOUT_ID = 'SessionTimeout' AND " + ' SECONDS_BETWEEN ( a.LAST_ACTIVITY_TIME , CURRENT_UTCTIMESTAMP ) < b.VALUE_IN_SECONDS AND ' + ' a.LAST_ACTIVITY_TIME < CURRENT_UTCTIMESTAMP AND' + ' a.USER_ID <> ? ').execute(sUserId);
     };
 
-    this.getActiveJobs = () => {
-        return hQuery.statement(`select JOB_NAME, FIRED_TIME FROM "sap.plc.db::map.t_scheduler_log" where state='RUNNING'`).execute();
+    this.getActiveJobs = async () => {
+        return await hQuery.statement(`select JOB_NAME, FIRED_TIME FROM "sap.plc.db::map.t_scheduler_log" where state='RUNNING'`).execute();
     };
 
     this.setHQuery = function (oHQuery) {
@@ -404,12 +404,12 @@ function Misc($, hQuery, sUserId, dbConnection) {
     };
 
 
-    this.getPLCUsers = function (sSearchAutoComplete, iTop) {
+    this.getPLCUsers = async function (sSearchAutoComplete, iTop) {
         var aUsers = [];
         var stmt = `select top ? DISTINCT USER_ID from  "${ Tables.auto_complete_user }" where lower(USER_ID) like lower(?) ORDER BY USER_ID`;
 
 
-        aUsers = dbConnection.executeQuery(stmt, iTop, sSearchAutoComplete + '%');
+        aUsers = await dbConnection.executeQuery(stmt, iTop, sSearchAutoComplete + '%');
 
         return aUsers;
     };

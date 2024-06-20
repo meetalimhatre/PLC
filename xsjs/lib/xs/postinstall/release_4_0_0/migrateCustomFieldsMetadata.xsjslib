@@ -17,7 +17,7 @@ async function migrateCustomFieldsMetadataTable() {
                                         "CREATED_AT" as "CREATED_ON", "CREATED_BY_USER_ID" as "CREATED_BY", "LAST_MODIFIED_AT" as "LAST_MODIFIED_ON", "LAST_MODIFIED_BY_USER_ID" as "LAST_MODIFIED_BY"
                                 FROM "${ sXSCSchema }"."${ sMetadataTable }" as XSC
                                         WHERE "IS_CUSTOM" = 1`;
-    oSqlccConnection.executeUpdate(sMigrationSelect);
+    await oSqlccConnection.executeUpdate(sMigrationSelect);
     await oSqlccConnection.commit();
 }
 
@@ -31,14 +31,14 @@ async function migrateCustomFieldsMetadataAttributesTable() {
                                 FROM "${ sXSCSchema }"."${ sMetadataAttributesTable }" as XSC
                                         WHERE XSC.COLUMN_ID LIKE_REGEXPR '^(CUST|CAPR|CWCE|CMPR|CMPL|CMAT|CCEN)_[A-Z][A-Z0-9_]*$'
                                         AND XSC.IS_ACTIVE IN (-1, 1)`;
-    oSqlccConnection.executeUpdate(sMigrationSelect);
+    await oSqlccConnection.executeUpdate(sMigrationSelect);
     await oSqlccConnection.commit();
 }
 
 async function removeOldVersionData() {
-    oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sXSCSchema }"."${ sMetadataTable }"`);
+    await oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sXSCSchema }"."${ sMetadataTable }"`);
     await oSqlccConnection.commit();
-    oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sXSCSchema }"."${ sMetadataAttributesTable }"`);
+    await oSqlccConnection.executeUpdate(`TRUNCATE TABLE "${ sXSCSchema }"."${ sMetadataAttributesTable }"`);
     await oSqlccConnection.commit();
 }
 

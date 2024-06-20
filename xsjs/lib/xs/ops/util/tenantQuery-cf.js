@@ -1,6 +1,6 @@
-const hdbext = require('@sap/hdbext');
-const async = require('@sap/async-xsjs');
-const moment = require('@sap/xsjs/node_modules/moment');
+const async = require('async');
+const hdbext = require('hdbext');
+const moment = require('moment');
 const _ = require('lodash');
 
 /**
@@ -37,9 +37,9 @@ var TenantQuery = function (credentials, options) {
     };
 };
 
-TenantQuery.prototype.getConnection = function () {
+TenantQuery.prototype.getConnection = async function () {
     if (this.connection === null) {
-        this.connection = hdbext.createConnection.sync(this.credentials);
+        this.connection = await hdbext.createConnection.sync(this.credentials);
     }
     return this.connection;
 };
@@ -119,8 +119,8 @@ TenantQuery.prototype.executeQuery = async function (sqlStatement, ...options) {
 };
 
 
-TenantQuery.prototype.executeUpdate = function (sqlStatement, ...options) {
-    var affectRows = this.executeQuery(sqlStatement, ...options);
+TenantQuery.prototype.executeUpdate = async function (sqlStatement, ...options) {
+    var affectRows = await this.executeQuery(sqlStatement, ...options);
     return affectRows;
 };
 

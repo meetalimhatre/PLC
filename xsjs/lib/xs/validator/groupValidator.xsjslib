@@ -64,12 +64,12 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
 	 *             If the request body can not be parsed as JSON array, mandatory item properties are missing or the
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
-    this.validate = async function (oRequest, mValidatedParameters, oServiceOutput) {
+    this.validate = function (oRequest, mValidatedParameters, oServiceOutput) {
         switch (oRequest.method) {
         case $.net.http.GET:
             return utils.checkEmptyBody(oRequest.body);
         case $.net.http.POST:
-            return  await validateBatchRequest();
+            return  validateBatchRequest();
         default: {
                 const sLogMessage = `Cannot validate HTTP method ${ oRequest.method } on service resource ${ oRequest.queryPath }.`;
                 $.trace.error(sLogMessage);
@@ -77,7 +77,7 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
             }
         }
 
-        async function validateBatchRequest() {
+        function validateBatchRequest() {
             var oGroup = utils.tryParseJson(oRequest.body.asString());
 
             //check invalid operations 
@@ -92,10 +92,10 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
             var aResultErrors = [];
             //check the batch operations
             if (_.has(oGroup, 'CREATE')) {
-                await validateBodyForOperation(oGroup.CREATE, MessageLibrary.Operation.CREATE, aResultErrors);
+                validateBodyForOperation(oGroup.CREATE, MessageLibrary.Operation.CREATE, aResultErrors);
             }
             if (_.has(oGroup, 'DELETE')) {
-                await validateBodyForOperation(oGroup.DELETE, MessageLibrary.Operation.DELETE, aResultErrors);
+                validateBodyForOperation(oGroup.DELETE, MessageLibrary.Operation.DELETE, aResultErrors);
             }
 
             //UPDATE - can be done only for group description
@@ -110,7 +110,7 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
                     if (!_.isArray(oGroup.UPDATE.GROUPS)) {
                         utils.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, MessageLibrary.Operation.UPDATE, AuthObjectTypes.groupObject, oGroup.UPDATE, validationCode.NOT_ARRAY, aResultErrors);
                     } else {
-                        await checkMandatoryAndInvalidPropertiesForObjects(oGroup.UPDATE.GROUPS, MessageLibrary.Operation.UPDATE, aMandatoryPropertiesGroup, aValidPropertiesGroup, aResultErrors);
+                        checkMandatoryAndInvalidPropertiesForObjects(oGroup.UPDATE.GROUPS, MessageLibrary.Operation.UPDATE, aMandatoryPropertiesGroup, aValidPropertiesGroup, aResultErrors);
                         oGroup.UPDATE.GROUPS.forEach(oGroup => {
                             try {
                                  checkPropertiesValues(oGroup);
@@ -132,8 +132,8 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
                 const sLogMessage = `Errors during validation checks.`;
                 throw new PlcException(Code.BATCH_OPPERATION_ERROR, sLogMessage);
             } else {
-                await checkIfUnique(aUserMembers, 'USER_ID');
-                await checkIfUnique(aGroupMembers, 'SUBGROUP_ID');
+                checkIfUnique(aUserMembers, 'USER_ID');
+                checkIfUnique(aGroupMembers, 'SUBGROUP_ID');
             }
 
             return oGroup;
@@ -149,7 +149,7 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
 	 *             property values cannot be validated against the data types provided in the meta data.
 	 */
 
-        async function checkPropertiesValues(oEntity) {
+        function checkPropertiesValues(oEntity) {
             let oGroup = JSON.parse(JSON.stringify(oEntity));
             oGroup.USERGROUP_ID = oGroup.GROUP_ID;
             delete oGroup.GROUP_ID;
@@ -164,7 +164,7 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
         }
 
 
-        async function validateBodyForOperation(oObject, operation, aResultErrors) {
+        function validateBodyForOperation(oObject, operation, aResultErrors) {
             try {
                 utils.checkInvalidProperties(oObject, aValidPropertiesBatch);
             } catch (e) {
@@ -172,7 +172,7 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
             }
 
             if (_.has(oObject, 'GROUPS')) {
-                await checkMandatoryAndInvalidPropertiesForObjects(oObject.GROUPS, operation, aMandatoryPropertiesGroup, aValidPropertiesGroup, aResultErrors);
+                checkMandatoryAndInvalidPropertiesForObjects(oObject.GROUPS, operation, aMandatoryPropertiesGroup, aValidPropertiesGroup, aResultErrors);
                 oObject.GROUPS.forEach(oGroup => {
                     try {
                          checkPropertiesValues(oGroup);
@@ -183,21 +183,21 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
             }
 
             if (_.has(oObject, 'MEMBERS')) {
-                await checkMandatoryAndInvalidPropertiesForObjects(oObject.MEMBERS, operation, aMandatoryPropertiesMember, aMandatoryPropertiesMember, aResultErrors);
+                checkMandatoryAndInvalidPropertiesForObjects(oObject.MEMBERS, operation, aMandatoryPropertiesMember, aMandatoryPropertiesMember, aResultErrors);
                 aUserMembers = _.union(aUserMembers, oObject.MEMBERS);
             }
 
             if (_.has(oObject, 'SUBGROUPS')) {
-                await checkMandatoryAndInvalidPropertiesForObjects(oObject.SUBGROUPS, operation, aMandatoryPropertiesSubgroup, aMandatoryPropertiesSubgroup, aResultErrors);
+                checkMandatoryAndInvalidPropertiesForObjects(oObject.SUBGROUPS, operation, aMandatoryPropertiesSubgroup, aMandatoryPropertiesSubgroup, aResultErrors);
                 aGroupMembers = _.union(aGroupMembers, oObject.SUBGROUPS);
             }
         }
 
-        async function checkMandatoryAndInvalidPropertiesForObjects(aObject, operation, oMandatoryProperties, oValidProperties, aResultErrors) {
+        function checkMandatoryAndInvalidPropertiesForObjects(aObject, operation, oMandatoryProperties, oValidProperties, aResultErrors) {
             if (!_.isArray(aObject)) {
                 utils.createMultipleValidationErrorsResponse(Code.GENERAL_VALIDATION_ERROR.code, operation, AuthObjectTypes.groupObject, aObject, validationCode.NOT_ARRAY, aResultErrors);
             } else {
-                _.each(aObject, async function (oObjectEntity) {
+                _.each(aObject, function (oObjectEntity) {
                     try {
                         utils.checkMandatoryProperties(oObjectEntity, oMandatoryProperties);
                     } catch (e) {
@@ -213,9 +213,9 @@ function GroupValidator(oPersistency, oMetadataProvider, utils) {
             }
         }
 
-        async function checkIfUnique(aItems, object) {
+        function checkIfUnique(aItems, object) {
             let aGroupsIds = _.uniq(_.map(aItems, 'GROUP_ID'));
-            _.each(aGroupsIds, async function (obj) {
+            _.each(aGroupsIds, function (obj) {
                 let aMembers = _.map(_.filter(aItems, function (member) {
                     if (member.GROUP_ID === obj) {
                         return member[object];

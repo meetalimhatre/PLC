@@ -50,8 +50,8 @@ function RetentionPeriods($, dbConnection) {
 	 *            Array of objects with the properties of retention periods
 	 *
 	 */
-    this.getAllRetentionData = function () {
-        return dbConnection.executeQuery(`select ENTITY, SUBJECT, VALID_TO, VALID_FOR from "${ Tables.retention_periods }"`);
+    this.getAllRetentionData = async function () {
+        return await dbConnection.executeQuery(`select ENTITY, SUBJECT, VALID_TO, VALID_FOR from "${ Tables.retention_periods }"`);
     };
 
     /**

@@ -23,7 +23,7 @@ async function getTenantUserCount(oClient) {
                                     AND (USER_ID NOT LIKE '%@sap.com%')`;
 
     try {
-        result = oClient.executeQuery(sqlStatement);
+        result = await oClient.executeQuery(sqlStatement);
     } catch (e) {
         console.log(e);
     }
@@ -36,7 +36,7 @@ async function getTenantUserCount(oClient) {
                                             where  LAST_ACTIVITY_TIME <= '${ sRetentionDate.toISOString() }'`;
 
     try {
-        resultDeleteData = oClient.executeQuery(sqlStatementDeleteData);
+        resultDeleteData = await oClient.executeQuery(sqlStatementDeleteData);
     } catch (e) {
         console.log(e);
     }

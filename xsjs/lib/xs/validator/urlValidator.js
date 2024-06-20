@@ -6,7 +6,7 @@ const Code = MessageLibrary.Code;
 const Helpers = require('../util/helpers');
 const HttpMethodMapping = require('../util/constants').HttpMethodMapping;
 
-async function logError(msg) {
+function logError(msg) {
     helpers.logError(msg);
 }
 
@@ -23,9 +23,9 @@ async function logError(msg) {
  * 
  * @constructor
  */
-async function UrlValidator(mResources) {
+function UrlValidator(mResources) {
 
-    const genericSyntaxValidator = await new GenericSyntaxValidator();
+    const genericSyntaxValidator = new GenericSyntaxValidator();
 
     /**
      * Validates a request if provided path variables and parameters are correct. In order to compare the correct 
@@ -40,11 +40,11 @@ async function UrlValidator(mResources) {
      *             if the value of a parameter cannot be validated against the specified data type of the parameter
      *             value
      */
-    this.validateUrl = async function (oRequest, sResourceDefinitionKey) {
+    this.validateUrl = function (oRequest, sResourceDefinitionKey) {
         const oDefinition = mResources[sResourceDefinitionKey];
         if (Helpers.isNullOrUndefined(oDefinition)) {
             const sLogMessage = `Cannot find resource definition for definition path ${ sResourceDefinitionKey }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
 
@@ -93,17 +93,17 @@ async function UrlValidator(mResources) {
             mRequestParameters.set(aTuple[0], aTuple[1]);
         });
 
-        return await validateParameterValues(mRequestParameters, mAllowedParameters);
+        return validateParameterValues(mRequestParameters, mAllowedParameters);
     };
 
-    async function validateParameterValues(mRequestParameters, mAllowedParameters) {
+    function validateParameterValues(mRequestParameters, mAllowedParameters) {
         const mValidatedParameters = {};
         const aMandatoryParameters = Array.from(mAllowedParameters.values()).filter(oParameterInfo => oParameterInfo.isMandatory);
         const aParametersInRequest = aMandatoryParameters.map(oMandatoryParameterInfo => mRequestParameters.has(oMandatoryParameterInfo.name));
         const iMissingMandatoryParameterIndex = aParametersInRequest.indexOf(false);
         if (iMissingMandatoryParameterIndex > -1) {
             const sLogMessage = `Missing mandatory parameter ${ aMandatoryParameters[iMissingMandatoryParameterIndex].name }.`;
-            await logError(sLogMessage);
+            logError(sLogMessage);
             throw new PlcException(Code.GENERAL_VALIDATION_ERROR, sLogMessage);
         }
 

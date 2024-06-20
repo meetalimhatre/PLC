@@ -89,7 +89,7 @@ function Document(dbConnection, hQuery, sObjectName) {
             }
             sStmt += ` order by plcTable.DOCUMENT_TYPE_ID, plcTable.DOCUMENT_ID, plcTable.DOCUMENT_VERSION, plcTable.DOCUMENT_PART`;
             sStmt += ` limit ${ oProcedureParameters.iTopRecords } offset ${ oProcedureParameters.iSkipRecords }`;
-            oReturnObject[BusinessObjectsEntities.DOCUMENT_ENTITIES] = _.values(dbConnection.executeQuery(sStmt));
+            oReturnObject[BusinessObjectsEntities.DOCUMENT_ENTITIES] = _.values( await dbConnection.executeQuery(sStmt));
         }
         return oReturnObject;
     };

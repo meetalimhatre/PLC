@@ -76,16 +76,16 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 * @returns {object} oItem - An object containing database data (columns as keys, whereas each key is associated with the value of the
 	 *          stored in the column) if the an object for the given session and id was found.
 	 */
-    this.getItem = async function (iItemId, iCalculationVersionId, sSessionId) {
+    this.getItem = function (iItemId, iCalculationVersionId, sSessionId) {
         oMessageDetails.addItemObjs({ id: iItemId });
         oMessageDetails.addCalculationVersionObjs({ id: iCalculationVersionId });
 
-        if (!await _.isNumber(iItemId) || iItemId % 1 !== 0 || iItemId < 0) {
+        if (! _.isNumber(iItemId) || iItemId % 1 !== 0 || iItemId < 0) {
             const sLogMessage = 'iItemId must be a positive integer.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
-        if (!await _.isNumber(iCalculationVersionId) || iCalculationVersionId < 0) {
+        if (! _.isNumber(iCalculationVersionId) || iCalculationVersionId < 0) {
             const sLogMessage = 'iCalculationVersionId must be a positive integer.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
@@ -131,7 +131,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 * @returns {array} Returns an array containing item objects for each item id found in the database. Hence, the returned array can be
 	 *          empty or shorter as aItemIds if not all item ids can be found.
 	 */
-    this.getItems = async function (aItemIds, iCalculationVersionId, sSessionId, bCompressedResult) {
+    this.getItems = function (aItemIds, iCalculationVersionId, sSessionId, bCompressedResult) {
         oMessageDetails.addCalculationVersionObjs({ id: iCalculationVersionId });
         _.each(aItemIds, function (iItemId) {
             oMessageDetails.addItemObjs({ id: iItemId });
@@ -142,15 +142,15 @@ async function Item($, dbConnection, hQuery, sUserId) {
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
-        var bContainsOnlyNumbers = _.every(aItemIds, async function (iItemId) {
-            return await _.isNumber(iItemId) && iItemId % 1 === 0 && iItemId >= 0;
+        var bContainsOnlyNumbers = _.every(aItemIds,  function (iItemId) {
+            return _.isNumber(iItemId) && iItemId % 1 === 0 && iItemId >= 0;
         });
         if (!bContainsOnlyNumbers) {
             const sLogMessage = 'aItemIds can only contain positive integers.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
         }
-        if (!await _.isNumber(iCalculationVersionId) || iCalculationVersionId < 0) {
+        if (! _.isNumber(iCalculationVersionId) || iCalculationVersionId < 0) {
             const sLogMessage = 'iCalculationVersionId must be a positive integer.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
@@ -190,7 +190,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 */
     this.get = async function (aItemIds, sSessionId, iCvId, bCompressedResult) {
         try {
-            var fnGet = dbConnection.loadProcedure(Procedures.get_items);
+            var fnGet = await dbConnection.loadProcedure(Procedures.get_items);
             var oResult = fnGet(aItemIds, sSessionId, iCvId);
             if (bCompressedResult === true) {
                 return {
@@ -308,17 +308,17 @@ async function Item($, dbConnection, hQuery, sUserId) {
                 let index = 0;
                 for (let i = 0; i <= aItemIds.length / MAX_LIMIT; i++) {
                     let sStmtVar = sStmt + ` and item_id in (${ aItemIds.slice(index, index + MAX_LIMIT).join(',') })`;
-                    aAuditResult = aAuditResult.concat(Array.from(dbConnection.executeQuery(sStmtVar, sSessionId, iCvId)));
+                    aAuditResult = aAuditResult.concat(Array.from( await dbConnection.executeQuery(sStmtVar, sSessionId, iCvId)));
                     index += MAX_LIMIT;
                 }
                 return aAuditResult;
             } else {
                 sStmt += ` and item_id in (${ aItemIds.join(',') })`;
-                const oAuditResult = dbConnection.executeQuery(sStmt, sSessionId, iCvId);
+                const oAuditResult = await dbConnection.executeQuery(sStmt, sSessionId, iCvId);
                 return Array.from(oAuditResult);
             }
         } else {
-            const oAuditResult = dbConnection.executeQuery(sStmt, sSessionId, iCvId);
+            const oAuditResult = await dbConnection.executeQuery(sStmt, sSessionId, iCvId);
             return Array.from(oAuditResult);
         }
 
@@ -439,7 +439,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         const aColumnNames = _.keys(oUpdateSet);
 
         // determine all possible custom fields
-        const aAllCustomFields = await determineAllCustomFields();
+        const aAllCustomFields = determineAllCustomFields();
 
         // determine which custom fields are set in the items
         const aCustomFields = [];
@@ -455,13 +455,13 @@ async function Item($, dbConnection, hQuery, sUserId) {
 
         // update standard fields
         if (aStandardFields.length !== 0) {
-            iUpdatedItem = await updateItemTable(aStandardFields, oItem, sSessionId);
+            iUpdatedItem = updateItemTable(aStandardFields, oItem, sSessionId);
 
         }
 
         // insert or update custom fields
         if (aCustomFields.length !== 0 && bUpdateOnlyStandardFields !== true) {
-            iUpdatedItemExt = await upsertItemExtensionTable(aCustomFields, oItem, sSessionId);
+            iUpdatedItemExt = upsertItemExtensionTable(aCustomFields, oItem, sSessionId);
         }
 
         if (_.has(oItem, 'PREDECESSOR_ITEM_ID')) {
@@ -527,7 +527,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         const aColumnNames = _.keys(oUpdateSet);
 
         // determine all possible custom fields
-        const aAllCustomFields = await determineAllCustomFields();
+        const aAllCustomFields = determineAllCustomFields();
 
         // determine which custom fields are set in the items
         const aCustomFields = [];
@@ -699,7 +699,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         //invoke procedure to set reference versions values	
         try {
             var fnUpdateReferencedCalcVer = dbConnection.loadProcedure(Procedures.update_referenced_calc_version);
-            var oResult = fnUpdateReferencedCalcVer(sSessionId);
+            var oResult = await fnUpdateReferencedCalcVer(sSessionId);
         } catch (e) {
             const sClientMsg = `Error while executing procedure ${ Procedures.update_referenced_calc_version }.`;
             const sServerMsg = `${ sClientMsg } Error: ${ e.message || e.msg }.`;
@@ -799,7 +799,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
             await dbConnection.executeUpdate(sStmt, aInsertValues);
 
             var fnDetermination = dbConnection.loadProcedure(Procedures.value_determination);
-            var oResult = fnDetermination(iCvId, sSessionId, sImportFlag, sReevaluate, false);
+            var oResult = await fnDetermination(iCvId, sSessionId, sImportFlag, sReevaluate, false);
             return {
                 VALUES: Array.slice(oResult.OT_ITEMS),
                 MESSAGES: Array.slice(oResult.OT_MESSAGES)
@@ -905,7 +905,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 
 
             var fnCreate = dbConnection.loadProcedure(Procedures.create_item);
-            var oResult = fnCreate(sSessionId, iCvId, iImport, iSetDefaultValues, iUpdateMasterDataAndPrices);
+            var oResult = await fnCreate(sSessionId, iCvId, iImport, iSetDefaultValues, iUpdateMasterDataAndPrices);
 
         } catch (e) {
             const sClientMsg = 'Error while creating items.';
@@ -950,7 +950,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
                     });
                 }
             });
-            await executeItemMassUpdate(aItems, Tables.item_temporary_ext, sSessionId, aMasterdataCustomFields);
+            executeItemMassUpdate(aItems, Tables.item_temporary_ext, sSessionId, aMasterdataCustomFields);
         }
 
         oResult.OT_CUSTOM_FIELDS_FROM_REQUEST = aCustomFieldItems;
@@ -969,7 +969,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
     this.deleteItems = async function (sSessionId, iCalculationVersionID) {
         oMessageDetails.addCalculationVersionObjs({ id: iCalculationVersionID });
 
-        if (!await _.isNumber(iCalculationVersionID)) {
+        if (! _.isNumber(iCalculationVersionID)) {
             const sLogMessage = 'iCalculationVersionID must be a number.';
             $.trace.error(sLogMessage);
             throw new PlcException(Code.GENERAL_UNEXPECTED_EXCEPTION, sLogMessage, oMessageDetails);
@@ -982,7 +982,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 
         try {
             var fnDelete = dbConnection.loadProcedure(Procedures.delete_items_marked_for_deletion);
-            var oResult = fnDelete(sSessionId, iCalculationVersionID);
+            var oResult = await fnDelete(sSessionId, iCalculationVersionID);
         } catch (e) {
             const sClientMsg = `Error while executing procedure ${ Procedures.delete_items_marked_for_deletion }.`;
             const sServerMsg = `${ sClientMsg } Error message: ${ e.message || e.msg }.`;
@@ -1055,7 +1055,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 
         try {
             var procedure = dbConnection.loadProcedure(Procedures.delete_item);
-            var procresult = procedure(sSessionId, oBodyItem.ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, bDeleteRoot ? 1 : 0);
+            var procresult = await procedure(sSessionId, oBodyItem.ITEM_ID, oBodyItem.CALCULATION_VERSION_ID, bDeleteRoot ? 1 : 0);
 
             result.CALCULATION_VERSION_ID = procresult.OV_CALCULATION_VERSION_ID;
             result.DELETED_ITEM_COUNT = procresult.OV_ITEM_COUNT;
@@ -1108,7 +1108,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         // currently there is no use case, for preserving the active state of substructures from XS; for this reason, it's always set to 0
         // if this changes, the signature of the function can be changed to give the business logic the opportuinity to change it
         const iPreserveSubstructureFlag = 0;
-        var oProcedureResult = fSetActiveStates(iCvId, sSessionId, iPreserveSubstructureFlag);
+        var oProcedureResult = await fSetActiveStates(iCvId, sSessionId, iPreserveSubstructureFlag);
         return oProcedureResult.ITEM_IDS_UPDATED;
     };
 
@@ -1126,7 +1126,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 * @return true if the TRANSACTION_CURRENCY_ID of the item with the given id and calculation version was updated, false otherwise
 	 *
 	 */
-    this.setPriceTransactionCurrencyForAssemblyItems = function (sSessionId, iCalculationVersionId, sPriceTransactionCurrencyId) {
+    this.setPriceTransactionCurrencyForAssemblyItems = async function (sSessionId, iCalculationVersionId, sPriceTransactionCurrencyId) {
 
 
         /**
@@ -1134,7 +1134,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
 		 * fields with currency unit
 		 */
         const fnSet = dbConnection.loadProcedure(Procedures.set_reporting_currency_item_custom_fields);
-        fnSet(sSessionId, iCalculationVersionId, sPriceTransactionCurrencyId);
+        await fnSet(sSessionId, iCalculationVersionId, sPriceTransactionCurrencyId);
 
     };
 
@@ -1182,10 +1182,10 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 *
 	 */
 
-    this.getPricesForItem = function (sSessionId, iCalculationVersionId, iItemId, sSessionLanguage) {
+    this.getPricesForItem =async function (sSessionId, iCalculationVersionId, iItemId, sSessionLanguage) {
         var oResultMasterdata = {};
         var fnReadProcedure = dbConnection.loadProcedure(Procedures.get_prices_for_item);
-        var oReadResult = fnReadProcedure(sSessionId, iCalculationVersionId, iItemId, sSessionLanguage);
+        var oReadResult = await fnReadProcedure(sSessionId, iCalculationVersionId, iItemId, sSessionLanguage);
 
         oResultMasterdata[BusinessObjectsEntities.MATERIAL_PRICE_ENTITIES] = Array.slice(oReadResult.OT_ALL_PRICES_MATERIAL);
         oResultMasterdata[BusinessObjectsEntities.ACTIVITY_PRICE_ENTITIES] = Array.slice(oReadResult.OT_ALL_PRICES_ACTIVITY);
@@ -1236,8 +1236,8 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 * @param aMaterialIds array of the material ids to search for
      * @return ResultSet object containing the found entities.
      */
-    this.getExistingMaterialBaseUomIds = function (dMasterdataTimestamp, aMaterialIds) {
-        return dbConnection.executeQuery(`
+    this.getExistingMaterialBaseUomIds = async function (dMasterdataTimestamp, aMaterialIds) {
+        return await dbConnection.executeQuery(`
             select material_id, base_uom_id from "${ Tables.material }"
             where   _valid_from <= ?
 				and (_valid_to > ? or _valid_to is null)
@@ -1263,12 +1263,12 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	 *
 	 * @return object with item category -> properties / values described above
 	 */
-    this.getFormulasAndRollupsForStandardAndCustomFields = function () {
+    this.getFormulasAndRollupsForStandardAndCustomFields = async function () {
         const aStandardFieldsWithFormulas = Array.from(MapStandardFieldsWithFormulas.keys());
         const sAllStandardFields = aStandardFieldsWithFormulas.map(field => "'" + field + "'").join(',');
 
         // get all formula-overwritable standard fields and all custom fields names except UNIT fields
-        const oAllFields = dbConnection.executeQuery(`select distinct meta.column_id, attr.item_category_id, rollup_type_id, is_formula_used 
+        const oAllFields = await dbConnection.executeQuery(`select distinct meta.column_id, attr.item_category_id, rollup_type_id, is_formula_used 
 			from "${ Tables.metadata }" meta
 				inner join "${ Tables.metadataItemAttributes }" attr 
 					on 	meta.column_id = attr.column_id 
@@ -1306,8 +1306,8 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	*
 	* @return Array containing the ids.
 	*/
-    this.getParentItemIds = function (iCvId, sSessionId) {
-        const oResult = dbConnection.executeQuery(`select distinct parent_item_id
+    this.getParentItemIds = async function (iCvId, sSessionId) {
+        const oResult = await dbConnection.executeQuery(`select distinct parent_item_id
 			from "${ Tables.item_temporary }"
 			where 	calculation_version_id = ?
 					and session_id = ?
@@ -1324,9 +1324,9 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	*/
     this.getParentsForItems = function (iCalculationVersionId, iVersionRootItemId, aListOfItems) {
 
-        const parentsForItemsWithDuplicates = function (iCalculationVersionId, iVersionRootItemId, aListOfItems) {
+        const parentsForItemsWithDuplicates = async function (iCalculationVersionId, iVersionRootItemId, aListOfItems) {
 
-            const oResult = dbConnection.executeQuery(`select distinct parent_item_id 
+            const oResult = await dbConnection.executeQuery(`select distinct parent_item_id 
 				from "${ Tables.item }"
 				where calculation_version_id = ?
 				and parent_item_id IS NOT NULL
@@ -1364,7 +1364,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
         }
         // item_id list in the where condition cannot be passed using SQL parameters ("?")
         // because there is a HANA limit in the maximum number of parameters.
-        const oResult = dbConnection.executeQuery(`select distinct item_id from "${ Tables.item_temporary }"
+        const oResult = await dbConnection.executeQuery(`select distinct item_id from "${ Tables.item_temporary }"
 			 where calculation_version_id = ? and session_id = ? and is_deleted = 0
 			 and item_id in (${ aItemIds.join(',') })`, iCalculationVersionId, sSessionId);
 
@@ -1379,10 +1379,10 @@ async function Item($, dbConnection, hQuery, sUserId) {
 	* @param iCalculationVersionId {number} calculation version id
 	* @return                      {array}  array of all valid and existing item_ids for category selected
 	*/
-    this.getItemIdsOfCategory = (iItemCategory, iCalculationVersionId) => {
+    this.getItemIdsOfCategory = async (iItemCategory, iCalculationVersionId) => {
         const sStmt = ` SELECT ITEM_ID FROM "${ Tables.item }"
 					WHERE CALCULATION_VERSION_ID = ? and ITEM_CATEGORY_ID = ?`;
-        return Array.from(dbConnection.executeQuery(sStmt, iCalculationVersionId, iItemCategory));
+        return Array.from( await dbConnection.executeQuery(sStmt, iCalculationVersionId, iItemCategory));
     };
 
     /**
@@ -1421,7 +1421,7 @@ async function Item($, dbConnection, hQuery, sUserId) {
     this.getItemCategories = async function () {
         try {
             const sStmt = ` SELECT ITEM_CATEGORY_ID, CHILD_ITEM_CATEGORY_ID FROM "${ Tables.item_category }"`;
-            const oResult = helpers.transposeResultArray(dbConnection.executeQuery(sStmt));
+            const oResult = helpers.transposeResultArray( await dbConnection.executeQuery(sStmt));
             return _.zipObject(oResult.CHILD_ITEM_CATEGORY_ID, oResult.ITEM_CATEGORY_ID);
         } catch (e) {
             const sClientMsg = 'Error while getting item categories.';

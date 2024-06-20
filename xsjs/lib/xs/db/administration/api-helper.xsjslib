@@ -17,7 +17,7 @@ const MessageOperation = MessageLibrary.Operation;
 /**
  * Helper to check if table name is not empty.
  */
-async function checkTableNameNonEmpty(sTableName) {
+function checkTableNameNonEmpty(sTableName) {
     if (sTableName === '') {
         const sLogMessage = `Table name is not specified.`;
         const oMessageDetails = new MessageDetails();
@@ -29,7 +29,7 @@ async function checkTableNameNonEmpty(sTableName) {
 /**
  * Helper to check if the column and value arrays have the same length.
  */
-async function checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns) {
+function checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns) {
     if (aKeyPlcTableColumns.length !== aKeyPlcValuesColumns.length) {
         const sLogMessage = `Different lenghts for columns and values arrays.`;
         const oMessageDetails = new MessageDetails();
@@ -45,12 +45,12 @@ async function checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcVa
  * @param   {string} sFilter - filter string(e.g:(CONTROLLING_AREA=123 and COMPANY_CODE_ID=2345)) retrieved from url parameter filter(e.g: filter=CONTROLLING_AREA=123 and COMPANY_CODE_ID=2345)
  * @returns {object} oFilter - filter object (e.g.: {"CONTROLLING_AREA":"123","COMPANY_CODE_ID":"2345"})
  */
-async function getFilterObjectFromFilterString(sFilter, aMetadata) {
+function getFilterObjectFromFilterString(sFilter, aMetadata) {
     var oFilter = {};
     var oColumns = [];
     var oValues = [];
 
-    var oValidationUtils = await new BusinessObjectValidatorUtils();
+    var oValidationUtils = new BusinessObjectValidatorUtils();
 
     if (helpers.isNullOrUndefined(sFilter)) {
         return oFilter;
@@ -81,7 +81,7 @@ async function getFilterObjectFromFilterString(sFilter, aMetadata) {
 
 
 
-async function createResponse(oRecord, section, e, operation, oResultObject) {
+function createResponse(oRecord, section, e, operation, oResultObject) {
     var oResult = {};
     var aEntity = [];
     var entitySection = {};
@@ -138,8 +138,8 @@ function getColumnKeyValues(aKeyPlcTableColumns, oObject) {
 
 
 
-async function checkColumns(oEntry, aMetadata) {
-    var oValidationUtils = await new BusinessObjectValidatorUtils();
+function checkColumns(oEntry, aMetadata) {
+    var oValidationUtils = new BusinessObjectValidatorUtils();
 
     if (!_.isObject(oEntry)) {
         const oMessageDetails = new MessageDetails();
@@ -197,7 +197,7 @@ async function checkEntry(aEntry, sEntryType) {
 
 
 
-async function checkMandatoryProperties(oObject, aMandatoryProperties) {
+function checkMandatoryProperties(oObject, aMandatoryProperties) {
 
     let aObjMissingProperties = [];
     let aObjNullOrEmptyProperties = [];
@@ -248,8 +248,8 @@ async function findEntryInTable(sTableName, aKeyPlcTableColumns, aKeyPlcValuesCo
     var aValues = [];
     var aStmtBuilder = [];
 
-    await checkTableNameNonEmpty(sTableName);
-    await checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns);
+    checkTableNameNonEmpty(sTableName);
+    checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns);
 
     aStmtBuilder.push('select * from "' + sTableName + '" WHERE ');
     _.each(aKeyPlcTableColumns, function (sColumnName, iIndex) {
@@ -294,8 +294,8 @@ async function findValidEntriesInTable(sTableName, aKeyPlcTableColumns, aKeyPlcV
         isVersioned = true;
     }
 
-    await checkTableNameNonEmpty(sTableName);
-    await checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns);
+    checkTableNameNonEmpty(sTableName);
+    checkColumnAndValueLengthsAreEqual(aKeyPlcTableColumns, aKeyPlcValuesColumns);
 
     aStmtBuilder.push('select * from "' + sTableName + '" WHERE ');
 
@@ -548,7 +548,7 @@ async function removeRow(oObject, sMasterDataDate, oConfiguration, hQuery) {
     var aPartialKeyPlcTableColumns = oConfiguration.aPartialKeyPlcTableColumns;
     var aKeyPlcTableColumns = aPartialKeyPlcTableColumns.concat(['_VALID_FROM']);
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
     var aKeyPlcTableColumnValues = aPartialKeyPlcTableColumnValues.concat([oObject['_VALID_FROM']]);
 
 
@@ -558,7 +558,7 @@ async function removeRow(oObject, sMasterDataDate, oConfiguration, hQuery) {
     else
         aMandatoryProperties = aKeyPlcTableColumns;
 
-    await checkMandatoryProperties(oObject, aMandatoryProperties);
+    checkMandatoryProperties(oObject, aMandatoryProperties);
 
 
     var aEntryToBeDeleted = await findEntryInTable(sTableName, aKeyPlcTableColumns, aKeyPlcTableColumnValues, hQuery);
@@ -628,7 +628,7 @@ async function removeTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     var sPlcTextTableName = Resources[oConfiguration.sObjectName].dbobjects.plcTextTable;
     var aPartialKeyPlcTableColumns = oConfiguration.aPartialKeyPlcTableColumns;
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
     var aPartialKeyPlcTextTableColumns = aPartialKeyPlcTableColumns.concat(['LANGUAGE']);
     var aPartialKeyPlcTextTableColumnValues = aPartialKeyPlcTableColumnValues.concat([oTextObject['LANGUAGE']]);
     var aKeyPlcTextTableColumns = aPartialKeyPlcTableColumns.concat([
@@ -647,7 +647,7 @@ async function removeTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     else
         aMandatoryProperties = aKeyPlcTextTableColumns;
 
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     var aEntryToBeDeleted = await findEntryInTable(sPlcTextTableName, aKeyPlcTextTableColumns, aKeyPlcTextTableColumnValues, hQuery);
@@ -698,7 +698,7 @@ async function checkObjectIsInUse(oObject, sMasterDataDate, oConfiguration, hQue
     var aObjUsedInBusinessObjects = [];
 
     aTableColumnsInMainObject = oConfiguration.aPartialKeyPlcTableColumns;
-    var aTableValuesInMainObject = await getColumnKeyValues(aTableColumnsInMainObject, oObject);
+    var aTableValuesInMainObject = getColumnKeyValues(aTableColumnsInMainObject, oObject);
 
     _.each(oConfiguration.UsedInBusinessObjects, async function (oBusinessObjectDetails, iIndex) {
         var sTableName = '';
@@ -803,7 +803,7 @@ async function insertTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
     var aTextColumns = oConfiguration.aTextColumns;
     var aMandatoryTextColumns = oConfiguration.aMandatoryTextColumns;
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
     var aPartialKeyPlcTextTableColumns = aPartialKeyPlcTableColumns.concat(['LANGUAGE']);
     var aPartialKeyPlcTextTableColumnValues = aPartialKeyPlcTableColumnValues.concat([oTextObject['LANGUAGE']]);
 
@@ -820,7 +820,7 @@ async function insertTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     if (_.isArray(aMandatoryTextColumns))
         aMandatoryProperties = _.union(aMandatoryProperties, aMandatoryTextColumns);
 
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     var aLanguages = await getMaintainableLanguages(sMasterDataDate, hQuery);
@@ -902,7 +902,7 @@ async function insertRow(oObject, sMasterDataDate, oConfiguration, hQuery, hQuer
     var aPartialKeyPlcTableColumns = oConfiguration.aPartialKeyPlcTableColumns;
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
     var aKeyErpTableColumns = oConfiguration.aKeyErpTableColumns;
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
 
 
     var aMandatoryProperties = [];
@@ -914,7 +914,7 @@ async function insertRow(oObject, sMasterDataDate, oConfiguration, hQuery, hQuer
     if (oConfiguration.aFieldsNotNull)
         aMandatoryProperties = _.union(aMandatoryProperties, oConfiguration.aFieldsNotNull);
 
-    await checkMandatoryProperties(oObject, aMandatoryProperties);
+    checkMandatoryProperties(oObject, aMandatoryProperties);
 
 
     var aFoundPlcRecords = await findValidEntriesInTable(sPlcTableName, aPartialKeyPlcTableColumns, aPartialKeyPlcTableColumnValues, sMasterDataDate, hQuery);
@@ -1006,7 +1006,7 @@ async function copyDataFromErp(aKeyFieldsPlcTable, aKeyFieldsValuesPlcTable, sMa
     var aErpTextEntries = [];
     if (oConfiguration.aKeyErpTextTableColumnsException) {
 
-        var aValues = await getColumnKeyValues(oConfiguration.aKeyErpTextTableColumnsException, aErpMainEntries[0]);
+        var aValues = getColumnKeyValues(oConfiguration.aKeyErpTextTableColumnsException, aErpMainEntries[0]);
         aErpTextEntries = await findEntryInTable(sErpTextTableName, oConfiguration.aKeyErpTextTableColumnsException, aValues, hQueryRepl);
     } else {
         aErpTextEntries = await findEntryInTable(sErpTextTableName, aKeyErpTableColumns, aKeyFieldsValuesPlcTable, hQueryRepl);
@@ -1019,11 +1019,11 @@ async function copyDataFromErp(aKeyFieldsPlcTable, aKeyFieldsValuesPlcTable, sMa
 
         var aPlcFields = [];
         if (oConfiguration.aKeyErpTextTableColumnsException)
-            aPlcFields = await getPlcFields(oConfiguration.aKeyErpTextTableColumnsException, oMappingMainErpPlc);
+            aPlcFields = getPlcFields(oConfiguration.aKeyErpTextTableColumnsException, oMappingMainErpPlc);
         else
             aPlcFields = aKeyFieldsPlcTable;
         var aPartialKeyPlcTextTableColumns = aPlcFields.concat(['LANGUAGE']);
-        var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTextTableColumns, oPlcTextEntry);
+        var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTextTableColumns, oPlcTextEntry);
         var aPlcNewerTextEntries = await findNewerEntriesInTable(sPlcTextTableName, aPartialKeyPlcTextTableColumns, aPartialKeyPlcTableColumnValues, sMasterDataDate, hQuery);
         if (aPlcNewerTextEntries.length !== 0) {
             sTextValidToTimestamp = aPlcNewerTextEntries[0]._VALID_FROM;
@@ -1129,7 +1129,7 @@ async function updateRow(oObject, sMasterDataDate, oConfiguration, hQuery, helpe
     var aPartialKeyPlcTableColumns = oConfiguration.aPartialKeyPlcTableColumns;
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
     var aKeyPlcTableColumns = aPartialKeyPlcTableColumns.concat(['_VALID_FROM']);
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oObject);
     var aKeyPlcTableColumnValues = aPartialKeyPlcTableColumnValues.concat([oObject['_VALID_FROM']]);
 
 
@@ -1142,7 +1142,7 @@ async function updateRow(oObject, sMasterDataDate, oConfiguration, hQuery, helpe
     if (oConfiguration.aFieldsNotNull)
         aMandatoryProperties = _.union(aMandatoryProperties, oConfiguration.aFieldsNotNull);
 
-    await checkMandatoryProperties(oObject, aMandatoryProperties);
+    checkMandatoryProperties(oObject, aMandatoryProperties);
 
 
     var aEntryToBeUpdated = await findEntryInTable(sTableName, aKeyPlcTableColumns, aKeyPlcTableColumnValues, hQuery);
@@ -1151,7 +1151,7 @@ async function updateRow(oObject, sMasterDataDate, oConfiguration, hQuery, helpe
 
 
     if (oConfiguration.aFieldsNotChangeble) {
-        await checkNotChangebleFields(oObject, aEntryToBeUpdated[0], oConfiguration.aFieldsNotChangeble);
+        checkNotChangebleFields(oObject, aEntryToBeUpdated[0], oConfiguration.aFieldsNotChangeble);
     }
 
 
@@ -1233,7 +1233,7 @@ async function updateTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     var aPartialKeyPlcTableColumns = oConfiguration.aPartialKeyPlcTableColumns;
     var aPartialKeyPlcNotMandatory = oConfiguration.aPartialKeyPlcNotMandatory;
     var aMandatoryTextColumns = oConfiguration.aMandatoryTextColumns;
-    var aPartialKeyPlcTableColumnValues = await getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
+    var aPartialKeyPlcTableColumnValues = getColumnKeyValues(aPartialKeyPlcTableColumns, oTextObject);
     var aPartialKeyPlcTextTableColumns = aPartialKeyPlcTableColumns.concat(['LANGUAGE']);
     var aPartialKeyPlcTextTableColumnValues = aPartialKeyPlcTableColumnValues.concat([oTextObject['LANGUAGE']]);
     var aKeyPlcTextTableColumns = aPartialKeyPlcTableColumns.concat([
@@ -1255,7 +1255,7 @@ async function updateTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuer
     if (_.isArray(aMandatoryTextColumns))
         aMandatoryProperties = _.union(aMandatoryProperties, aMandatoryTextColumns);
 
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     var aEntryToBeUpdated = await findEntryInTable(sPlcTextTableName, aKeyPlcTextTableColumns, aKeyPlcTextTableColumnValues, hQuery);
@@ -1367,7 +1367,7 @@ async function copyUnchangedRows(aChangedObjectsKeys, oConfiguration, sMasterDat
         texts: []
     };
 
-    var oWhereCondition = await createWhereConditionWithValidEntriesNotChanged(aChangedObjectsKeys, sMasterDataDate);
+    var oWhereCondition = createWhereConditionWithValidEntriesNotChanged(aChangedObjectsKeys, sMasterDataDate);
 
 
     var aMainUnchangedEntries = await findEntriesInTable(Resources[oConfiguration.sObjectName].dbobjects.plcTable, oWhereCondition, hQuery);
@@ -1417,7 +1417,7 @@ async function findEntriesInTable(sTableName, oWhereCondition, hQuery) {
     var aStmtBuilder = [];
     var aFoundEntries = [];
 
-    await checkTableNameNonEmpty(sTableName);
+    checkTableNameNonEmpty(sTableName);
 
     aStmtBuilder.push('select * from "' + sTableName + '" WHERE ');
     aStmtBuilder = aStmtBuilder.concat(oWhereCondition.conditions);
@@ -1513,10 +1513,10 @@ async function checkNotVersionedMainRowToInsert(oObject, sMasterDataDate, oConfi
     var aCompleteKeyPlcTableColumns = oConfiguration.aCompleteKeyPlcTableColumns;
     var aMandatoryMainColumns = oConfiguration.aMandatoryMainColumns;
 
-    var aCompleteKeyPlcTableColumnValues = await getColumnKeyValues(aCompleteKeyPlcTableColumns, oObject);
+    var aCompleteKeyPlcTableColumnValues = getColumnKeyValues(aCompleteKeyPlcTableColumns, oObject);
 
 
-    await checkMandatoryProperties(oObject, aMandatoryMainColumns);
+    checkMandatoryProperties(oObject, aMandatoryMainColumns);
 
 
     var aFoundPlcRecords = await findValidEntriesInTable(sPlcTableName, aCompleteKeyPlcTableColumns, aCompleteKeyPlcTableColumnValues, sMasterDataDate, hQuery, false);
@@ -1562,7 +1562,7 @@ async function checkNotVersionedTextRowToInsert(oTextObject, sMasterDataDate, oC
     var sPlcTextTableName = Resources[oConfiguration.sObjectName].dbobjects.plcTextTable;
     var aTextColumns = oConfiguration.aTextColumns;
     var aCompleteKeyPlcTableColumns = oConfiguration.aCompleteKeyPlcTableColumns;
-    var aCompleteKeyPlcTableColumnValues = await getColumnKeyValues(aCompleteKeyPlcTableColumns, oTextObject);
+    var aCompleteKeyPlcTableColumnValues = getColumnKeyValues(aCompleteKeyPlcTableColumns, oTextObject);
     var aCompleteKeyPlcTextTableColumns = aCompleteKeyPlcTableColumns.concat(['LANGUAGE']);
     var aCompleteKeyPlcTextTableColumnValues = aCompleteKeyPlcTableColumnValues.concat([oTextObject['LANGUAGE']]);
 
@@ -1570,7 +1570,7 @@ async function checkNotVersionedTextRowToInsert(oTextObject, sMasterDataDate, oC
     aMandatoryProperties = _.union(aMandatoryProperties, aTextColumns);
 
 
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     var aLanguages = await getMaintainableLanguages(sMasterDataDate, hQuery);
@@ -1681,7 +1681,7 @@ async function checkNotVersionedMainRowToRemove(oObject, sMasterDataDate, oConfi
 
     var aMandatoryProperties = [];
     aMandatoryProperties = _.union(aCompleteKeyPlcTableColumns, ['LAST_MODIFIED_ON']);
-    await checkMandatoryProperties(oObject, aMandatoryProperties);
+    checkMandatoryProperties(oObject, aMandatoryProperties);
 
 
     await checkNotVersionedEntryHasConflicts(oObject, sMasterDataDate, oConfiguration, hQuery, AdministrationObjType.MAIN_OBJ);
@@ -1704,7 +1704,7 @@ async function checkNotVersionedMainRowToRemove(oObject, sMasterDataDate, oConfi
 async function removeNotVersionedMainRow(oObject, sMasterDataDate, oConfiguration, hQuery) {
     var sTableName = Resources[oConfiguration.sObjectName].dbobjects.plcTable;
     var aKeyPlcTableColumns = oConfiguration.aCompleteKeyPlcTableColumns;
-    var aKeyPlcValuesColumns = await getColumnKeyValues(aKeyPlcTableColumns, oObject);
+    var aKeyPlcValuesColumns = getColumnKeyValues(aKeyPlcTableColumns, oObject);
     var iRemove = await removeRowsFromTable(sTableName, aKeyPlcTableColumns, aKeyPlcValuesColumns, sMasterDataDate, hQuery);
     var sTextTableName = Resources[oConfiguration.sObjectName].dbobjects.plcTextTable;
     var iRemoveTexts = await removeRowsFromTable(sTextTableName, aKeyPlcTableColumns, aKeyPlcValuesColumns, sMasterDataDate, hQuery);
@@ -1726,7 +1726,7 @@ async function checkNotVersionedTextRowToRemove(oTextObject, sMasterDataDate, oC
 
     var aMandatoryProperties = [];
     aMandatoryProperties = _.union(aKeyPlcTableColumns, ['LAST_MODIFIED_ON']);
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     await checkNotVersionedEntryHasConflicts(oTextObject, sMasterDataDate, oConfiguration, hQuery, AdministrationObjType.TEXT_OBJ);
@@ -1744,7 +1744,7 @@ async function checkNotVersionedTextRowToRemove(oTextObject, sMasterDataDate, oC
 async function removeNotVersionedTextRow(oTextObject, sMasterDataDate, oConfiguration, hQuery) {
     var sTextTableName = Resources[oConfiguration.sObjectName].dbobjects.plcTextTable;
     var aKeyPlcTableColumns = oConfiguration.aCompleteKeyPlcTableColumns.concat(['LANGUAGE']);
-    var aKeyPlcValuesColumns = await getColumnKeyValues(aKeyPlcTableColumns, oTextObject);
+    var aKeyPlcValuesColumns = getColumnKeyValues(aKeyPlcTableColumns, oTextObject);
     var iResult = await removeRowsFromTable(sTextTableName, aKeyPlcTableColumns, aKeyPlcValuesColumns, sMasterDataDate, hQuery);
 }
 
@@ -1793,7 +1793,7 @@ async function checkNotVersionedMainRowToUpdate(oObject, sMasterDataDate, oConfi
 
     var aMandatoryProperties = [];
     aMandatoryProperties = _.union(aMandatoryMainColumns, ['LAST_MODIFIED_ON']);
-    await checkMandatoryProperties(oObject, aMandatoryProperties);
+    checkMandatoryProperties(oObject, aMandatoryProperties);
 
 
     await checkNotVersionedEntryHasConflicts(oObject, sMasterDataDate, oConfiguration, hQuery, AdministrationObjType.MAIN_OBJ);
@@ -1834,7 +1834,7 @@ async function checkNotVersionedTextRowToUpdate(oTextObject, sMasterDataDate, oC
 
     var aMandatoryProperties = [];
     aMandatoryProperties = _.union(aKeyPlcTableColumns, ['LAST_MODIFIED_ON']);
-    await checkMandatoryProperties(oTextObject, aMandatoryProperties);
+    checkMandatoryProperties(oTextObject, aMandatoryProperties);
 
 
     await checkNotVersionedEntryHasConflicts(oTextObject, sMasterDataDate, oConfiguration, hQuery, AdministrationObjType.TEXT_OBJ);
@@ -1873,7 +1873,7 @@ async function updateNotVersionedTextRow(oTextObject, sMasterDataDate, oConfigur
 
 
 async function updateRowInTable(sPlcTableName, oObject, aKeyPlcTableColumns, sMasterDataDate, hQuery, hQueryRepl, helper) {
-    var aKeyPlcValuesColumns = await getColumnKeyValues(aKeyPlcTableColumns, oObject);
+    var aKeyPlcValuesColumns = getColumnKeyValues(aKeyPlcTableColumns, oObject);
     var oWhereCondition = _.zipObject(aKeyPlcTableColumns, aKeyPlcValuesColumns);
 
     helper.setHQuery(hQuery);
@@ -1917,7 +1917,7 @@ async function checkNotVersionedEntryHasConflicts(oObject, sMasterDataDate, oCon
         aKeyPlcTableColumns = oConfiguration.aCompleteKeyPlcTableColumns;
     }
 
-    var aKeyPlcValuesColumns = await getColumnKeyValues(aKeyPlcTableColumns, oObject);
+    var aKeyPlcValuesColumns = getColumnKeyValues(aKeyPlcTableColumns, oObject);
 
 
     var aEntryToBeMaintained = await findValidEntriesInTable(sTableName, aKeyPlcTableColumns, aKeyPlcValuesColumns, sMasterDataDate, hQuery, false);
@@ -1966,8 +1966,8 @@ this.checkObjectExists = async function (oObject, sMasterDataDate, sBusinessObje
 
     var aKeyPlcTableColumns = Resources[sBusinessObjectName].configuration.aKeyColumns;
 
-    if (!await areAllFieldsEmpty(aKeyPlcTableColumns, oObject)) {
-        var aFieldsValuesMainPlcTable = await getColumnKeyValues(aKeyPlcTableColumns, oObject);
+    if (! areAllFieldsEmpty(aKeyPlcTableColumns, oObject)) {
+        var aFieldsValuesMainPlcTable = getColumnKeyValues(aKeyPlcTableColumns, oObject);
         var aFoundPlcRecords = await findValidEntriesInTable(Resources[sBusinessObjectName].dbobjects.plcTable, aKeyPlcTableColumns, aFieldsValuesMainPlcTable, sMasterDataDate, hQuery, Resources[sBusinessObjectName].configuration.IsVersioned);
         if (aFoundPlcRecords.length === 0) {
             const oMessageDetails = new MessageDetails();

@@ -17,7 +17,7 @@ module.exports.GlobalSearch = function ($) {
         var iTop = aParameters.top;
         var oBody = {};
 
-        oBody.GLOBAL_SEARCH = oPersistency.GlobalSearch.get(sSortedColumnId, sSortedDirection, sFilter, sType, iTop, sUserId);
+        oBody.GLOBAL_SEARCH = await oPersistency.GlobalSearch.get(sSortedColumnId, sSortedDirection, sFilter, sType, iTop, sUserId);
 
         oServiceOutput.setBody(oBody);
     };

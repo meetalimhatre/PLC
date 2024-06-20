@@ -46,7 +46,7 @@ function Session($, dbConnection, hQuery) {
      * @returns {string} sessionData.language - the language defined by the user for the session
      */
 
-    this.getSessionDetails = async function (sSessionId, sUserId) {
+    this.fgetSessionDetails = async function (sSessionId, sUserId) {
         oMessageDetails.addUserObj({ id: sUserId });
 
         if (!_.isString(sSessionId)) {
@@ -346,7 +346,7 @@ function Session($, dbConnection, hQuery) {
 		                select CALCULATION_ID from "${ Tables.calculation_version_temporary }"
 		           )`);
 
-        var bItemExtExists = dbConnection.executeQuery(`select table_name from "SYS"."TABLES" where schema_name=CURRENT_SCHEMA and table_name=? and is_user_defined_type=?`, Tables.item_temporary_ext, 'FALSE').length === 1;
+        var bItemExtExists = await dbConnection.executeQuery(`select table_name from "SYS"."TABLES" where schema_name=CURRENT_SCHEMA and table_name=? and is_user_defined_type=?`, Tables.item_temporary_ext, 'FALSE').length === 1;
         if (bItemExtExists) {
             await dbConnection.executeUpdate(`delete from "${ Tables.item_temporary_ext }" where SESSION_ID not in (select SESSION_ID FROM "${ Tables.session }")`);
         }

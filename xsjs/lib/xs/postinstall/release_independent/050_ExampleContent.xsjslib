@@ -1,19 +1,19 @@
 const whoAmI = 'sap.plc.init:050_ExampleContent';
 
-async function check(oConnection) {
+function check(oConnection) {
     return true;
 }
 
 async function run(oConnection) {
     console.log('start insert sample data');
-    var procedure = oConnection.loadProcedure('sap.plc.init::050_ExampleContent');
-    procedure();
+    var procedure = await oConnection.loadProcedure('sap.plc.init::050_ExampleContent');
+    await procedure();
     console.log('finish insert sample data');
     console.log('start get calculation version');
     var calVersionId = await oConnection.executeQuery(`SELECT CALCULATION_VERSION_ID FROM "sap.plc.db::basis.t_calculation_version"`);
     if (calVersionId !== null && calVersionId.length) {
         try {
-            procedure = oConnection.loadProcedure(`sap.plc.db.calcengine.procedures::p_calculate_saved_calculation_version`);
+            procedure = await  oConnection.loadProcedure(`sap.plc.db.calcengine.procedures::p_calculate_saved_calculation_version`);
             calVersionId.forEach(function (versionId) {
                 procedure(versionId['CALCULATION_VERSION_ID']);
             });
@@ -30,7 +30,7 @@ async function run(oConnection) {
     return true;
 }
 
-async function clean(oConnection) {
+function clean(oConnection) {
 
     //The Run is either committed as a unit or rolled back, hence their is no dirty data.
     return true;

@@ -24,7 +24,7 @@ sSessionId = sUserId = $.getPlcUsername();
 
 var Procedures = Object.freeze({ component_split_read: 'sap.plc.db.administration.procedures::p_component_split_read' });
 
-async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
+function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
     this.helper = new Helper($, hQuery, dbConnection);
     var sBusinessObjectName = BusinessObjectTypes.ComponentSplit;
     var sBusinessObjectNameCostEl = BusinessObjectTypes.ComponentSplitAccountGroup;
@@ -97,7 +97,7 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
 
         try {
             var procedure = dbConnection.loadProcedure(Procedures.component_split_read);
-            var result = procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring, noRecords, noSkipRecords);
+            var result = await procedure(sLanguage, sMasterDataDate, sTextFromAutocomplete, sSQLstring, noRecords, noSkipRecords);
 
             oReturnObject[BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES] = Array.slice(result.OT_COMPONENT_SPLIT);
 
@@ -140,27 +140,27 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
             aMetadataFields = this.metadata.getMetadataFields(sBusinessObjectName, sBusinessObjectName, null);
         }
 
-        _.each(aBatchMainItems, async function (oRecord) {
+        _.each(aBatchMainItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oResultDelete = that.removeComponentSplitRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES].push(oResultDelete);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.DELETE, oResult);
             }
         });
 
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES] = [];
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultDelete = that.removeComponentSplitTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES].push(oTextResultDelete);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.DELETE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.DELETE, oResult);
             }
         });
 
@@ -267,27 +267,27 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
             aMetadataFields = this.metadata.getMetadataFields(sBusinessObjectName, sBusinessObjectName, null);
         }
 
-        _.each(aBatchMainItems, async function (oRecord) {
+        _.each(aBatchMainItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oMainResultInsert = that.insertComponentSplitRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES].push(oMainResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.CREATE, oResult);
             }
         });
 
         var aBatchTextItems = oBatchItems[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES];
         oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES] = [];
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultInsert = that.insertComponentSplitTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES].push(oTextResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.CREATE, oResult);
             }
         });
 
@@ -299,7 +299,7 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
                 oResult.entities[BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES].push(oAccGrResultInsert);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES, e, MessageOperation.CREATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES, e, MessageOperation.CREATE, oResult);
             }
         });
 
@@ -338,7 +338,7 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
     this.insertSelectedAccountGroupsRow = async function (oCostElGrCostComp, sMasterDataDate) {
         const sCommonLogMessage = 'Inconsistent or missing data for Account Group.';
 
-        var aFieldsValuesMainPlcTable = await apiHelpers.getColumnKeyValues(oConfigurationCostEl.aPartialKeyPlcTableColumns, oCostElGrCostComp);
+        var aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(oConfigurationCostEl.aPartialKeyPlcTableColumns, oCostElGrCostComp);
         var aFoundCostElGroupRecords = await apiHelpers.findValidEntriesInTable(Resources[sBusinessObjectNameCostElGroup].dbobjects.plcTable, [oConfigurationCostEl.aPartialKeyPlcTableColumns[0]], [aFieldsValuesMainPlcTable[0]], sMasterDataDate, hQuery);
         if (aFoundCostElGroupRecords.length === 0) {
             const oMessageDetails = new MessageDetails();
@@ -370,12 +370,12 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
 
     };
 
-    this.checkCreateReferenceObjects = async function (oComponentSplit, sMasterDataDate) {
+    this.checkCreateReferenceObjects = function (oComponentSplit, sMasterDataDate) {
 
         //take each referenced object      	
         var aFieldsMainPlcTable = ['CONTROLLING_AREA_ID'];//name in t_component_split
         var aKeyFieldsRefObjectPlcTable = ['CONTROLLING_AREA_ID'];//name in t_controlling_area  
-        var aFieldsValuesMainPlcTable = await apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oComponentSplit);
+        var aFieldsValuesMainPlcTable = apiHelpers.getColumnKeyValues(aFieldsMainPlcTable, oComponentSplit);
         var oControllingArea = _.zipObject(aKeyFieldsRefObjectPlcTable, aFieldsValuesMainPlcTable);
         apiHelpers.checkObjectExists(oControllingArea, sMasterDataDate, BusinessObjectTypes.ControllingArea, hQuery);
 
@@ -409,7 +409,7 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
         // for update, the component_split_table cannot be updated, only the component_split_account_group table
         // the decision was that we deactivate all the component_split_account_group records for the component_split_id
         // and insert them again in the table with a new _VALID_FROM date
-        _.each(aBatchMainItems, async function (oRecord) {
+        _.each(aBatchMainItems, function (oRecord) {
             try {
                 //apiHelpers.checkColumns(oRecord,aMetadataFields);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES].push(oRecord);
@@ -418,28 +418,28 @@ async function ComponentSplit(dbConnection, hQuery, hQueryRepl) {
                 }
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_ENTITIES, e, MessageOperation.UPDATE, oResult);
             }
         });
 
-        _.each(aBatchTextItems, async function (oRecord) {
+        _.each(aBatchTextItems, function (oRecord) {
             try {
-                await apiHelpers.checkColumns(oRecord, aMetadataFields);
+                apiHelpers.checkColumns(oRecord, aMetadataFields);
                 var oTextResultUpdate = that.updateComponentSplitTextRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES].push(oTextResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.COMPONENT_SPLIT_TEXT_ENTITIES, e, MessageOperation.UPDATE, oResult);
             }
         });
 
-        _.each(aBatchAccGrItems, async function (oRecord) {
+        _.each(aBatchAccGrItems, function (oRecord) {
             try {
                 var oAccGrResultUpdate = that.insertSelectedAccountGroupsRow(oRecord, sMasterDataDate);
                 oResult.entities[BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES].push(oAccGrResultUpdate);
             } catch (e) {
                 oResult.hasErrors = true;
-                await apiHelpers.createResponse(oRecord, BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES, e, MessageOperation.UPDATE, oResult);
+                apiHelpers.createResponse(oRecord, BusinessObjectsEntities.SELECTED_ACCOUNT_GROUPS_ENTITIES, e, MessageOperation.UPDATE, oResult);
             }
         });
 

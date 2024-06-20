@@ -13,7 +13,7 @@ module.exports.FrontendSettings = function ($) {
     this.get = async function (aBodyItems, oParameters, oServiceOutput, oPersistency) {
         var sUserId = $.getPlcUsername();
         var sType = oParameters.type.toUpperCase();
-        var oFrontendSettingsInformation = oPersistency.FrontendSettings.getFrontendSettings(sType, sUserId);
+        var oFrontendSettingsInformation = await oPersistency.FrontendSettings.getFrontendSettings(sType, sUserId);
 
         oServiceOutput.setBody({ 'SETTINGS': _.values(oFrontendSettingsInformation) });
     };
@@ -23,9 +23,9 @@ module.exports.FrontendSettings = function ($) {
  */
     this.create = async function (aBodyItems, aParameters, oServiceOutput, oPersistency) {
         var sUserId = aParameters.is_corporate === true ? null : $.getPlcUsername();
-        var oResult = oPersistency.FrontendSettings.insertFrontendSettings(aBodyItems, sUserId);
+        var oResult = await oPersistency.FrontendSettings.insertFrontendSettings(aBodyItems, sUserId);
         if (oResult.ERRORS.length > 0) {
-            await namingConflictError(oResult.ERRORS);
+            namingConflictError(oResult.ERRORS);
         }
         oServiceOutput.setBody({ 'SETTINGS': _.values(oResult.SETTINGS) }).setStatus($.net.http.CREATED);
         return oServiceOutput;
@@ -37,10 +37,10 @@ module.exports.FrontendSettings = function ($) {
  *
  */
     this.update = async function (aBodyItems, aParameters, oServiceOutput, oPersistency) {
-        var aMappingResults = await mapSettingsUpdates(aBodyItems, await getExistentSettings(aBodyItems, aParameters.is_corporate, oPersistency));
+        var aMappingResults = mapSettingsUpdates(aBodyItems, await getExistentSettings(aBodyItems, aParameters.is_corporate, oPersistency));
         var oResult = await oPersistency.FrontendSettings.updateFrontendSettings(aMappingResults);
         if (oResult.ERRORS.length > 0) {
-            await namingConflictError(oResult.ERRORS);
+            namingConflictError(oResult.ERRORS);
         }
         oServiceOutput.setBody({ 'SETTINGS': _.values(oResult.SETTINGS) }).setStatus($.net.http.OK);
         return oServiceOutput;
@@ -80,7 +80,7 @@ module.exports.FrontendSettings = function ($) {
  */
     async function getExistentSettings(aBodyItems, isCorporate, oPersistency) {
         var sUserId = isCorporate === true ? null : $.getPlcUsername();
-        var aDbSettings = oPersistency.FrontendSettings.getDbSettings(aBodyItems, sUserId);
+        var aDbSettings = await oPersistency.FrontendSettings.getDbSettings(aBodyItems, sUserId);
         if (aDbSettings.length != aBodyItems.length) {
             const aErrors = _.difference(_.map(aBodyItems, 'SETTING_ID'), _.map(aDbSettings, 'SETTING_ID'));
             let oMessageDetails = new MessageDetails();
@@ -125,7 +125,7 @@ module.exports.FrontendSettings = function ($) {
  *          aErrors - array with objects with naming conflict error
  * @throws {PlcException} frontend settings naming conflict error
  */
-    async function namingConflictError(aErrors) {
+    function namingConflictError(aErrors) {
         let oMessageDetails = new MessageDetails();
         const sClientMsg = 'The frontend settings have naming conflict.';
         let sServerMsg = `${ sClientMsg } Ids: `;
